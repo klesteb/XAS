@@ -2,8 +2,6 @@ package XAS:: ;
 
 our $VERSION = '0.01';
 
-use Params::Validate ':all';
-
 use XAS::Class
   base    => 'XAS::Base',
   version => $VERSION,
@@ -12,14 +10,6 @@ use XAS::Class
     }
   }
 ;
-
-Params::Validate::validation_options(
-    on_fail => sub {
-        my $params = shift;
-        my $class  = __PACKAGE__;
-        XAS::Base::validation_exception($params, $class);
-    }
-);
 
 # ----------------------------------------------------------------------
 # Public Methods
