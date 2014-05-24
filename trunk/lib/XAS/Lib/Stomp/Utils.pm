@@ -1,0 +1,883 @@
+package XAS::Lib::Stomp::Utils;
+
+our $VERSION = '0.01';
+
+use XAS::Lib::Stomp::Frame;
+
+use XAS::Class
+  version => $VERSION,
+  base    => 'XAS::Base',
+  debug   => 0,
+  messages => {
+    noid  => 'v%s requires an id',
+    nosub => 'v%s requires a subscription',
+    noque => 'v%s requires a destination',
+    nosup => "v%s doesn't support this frame type: %s",
+    nopar => "you have invalid paramters for v%s",
+  },
+  vars => {
+    PARAMS => {
+      -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
+    }
+  }
+;
+
+#use Data::Dumper;
+
+# -----------------------------------------------------------
+# Public Methods
+# -----------------------------------------------------------
+
+sub connect {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -login      => { optional => 1, default => undef },
+        -passcode   => { optional => 1, default => undef },
+        -host       => { optional => 1, default => 'localhost' },
+        -heart_beat => { optional => 1, default => '0,0', regex => qr/\d+,\d+/ },
+        -acceptable => { optional => 1, default => '1.0,1.1,1.2', 
+            callbacks => {
+                'valid target' => \&_match
+            }
+        }
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'login'}    = $p->{'login'}    if (defined($p->{'login'}));
+    $header->{'passcode'} = $p->{'passcode'} if (defined($p->{'passcode'}));
+
+    if ($self->target > 1.0) {
+
+        $header->{'host'}           = $p->{'host'};
+        $header->{'heart-beat'}     = $p->{'heart_beat'};
+        $header->{'accept-version'} = $p->{'acceptable'};
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'CONNECT',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub stomp {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -login      => { optional => 1, default => undef },
+        -passcode   => { optional => 1, default => undef },
+        -host       => { optional => 1, default => 'localhost' },
+        -heart_beat => { optional => 1, default => '0,0', regex => qr/\d+,\d+/ },
+        -acceptable => {
+            optional => 1,
+            default  => '1.0,1.1,1.2',
+            callbacks => {
+                'valid target' => \&_match
+            }
+        }
+    });
+
+    my $frame;
+    my $header = {};
+
+    if ($self->target == 1.0) {
+
+        $self->throw_msg(
+            'xas.lib.stomp.utils.stomp',
+            'nosup',
+            $self->target,
+            'stomp'
+        );
+
+    }
+
+    $header->{'login'}    = $p->{'login'}    if (defined($p->{'login'}));
+    $header->{'passcode'} = $p->{'passcode'} if (defined($p->{'passcode'}));
+
+    if ($self->target > 1.0) {
+
+        $header->{'host'}           = $p->{'host'};
+        $header->{'heart-beat'}     = $p->{'heart_beat'};
+        $header->{'accept-version'} = $p->{'acceptable'};
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'STOMP',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub subscribe {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -destination  => 1,
+        -id           => { optional => 1, default => undef },
+        -receipt      => { optional => 1, default => undef },
+        -ack          => { optional => 1, default => 'auto', regex => qr/auto|client|client\-individual/ }, 
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'ack'}         = $p->{'ack'};
+    $header->{'destination'} = $p->{'destination'};
+    $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    if (defined($p{'-id'})) {
+
+        $header->{'id'} = $p->{'id'};
+
+    } else {
+
+        # v1.1 and greater must have an id header
+
+        if ($self->target > 1.0) {
+
+            $self->throw_msg(
+                'xas.lib.stomp.utils.subscribe',
+                'noid',
+                $self->target
+                
+            );
+
+        }
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'SUBSCRIBE',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub unsubscribe {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -id           => { optional => 1, default => undef },
+        -destination  => { optional => 1, default => undef },
+        -receipt      => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'receipt'} = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    # v1.0 should have either a destination and/or id header
+    # v1.1 and greater may have a destination header
+
+    if (defined($p->{'destination'}) && defined($p->{'id'})) {
+
+        $header->{'id'}          = $p->{'id'};
+        $header->{'destination'} = $p->{'destination'};
+
+    } elsif (defined($p->{'destination'})) {
+
+        $header->{'destination'} = $p->{'destination'};
+
+    } elsif (defined($p->{'id'})) {
+
+        $header->{'id'} = $p->{'id'};
+
+    } else {
+
+        $self->throw_msg(
+            'xas.lib.stomp.utils.unsubscribe',
+            'nopar',
+            $self->target
+        );
+
+    }
+
+    if ($self->target > 1.0) {
+
+        # v1.1 and greater must have an id header
+
+        unless (defined($header->{'id'})) {
+
+            $self->throw_msg(
+                'xas.lib.stomp.utils.unsubscribe',
+                'noid',
+                $self->target
+            );
+
+        }
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'UNSUBSCRIBE',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub begin {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -transaction => 1,
+        -receipt     => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'transaction'} = $p->{'transaction'};
+    $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'BEGIN',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub commit {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -transaction => 1,
+        -receipt     => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'transaction'} = $p->{'transaction'};
+    $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'COMMIT',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub abort {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -transaction => 1,
+        -receipt     => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'transaction'} = $p->{'transaction'};
+    $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'ABORT',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub ack {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -message_id   => 1,
+        -subscription => { optional => 1, default => undef },
+        -receipt      => { optional => 1, default => undef },
+        -transaction  => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
+    $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
+
+    if ($self->target < 1.2) {
+
+        $header->{'message-id'} = $p->{'message_id'};
+
+    } else {
+
+        $header->{'id'} = $p->{'message_id'};
+
+    }
+
+    if (defined($p->{'subscription'})) {
+
+        $header->{'subscription'} = $p->{'subscription'};
+
+    } else {
+
+        if ($self->target > 1.0) {
+
+            $self->throw_msg(
+                'xas.lib.stomp.utils.act',
+                'nosub',
+                $self->target
+            );
+
+        }
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'ACK',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub nack {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -message_id   => 1,
+        -receipt      => { optional => 1, default => undef },
+        -subscription => { optional => 1, default => undef },
+        -transaction  => { optional => 1, default => undef },
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
+    $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
+
+    if ($self->target == 1.0) {
+
+        $self->throw_msg(
+            'xas.lib.stomp.utils.nack',
+            'nosup',
+            $self->target,
+            'nack'
+        );
+
+    }
+
+    if ($self->target < 1.2) {
+
+        $header->{'message-id'} = $p->{'message_id'};
+
+    } else {
+
+        $header->{'id'} = $p->{'message_id'};
+
+    }
+
+    if (defined($p->{'subscription'})) {
+
+        $header->{'subscription'} = $p->{'subscription'};
+
+    } else {
+
+        if ($self->target > 1.0) {
+
+            $self->throw_msg(
+                'xas.lib.stomp.utils.nact',
+                'nosub',
+                $self->target
+            );
+
+        }
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'NACK',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub disconnect {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -receipt => { optional => 1, default => undef }
+    });
+
+    my $frame;
+    my $header = {};
+
+    $header->{'receipt'} = $p->{'receipt'} if (defined($p->{'receipt'}));
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'DISCONNECT',
+        -headers => $header,
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+sub send {
+    my $self = shift;
+
+    my $p = $self->validate_params(\@_, {
+        -destination => 1,
+        -message     => 1,
+        -receipt     => { optional => 1, default => undef },
+        -persistent  => { optional => 1, default => undef },
+        -transaction => { optional => 1, default => undef },
+        -length      => { optional => 1, default => undef },
+        -type        => { optional => 1, default => 'text/plain' },
+    });
+
+    my $frame;
+    my $header = {};
+    my $body = $p->{'message'};
+
+    $header->{'destination'} = $p->{'destination'};
+    $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
+    $header->{'persistent'}  = $p->{'persistent'}  if (defined($p->{'presistent'}));
+    $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
+    $header->{'content-length'} = defined($p->{'length'}) ? $p->{'length'} : length($body);
+
+    if ($self->target > 1.0) {
+
+        $header->{'content-type'} = $p->{'type'};
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'SEND',
+        -headers => $header,
+        -body    => $body
+    );
+
+    return $frame;
+
+}
+
+sub noop {
+    my $self = shift;
+
+    my $frame;
+
+    if ($self->target == 1.0) {
+
+        $self->throw_msg(
+            'xas.lib.stomp.utils.noop',
+            'nosup',
+            $self->target,
+            'noop'
+        );
+
+    }
+
+    $frame = XAS::Lib::Stomp::Frame->new(
+        -target  => $self->target,
+        -command => 'NOOP',
+        -headers => {},
+        -body    => ''
+    );
+
+    return $frame;
+
+}
+
+# -----------------------------------------------------------
+# Private Methods
+# -----------------------------------------------------------
+
+sub _match {
+    my $buffer = shift;
+
+    foreach my $item (split(',', $buffer)) {
+
+        return 0 if ($item !~ m/\d\.\d/);
+
+    }
+
+    return 1;
+
+}
+
+1;
+
+__END__
+
+=head1 NAME 
+
+XAS::Lib::Stomp::Utils - STOMP protocol utilities for clients
+
+=head1 SYNOPSIS
+
+This module uses XAS::Lib::Stomp::Frame to create STOMP frames.
+
+ use XAS::Lib::Stomp::Utils;
+
+ my $stomp = XAS::Lib::Stomp::Utils->new();
+ my $frame = $stomp->connect(
+     -login    => 'test', 
+     -passcode => 'test'
+ );
+
+ put($frame->to_string);
+
+=head1 DESCRIPTION
+
+This module is an easy way to create STOMP frames without worrying about
+the various differances between the protocol versions.
+
+=head1 METHODS
+
+=head2 new
+
+This method initializes the base object. It takes the following parameters:
+
+=over 4 
+
+=item B<-target>
+
+This is the targeted version of the STOMP protocol that the frame 
+will represent. Defaults to '1.0'.
+
+=back 
+
+=head2 connect
+
+This method creates a "CONNECT" frame. This frame is used to initiate a
+session with a STOMP server. On STOMP v1.1 and later targets the following 
+headers are automatically set: 
+
+  host
+  heart-beat
+  accept-version
+
+Unless otherwise specified, they will be the defaults. This method takes the 
+following parameters:
+
+=over 4 
+
+=item B<-login>
+
+An optional login name to be used on the STOMP server.
+
+=item B<-passcode>
+
+An optional password for the login name on the STOMP server.
+
+=item B<-host>
+
+An optional virtual host name to connect to on STOMP v1.1 and later servers.
+Defaults to 'localhost'.
+
+=item B<-heart_beat>
+
+An optional heart beat request for STOMP v1.1 and later servers. The default
+is to turn them off.
+
+=item B<-acceptable>
+
+An optional list of protocol versions that are acceptable to this client for
+STOMP v1.1 and later clients. The default is '1.0,1.1,1.2'.
+
+=back
+
+=head2 stomp
+
+This method creates a "STOMP" frame, this works the same as connect(), but 
+only works for STOMP v1.1 and later tagets. Please see the documentation for 
+connect().
+
+=head2 disconnect
+
+This method creates a "DISCONNECT" frame. This frame is used to signal the
+server that you no longer wish to communicate with it. This method takes the
+following parameters:
+
+=over 4
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 subscribe
+
+This method create a "SUBSCRIBE" frame. This frame is used to notify 
+the server which queues you want to listen too. The naming of queues is 
+left up to the server implementation. This method takes the following
+parameters:
+
+=over 4
+
+=item B<-destination>
+
+The name of the queue you wish to subscribe too. Naming convention is
+server dependent.
+
+=item B<-subscription>
+
+A mandatory subscription id for usage on STOMP v1.1 and later targets. It 
+has no meaning for STOMP v1.0 servers.
+
+=item B<-ack>
+
+The type of acknowledgement you would like to recieve when messages are sent
+to a queue. It defaults to 'auto'. It understands 'auto', 'client' and 
+'client-individual'. Please refer to the STOMP protocol reference for 
+what this means.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 unsubscribe
+
+This method creates an "UNSUBSCRIBE" frame. This frame is used to notify the
+server that you don't want to subscribe to a queue anymore. Subsequently
+any messages left on that queue will no longer be sent to your client.
+
+=over 4
+
+=item B<-destination>
+
+The optional name of the queue that you subscribed too. STOMP v1.0 targets
+need a queue name and/or a subscription id to unsubscribe. This is optional 
+on v1.1 and later targets.
+
+=item B<-subscription>
+
+The id of the subscribtion, this should be the same as the one used 
+with subscribe(). This is optional on STOMP v1.0 servers and mandatory
+on v1.1 and later targets.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 begin
+
+This method creates a "BEGIN" frame. This frame signals the server that a 
+transaction is beginning. A transaction is either ended by a "COMMIT" frame 
+or an "ABORT" frame. Any other frame that is sent must have a transaction id
+associated with them. This method takes the following parameters:
+
+=over 4
+
+=item B<-transaction>
+
+The mandatory id for the transaction.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 commit
+
+This method creates a "COMMIT" frame. This frame signals the end of a 
+transaction. This method takes the following parameters:
+
+=over 4
+
+=item B<-transaction>
+
+The mandatory transaction id from begin().
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 abort
+
+This method creates an "ABORT" frame. This frame is used to signal the server
+that the current transaction is to be aborted.
+
+This method takes the following parameters:
+
+=over 4
+
+=item B<-transaction>
+
+The mandatory transaction id from begin().
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 send
+
+This method creates a "SEND" frame. This frame is the basis of communication
+over your queues to the server. This method takes the following parameters:
+
+=over 4
+
+=item B<-destination>
+
+The name of the queue to send the message too.
+
+=item B<-message>
+
+The message to be sent. No attempt is made to serializes the message.
+
+=item B<-transaction>
+
+An optional tranasction number. This should be the same as for begin().
+
+=item B<-length>
+
+An optional length for the message. If one is not specified a 
+'content-length' header will be auto generated.
+
+=item B<-type>
+
+An optional MIME type for the message. If one is not specified, 'text/plain'
+will be used. This only has meaning for STOMP v1.1 and later targets.
+
+=item B<-persistent>
+
+An optional header for indicating that this frame should be 'presisted' by
+the server. What this means, is highly server specific.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 ack
+
+This method creates an "ACK" frame. This frame is used to tell the server that 
+the message was successfully received. This method takes the following 
+parameters:
+
+=over 4
+
+=item B<-message_id>
+
+The id of the message that is being acked.
+
+=item B<-subscription>
+
+This should match the id from the subscribe() method. This has meaning for
+STOMP v1.1 and later targets.
+
+=item B<-transaction>
+
+The transaction id if this ack is part of a transaction.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 nack
+
+This method creates a "NACK" frame. It notifies the server that the message 
+was rejected. It has meaning on STOMP v1.1 and later targets. This method
+takes the following paramters:
+
+=over 4
+
+=item B<-message_id>
+
+The id of the message that is being nacked.
+
+=item B<-subscription>
+
+This should match the id from the subscribe() method. This has meaning for
+STOMP v1.1 and later targets.
+
+=item B<-transaction>
+
+The transaction id if this nack is part of a transaction.
+
+=item B<-receipt>
+
+An optional receipt that will be returned by the server.
+
+=back
+
+=head2 noop
+
+This method creates a "NOOP" frame. It has meaning on STOMP v1.1 and 
+later targets. 
+
+=head1 SEE ALSO
+
+=over 4
+
+=item Net::Stomp
+
+=item Net::Stomp::Frame
+
+=item L<XAS|XAS>
+
+=back
+
+For more information on the STOMP protocol, please refer to: L<http://stomp.github.io/> .
+
+=head1 AUTHOR
+
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by Kevin L. Esteb
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
