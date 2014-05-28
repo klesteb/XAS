@@ -16,7 +16,7 @@ use XAS::Class
 
 sub exception_handler {
     my $self = shift;
-    
+
     my ($ex) = $self->validate_params(\@_, [1]);
 
     my $errors = $self->parse_exception($ex);

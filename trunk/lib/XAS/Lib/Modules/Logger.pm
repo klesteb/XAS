@@ -1,10 +1,16 @@
 package XAS::Lib::Modules::Logger;
 
+my ($types, $levels);
+
 our $VERSION = '0.01';
+
+BEGIN {
+    $types  = qr/console|file|json|syslog/i;
+    $levels = qr/info|warn|error|fatal|debug|trace/i;
+}
 
 use Try::Tiny;
 use Badger::Filesystem 'File';
-use Log::Log4perl qw(get_logger :levels);
 
 use XAS::Class
   debug    => 0,
@@ -13,16 +19,13 @@ use XAS::Class
   mutators => 'category',
   vars => {
     PARAMS => {
-      -category => { optional => 1 },
-      -configs  => { optional => 1, default => undef },
+      -type     => { optional => 1, default => 'console', regex => $types },
       -filename => { optional => 1, isa => 'Badger::Filesystem::File', default => File('stderr') },
     }
   }
 ;
 
 #use Data::Dumper;
-
-my $levels = qr/info|warn|error|fatal|debug|trace/i;
 
 # ------------------------------------------------------------------------
 # Public Methods
@@ -39,11 +42,7 @@ for my $routine (qw( info warn error fatal debug trace )) {
         $self = $self->prototype() unless ref $self;
 
         my ($text) = $self->validate_params(\@_, [1]);
-
-        my $category = $self->category;
-        my $logger   = get_logger($category);
-
-        $logger->info($text) if ($logger->is_$routine());
+        
 
     }
 
@@ -54,13 +53,8 @@ for my $routine (qw( info warn error fatal debug trace )) {
 
         my ($message, $text) = $self->validate_params(\@_, [1, 1]);
 
-        my $category = $self->category;
-        my $logger   = get_logger($category);
-
-        $logger->info($self->message($message, $text)) if ($logger->is_$routine());
 
     }
-    
 
 }
 
@@ -125,7 +119,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    my $logcfg;
+    my $logcfg  = $self->configs;
     my $logfile = $self->filename->path;
 
     # Diddling with the symbol table.
@@ -135,23 +129,21 @@ sub init {
     # log4perl.appender.logfile.filename = sub { _get_logfile(); }
     #
     # causes Log4perl to do a callback to main::_get_logfile(). This
-    # callback returns the filename of the log file, which is stored in
-    # the package variable LOGFILE. This defaults to 'stderr' 
-    # from XAS::Base.
+    # callback returns the filename of the log file, 
 
     {
         no warnings;
         *main::_get_logfile = sub { $logfile; }
     }
 
-    unless (defined($self->{configs})) {
+    unless (defined($logcfg)) {
 
         # Retrieve the default log defination.
 
         if ($logfile =~ /stderr/i) {
 
             $logcfg = q(
-                log4perl.logger = INFO, screen
+                log4perl.rootLogger = INFO, screen
                 log4perl.appender.screen = Log::Log4perl::Appender::Screen
                 log4perl.appender.screen.stderr = 1
                 log4perl.appender.screen.layout = PatternLayout
@@ -167,7 +159,7 @@ sub init {
             if ($^O eq 'MSWin32') {
 
                 $logcfg = q(
-                    log4perl.logger = INFO, logfile
+                    log4perl.rootLogger = INFO, logfile
                     log4perl.appender.logfile = Log::Log4perl::Appender::File
                     log4perl.appender.logfile.filename = sub { _get_logfile(); }
                     log4perl.appender.logfile.mode = append
@@ -181,7 +173,7 @@ sub init {
                 # File protection mask will be -rw-rw-r--
 
                 $logcfg = q(
-                    log4perl.logger = INFO, logfile
+                    log4perl.rootLogger = INFO, logfile
                     log4perl.appender.logfile = Log::Log4perl::Appender::File
                     log4perl.appender.logfile.filename = sub { _get_logfile(); }
                     log4perl.appender.logfile.mode = append
@@ -203,7 +195,6 @@ sub init {
         # on this value. So it could be anything acceptable to Log4perl.
         # This is assuming a file name of some sort.
 
-        $logcfg = $self->configs;
         Log::Log4perl->init($logcfg);
 
     }

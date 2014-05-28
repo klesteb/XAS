@@ -2,11 +2,9 @@ package XAS::Lib::App::Service;
 
 our $VERSION = '0.01';
 
-use Win32;
 use Try::Tiny;
 use File::Pid;
 use Pod::Usage;
-use Win32::Daemon;
 
 use XAS::Class
   debug      => 0,
@@ -44,29 +42,11 @@ sub define_signals {
 
 }
 
-sub get_service_config {
-    my $self = shift;
-
-    # here be dragons... the format is important, especially for the path.
-
-    my $script = Win32::GetFullPathName($0);
-
-    return {
-        name        =>  "XAS_Test",
-        display     =>  "XAS Test",
-        path        =>  "\"$^X\" \"$script\"",
-        user        =>  '',
-        password    =>  '',
-        description => 'This is a test Perl service'
-    };
-
-}
-
 sub _default_options {
     my $self = shift;
 
     my $options = $self->SUPER::_default_options();
-    
+
     $self->{logfile} = $self->env->logfile;
     $self->{cfgfile} = $self->env->cfgfile;
     
@@ -87,46 +67,6 @@ sub _default_options {
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub _install_service {
-    my $self = shift;
-
-    my $config = $self->get_service_config();
-
-    if (Win32::Daemon::CreateService($config)) {
-
-        printf("%s\n", $self->message('installed'));
-
-    } else {
-
-        printf("%s\n", $self->message('failed', 'install', $self->_get_error()));
-
-    }
-
-}
-
-sub _remove_service {
-    my $self = shift;
-
-    my $config = $self->get_service_config();
-
-    if (Win32::Daemon::DeleteService($config->{name})) {
-
-        printf("%s\n", $self->message('removed'));
-
-    } else {
-
-        printf("%s\n", $self->message('failed', 'remove', $self->_get_error()));
-
-    }
-
-}
-
-sub _get_error {
-    my $self = shift;
-
-    return(Win32::FormatMessage(Win32::Daemon::GetLastError()));
-
-}
 
 1;
 

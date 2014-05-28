@@ -11,11 +11,30 @@ use XAS::Class
   base       => 'XAS::Base Badger::Prototype',
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username',
-  mutators   => 'mqserver mqport mxserver mxport mxmailer',
+  mutators   => 'mqserver mqport mxserver mxport mxmailer logcfg',
 ;
 
 # ------------------------------------------------------------------------
 # Public Methods
+# ------------------------------------------------------------------------
+
+sub logtype {
+    my $self = shift;
+
+    $self = $self->prototype() unless ref $self;
+
+    my ($type) = $self->validate_params(\@_, [
+        { optional => 1, default => 'console', regex => qr/console|file|logstash|syslog/ }
+    ]);
+
+    $self->{logtype} = $type if (defined($type));
+
+    return $self->{logtype};
+
+}
+
+# ------------------------------------------------------------------------
+# Private Methods
 # ------------------------------------------------------------------------
 
 sub init {
@@ -200,21 +219,6 @@ sub init {
     $self->{cfgfile} = File($self->{etc}, $name . '.ini');
 
     return $self;
-
-}
-
-sub logtype {
-    my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
-
-    my ($type) = $self->validate_params(\@_, [
-        { optional => 1, default => undef, regex => qr/console|file|logstash|syslog/ }
-    ]);
-
-    $self->{logtype} = $type if (defined($type));
-
-    return $self->{logtype};
 
 }
 

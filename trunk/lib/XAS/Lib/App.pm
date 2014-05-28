@@ -10,7 +10,7 @@ use Getopt::Long;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Base',
+  base      => 'XAS::Hub',
   mixin     => 'XAS::Lib::Mixins::Handlers',
   import    => 'class CLASS',
   utils     => 'dotid',
@@ -32,7 +32,7 @@ use XAS::Class
 sub signal_handler {
     my $signal = shift;
 
-    my $ex = WPM::Exception->new(
+    my $ex = XAS::Exception->new(
         type => 'xas.lib.app.signal_handler',
         info => 'process interrupted by signal ' . $signal
     );
@@ -124,11 +124,9 @@ sub _default_options {
     my $version = $self->CLASS->VERSION;
     my $script  = $self->class->any_var('SCRIPT');
 
-    $self->{logcfg} = undef;
-
     return {
-        'logcfg=s' => \$self->{logcfg},
-        'alerts!'  => sub { $self->alerts($_[1]); },
+        'logcfg=s' => sub { $self->env->logcfg($_[1]) },
+        'alerts!'  => sub { $self->alerts->on($_[1]); },
         'debug'    => sub { $self->debugging(1); },
         'help|h|?' => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
         'manual'   => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
@@ -232,9 +230,9 @@ them.
 
   Example
 
-    use WPM::Class
+    use XAS::Class
       version    => '0.01',
-      base       => 'WPM::Lib::App',
+      base       => 'XAS::Lib::App',
       filesystem => 'File',
       accessors  => 'logfile
     ;

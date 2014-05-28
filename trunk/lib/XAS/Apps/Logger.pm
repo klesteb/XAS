@@ -5,9 +5,10 @@ use XAS::Class
   debug      => 0,
   version    => '0.02',
   base       => 'XAS::Lib::App',
-  accessors  => 'logfile',
   filesystem => 'File',
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -32,17 +33,17 @@ sub main {
 
     $self->log->info('shutting down');
 
+warn Dumper($self);
+    
 }
 
 sub options {
     my $self = shift;
 
-    $self->{logfile} = File('stderr');
-
     return {
         'logfile=s' => sub { 
-            $self->{logfile} = File($_[1]); 
-            $self->class->var('LOGFILE', $self->logfile);
+            my $logfile = File($_[1]); 
+            $self->env->logfile($logfile);
         }
     };
 
