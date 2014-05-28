@@ -10,7 +10,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Base Badger::Prototype',
   debug      => 0,
-  accessors  => 'spooler',
+  accessors  => 'spooler env',
   codec      => 'JSON',
   utils      => 'dt2db',
   filesystem => 'Dir'
@@ -66,6 +66,8 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
+    $self->{env} = XAS::Factory->('environment');
+    
     $self->{spooler} = XAS::Factory->module('spooler', {
         -directory => Dir($self->env->spool, 'alerts'),
         -mask      => 0777

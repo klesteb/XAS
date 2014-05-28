@@ -2,6 +2,13 @@ package XAS::Lib::App::Service;
 
 our $VERSION = '0.01';
 
+my $mixin;
+BEGIN {
+    $mixin = ($^O eq 'MSWin32')
+      ? 'XAS::Lib::App::Service::Win32'
+      : 'XAS::Lib::App::Service::Unix';
+}
+
 use Try::Tiny;
 use File::Pid;
 use Pod::Usage;
@@ -9,8 +16,9 @@ use Pod::Usage;
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
-  import     => 'class CLASS',
   base       => 'XAS::Lib::App',
+  mixin      => $mixin,
+  import     => 'class CLASS',
   constants  => 'TRUE FALSE',
   accessors  => 'logfile cfgfile',
   filesystem => 'File',
