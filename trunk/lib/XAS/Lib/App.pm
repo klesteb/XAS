@@ -125,12 +125,12 @@ sub _default_options {
     my $script  = $self->class->any_var('SCRIPT');
 
     return {
-        'logcfg=s' => sub { $self->env->logcfg($_[1]) },
-        'alerts!'  => sub { $self->alerts->on($_[1]); },
-        'debug'    => sub { $self->debugging(1); },
-        'help|h|?' => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
-        'manual'   => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
-        'version'  => sub { printf("%s - v%s\n", $script, $version); exit 0; }
+        'logtype=s' => sub { $self->env->logtype($_[1]) },
+        'alerts!'   => sub { $self->alerts->on($_[1]); },
+        'debug'     => sub { $self->debugging(1); },
+        'help|h|?'  => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
+        'manual'    => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
+        'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; }
     };
 
 }

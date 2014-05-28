@@ -22,24 +22,28 @@ sub _auto_load {
     my $name = shift;
 
     if ($name eq 'alert') {
+warn "alert\n";
 
         return sub { XAS::Factory->module('alert'); } 
 
     }
 
     if ($name eq 'alerts') {
+warn "alerts\n";
 
         return sub { XAS::Alerts->new(); } 
 
     }
 
     if ($name eq 'env') {
+warn "env\n";
 
         return sub { XAS::Factory->module('environment'); } 
 
     }
 
     if ($name eq 'email') {
+warn "email\n";
 
         if ( my $params = $self->class->any_var('EMAIL')) {
 
@@ -62,7 +66,8 @@ sub _auto_load {
     }
 
     if ($name eq 'log') {
-
+warn "log\n";
+        
         if ( my $params = $self->class->any_var('LOG')) {
 
             return sub { XAS::Factory->module('logger', $params); } 

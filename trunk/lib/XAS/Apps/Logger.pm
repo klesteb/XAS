@@ -25,16 +25,15 @@ sub main {
     $self->setup();
 
     $self->log->info('starting up');
+warn "log message\n";
+    $self->log->level('debug', 1);
     $self->log->debug('heh debugging is working');
-    $self->log->debug(sprintf('category = %s', $self->log->category));
     $self->log->debug(sprintf('level = %s', $self->log->level));
 
     sleep(10);
 
     $self->log->info('shutting down');
 
-warn Dumper($self);
-    
 }
 
 sub options {

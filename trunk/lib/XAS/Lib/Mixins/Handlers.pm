@@ -22,7 +22,7 @@ sub exception_handler {
     my $errors = $self->parse_exception($ex);
     my $script = $self->class->any_var('SCRIPT');
 
-    $self->log('error', $errors);
+    $self->log->error($errors);
 
     if ($self->alerts->check) {
 
@@ -46,7 +46,7 @@ sub exit_handler {
     my $errors = $self->parse_exception($ex);
     my $script = $self->class->any_var('SCRIPT');
 
-    $self->log('fatal', $errors);
+    $self->log->fatal($errors);
 
     if ($self->alerts->check) {
 
@@ -69,7 +69,7 @@ sub error_handler {
     my ($ex) = $self->validate_params(\@_, [1]);
     my $errors = $self->parse_exception($ex);
 
-    $self->log('error', $errors);
+    $self->log->error($errors);
 
 }
 

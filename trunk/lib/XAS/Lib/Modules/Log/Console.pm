@@ -2,31 +2,29 @@ package XAS::Lib::Modules::Log::Console;
 
 our $VERSION = '0.01';
 
+use Params::Validate 'HASHREF';
 use XAS::Class
-  base    => 'XAS::Base',
-  version => $VERSION,
-  mixins  => 'init_log log',
+  base      => 'XAS::Base',
+  version   => $VERSION,
+  mixins    => 'init_log output',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub log {
+sub output {
     my $self  = shift;
 
     $self = $self->prototype() unless ref $self;
 
-    my ($level, $message) = $self->validate_params(\@_, [
-        { regex => $levels },
-        1
+    my ($args) = $self->validate_params(\@_, [
+        { type => HASHREF }
     ]);
 
-    my $output = $self->_generate($level, $message);
-
     warn sprintf("%-5s - %s\n", 
-        uc($output->{priority}), 
-        $data->{message}
+        uc($args->{priority}), 
+        $args->{message}
     );
 
 }

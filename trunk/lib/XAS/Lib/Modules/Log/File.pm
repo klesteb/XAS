@@ -2,12 +2,14 @@ package XAS::Lib::Modules::Log::File;
 
 our $VERSION = '0.01';
 
+use Params::Validate 'HASHREF';
+
 use XAS::Class
   debug    => 0,
   version  => $VERSION,
   base     => 'XAS::Base',
   utils    => 'dotid',
-  mixins   => 'init_log log',
+  mixins   => 'init_log output',
   messages => {
     invperms  => "unable to change file permissions on %s",
     creatfile => "unable to create file %s"
@@ -18,23 +20,20 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub log {
+sub output {
     my $self  = shift;
 
     $self = $self->prototype() unless ref $self;
 
-    my ($level, $message) = $self->validate_params(\@_, [
-        { regex => $levels },
-        1
+    my ($args) = $self->validate_params(\@_, [
+        { type => HASHREF }
     ]);
-
-    my $output = $self->_generate($level, $message);
 
     $self->filename->append(
         sprintf("[%s] %-5s - %s\n", 
-            $output->{datetime}->strftime('%Y-%m-%d %H:%M:%S'),
-            uc($output->{priority}), 
-            $output->{message}
+            $args->{datetime}->strftime('%Y-%m-%d %H:%M:%S'),
+            uc($args->{priority}), 
+            $args->{message}
     ));
 
 }
