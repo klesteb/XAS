@@ -25,10 +25,9 @@ sub main {
     $self->setup();
 
     $self->log->info('starting up');
-warn "log message\n";
     $self->log->level('debug', 1);
     $self->log->debug('heh debugging is working');
-    $self->log->debug(sprintf('level = %s', $self->log->level));
+    $self->log->trace('tracing is working');
 
     sleep(10);
 

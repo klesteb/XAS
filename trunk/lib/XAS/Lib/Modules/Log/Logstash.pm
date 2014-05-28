@@ -1,12 +1,17 @@
-package XAS::Lib::Modules::Log::Console;
+package XAS::Lib::Modules::Log::Logstash;
 
 our $VERSION = '0.01';
 
+use XAS::Factory;
 use Params::Validate 'HASHREF';
+
 use XAS::Class
-  base      => 'XAS::Base',
-  version   => $VERSION,
-  mixins    => 'init_log output destroy',
+  base       => 'XAS::Hub',
+  version    => $VERSION,
+  codecs     => 'JSON',
+  accessors  => 'spool',
+  filesystem => 'Dir',
+  mixins     => 'init_log output destroy',
 ;
 
 # ----------------------------------------------------------------------
@@ -18,14 +23,34 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my ($args) = $self->validate_params(\@_, [
+    my $args = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 
-    warn sprintf("%-5s - %s\n", 
+    my $message = sprintf('[%s] %-5s - %s',
+        $args->{datetime}->strftime('%Y-%m-%d %H:%M:%S'),
         uc($args->{priority}), 
         $args->{message}
     );
+
+    # create a logstash "json_event"
+
+    my $data = {
+        '@timestamp' => $args->{datetime}->strftime('%Y-%m-%dT%H:%M:%S.%3N%z'),
+        '@version'   => '1',
+        '@message'   => $message,
+        message      => $args->{message},
+        hostname     => $args->{hostname},
+        priority     => $args->{priority},
+        facility     => $args->{facility},
+        process      => $args->{process},
+        pid          => $args->{pid}
+        tid          => '0'
+    };
+
+    # write the spool file
+
+    $self->spool->write(encode($data));
 
 }
 
@@ -40,7 +65,11 @@ sub destroy {
 
 sub init_log {
     my $self = shift;
-    return $self;
+
+    $self->{spool} = XAS::Factory->module('spool', {
+        -directory = Dir($self->env->spool, 'logstash')
+    });
+
 }
 
 1;

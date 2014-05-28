@@ -1,12 +1,14 @@
-package XAS::Lib::Modules::Log::Console;
+package XAS::Lib::Modules::Log::Syslog;
 
 our $VERSION = '0.01';
 
 use Params::Validate 'HASHREF';
+use Sys::Syslog ':DEFAULT setlogsock';
+
 use XAS::Class
-  base      => 'XAS::Base',
-  version   => $VERSION,
-  mixins    => 'init_log output destroy',
+  base       => 'XAS::Base',
+  version    => $VERSION,
+  mixins     => 'init_log output destroy',
 ;
 
 # ----------------------------------------------------------------------
@@ -18,29 +20,50 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my ($args) = $self->validate_params(\@_, [
+    my $args = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 
-    warn sprintf("%-5s - %s\n", 
-        uc($args->{priority}), 
-        $args->{message}
-    );
+    my $priority = _translate($args->{priority});
+    my $message = sprintf('%s', $args->{message});
+
+    syslog($priority, $message);
 
 }
 
 sub destroy {
     my $self = shift;
-    
+
+    closelog();
+
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub _translate {
+    my $value = shift;
+
+    my $translate = {
+        info  => 'info',
+        error => 'err',
+        warn  => 'warning',
+        fatal => 'alert',
+        trace => 'notice',
+        debug => 'debug'
+    };
+
+    return $translate->{lc($value)};
+
+}
+
 sub init_log {
     my $self = shift;
-    return $self;
+
+    setlogsock('unix');
+    openlog($self->process, 'pid', $self->facility);
+
 }
 
 1;

@@ -9,7 +9,7 @@ use XAS::Class
   version  => $VERSION,
   base     => 'XAS::Base',
   utils    => 'dotid',
-  mixins   => 'init_log output',
+  mixins   => 'init_log output destroy',
   messages => {
     invperms  => "unable to change file permissions on %s",
     creatfile => "unable to create file %s"
@@ -36,6 +36,11 @@ sub output {
             $args->{message}
     ));
 
+}
+
+sub destroy {
+    my $self = shift;
+    
 }
 
 # ----------------------------------------------------------------------
