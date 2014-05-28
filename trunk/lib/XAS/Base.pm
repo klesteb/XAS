@@ -6,7 +6,6 @@ our ($SCRIPT)  = ( $0 =~ m#([^\\/]+)$# );
 
 use XAS::Factory;
 use XAS::Exception;
-use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
