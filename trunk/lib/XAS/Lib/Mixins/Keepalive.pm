@@ -94,7 +94,7 @@ sub init_keepalive {
             my ($err) = m/(.*,)/;
             chop($err);
 
-            $self->log('warn', lcfirst($err));
+            $self->log->warn(lcfirst($err));
 
         };
 

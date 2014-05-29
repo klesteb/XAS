@@ -6,10 +6,10 @@ use XAS::Factory;
 use LockFile::Simple;
 
 use XAS::Class
+  debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base',
-  debug      => 0,
-  accessors  => 'lockmgr log',
+  accessors  => 'lockmgr',
   mutators   => 'lockfile max delay hold',
   filesystem => 'File',
   vars => {
@@ -115,7 +115,6 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{log} = XAS::Factory->module('log');
     $self->{lockmgr} = LockFile::Simple->make(
         -stale  => 1,
         -nfs    => 1,

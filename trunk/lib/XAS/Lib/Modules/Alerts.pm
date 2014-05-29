@@ -66,8 +66,6 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{env} = XAS::Factory->('environment');
-    
     $self->{spooler} = XAS::Factory->module('spooler', {
         -directory => Dir($self->env->spool, 'alerts'),
         -mask      => 0777
@@ -101,7 +99,9 @@ Your program can use this module in the following fashion:
 
 =head1 DESCRIPTION
 
-This is the module for sending alerts within the XAS environment. 
+This is the module for sending alerts within the XAS environment. It will write
+an "alert" to the alerts spool directory. It is implemented as a singleton 
+and will autoload when invoked.
 
 =head1 METHODS
 

@@ -3,7 +3,7 @@ package XAS::Lib::Modules::Log::Syslog;
 our $VERSION = '0.01';
 
 use Params::Validate 'HASHREF';
-use Sys::Syslog ':DEFAULT setlogsock';
+use Sys::Syslog qw(:standard :extended);
 
 use XAS::Class
   base       => 'XAS::Base',
@@ -20,7 +20,7 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my $args = $self->validate_params(\@_, [
+    my ($args) = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 

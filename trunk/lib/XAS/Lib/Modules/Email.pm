@@ -13,19 +13,10 @@ use MIME::Lite;
 use File::Basename;
 
 use XAS::Class
-  version  => $VERSION,
-  base     => 'XAS::Base Badger::Prototype',
-  debug    => 0,
-  utils    => 'dotid',
-  mutators => 'server port timeout',
-  vars => {
-    PARAMS => {
-      -port    => 1,
-      -server  => 1,
-      -timeout => { optional => 1, default => 60 },
-      -mailer  => { optional => 1, default => 'smtp', regex => $mailers },
-    }
-  }
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Base Badger::Prototype',
+  utils   => 'dotid',
 ;
 
 # ------------------------------------------------------------------------
@@ -50,9 +41,9 @@ sub send {
     try {
 
         MIME::Lite->send(
-            $self->mailer, 
-            $self->server, 
-            Timeout => $self->timeout
+            $self->env->mxmailer, 
+            $self->env->mxserver, 
+            Timeout => $self->env->mxtimeout
         );
 
         $msg = MIME::Lite->new(
@@ -95,21 +86,6 @@ sub send {
         ); 
 
     };
-
-}
-
-sub mailer {
-    my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
-
-    my ($mailer) = $self->validate_params(\@_, [
-        { optional => 1, default => undef, regex => $mailers },
-    ]);
-
-    $self->{mailer} = $mailer if (defined($mailer));
-
-    return $self->{mailer};
 
 }
 

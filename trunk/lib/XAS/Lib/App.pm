@@ -10,7 +10,7 @@ use Getopt::Long;
 use XAS::Class
   debug   => 0,
   version => $VERSION,
-  base    => 'XAS::Hub',
+  base    => 'XAS::Base',
   mixin   => 'XAS::Lib::Mixins::Handlers',
   import  => 'class CLASS',
   utils   => 'dotid',

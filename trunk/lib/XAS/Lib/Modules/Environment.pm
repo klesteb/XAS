@@ -3,6 +3,7 @@ package XAS::Lib::Modules::Environment;
 our $VERSION = '0.01';
 
 use File::Basename;
+use XAS::Constants ':logging';
 use Net::Domain qw(hostdomain);
 
 use XAS::Class
@@ -11,12 +12,27 @@ use XAS::Class
   base       => 'XAS::Base Badger::Prototype',
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username',
-  mutators   => 'mqserver mqport mxserver mxport mxmailer logcfg',
+  mutators   => 'mqserver mqport mxserver mxport mxtimeout',
 ;
 
 # ------------------------------------------------------------------------
 # Public Methods
 # ------------------------------------------------------------------------
+
+sub mxmailer {
+    my $self = shift;
+
+    $self = $self->prototype() unless ref $self;
+
+    my ($mailer) = $self->validate_params(\@_, [
+        { optional => 1, default => undef, regex => qr/sendmail|smtp/ }
+    ]);
+
+    $self->{mxmailer} = $mailer if (defined($mailer));
+
+    return $self->{mxmailer};
+
+}
 
 sub logtype {
     my $self = shift;
@@ -24,7 +40,7 @@ sub logtype {
     $self = $self->prototype() unless ref $self;
 
     my ($type) = $self->validate_params(\@_, [
-        { optional => 1, default => 'console', regex => qr/console|file|logstash|syslog/ }
+        { optional => 1, default => 'console', regex => LOG_TYPES }
     ]);
 
     $self->{logtype} = $type if (defined($type));
@@ -49,25 +65,38 @@ sub init {
 
     # Initialize variables - these are defaults
 
-    $self->{mqserver} = defined($ENV{XAS_MQSERVER}) ? $ENV{XAS_MQSERVER} : 'mq.example.com';
-    $self->{mqport}   = defined($ENV{XAS_MQPORT}) ? $ENV{XAS_MQPORT} : '61613';
+    $self->{mqserver} = defined($ENV{'XAS_MQSERVER'}) 
+      ? $ENV{'XAS_MQSERVER'} 
+      : 'localhost';
 
-    $self->{mxserver} = defined($ENV{XAS_MXSERVER}) ? $ENV{XAS_MXSERVER} : 'mq.example.com';
-    $self->{mxport}   = defined($ENV{XAS_MXPORT}) ? $ENV{XAS_MXPORT} : '25';
+    $self->{mqport} = defined($ENV{'XAS_MQPORT'}) 
+      ? $ENV{'XAS_MQPORT'} 
+      : '61613';
 
-    $self->{path}    = $ENV{'PATH'};
-    $self->{domain}  = defined($ENV{XAS_DOMAIN}) ? $ENV{XAS_DOMAIN} : hostdomain();
+    $self->{mxserver} = defined($ENV{'XAS_MXSERVER'}) 
+      ? $ENV{'XAS_MXSERVER'} 
+      : 'localhost';
+
+    $self->{mxport} = defined($ENV{'XAS_MXPORT'}) 
+      ? $ENV{'XAS_MXPORT'} 
+      : '25';
+
+    $self->{domain} = defined($ENV{'XAS_DOMAIN'}) 
+      ? $ENV{'XAS_DOMAIN'} 
+      : hostdomain();
+
+    # platform specific
 
     if ($^O eq "aix") {
 
-        $self->{host} = defined($ENV{XAS_HOSTNAME}) 
-          ? $ENV{XAS_HOSTNAME} 
+        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+          ? $ENV{'XAS_HOSTNAME'} 
           : `hostname -s`;
 
         chomp($self->{host});
 
-        $self->{root} = Dir(defined($ENV{XAS_ROOT}) 
-            ? $ENV{XAS_ROOT} 
+        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+            ? $ENV{'XAS_ROOT'} 
             : ['/', 'usr', 'local']);
 
         $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
@@ -94,22 +123,22 @@ sub init {
             ? $ENV{'XAS_SPOOL'} 
             : ['/', 'var', 'spool', 'xas']);
 
-        $self->{mxmailer}  = defined($ENV{XAS_MXMAILER}) 
-          ? $ENV{XAS_MXMAILER} 
+        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+          ? $ENV{'XAS_MXMAILER'} 
           : 'sendmail';
 
         $self->{username} = getpwuid($<);
 
     } elsif ($^O eq "linux"){
 
-        $self->{host} = defined($ENV{XAS_HOSTNAME}) 
-          ? $ENV{XAS_HOSTNAME} 
+        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+          ? $ENV{'XAS_HOSTNAME'} 
           : `hostname -s`;
 
         chomp($self->{host});
 
-        $self->{root} = Dir(defined($ENV{XAS_ROOT}) 
-            ? $ENV{XAS_ROOT} 
+        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+            ? $ENV{'XAS_ROOT'} 
             : ['/', 'usr', 'local']);
 
         $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
@@ -136,8 +165,8 @@ sub init {
             ? $ENV{'XAS_SPOOL'} 
             : ['/', 'var', 'spool', 'xas']);
 
-        $self->{mxmailer}  = defined($ENV{XAS_MXMAILER}) 
-          ? $ENV{XAS_MXMAILER} 
+        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+          ? $ENV{'XAS_MXMAILER'} 
           : 'sendmail';
 
         $self->{username} = getpwuid($<);
@@ -146,12 +175,12 @@ sub init {
 
         require Win32;
 
-        $self->{host} = defined($ENV{XAS_HOSTNAME}) 
-          ? $ENV{XAS_HOSTNAME} 
+        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+          ? $ENV{'XAS_HOSTNAME'} 
           : Win32::NodeName();
 
-        $self->{root} = Dir(defined($ENV{XAS_ROOT}) 
-            ? $ENV{XAS_ROOT} 
+        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+            ? $ENV{'XAS_ROOT'} 
             : ['C:', 'xas']);
 
         $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
@@ -178,8 +207,8 @@ sub init {
             ? $ENV{'XAS_SPOOL'} 
             : [$self->{root}, 'var', 'spool']);
 
-        $self->{mxmailer}  = defined($ENV{XAS_MXMAILER}) 
-          ? $ENV{XAS_MXMAILER} 
+        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+          ? $ENV{'XAS_MXMAILER'} 
           : 'smtp';
 
         $self->{username} = Win32::LoginName();
@@ -208,7 +237,9 @@ sub init {
         ? $ENV{'XAS_BIN'}   
         : [$self->{root}, 'bin']);
 
-    $self->{logtype} = 'console';
+    $self->{path}      = $ENV{'PATH'};
+    $self->{logtype}   = 'console';
+    $self->{mxtimeout} = 60;
 
     # create some common file names
 
@@ -282,10 +313,9 @@ for my $datum (qw( root etc sbin tmp var bin lib log run spool )) {
 
 __END__
 
-
 =head1 NAME
 
-XAS::System::Environment - The base environment for the XAS environment
+XAS::Lib::Modules::Environment - The base environment for the XAS environment
 
 =head1 SYNOPSIS
 
@@ -293,7 +323,7 @@ Your program can use this module in the following fashion:
 
  use XAS::Class
    version => '0.01',
-   base    => 'XAS::Hub',
+   base    => 'XAS::Base',
  ;
 
   $pidfile = $self->env->pidfile;
@@ -303,55 +333,97 @@ Your program can use this module in the following fashion:
 
 =head1 DESCRIPTION
 
-This module describes the base environment for XAS. It will provide a
-uniform description of the directory layout for perl programs within the 
-XAS environemnt. 
+This module describes the base environment for XAS. This module is implemented 
+as a singleton and will be autoloaded when invoked.
 
 =head1 METHODS
 
 =head2 new
 
-This method will initialize the base module. It parses the environment using
-the following variables:
+This method will initialize the base module. It parses the current environment
+using the following variables:
 
 =over 4
 
 =item B<XAS_ROOT>
 
-The root of the directory structure.
+The root of the directory structure. On Unix like boxes this will be 
+/usr/local and Windows this will be C:\xas.
 
 =item B<XAS_LOG>
 
-The path for log files.
+The path for log files. On Unix like boxes this will be /var/log/xas and on
+Windows this will be %XAS_ROOT%\var\log.
 
 =item B<XAS_RUN>
 
-The path for pid files.
+The path for pid files. On Unix like boxes this will be /var/run/xas and
+on Windows this will be %XAS_ROOT%\var\run.
 
 =item B<XAS_SPOOL>
 
-The base path for spool files.
+The base path for spool files. On Unix like boxes this will be /var/spool/xas 
+and on Windows this will be %XRS_ROOT%\var\spool.
+
+=item B<XAS_LIB>
+
+The path to the lib directory. On Unix like boxes this will be /var/lib/xas 
+and on Windows this will be %XAS_ROOT%\var\lib.
+
+=item B<XAS_ETC>
+
+The path to the etc directory. On Unix like boxes this will be /usr/local/etc
+and on Windows this will be %XAS_ROOT%\etc
+
+=item B<XAS_BIN>
+
+The path to the bin directory. On Unix like boxes this will be /usr/local/bin
+and on Windoes this will be %XAS_ROOT%\bin.
+
+=item B<XAS_SBIN>
+
+The path to the sbin directory. On UNix like boex this will be /usr/local/sbin
+and on Windows this will be %XAS_ROOT%\sbin.
+
+=item B<XAS_HOSTNAME>
+
+The hostname of the system. If not provided, on Unix the "hostname -s" command
+will be used and on Windows Win32::NodeName() will be called. 
+
+=item B<XAS_DOMAIN>
+
+The domain of the system: If not provided, then Net::Domain::hostdomain() will
+be used.
 
 =item B<XAS_MQSERVER>
 
-The server where a STOMP enabled message queue is located.
+The server where a STOMP enabled message queue server is located. Default
+is "localhost".
 
 =item B<XAS_MQPORT>
 
-The port that server is listening on.
+The port that server is listening on. Default is "61613".
 
 =item B<XAS_MXSERVER>
 
-The server where a SMTP based mail server resides.
+The server where a SMTP based mail server resides. Default is "localhost".
 
 =item B<XAS_MXPORT>
 
-The port it is listening on.
+The port it is listening on. Default is "25".
+
+=item B<XAS_MXMAILER>
+
+The mailer to use for sending email. On Unix like boxes this will be "sendmail"
+on Windows this will be "smtp".
 
 =back
 
-On Debian Linux these are defined in the etc/environment script, which is 
-created on initial installation.
+=head2 logtype
+
+This method will return the currently defined log type. By default this is
+"console". i.e. all logging will go to the terminal screen. Valid options
+are "file", "logstash" and "syslog'. 
 
 =head2 logfile
 
@@ -428,6 +500,16 @@ Example
 
     $mxport = $xas->mxport;
     $xas->mxport('25');
+
+=head2 mxmailer
+
+This method will return the mailer to use for sending email, or you can
+change the mailer used.
+
+Example
+
+    $mxmailer = $xas->mxmailer;
+    $xas->mxmailer('smtp');
 
 =head1 ACCESSORS
 

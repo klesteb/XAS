@@ -51,8 +51,9 @@ use Badger::Class
 
       # logging
       
-      LOG_LEVELS => qr/info|warn|error|fatal|debug|trace/,
-      LOG_TYPES  => qr/console|file|logstash|syslog/,
+      LOG_LEVELS   => qr/info|warn|error|fatal|debug|trace/,
+      LOG_TYPES    => qr/console|file|logstash|syslog/,
+      LOG_FACILITY => qr/auth|authpriv|cron|daemon|ftp|local.|lpr|mail|news|user|uucp/,
   },
   exports => {
       all => q/RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
@@ -60,13 +61,15 @@ use Badger::Class
                RPC_ERR_SERVER RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN 
                RPC_ERR_APP XAS_QUEUE START STOP EXIT 
                RELOAD STAT RUNNING ALIVE DEAD STOPPED STARTED RELOADED 
-               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD/,
+               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD
+               LOG_LEVELS LOG_TYPES LOG_FACILITY/,
       any => q/RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
                RPC_ERR_REQ RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL 
                RPC_ERR_SERVER RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN 
                RPC_ERR_APP XAS_QUEUE START STOP EXIT 
                RELOAD STAT RUNNING ALIVE DEAD STOPPED STARTED RELOADED 
-               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD/,
+               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD
+               LOG_LEVELS LOG_TYPES LOG_FACILITY/,
       tags => {
           jsonrpc => q/RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
                       RPC_ERR_REQ RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL 
@@ -74,7 +77,7 @@ use Badger::Class
           supervisor => q/START STOP EXIT RELOAD STAT RUNNING ALIVE DEAD 
                           STOPPED STARTED RELOADED STATED EXITED SHUTDOWN 
                           KILLME PROC_ROOT NOCMD/,
-          logging => q/LOG_LEVELS LOG_TYPES/,
+          logging => q/LOG_LEVELS LOG_TYPES LOG_FACILITY/,
 
       }
   }

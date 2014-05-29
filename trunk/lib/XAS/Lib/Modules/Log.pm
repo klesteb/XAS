@@ -2,25 +2,13 @@ package XAS::Lib::Modules::Log;
 
 our $VERSION = '0.01';
 
-our ($types, $levels, $mixins);
-
-BEGIN {
-    $types  = qr/console|file|logstash|syslog/;
-    $levels = qr/info|warn|error|fatal|debug|trace/;
-    $mixins = {
-        console  => 'XAS::Lib::Modules::Log::Console',
-        file     => 'XAS::Lib::Modules::Log::File',
-        logstash => 'XAS::Lib::Modules::Log::Logstash',
-        syslog   => 'XAS::Lib::Modules::Log::Syslog',
-    };
-}
-
 use DateTime;
+use XAS::Constants ':logging';
 use Params::Validate 'HASHREF';
 
 use XAS::Class
   version    => $VERSION,
-  base       => 'XAS::Hub Badger::Prototype',
+  base       => 'XAS::Base Badger::Prototype',
   filesystem => 'File',
   vars => {
     LEVELS => {
@@ -34,17 +22,21 @@ use XAS::Class
     PARAMS => {
       -filename => { optional => 1 },
       -process  => { optional => 1, default => 'XAS' },
-      -facility => { optional => 1, default => 'local7' },
       -levels   => { optional => 1, default => {}, type => HASHREF },
-      -type     => { optional => 1, default => 'console', regex => $types },
+      -type     => { optional => 1, default => 'console', regex => LOG_TYPES },
+      -facility => { optional => 1, default => 'local7', regex => LOG_FACILITY },
     }
   },
-  messages  => {
-    bad_level => 'invalid logging level: %s',
-  }
 ;
 
 #use Data::Dumper;
+
+my $mixins = {
+    console  => 'XAS::Lib::Modules::Log::Console',
+    file     => 'XAS::Lib::Modules::Log::File',
+    logstash => 'XAS::Lib::Modules::Log::Logstash',
+    syslog   => 'XAS::Lib::Modules::Log::Syslog',
+};
 
 # ------------------------------------------------------------------------
 # Public Methods
@@ -56,7 +48,7 @@ sub level {
     $self = $self->prototype() unless ref $self;
 
     my ($level, $action) = $self->validate_params(\@_, [
-        { regex => $levels },
+        { regex => LOG_LEVELS },
         { optional => 1, default => undef , regex => qr/0|1/ },
     ]);
 
@@ -71,7 +63,10 @@ sub build {
 
     $self = $self->prototype() unless ref $self;
 
-    my ($level, $message) = $self->validate_params(\@_, [1,1]);
+    my ($level, $message) = $self->validate_params(\@_, [
+        { regex => LOG_LEVELS },
+        1
+    ]);
 
     return {
         hostname => $self->env->host,
@@ -181,19 +176,10 @@ XAS::Lib::Modules::Log - log for errors, warnings and other messages
 
 =head1 SYNOPSIS
 
-    use Badger::Log;
-    
-    my $log = Badger::Log->new({
-        debug => 0,      # ignore debug messages
-        info  => 1,      # print info messages
-        warn  => \@warn, # add warnings to list
-        error => $log2,  # delegate errors to $log2
-        fatal => sub {   # custom fatal error handler
-            my $message = shift;
-            print "FATAL ERROR: $message\n";
-        },
-    });
-        
+    use XAS::Lib::Modules::Log;
+
+    my $log = XAS::Lib::Modules::Log->new();
+
     $log->debug('a debug message');
     $log->info('an info message');
     $log->warn('a warning message');
@@ -209,10 +195,10 @@ extension by subclassing.
 
 It offers little, if anything, over the many other fine logging modules 
 available from CPAN.  It exists to provide a basic logging facility 
-that integrates cleanly with, and can be bundled up with the other Badger 
+that integrates cleanly with, and can be bundled up with the other XAS 
 modules so that you've got something that works "out of the box".
 
-There are five message categories:
+There are six message categories:
 
 =over
 
@@ -235,6 +221,10 @@ An error message.
 =item fatal
 
 A fatal error message.
+
+=item trace
+
+A tracing message.
 
 =back
 

@@ -343,13 +343,13 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Hub::Spool - A Perl extension for the XAS environment
+XAS::Lib::Modules::Spool - A Perl extension for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::System;
+ use XAS::Factory;
 
- my $spl = XAS::System->module(
+ my $spl = XAS::Factory->module(
      spool => {
          -directory => 'spool'
      }

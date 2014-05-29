@@ -23,7 +23,7 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my $args = $self->validate_params(\@_, [
+    my ($args) = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 

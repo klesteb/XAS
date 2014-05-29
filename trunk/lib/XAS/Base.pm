@@ -13,6 +13,7 @@ use XAS::Class
   version  => $VERSION,
   base     => 'Badger::Base',
   utils    => 'dotid',
+  auto_can => '_auto_load',
   messages => {
     exception     => '%s: %s',
     dberror       => 'a database error has occurred: %s',
@@ -98,6 +99,66 @@ sub validate_params {
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub _auto_load {
+    my $self = shift;
+    my $name = shift;
+
+    if ($name eq 'alert') {
+
+        return sub { XAS::Factory->module('alert'); } 
+
+    }
+
+    if ($name eq 'alerts') {
+
+        return sub { XAS::Alerts->new(); } 
+
+    }
+
+    if ($name eq 'env') {
+
+        return sub { XAS::Factory->module('environment'); } 
+
+    }
+
+    if ($name eq 'email') {
+
+        return sub { XAS::Factory->module('email', $params); } 
+
+    }
+
+    if ($name eq 'log') {
+
+        if ( my $params = $self->class->any_var('LOG')) {
+
+            return sub { XAS::Factory->module('logger', $params); } 
+
+        } else {
+
+            return sub { 
+
+                XAS::Factory->module('logger', {
+                    -type     => $self->env->logtype,
+                    -filename => $self->env->logfile,
+                    -levels => {
+                        debug => $self->debugging ? 1 : 0,
+                    }
+                }); 
+
+            }
+
+        }
+
+    }
+
+    $self->throw_msg(
+        dotid($self->class) . '.auto_load.invmethod',
+        'invmethod',
+        $name
+    );
+
+}
+
 sub init {
     my $self = shift;
 
@@ -154,7 +215,7 @@ sub on {
     $self = $self->prototype() unless ref $self;
 
     my ($enable) = $self->validate_params(\@_, [ 
-        { optional => 1, default => undef } 
+        { optional => 1, default => undef, regex => qr/0|1/ } 
     ]);
 
     $self->{enabled} = $enable if (defined($enable));
