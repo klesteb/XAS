@@ -5,9 +5,9 @@ our $VERSION = '0.01';
 use XAS::Lib::Stomp::Frame;
 
 use XAS::Class
+  debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  debug   => 0,
   messages => {
     noid  => 'v%s requires an id',
     nosub => 'v%s requires a subscription',

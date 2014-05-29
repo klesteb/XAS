@@ -5,9 +5,9 @@ our $VERSION = '0.01';
 use POE;
 
 use XAS::Class
+  debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  debug   => 0,
   constant => {
     SERVICE_START_PENDING    => 1,
     SERVICE_STOP_PENDING     => 2,

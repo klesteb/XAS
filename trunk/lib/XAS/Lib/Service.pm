@@ -12,9 +12,9 @@ BEGIN {
 }
 
 use XAS::Class
+  debug    => 0,
   version  => $VERSION,
   base     => 'XAS::Lib::Session',
-  debug    => 0,
   mixin    => $mixin,
   mutators => 'last_state',
   messages => {

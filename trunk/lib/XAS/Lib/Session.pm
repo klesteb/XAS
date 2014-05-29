@@ -5,9 +5,9 @@ our $VERSION = '0.02';
 use POE;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  debug     => 0,
   utils     => 'weaken',
   accessors => 'session',
   messages => {

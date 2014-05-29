@@ -5,9 +5,9 @@ our $VERSION = '0.01';
 use XAS::Lib::Stomp::Frame;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  debug     => 0,
   utils     => 'trim',
   accessors => 'target',
   vars => {

@@ -6,9 +6,9 @@ use POE;
 use Win32::Daemon;
 
 use XAS::Class
+  debug    => 0,
   version  => $VERSION,
   base     => 'XAS::Base',
-  debug    => 0,
   mixins   => 'initialize _current_state
                SERVICE_START_PENDING
                SERVICE_STOP_PENDING SERVICE_PAUSE_PENDING

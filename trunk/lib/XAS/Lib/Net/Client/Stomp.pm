@@ -8,10 +8,10 @@ use POE::Filter::Stomp;
 use POE::Component::Client::Stomp::Utils;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::Net::Client::POE',
   mixin     => 'XAS::Lib::Mixins::Handlers',
-  debug     => 0,
   codec     => 'JSON',
   constants => 'ARRAY',
   accessors => 'stomp',
@@ -59,7 +59,7 @@ sub handle_connection {
         passcode => $self->passcode,
     });
 
-    $self->log->info($self->message('connected', $alias, $self->host, $self->port));
+    $self->log->info_msg('connected', $alias, $self->host, $self->port);
     $kernel->yield('write_data', $frame);
 
 }
@@ -69,7 +69,7 @@ sub handle_receipt {
 
     my $alias  = $self->alias;
 
-    $self->log->info($self->message('receipts', $alias, $frame->headers->{'message-id'}));
+    $self->log->info_msg('receipts', $alias, $frame->headers->{'message-id'});
 
 }
 
@@ -78,13 +78,13 @@ sub handle_error {
 
     my $alias  = $self->alias;
 
-    $self->log->error($self->message(
+    $self->log->error_msg(
         'errors',
         $alias,
         $frame->headers->{'message-id'} || '',
         $frame->headers->{'message'} || '',
         $frame->body
-    ));
+    );
 
 }
 
@@ -94,6 +94,15 @@ sub handle_message {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: handle_message()");
+
+}
+
+sub handle_noop {
+    my ($kernel, $self, $frame) = @_[KERNEL,OBJECT,ARG0];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: handle_noop()");
 
 }
 
@@ -118,6 +127,7 @@ sub session_intialize {
 
     # private events
 
+    $kernel->state('handle_noop',       $self);
     $kernel->state('handle_error',      $self);
     $kernel->state('handle_message',    $self);
     $kernel->state('handle_receipt',    $self);
@@ -179,6 +189,11 @@ sub _server_message {
 
         $self->log->debug("$alias: received an \"ERROR\" message");
         $kernel->yield('handle_error', $frame);
+
+    } elsif ($frame->command eq 'NOOP') {
+
+        $self->log->debug("$alias: received an \"NOOP\" message");
+        $kernel->yield('handle_noop', $frame);
 
     } else {
 

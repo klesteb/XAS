@@ -3,8 +3,9 @@ package XAS:: ;
 our $VERSION = '0.01';
 
 use XAS::Class
-  base    => 'XAS::Base',
+  debug   => 0,
   version => $VERSION,
+  base    => 'XAS::Base',
   vars => {
     PARAMS => {
     }

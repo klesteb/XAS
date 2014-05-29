@@ -10,10 +10,10 @@ use POE::Wheel::ReadWrite;
 use POE::Wheel::SocketFactory;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::Service',
   mixin     => 'XAS::Lib::Mixins::Keepalive',
-  debug     => 0,
   accessors => 'wheel host port listener',
   vars => {
     PARAMS => {

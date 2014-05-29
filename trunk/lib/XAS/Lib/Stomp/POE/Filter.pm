@@ -5,9 +5,9 @@ our $VERSION = '0.01';
 use XAS::Lib::Stomp::Parser;
 
 use XAS::Class
-  version   => $VERSION,
-  base      => 'XAS::Base',
-  debug     => 0,
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Base',
   accessors => 'filter',
   vars => {
     PARAMS => {

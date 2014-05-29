@@ -9,9 +9,9 @@ use POE::Wheel::ReadWrite;
 use POE::Wheel::SocketFactory;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::Service',
-  debug     => 0,
   mixin     => 'XAS::Lib::Mixins::Keepalive',
   utils     => 'weaken params',
   accessors => 'session',

@@ -8,9 +8,9 @@ use XAS::Lib::Stomp::Utils;
 use XAS::Lib::Stomp::POE::Filter;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::Net::Client::POE',
-  debug     => 0,
   accessors => 'stomp',
   vars => {
     PARAMS => {

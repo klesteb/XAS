@@ -5,9 +5,9 @@ our $VERSION = '0.02';
 use IO::Socket;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  debug     => 0,
   utils     => 'trim',
   accessors => 'handle',
   mutators  => 'timeout',
