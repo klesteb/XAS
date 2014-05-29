@@ -1,6 +1,6 @@
 package XAS::Lib::App::Daemon;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Try::Tiny;
 use File::Pid;
@@ -16,7 +16,7 @@ use XAS::Class
   base      => 'XAS::Lib::App',
   utils     => ':process',
   constants => 'TRUE FALSE',
-  accessors => 'logfile pidfile cfgfile daemon',
+  accessors => 'daemon',
   messages => {
     'runerr' => '%s is already running: %d',
     'piderr' => '%s has left a pid file behind, exiting',
@@ -45,13 +45,15 @@ sub define_pidfile {
 
     # create a pid file, use it as a semaphore lock file
 
-    $self->log('debug', "entering define_pidfile()");
-    $self->log('debug', "pid file = " . $self->pidfile);
+    $self->log->debug("entering define_pidfile()");
+    $self->log->debug("pid file = " . $self->env->pidfile);
 
     try {
 
-        $self->{pid} = File::Pid->new({file => $self->pidfile});
-        if ((my $num = $self->pid->running()) || (-e $self->pidfile)){
+        $self->{pid} = File::Pid->new({file => $self->env->pidfile->path});
+
+        if ((my $num = $self->pid->running()) || 
+            ($self->env->pidfile->exists)) {
 
             if ($num) {
 
@@ -90,7 +92,7 @@ sub define_pidfile {
 
     };
 
-    $self->log('debug', "leaving define_pidfile()");
+    $self->log->debug("leaving define_pidfile()");
 
 }
 
@@ -100,7 +102,7 @@ sub define_daemon {
     # become a daemon...
     # interesting, "daemonize() if ($self->daemon);" doesn't work as expected
 
-    $self->log('debug', "before pid = " . $$);
+    $self->log->debug("before pid = " . $$);
 
     if ($self->daemon) {
 
@@ -108,7 +110,7 @@ sub define_daemon {
 
     }
 
-    $self->log('debug', "after pid = " . $$);
+    $self->log->debug("after pid = " . $$);
 
 }
 
@@ -132,22 +134,21 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{pidfile} = $self->env->pidfile;
-    $self->{logfile} = $self->env->logfile;
-    $self->{cfgfile} = $self->env->cfgfile;
-    $self->{daemon}  = FALSE;
+    $self->{daemon} = FALSE;
 
     $options->{'cfgfile=s'} = sub { 
-        $self->{cfgfile} = File($_[1]); 
+        my $cfgfile = File($_[1]);
+        $self->env->cfgfile($cfgfile);
     };
 
     $options->{'pidfile=s'} = sub { 
-        $self->{pidfile} = File($_[1]); 
+        my $pidfile = File($_[1]); 
+        $self->env->pidfile($pidfile);
     };
 
     $options->{'logfile=s'} = sub {
-        $self->{logfile} = File($_[1]);
-        $self->class->var('LOGFILE', $self->logfile->path);
+        my $logfile = File($_[1]);
+        $self->env->logfile($logfile);
     };
 
     return $options;

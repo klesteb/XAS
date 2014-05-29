@@ -55,16 +55,17 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{logfile} = $self->env->logfile;
-    $self->{cfgfile} = $self->env->cfgfile;
-    
     $options->{'install'}   = sub { $self->_install_service(); exit 0; };
     $options->{'deinstall'} = sub { $self->_remove_service(); exit 0; };
-    $options->{'cfgfile=s'} = sub { $self->{cfgfile} = File($_[1]); };
+
+    $options->{'cfgfile=s'} = sub { 
+        my cfgfile = File($_[1]); 
+        $self->env->cfgfile($cfgfile);
+    };
 
     $options->{'logfile=s'} = sub {
-        $self->{logfile} = File($_[1]);
-        $self->class->var('LOGFILE', $self->logfile->path);
+        my $logfile = File($_[1]);
+        $self->env->logfile($logfile);
     };
 
     return $options;
@@ -74,7 +75,6 @@ sub _default_options {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
 
 1;
 
