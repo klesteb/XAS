@@ -683,7 +683,7 @@ An optional timeout in seconds. Default is none.
 
 =head2 exitcode
 
-Decodes perls exit code of a cli process. Returns two items.
+Decodes Perls version of the exit code from a cli process. Returns two items.
 
  Example:
 
@@ -698,7 +698,7 @@ clear the protection mask and redirect stdin, stdout and stderr to /dev/null.
 =head2 glob2regx($glob)
 
 This method will take a shell glob pattern and convert it into a Perl regex.
-This also works with DOS wildcards.
+This also works with DOS/Windows wildcards.
 
 =over 4
 
@@ -711,7 +711,7 @@ The wildcard to convert.
 =head2 hash_walk
 
 This routine will walk a HOH and does a callback on the key/values that are 
-found. It takes three named parameters:
+found. It takes these parameters:
 
 =over 4
 
@@ -742,6 +742,27 @@ The value of that key.
 A list of the key depth.
 
 =back
+
+=back
+
+=head2 dir_walk
+
+This will walk a directory structure and execute a callback for the found 
+files. It takes these parameters:
+
+=over 4
+
+=item B<-directory>
+
+The root directory to start from.
+
+=item B<-filter>
+
+A compiled regex to compare files against.
+
+=item B<-callback>
+
+The callback to execute when matching files are found.
 
 =back
 
@@ -817,9 +838,9 @@ Take the items from the current $ENV variable and create a formated string.
 
 =over 4
 
-=item L<Badger::Utils|Badger::Utils>
-
 =item L<XAS|XAS>
+
+=item L<Badger::Utils|Badger::Utils>
 
 =back
 

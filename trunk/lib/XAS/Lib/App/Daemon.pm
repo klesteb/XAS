@@ -136,6 +136,8 @@ sub _default_options {
 
     $self->{daemon} = FALSE;
 
+    $options->{'daemon'} = \$self->{daemon};
+  
     $options->{'cfgfile=s'} = sub { 
         my $cfgfile = File($_[1]);
         $self->env->cfgfile($cfgfile);
@@ -144,11 +146,6 @@ sub _default_options {
     $options->{'pidfile=s'} = sub { 
         my $pidfile = File($_[1]); 
         $self->env->pidfile($pidfile);
-    };
-
-    $options->{'logfile=s'} = sub {
-        my $logfile = File($_[1]);
-        $self->env->logfile($logfile);
     };
 
     return $options;
@@ -179,15 +176,10 @@ documentation.
 
 =head1 METHODS
 
-=head2 define_logging
-
-This method sets up the logger. By default, this file is named 
-xas/var/log/<$0>.log. This can be overridden by the --logfile option.
-
 =head2 define_pidfile
 
-This methid sets up the pid file for the process. By default, this file
-is named  xas/var/run/<$0>.pid. This can be overridded by the --pidfile option.
+This method sets up the pid file for the process. By default, this file
+is named $XAS_RUN/<$0>.pid. This can be overridded by the --pidfile option.
 
 =head2 define_signals
 
@@ -198,25 +190,13 @@ TERM, HUP and QUIT signals.
 
 This method will cause the process to become a daemon.
 
-=head1 ACCESSORS
-
-The following accessors are defined.
-
-=head2 logfile
-
-This returns the currently defined log file. 
-
-=head2 pidfile
-
-This returns the currently defined pid file.
-
 =head1 OPTIONS
 
 This module handles these additional options.
 
-=head2 --logfile
+=head2 --cfgfile
 
-This defines a log file for logging information.
+This defines an optional configuration file.
 
 =head2 --pidfile
 

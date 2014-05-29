@@ -82,7 +82,7 @@ sub session_cleanup {
 
     $kernel->delay('poll');
 
-    #walk the chain
+    # walk the chain
 
     $self->SUPER::session_cleanup($kernel, $session);
 
@@ -91,6 +91,25 @@ sub session_cleanup {
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _session_init {
+    my ($kernel, $self, $session) = @_[KERNEL,OBJECT,SESSION];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _session_init()");
+
+    $self->session_initialize($kernel, $session);
+
+    # on Win32 the SCM will tell the service to start
+
+    unless ($^O eq 'MSWin32') {
+
+        $kernel->yield('session_startup');
+
+    }
+
+}
 
 sub _poll {
     my ($kernel, $self, $session) = @_[KERNEL,OBJECT,SESSION];
@@ -264,7 +283,7 @@ can cleanup after itself. The default is 25 seconds.
 
 =back
 
-It also use parameters from XAS::Lib::Session.
+It also use parameters from L<XAS::Lib::Session>.
 
 =head2 service_startup()
 

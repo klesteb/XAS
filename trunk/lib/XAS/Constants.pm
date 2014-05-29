@@ -105,27 +105,22 @@ XAS::Constants - A Perl extension for the XAS environment
 =head1 DESCRIPTION
 
 This module provides various constants for the XAS enviromnet. It inherits from
-L<Badger::Constants|Badger::Constants> and also provides those constants.
+L<Badger::Constants|Badger::Constants> and also provides these additional
+constants.
 
 =head2 EXPORT
 
- AVAILABLE DELETE UNKNOWN QUEUED COMPLETED EXITING RUNNING 
- MOVING WAITING SUSPENDED SUBMIT SUBMITTED JOBSTATS RPC_JSON 
- RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE RPC_ERR_REQ 
- RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL RPC_ERR_SERVER 
- RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN RPC_ERR_APP LABEL_F1 LABEL_F2 
- LABEL_F3 LABEL_F4 LABEL_F5 LABEL_F6 LABEL_F7 LABEL_F8 LABEL_F9 
- LABEL_F10 LABEL_F11 LABEL_F12 START STOP EXIT RELOAD STAT 
- RUNNING ALIVE DEAD STOPPED STARTED RELOADED STATED EXITED 
- SHUTDOWN KILLME PROC_ROOT
+ RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
+ RPC_ERR_REQ RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL 
+ RPC_ERR_SERVER RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN RPC_ERR_APP 
+
+ LOG_TYPES LOG_FACILITY LOG_LEVELS
 
  Along with these tags
 
- batch
- workman
  jsonrpc
- labels
  supervisor
+ logging
 
 =head1 SEE ALSO
 
@@ -141,7 +136,7 @@ Kevin Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Kevin L. Esteb
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

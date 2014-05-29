@@ -12,7 +12,6 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   mixin   => 'XAS::Lib::Mixins::Handlers',
-  import  => 'class CLASS',
   utils   => 'dotid',
   vars => {
     PARAMS => {
@@ -103,7 +102,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    class->throws($self->throws);
+    $self->class->throws($self->throws);
 
     my $options = $self->options();
     my $defaults = $self->_default_options();
@@ -131,6 +130,11 @@ sub _default_options {
         'help|h|?'  => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
         'manual'    => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
         'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; }
+        'logfile=s' => sub {
+            my $logfile = File($_[1]);
+            $self->env->logtype('file');
+            $self->env->logfile($logfile);
+        }
     };
 
 }
@@ -163,15 +167,15 @@ XAS::Lib::App - The base class to write procedures within the XAS environment
 
 =head1 DESCRIPTION
 
-This module defines a base class for writing procedures. It provides a
-logger, signal handling, options processing along with a exit handler.
+This module defines a base class for writing procedures. It provides
+signal handling, options processing, along with a exit handler.
 
 =head1 METHODS
 
 =head2 new
 
 This method initilaizes the module. It inherits from XAS::Base and takes 
-several additional parameters:
+these additional parameters:
 
 =over 4
 
@@ -231,47 +235,30 @@ them.
   Example
 
     use XAS::Class
-      version    => '0.01',
-      base       => 'XAS::Lib::App',
-      filesystem => 'File',
-      accessors  => 'logfile
+      version   => '0.01',
+      base      => 'XAS::Lib::App',
+      accessors => 'widget'
     ;
 
     sub main {
         my $self = shift;
 
-        $self->log('info', 'starting up');
+        $self->log->info('starting up');
         sleep(60);
-        $self->log('info', 'shutting down');
+        $self->log->info('shutting down');
 
     }
 
     sub options {
         my $self = shift;
 
-        $self->{logfile} = $self->env->logfile;
-        $self->class->var('LOGFILE', $self->logfile->path);
-
         return {
-            'logfile=s' => sub {
-                $self->{logfile} = File($_[1]);
-                $self->class->var('LOGFILE', $self->logfile->path);
+            'widget=s' => sub {
+                $self->{widget} = uc($_[1]);
             }
         };
 
     }
-
-By default, log output goes to 'stderr'. This sets up a '--logfile' option.
-It defines the default as <XAS_ROOT>/var/log/<$0>.log and sets
-the package variable LOGFILE to the stringified path. If the '--logfile' 
-option is used, then it sets up the options handling to do the same thing 
-with the supplied parameter.
-
-=head2 define_logging
-
-This method sets up the logger using Log::Log4perl. It uses the package
-variable LOGFILE to determine how logging is provided. The provided
-logging configuration can be overridden by using the --logcfg cli option.
 
 =head2 define_signals
 
@@ -309,22 +296,6 @@ The signal that was captured.
 
 =back
 
-=head1 ACCESSORS
-
-This module has several accessors that make life easier for you.
-
-=head2 alert
-
-This is the handle to the XAS Alert system.
-
-=head2 env
-
-This is the handle to the XAS environment.
-
-=head2 alerts
-
-Wither or not to send alerts.
-
 =head1 OPTIONS
 
 This module handles the following command line options.
@@ -349,9 +320,15 @@ This displaces the procedures manual in the defined pager.
 
 This prints out the version of the module.
 
-=head2 --logcfg
+=head2 --logtype
 
-An optional Log::Log4perl configuration file.
+What type of log to use. By default the log is displayed on the console. Log
+types can be one of the following "console", "file", "logstash" or "syslog".
+
+=head2 --logfile
+
+The name of the log file. When --logfile is specified, it implies a log type 
+of "file".
 
 =head1 SEE ALSO
 
@@ -367,7 +344,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by Kevin L. Esteb
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

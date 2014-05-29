@@ -129,23 +129,15 @@ sub _auto_load {
 
     if ($name eq 'log') {
 
-        if ( my $params = $self->class->any_var('LOG')) {
+        return sub { 
 
-            return sub { XAS::Factory->module('logger', $params); } 
-
-        } else {
-
-            return sub { 
-
-                XAS::Factory->module('logger', {
-                    -type     => $self->env->logtype,
-                    -filename => $self->env->logfile,
-                    -levels => {
-                        debug => $self->debugging ? 1 : 0,
-                    }
-                }); 
-
-            }
+            XAS::Factory->module('logger', {
+                -type     => $self->env->logtype,
+                -filename => $self->env->logfile,
+                -levels => {
+                    debug => $self->debugging ? 1 : 0,
+                }
+            }); 
 
         }
 
@@ -338,17 +330,13 @@ for more details.
 
 =head2 email
 
-This will autoload L<XAS::Lib::Modules::Email>. The $EMAIL package variable 
-can be defined to provide parameters for this module. If this varaible is not 
-defined, then defaults from the Environment package will be used. Please see 
-that module for more details.
+This will autoload L<XAS::Lib::Modules::Email>. Please see that module
+for more details.
 
 =head2 log
 
-This will autoload L<XAS::Lib::Modules::Logger>. The $LOG package variable 
-can be defined to provide parameters for this module. If this varaible is not 
-defined, then defaults from the Environment package will be used. Please see 
-that module for more details.
+This will autoload L<XAS::Lib::Modules::Log>. Please see that module 
+for more details.
 
 =head1 SEE ALSO
 

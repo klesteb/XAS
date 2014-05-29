@@ -50,6 +50,38 @@ all your modules at the beginning of your program. You also don't need to
 know where individual modules live. And this system can provide nice alias 
 for long module names. This should lead to cleaner more readable programs.
 
+=head1 MODULES
+
+The following modules have been defined.
+
+=over 4
+
+=item B<alert>
+
+This will load L<XAS::Lib::Modules::Alerts>.
+
+=item B<email>
+
+This will load L<XAS::Lib::Modules::Email>.
+
+=item B<environment>
+
+This will load L<XAS::Lib::Modules::Environment>
+
+=item B<log logger>
+
+This will load L<XAS::Lib::Modules::Log>
+
+=item B<locking lockmgr>
+
+This will load L<XAS::Lib::Modules::Locking>.
+
+=item B<spool spooler>
+
+This will load L<XAS::Lib::Modules::Spool>.
+
+=back
+
 =head1 METHODS
 
 =head2 module

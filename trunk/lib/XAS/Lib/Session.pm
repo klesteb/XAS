@@ -171,7 +171,7 @@ sub _session_init {
 
     $self->session_initialize($kernel, $session);
 
-    $kernel->yield('startup');
+    $kernel->yield('session_startup');
 
 }
 
@@ -181,7 +181,7 @@ sub _session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_interrupt()");
-    $self->log->warn($self->message('signaled', $alias, $signal));
+    $self->log->warn_msg('signaled', $alias, $signal);
 
     if ($signal eq 'HUP') {
 
