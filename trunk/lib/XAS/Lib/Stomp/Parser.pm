@@ -307,11 +307,12 @@ XAS::Lib::Stomp::Parse - Create a STOMP Frame From a Buffer
 
 =head1 DESCRIPTION
 
-This module encapulates creates STOMP frames from a buffer. STOMP is the 
+This module creates STOMP frames from a buffer. STOMP is the 
 Streaming Text Orientated Messaging Protocol (or the Protocol Briefly 
 Known as TTMP and Represented by the symbol :ttmp). It's a simple and easy to
 implement protocol for working with Message Orientated Middleware from
-any language. 
+any language. This module supports v1.0, v1.1 and v1.2 frames with limited
+interoperability between the frame types.
 
 A STOMP frame consists of a command, a series of headers and a body.
 

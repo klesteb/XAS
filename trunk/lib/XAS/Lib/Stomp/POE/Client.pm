@@ -34,7 +34,33 @@ use XAS::Class
 # Public Methods
 # ---------------------------------------------------------------------
 
-sub cleanup {
+sub session_initalize {
+    my $self = shift;
+
+    my ($kernel, $session) = $self->validate_params(\@_, [1,1]);
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_initialize()");
+
+    # public events
+
+    $self->log->debug("$alias: doing public events");
+
+    $kernel->state('handle_noop',       $self);
+    $kernel->state('handle_error',      $self);
+    $kernel->state('handle_message',    $self);
+    $kernel->state('handle_receipt',    $self);
+    $kernel->state('handle_connected',  $self);
+
+    # walk the chain
+
+    $self->SUPER::session_initialize($kernel, $session);
+
+    $self->log->debug("$alias: leaving initialize()");
+
+}
+
+sub session_cleanup {
     my ($self, $kernel, $session) = @_;
 
     my $frame = $self->stomp->disconnect(
@@ -42,7 +68,7 @@ sub cleanup {
     );
 
     $kernel->call($session, 'write_data', $frame);
-    $self->SUPER::cleanup($kernel, $session);
+    $self->SUPER::session_cleanup($kernel, $session);
 
 }
 
@@ -88,12 +114,12 @@ sub handle_error {
 
     my $alias = $self->alias;
 
-    $self->log->error($self->message('errors',
+    $self->log->error_msg('errors',
         $alias,
         $frame->header->message_id,
         $frame->header->message,
         $frame->body
-    ));
+    );
 
 }
 
@@ -105,44 +131,6 @@ sub handle_noop {
 # ---------------------------------------------------------------------
 # Private Events
 # ---------------------------------------------------------------------
-
-sub _session_init {
-    my ($kernel, $self, $session) = @_[KERNEL,OBJECT,SESSION];
-
-    my $alias = $self->alias;
-
-    # private events
-
-    $self->log->debug("$alias: _session_init()");
-    $self->log->debug("$alias: doing private events");
-
-    $kernel->state('server_connected', $self, '_server_connected');
-    $kernel->state('server_connect',   $self, '_server_connect');
-    $kernel->state('server_error',     $self, '_server_error');
-    $kernel->state('server_message',   $self, '_server_message');
-
-    # public events
-
-    $self->log->debug("$alias: doing public events");
-
-    $kernel->state('read_data',         $self);
-    $kernel->state('write_data',        $self);
-    $kernel->state('handle_noop',       $self);
-    $kernel->state('handle_error',      $self);
-    $kernel->state('handle_message',    $self);
-    $kernel->state('handle_receipt',    $self);
-    $kernel->state('handle_connected',  $self);
-    $kernel->state('handle_connection', $self);
-    $kernel->state('connection_down',   $self);
-    $kernel->state('connection_up',     $self);
-
-    $kernel->yield('server_connect');
-    $self->initialize($kernel, $session);
-    $kernel->yield('startup');
-
-    $self->log->debug("$alias: leaving initialize()");
-
-}
 
 sub _server_message {
     my ($kernel, $self, $frame, $wheel_id) = @_[KERNEL, OBJECT, ARG0, ARG1];
@@ -434,6 +422,19 @@ This event and corresponding method is used to process "ERROR" frames.
 
 This example really doesn't do much. Error handling is pretty much what the
 process needs to do when something unexpected happens.
+
+=head2 handle_noop
+
+This event and corresponding method is used to process "NOOP" frames. 
+
+ Example
+
+    sub handle_noop {
+        my ($kernel, $self, $frame) = @_[KERNEL,$OBJECT,ARG0];
+ 
+    }
+
+This example really doesn't do much. 
 
 =head2 gather_data
 

@@ -1,4 +1,4 @@
-package XAS::Lib::App::Service::Unix;
+package XAS::Lib::App::Services::Unix;
 
 our $VERSION = '0.01';
 
@@ -30,19 +30,19 @@ sub get_service_config {
 
 }
 
+sub install_service {
+    my $self = shift;
+
+}
+
+sub remove_service {
+    my $self = shift;
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub _install_service {
-    my $self = shift;
-
-}
-
-sub _remove_service {
-    my $self = shift;
-
-}
 
 1;
 
@@ -50,17 +50,34 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Service::Unix - A class for the XAS environment
+XAS::Lib::Services::Unix - A mixin class for Unix Services
 
 =head1 SYNOPSIS
 
- use XAS::Lib::Service::Unix;
+ use XAS::Lib::Services::Unix;
 
 =head1 DESCRIPTION
 
+This module provides a mixin class to define the necessary functionality for
+a Service to run on a Unix like box.
+
 =head1 METHODS
 
-=head2 method1
+=head2 define_daemon
+
+This method will tell POE that the process has forked.
+
+=head2 get_service_config
+
+This method does nothing on Unix.
+
+=head2 install_service
+
+This method does nothing on Unix.
+
+=head2 remove_service
+
+This method does nothing on Unix.
 
 =head1 SEE ALSO
 

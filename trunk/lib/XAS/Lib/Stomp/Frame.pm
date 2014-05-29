@@ -202,7 +202,6 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   constants => 'REFS',
-  accessors => 'methods',
 ;
 
 #use Data::Dumper;

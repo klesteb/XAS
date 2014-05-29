@@ -1,12 +1,12 @@
-package XAS::Lib::App::Service;
+package XAS::Lib::App::Services;
 
 our $VERSION = '0.01';
 
 my $mixin;
 BEGIN {
     $mixin = ($^O eq 'MSWin32')
-      ? 'XAS::Lib::App::Service::Win32'
-      : 'XAS::Lib::App::Service::Unix';
+      ? 'XAS::Lib::App::Services::Win32'
+      : 'XAS::Lib::App::Services::Unix';
 }
 
 use Try::Tiny;
@@ -18,9 +18,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Lib::App',
   mixin      => $mixin,
-  import     => 'class CLASS',
   constants  => 'TRUE FALSE',
-  accessors  => 'logfile cfgfile',
   filesystem => 'File',
   messages => {
       installed => 'The service was successfully installed.',
@@ -50,31 +48,31 @@ sub define_signals {
 
 }
 
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
 sub _default_options {
     my $self = shift;
 
     my $options = $self->SUPER::_default_options();
 
-    $options->{'install'}   = sub { $self->_install_service(); exit 0; };
-    $options->{'deinstall'} = sub { $self->_remove_service(); exit 0; };
+    $options->{'install'}   = sub { $self->install_service(); exit 0; };
+    $options->{'deinstall'} = sub { $self->remove_service(); exit 0; };
+
+    $options->{'pidfile=s'} = sub { 
+        my cfgfile = File($_[1]); 
+        $self->env->pidfile($cfgfile);
+    };
 
     $options->{'cfgfile=s'} = sub { 
         my cfgfile = File($_[1]); 
         $self->env->cfgfile($cfgfile);
     };
 
-    $options->{'logfile=s'} = sub {
-        my $logfile = File($_[1]);
-        $self->env->logfile($logfile);
-    };
-
     return $options;
 
 }
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
 
 1;
 
@@ -82,71 +80,38 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::App::Service - The base class to write services within the XAS environment
+XAS::Lib::App::Services - The base class to write services within the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::Lib::App::Service;
+ use XAS::Lib::App::Services;
 
- my $service = XAS::Lib::App::Service->new();
+ my $service = XAS::Lib::App::Services->new();
 
  $service->run();
 
 =head1 DESCRIPTION
 
-This module defines a base class for writing Win32 Services. It inherits from
-XAS::Lib::App. Please see that module for additional documentation.
+This module defines an opeating environment for Services. A service is a 
+managed daemon. They behave differently depending on what platform they
+are running on. On Windows, they will run under the SCM, on Unix like boxes, 
+they may be standalone daemons. These differences are handled by mixins.
 
-=head1 METHODS
-
-=head2 get_service_config()
-
-This method defines how the service is configured. This is used with the
---install and --deintall command line options. The format is important
-and should follow this:
-
- sub get_service_config {
-     my $self = shift;
-
-     my $script = Win32::GetFullPathName($0);
-
-     return {
-         name        =>  "XAS_Test",
-         display     =>  "XAS Test",
-         path        =>  "\"$^X\" \"$script\"",
-         user        =>  '',
-         password    =>  '',
-         description => 'This is a test Perl service'
-     };
-
- }
-
-The user and password can be defined, the path should not be changed. See
-L<Win32::Daemon> for more details.
-
-=head1 ACCESSORS
-
-The following accessors are defined.
-
-=head2 logfile
-
-This returns the currently defined log file.
-
-=head2 cfgfile
-
-This returns the currently defined config file.
+The proper mixin is loaded when the process starts, so all the interaction
+happens in the background. It inherits from L<XAS::Lib::App>. Please see 
+that module for additional documentation.
 
 =head1 OPTIONS
 
 This module handles these additional options.
 
-=head2 B<--logfile>
-
-This defines a log file for logging information.
-
 =head2 B<--cfgfile>
 
 This defines a configuration file.
+
+=head2 B<--pidfile>
+
+This defines the pid file to use.
 
 =head2 B<--install>
 
@@ -162,8 +127,6 @@ This will deinstall the service from the Win32 SCM.
 
 =item L<XAS|XAS>
 
-=item L<Log::Log4perl>
-
 =back
 
 =head1 AUTHOR
@@ -172,7 +135,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by Kevin L. Esteb
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

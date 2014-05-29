@@ -122,73 +122,16 @@ __END__
 
 XAS::Lib::Service::Unix - A mixin class for Unix Services
 
-=head1 SYNOPSIS
-
- use XAS::Lib::Service;
-
- my $sevice = XAS::Lib::Service->new(
-    -alias             => 'session',
-    -poll_interval     => 2,
-    -shutdown_interval => 25
- );
-
 =head1 DESCRIPTION
 
-This module is a mixin that provides an interface between a process supervisor
-and POE sessions. It allows POE to manage the scheduling of sessions while
-referencing Unix signals for process job control.
+This module is a mixin that provides an interface between a Unix like system 
+and a Service. It responds to these additonal signals.
 
-=head1 METHODS
+ TSTP - pause the session
+ CONT - resume the session
 
-=head2 new()
-
-This method is used to initialize the service. It takes the following
-parameters:
-
-=over 4
-
-=item B<-alias>
-
-The name of this POE session.
-
-=item B<-poll_interval>
-
-This is the interval were the SCM sends SERVICE_RUNNING message. The
-default is every 2 seconds.
-
-=item B<-shutdown_interval>
-
-This is the interval to pause the system shutdown so that the service
-can cleanup after itself. The default is 25 seconds.
-
-=back
-
-It also use parameters from XAS::Lib::Session.
-
-=head2 service_startup()
-
-This method should be overridden, it is called when the service is
-starting up.
-
-=head2 service_shutdown()
-
-This method should be overridden, it is called when the service has
-been stopped or when the system is shutting down.
-
-=head2 service_idle()
-
-This method should be overridden, it is called every B<--poll_interval>.
-This is where the work of the service can be done.
-
-=head2 service_paused()
-
-This method should be overridden, it is called when the service has been
-paused.
-
-=head2 service_unpaused()
-
-This method should be overridden, it is called when the service has been
-resumed.
+It allows POE to manage the scheduling of sessions while handling the 
+additional signals to emulate the Windows SCM.
 
 =head1 SEE ALSO
 

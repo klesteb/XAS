@@ -1,4 +1,4 @@
-package XAS::Lib::App::Service::Win32;
+package XAS::Lib::App::Services::Win32;
 
 our $VERSION = '0.01';
 
@@ -9,8 +9,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  mixins  => 'define_daemon get_service_config _install_service 
-              _remove_service _get_error',
+  mixins  => 'define_daemon get_service_config install_service remove_service',
 ;
 
 # ----------------------------------------------------------------------
@@ -40,11 +39,7 @@ sub get_service_config {
 
 }
 
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
-
-sub _install_service {
+sub install_service {
     my $self = shift;
 
     my $config = $self->get_service_config();
@@ -55,13 +50,13 @@ sub _install_service {
 
     } else {
 
-        printf("%s\n", $self->message('failed', 'install', $self->_get_error()));
+        printf("%s\n", $self->message('failed', 'install', _get_error()));
 
     }
 
 }
 
-sub _remove_service {
+sub remove_service {
     my $self = shift;
 
     my $config = $self->get_service_config();
@@ -72,14 +67,18 @@ sub _remove_service {
 
     } else {
 
-        printf("%s\n", $self->message('failed', 'remove', $self->_get_error()));
+        printf("%s\n", $self->message('failed', 'remove', _get_error()));
 
     }
 
 }
 
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
 sub _get_error {
-    my $self = shift;
 
     return(Win32::FormatMessage(Win32::Daemon::GetLastError()));
 
@@ -91,17 +90,51 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::App::Service::Unix - A class for the XAS environment
-
-=head1 SYNOPSIS
-
- use XAS::Lib::Service::Unix;
+XAS::Lib::App::Services::Win32 - A mixin class for Win32 Services
 
 =head1 DESCRIPTION
 
+This module provides a mixin class to define the necessary functionality for
+a Service to run on Win32.
+
 =head1 METHODS
 
-=head2 method1
+=head2 define_daemon
+
+This method does nothing on Win32.
+
+=head2 get_service_config
+
+This method defines how the service is configured. This is used with the
+--install and --deintall command line options. The format is important
+and should follow this:
+
+ sub get_service_config {
+     my $self = shift;
+
+     my $script = Win32::GetFullPathName($0);
+
+     return {
+         name        =>  "XAS_Test",
+         display     =>  "XAS Test",
+         path        =>  "\"$^X\" \"$script\"",
+         user        =>  '',
+         password    =>  '',
+         description => 'This is a test Perl service'
+     };
+
+ }
+
+The user and password can be defined, the path should not be changed. See
+L<Win32::Daemon> for more details.
+
+=head2 install_service
+
+This method will install the service with the SCM.
+
+=head2 remove_service
+
+This method will deinstall the service for the SCM.
 
 =head1 SEE ALSO
 

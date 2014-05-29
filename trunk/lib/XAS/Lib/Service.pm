@@ -253,8 +253,8 @@ XAS::Lib::Service - A base class for Services
 =head1 DESCRIPTION
 
 This module provides a generic interface to "Services". A Service is
-a managed background process. It reponds to external stimili. On Win32
-this would responding to commands from the SCM. On Unix this would be
+a managed background process. It reponds to external stimuli. On Windows
+this would be responding to commands from the SCM. On Unix this would be
 responding to a special set of signals. A service can be stopped, started,
 paused and resumed.
 

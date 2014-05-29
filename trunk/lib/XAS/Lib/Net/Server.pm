@@ -307,11 +307,11 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info($self->message('client_disconnect', $alias, $self->host($wheel), $self->port($wheel)));
+        $self->log->info_msg('client_disconnect', $alias, $self->host($wheel), $self->port($wheel));
 
     } else {
 
-        $self->log->error($self->message('client_error', $alias, $errnum, $errstr));
+        $self->log->error_msg('client_error', $alias, $errnum, $errstr);
 
     }
 
@@ -428,22 +428,6 @@ Called when the inactivity timer is triggered.
 =item B<$wheel>
 
 The POE wheel that triggered the timer.
-
-=back
-
-=head2 declare_events($kernel, $session)
-
-Declare methods to be acted upon.
-
-=over 4
-
-=item B<$kernel>
-
-A handle to the POE kernel.
-
-=item B<$session>
-
-A handle to the current POE session.
 
 =back
 

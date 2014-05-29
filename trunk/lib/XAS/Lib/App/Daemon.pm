@@ -170,8 +170,14 @@ XAS::Lib::App::Daemon - The base class to write daemons within the XAS environme
 
 =head1 DESCRIPTION
 
-This module defines a base class for writing daemons. It inherits from
-L<XAS::Lib::App|XAS::Lib::App>. Please see that module for additional 
+This module defines an opeating environment for daemons. A daemon is a 
+Unix background process without a controlling terminal. Windows really
+doesn't have a concept for this behavior. For running background jobs
+on Windows please see L<XAS::Lib::App::Services>. 
+
+This module is also single threaded, it doesn't use POE to provide an 
+async environment. If you need that, the see the above module. This inherits 
+from L<XAS::Lib::App|XAS::Lib::App>. Please see that module for additional 
 documentation.
 
 =head1 METHODS
@@ -220,7 +226,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Kevin L. Esteb
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
