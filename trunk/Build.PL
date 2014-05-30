@@ -44,7 +44,7 @@ if ($^O eq 'MSWin32') {
     $requires->{'Win32::Daemon'}  = 20110117;
     $requires->{'Win32::Service'} = 0.06;
 
-    my $path = defined($ENV{XAS_ROOT}) ? $ENV{XAS_ROOT} : 'C:\\xas';
+    my $path = defined($ENV{'XAS_ROOT'}) ? $ENV{'XAS_ROOT'} : 'C:\\xas';
 
     $install_path = {
         script      => $path . '\\bin',
@@ -100,6 +100,34 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
             system("chmod 0664 /var/spool/xas/alerts");
             system("chmod 0664 /var/spool/xas/logstash");
+
+        } else {
+
+            my $path = defined($ENV{'XAS_ROOT'}) ? $ENV{'XAS_ROOT'} : 'C:\\xas';
+
+            my $dir = catdir($base, 'tmp');
+            system("mkdir $dir");
+
+            my $dir = catdir($base, 'var');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'log');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'run');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'lib');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'spool');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'spool', 'alerts');
+            system("mkdir $dir");
+
+            $dir = catdir($base, 'var', 'spool', 'logstash');
+            system("mkdir $dir");
 
         }
 
