@@ -45,7 +45,6 @@ sub output {
         facility     => $args->{facility},
         process      => $args->{process},
         pid          => $args->{pid}
-        tid          => '0'
     };
 
     # write the spool file
@@ -78,17 +77,38 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
-
-=head1 SYNOPSIS
-
- use XAS::XXX;
+XAS::Lib::Modules::Log::Logstash - A mixin class for logging
 
 =head1 DESCRIPTION
 
+This module is a mixin for logging. It creates a logstash "json_event" which
+is then logged to the logstash spool directory.
+
 =head1 METHODS
 
-=head2 method1
+=head2 init_log
+
+This method initializes the module. It creates a spool object for writing
+the "json_event".
+
+=head2 output($hashref)
+
+This method formats the hashref and writes out the results. The JSON data
+structure has the following fields:
+
+    @timestamp     - current time in GMT
+    @version       - 1
+    @message       - the line that would have gone to a log file
+    message        - the log line
+    hostname       - the hostname
+    pid            - the pid of the process
+    priority       - the priority from -priority
+    facility       - the facility from -facility
+    process        - the process  from -process
+
+=head2 destroy
+
+This methods deinitializes the module.
 
 =head1 SEE ALSO
 

@@ -10,12 +10,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  perl(Badger) >= 0.09
 BuildRequires:  perl(Config::IniFiles) >= 2.72
-BuildRequires:  perl(Config::Tiny)
 BuildRequires:  perl(DateTime) >= 0.53
 BuildRequires:  perl(DateTime::Format::Pg)
 BuildRequires:  perl(DateTime::Format::Strptime) >= 1.1
-BuildRequires:  perl(DBIx::Class)
-BuildRequires:  perl(DBIx::Class::Schema::Config)
 BuildRequires:  perl(File::Pid)
 BuildRequires:  perl(Hash::Merge) >= 0.12
 BuildRequires:  perl(JSON::XS) >= 2.27
@@ -23,33 +20,24 @@ BuildRequires:  perl(LockFile::Simple) >= 0.207
 BuildRequires:  perl(Log::Log4perl)
 BuildRequires:  perl(MIME::Lite) >= 3.027
 BuildRequires:  perl(Module::Build)
-BuildRequires:  perl(Net::OpenSSH)
 BuildRequires:  perl(Params::Validate) >= 0.92
 BuildRequires:  perl(POE) >= 1.35
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Try::Tiny::Retry) >= 0.0
-BuildRequires:  perl(Capture::Tiny) >= 0.22
-BuildRequires:  perl(Net::SSH2) >= 0.45
 Requires:       perl(Badger) >= 0.09
 Requires:       perl(Config::IniFiles) >= 2.72
-Requires:       perl(Config::Tiny)
 Requires:       perl(DateTime) >= 0.53
 Requires:       perl(DateTime::Format::Pg)
 Requires:       perl(DateTime::Format::Strptime) >= 1.1
-Requires:       perl(DBIx::Class)
-Requires:       perl(DBIx::Class::Schema::Config)
 Requires:       perl(File::Pid)
 Requires:       perl(Hash::Merge) >= 0.12
 Requires:       perl(JSON::XS) >= 2.27
 Requires:       perl(LockFile::Simple) >= 0.207
 Requires:       perl(Log::Log4perl)
 Requires:       perl(MIME::Lite) >= 3.027
-Requires:       perl(Net::OpenSSH)
 Requires:       perl(Params::Validate) >= 0.92
 Requires:       perl(POE) >= 1.35
 Requires:       perl(Try::Tiny::Retry) >= 0.0
-Requires:       perl(Capture::Tiny) >= 0.22
-Requires:       perl(Net::SSH2) >= 0.45
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 # filter out Win32 stuff.
@@ -59,8 +47,7 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 %filter_setup
 
 %description
-This is an attempt to create an environment that will allow code to run
-consistently on Linux and Win32 platforms.
+This is middleware for Perl. It is cross platform capable.
 
 %prep
 %setup -q -n XAS-%{version}
@@ -87,10 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc Changes perl-XAS.spec README
 %{perl_sitelib}/*
-/usr/local/bin/template.pl
 /usr/local/share/man/man3/*
-/usr/local/share/man/man1/template.pl.1
-/etc/profile.d/xas.sh
 
 %changelog
 * Tue Sep 24 2013 kesteb 0.07-1

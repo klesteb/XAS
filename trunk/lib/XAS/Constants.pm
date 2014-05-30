@@ -53,7 +53,7 @@ use Badger::Class
       
       LOG_LEVELS   => qr/info|warn|error|fatal|debug|trace/,
       LOG_TYPES    => qr/console|file|logstash|syslog/,
-      LOG_FACILITY => qr/auth|authpriv|cron|daemon|ftp|local.|lpr|mail|news|user|uucp/,
+      LOG_FACILITY => qr/auth|authpriv|cron|daemon|ftp|local[0-7]|lpr|mail|news|user|uucp/,
   },
   exports => {
       all => q/RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 

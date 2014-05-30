@@ -72,17 +72,34 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
-
-=head1 SYNOPSIS
-
- use XAS::XXX;
+XAS::Lib::Modules::Log::Syslog - A mixin class for logging
 
 =head1 DESCRIPTION
 
+This module is a mixin for logging. This logs to syslog.
+
 =head1 METHODS
 
-=head2 method1
+=head2 init_log
+
+This method initializes syslog. Sets the process, facility and requests that
+the pid be included.
+
+=head2 output($hashref)
+
+This method translate the log level to an appropiate syslog priority and
+writes out the log line. The translation is a follows:
+
+    info  => 'info',
+    error => 'err',
+    warn  => 'warning',
+    fatal => 'alert',
+    trace => 'notice',
+    debug => 'debug'
+
+=head2 destroy
+
+Closes the connection to syslog.
 
 =head1 SEE ALSO
 

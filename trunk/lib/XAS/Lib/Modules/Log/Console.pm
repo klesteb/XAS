@@ -18,7 +18,7 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my ($args) = $self->validate_params(\@_, [
+    my $args = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -49,17 +49,25 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
-
-=head1 SYNOPSIS
-
- use XAS::XXX;
+XAS::Lib::Modules::Log::Console - A mixin class for logging
 
 =head1 DESCRIPTION
 
+This module is a mixin for logging. It logs to the console.
+
 =head1 METHODS
 
-=head2 method1
+=head2 init_log
+
+This method initializes the module.
+
+=head2 output($hashref)
+
+The method formats the hashref and writes out the results.
+
+=head2 destroy
+
+This methods deinitializes the module.
 
 =head1 SEE ALSO
 
