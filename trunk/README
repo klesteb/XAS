@@ -1,25 +1,72 @@
-XAS
+XAS v0.07
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
-
-A README file is required for CPAN modules since CPAN extracts the README
-file from a module distribution so that people browsing the archive
-can use it to get an idea of the module's uses. It is usually a good idea
-to provide version information here so that people can decide whether
-fixes for the module are worth downloading.
-
+XAS is middleware for Perl. It provides standardized methods, modules
+and philosophy for constructing large distributed applications. This 
+system is based on production code that has been running for over five 
+years without any problems.
 
 INSTALLATION
 
 To install this module, run the following commands:
 
-	perl Build.PL
-	./Build
-	./Build test
-	./Build install
+    # perl Build.PL
+    # ./Build
+    # ./Build test
+    # ./Build install
+    # ./Build post_install
+
+On a Linux system this will install the software into /usr/local. This can
+be overridden with the --install_base option to Build.PL. 
+
+You can also use the Debian package manager to install this software. Use the
+following commands to do so:
+
+    # debuild -uc -us
+    # dpkg -i ../libxas-base-perl_0.05-1_all.deb
+
+If you are RPM based then a spec file has been included. If you have a
+rpm build environment then you can do the following:
+
+   # rpmbuild -ta xas-0.07.tar.gz
+   # yum localinstall perl-XAS-0.07-1.noarch.rpm
+
+The above will install the software into /usr/local. This package uses CPAN
+modules that may not be supported from debian/rpm repositories.  
+
+WARNING
+
+    These installation instructions presupposes some sort of Linux box.
+    Persumably a Debian based distribution. The perl based installation
+    steps will work on Redhat based distributions. They will also work,
+    to a certain extent, on generic Unix based systems. With these, the 
+    specialized startup scripts will need to be modified to work on them.
+    This software requires Perl 5.8.8 or higher to operate.
+
+POST INSTALLATION
+
+This installation also creates a "xas" user and group. This is used to
+set permissions on files and for user context with running daemons.
+
+A xas.sh file is created and placed in the /etc/profile.d directory to define 
+environment variables for the system. 
+
+A xas file is created and placed in the /etc/logrotate.d directory to
+help manage log files.
+
+Start up scripts for various daemons are created in /etc/init.d. Since the 
+LSB is rather liberally interrupted by the various distributors, these scripts 
+are for Debian based systems. Porting them to other distributions is rather
+trivial and if you have a fool proof way to determine the Linux distribution,
+please forward it to me. Thanks.
+
+This system uses a Message Queue. This queue needs to be STOMP 1.0 compatible.
+RabbitMQ and POE::Component::MessageQueue have been tested. 
+
+This system uses a database. The default install assumes PostgreSQL.
+It has been tested with SQLite. You need to run /opt/xas/bin/create_db.pl 
+to create a schema for the database. Once the schema is loaded you may
+need to modify /opt/xas/etc/database.ini to reflect your database
+environment. 
 
 SUPPORT AND DOCUMENTATION
 
@@ -28,20 +75,13 @@ perldoc command.
 
     perldoc XAS
 
-You can also look for information at:
+Extended documentation is available here:
 
-    RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=XAS
+    http://svn.kesteb.us/trac
 
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/XAS
+The latest and greatest is always available at:
 
-    CPAN Ratings
-        http://cpanratings.perl.org/d/XAS
-
-    Search CPAN
-        http://search.cpan.org/dist/XAS/
-
+    http://svn.kesteb.us/repos/XAS/trunk
 
 LICENSE AND COPYRIGHT
 
