@@ -1,6 +1,6 @@
 package XAS::Apps::Rotate;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Try::Tiny;
 
@@ -8,7 +8,6 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Lib::App',
-  accessors  => 'logfile cfgfile',
   utils      => 'compress glob2regex',
   constants  => 'TRUE FALSE WILDCARD',
   filesystem => 'Dir File',
@@ -164,7 +163,7 @@ sub is_oldder {
 
     if ( $age_diff !~ /(\d+)\s+([smhdw])/i ) {
 
-        $self->log->warn($self->message('age_params', $age_diff));
+        $self->log->warn_msg('age_params', $age_diff);
 
         return FALSE;
 
@@ -199,7 +198,7 @@ sub is_bigger {
 
     if ($size_spec !~ /(\d+)\s+([bkmgt])/i ) {
 
-        $self->log->warn($self->message('size_params', $size_spec));
+        $self->log->warn_msg('size_params', $size_spec);
 
         return FALSE;
 
@@ -233,7 +232,7 @@ sub compress_file {
 
         my $file = $filename->path . ".0";
         $ext = get_extension();
-        $self->log->info($self->message('compressing', $file));
+        $self->log->info_msg('compressing', $file);
 
         if ($compressor =~ /zip/i) {
 
@@ -258,7 +257,7 @@ sub compress_file {
         }
 
         $self->run_cmd($cmd);
-        $self->log->error($self->message('nocompress', $file)) if $?;
+        $self->log->error_msg('nocompress', $file) if $?;
 
     }
 
@@ -305,7 +304,7 @@ sub recreate_file {
                 my $ex = $_;
                 my $ref = ref($ex);
 
-                $self->log->warn($self->message('norecreate', $filename->path));
+                $self->log->warn_msg('norecreate', $filename->path);
 
             };
 
@@ -330,7 +329,7 @@ sub recreate_file {
             }
 
             $self->run_cmd($cmd);
-            $self->log->error($self->message('notail', $line_count, $filename)) if $?;
+            $self->log->error_msg(('notail', $line_count, $filename) if $?;
 
         }
 
@@ -381,18 +380,18 @@ sub rotate_file {
             if ($method =~ /copy/i) {
 
                 $prvname->copy($tmpname->path);
-                $self->log->info($self->message('copied', $prvname, $tmpname));
+                $self->log->info_msg('copied', $prvname, $tmpname);
 
             } else { 
 
                 $prvname->move($tmpname->path); 
-                $self->log->info($self->message('moved', $prvname, $tmpname));
+                $self->log->info_msg('moved', $prvname, $tmpname);
 
             }
 
         } else {
 
-            $self->log->warn($self->message('noexist', $prvname));
+            $self->log->warn_msg('noexist', $prvname);
 
         }
 
@@ -401,12 +400,12 @@ sub rotate_file {
     if ($method =~ /copy/i) {
 
         $filename->copy($filename->path . '.0');
-        $self->log->info($self->message('copied', $filename, $filename. '.0'));
+        $self->log->info_msg('copied', $filename, $filename. '.0');
 
     } else { 
 
         $filename->move($filename->path . '.0');
-        $self->log->info($self->message('moved', $filename, $filename . '.0'));
+        $self->log->info_msg('moved', $filename, $filename . '.0');
 
     }
 
@@ -468,7 +467,7 @@ sub find_files {
     my @files;
     my $fdir = Dir($from->volume, $from->dir);
 
-    $self->log->info($self->message('processing', $from->name, $fdir->path));
+    $self->log->info_msg('processing', $from->name, $fdir->path);
 
     if ($from->name =~ WILDCARD) {
 
@@ -527,7 +526,7 @@ sub find_files {
 
     if ($#wanted_files < 0) {
 
-        $self->log->warn($self->message('nomatch', $fdir->path, $from->name)) if ($self->is_true($missingok));
+        $self->log->warn_msg('nomatch', $fdir->path, $from->name) if ($self->is_true($missingok));
 
     }
 
@@ -539,11 +538,11 @@ sub setup {
     my $self = shift;
 
     $compressor = $self->cfg->val('settings', 'compressor', 'zip');
-    $zipcmd =     $self->cfg->val('settings', 'zip-command', 'c:\bin\zip.exe');
-    $gzipcmd =    $self->cfg->val('settings', 'gzip-command', 'c:\bin\gzip.exe');
-    $bzipcmd =    $self->cfg->val('settings', 'bzip2-command', 'c:\bin\bzip2.exe');
-    $compcmd =    $self->cfg->val('settings', 'compress-command', 'c:\bin\compress.exe');
-    $tailcmd =    $self->cfg->val('settings', 'tail-command', 'c:\bin\tail.exe');
+    $zipcmd     = $self->cfg->val('settings', 'zip-command', 'c:\bin\zip.exe');
+    $gzipcmd    = $self->cfg->val('settings', 'gzip-command', 'c:\bin\gzip.exe');
+    $bzipcmd    = $self->cfg->val('settings', 'bzip2-command', 'c:\bin\bzip2.exe');
+    $compcmd    = $self->cfg->val('settings', 'compress-command', 'c:\bin\compress.exe');
+    $tailcmd    = $self->cfg->val('settings', 'tail-command', 'c:\bin\tail.exe');
 
 }
 
@@ -593,15 +592,11 @@ sub main {
 sub options {
     my $self = shift;
 
-    $self->{logfile} = File('stderr');
-    $self->{cfgfile} = $self->env->cfgfile;
-
     return {
-        'cfgfile=s' => sub { $self->{cfgfile} = File($_[1]); },
-        'logfile=s' => sub { 
-            $self->{logfile} = File($_[1]); 
-            $self->class->var('LOGFILE', $self->logfile->path);
-        }
+        'cfgfile=s' => sub { 
+            $cfgfile} = File($_[1]); 
+            $self->env->cfgfile($cfgfile);
+        },
     };
 
 }

@@ -2,13 +2,12 @@ package XAS::Apps::Logger;
 
 use Try::Tiny;
 use XAS::Class
-  debug      => 0,
-  version    => '0.02',
-  base       => 'XAS::Lib::App',
-  filesystem => 'File',
+  debug   => 0,
+  version => '0.02',
+  base    => 'XAS::Lib::App',
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -32,18 +31,6 @@ sub main {
     sleep(10);
 
     $self->log->info('shutting down');
-
-}
-
-sub options {
-    my $self = shift;
-
-    return {
-        'logfile=s' => sub { 
-            my $logfile = File($_[1]); 
-            $self->env->logfile($logfile);
-        }
-    };
 
 }
 

@@ -28,6 +28,8 @@ method for writting distributed applications.
 
 =item L<XAS::Exceptions>
 
+=iem L<XAS::Factory>
+
 =item L<XAS::Utils>
 
 =item L<XAS::Apps::Logger>
@@ -38,21 +40,39 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::App::Daemon>
 
-=item L<XAS::Lib::App::Daemon::POE>
+=item L<XAS::Lib::App::Services>
 
-=item L<XAS::Lib::App::Service>
+=item L<XAS::Lib::App::Services::Unix>
 
-=item L<XAS::Lib::Locking>
+=item L<XAS::Lib::App::Services::Win32>
 
 =item L<XAS::Lib::Mixins::Handlers>
 
 =item L<XAS::Lib::Mixins::Keepalive>
 
+=item L<XAS::Lib::Modules::Alerts>
+
+=item L<XAS::Lib::Modules::Email>
+
+=item L<XAS::Lib::Modules::Environment>
+
+=item L<XAS::Lib::Modules::Locking>
+
+=item L<XAS::Lib::Modules::Log>
+
+=item L<XAS::Lib::Modules::Log::Console>
+
+=item L<XAS::Lib::Modules::Log::Files>
+
+=item L<XAS::Lib::Modules::Log::Logstash>
+
+=item L<XAS::Lib::Modules::Log::Syslog>
+
+=item L<XAS::Lib::Modules::Spool>
+
 =item L<XAS::Lib::Net::Client::Default>
 
 =item L<XAS::Lib::Net::Client::POE>
-
-=item L<XAS::Lib::Net::Client::Stomp>
 
 =item L<XAS::Lib::Service>
 
@@ -61,8 +81,6 @@ method for writting distributed applications.
 =item L<XAS::Lib::Service::Win32>
 
 =item L<XAS::Lib::Session>
-
-=item L<XAS::Lib::Spool>
 
 =item L<XAS::Lib::Stomp::Frame>
 
@@ -73,12 +91,6 @@ method for writting distributed applications.
 =item L<XAS::Lib::Stomp::POE::Filter>
 
 =item L<XAS::Lib::Stomp::Utils>
-
-=item L<XAS::Lib::System::Alerts>
-
-=item L<XAS::Lib::System::Email>
-
-=item L<XAS::Lib::System::Environment>
 
 =back
 
