@@ -214,8 +214,8 @@ XAS::Lib::Session - The base class for all POE Sessions.
 This module provides an object based POE session. This object will perform
 the necessary actions for the lifetime of the session. This includes handling
 signals. The following signals INT, TERM, QUIT will trigger the 'shutdown'
-event which invokes the cleanup() method. The HUP signal will invoke the
-reload() method. This module inherits from XAS::Base.
+event which invokes the session_cleanup() method. The HUP signal will invoke 
+the session_reload() method. This module inherits from XAS::Base.
 
 =head1 METHODS
 
@@ -311,7 +311,7 @@ A handle to the current self.
 
 =head2 session_shutdown
 
-When you send this event to the session, it will invoke the cleanup() method.
+When you send this event to the session, it will invoke the session_cleanup() method.
 
 =head1 PRIVATE EVENTS
 
