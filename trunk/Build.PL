@@ -19,26 +19,23 @@ my $install_path = {
 
 my $requires = {
     'Badger'                      => 0.09,
-    'Config::IniFiles'            => 2.72,
+    'POE'                         => 1.35,
     'DateTime'                    => 0.53,
     'DateTime::Format::Pg'        => 0.0,     #0.16008,
     'DateTime::Format::Strptime'  => 1.10,
+    'Config::IniFiles'            => 2.72,
     'File::Pid'                   => 0.0,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
     'LockFile::Simple'            => 0.207,
     'MIME::Lite'                  => 3.027,
-    'Net::Stomp'                  => 0.36,
     'Params::Validate'            => 0.92,
     'Pod::Usage'                  => 1.51,
     'Try::Tiny::Retry'            => 0.003,
     'Set::Light'                  => 0.04,
-    'Net::SSH2'                   => 0.0,
-    'POE'                         => 1.35,
-    'Log::Log4perl'               => 0.0,
 };
 
-# Needed for Win32 installations, not part of standard install
+# Needed for Win32 installations
 
 if ($^O eq 'MSWin32') {
 
@@ -58,17 +55,6 @@ if ($^O eq 'MSWin32') {
 
 }
 
-# Needed for database access, not part of standard install
-
-eval 'use DBIx::Class';
-unless ($@) {
-
-    $requires->{'Config::Tiny'}                              = 0.0;
-    $requires->{'DBIx::Class'}                               = 0.0;
-    $requires->{'DBIx::Class::Schema::Config'}               = 0.0;
-
-}
-
 my $class = Module::Build->subclass(code => <<'EOC');
 
     use strict;
@@ -78,6 +64,48 @@ my $class = Module::Build->subclass(code => <<'EOC');
     use File::Find;
     use File::Basename;
     use File::Spec::Functions qw( catfile catdir rel2abs );
+
+    sub ACTION_post_install {
+        my $self = shift;
+
+        # create xas owner/group 
+
+        unless ($^O eq 'MSWin32') {
+
+            unless (getpwnam('xas')) {
+
+                system("addgroup --system xas");
+                system("adduser --system --ingroup xas --home /dev/null xas");
+
+            }
+
+            # using the standard filesystem layout
+
+            system("mkdir /var/log/xas");
+            system("mkdir /var/lib/xas");
+            system("mkdir /var/run/xas");
+            system("mkdir /var/spool/xas");
+
+            # create some spool directories
+
+            system("mkdir /var/spool/xas/alerts");
+            system("mkdir /var/spool/xas/logstash");
+
+            # set ownership/permissions on the files/directories
+
+            system("chown -R xas.xas /var/log/xas");
+            system("chown -R xas.xas /var/lib/xas");
+            system("chown -R xas.xas /var/run/xas");
+            system("chown -R xas.xas /var/spool/xas");
+
+            system("chmod 0664 /var/spool/xas/alerts");
+            system("chmod 0664 /var/spool/xas/logstash");
+
+        }
+
+        return $self;
+
+    }
 
     sub process_etc_files {
         my $self = shift;

@@ -17,7 +17,6 @@ BuildRequires:  perl(File::Pid)
 BuildRequires:  perl(Hash::Merge) >= 0.12
 BuildRequires:  perl(JSON::XS) >= 2.27
 BuildRequires:  perl(LockFile::Simple) >= 0.207
-BuildRequires:  perl(Log::Log4perl)
 BuildRequires:  perl(MIME::Lite) >= 3.027
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Params::Validate) >= 0.92
@@ -33,7 +32,6 @@ Requires:       perl(File::Pid)
 Requires:       perl(Hash::Merge) >= 0.12
 Requires:       perl(JSON::XS) >= 2.27
 Requires:       perl(LockFile::Simple) >= 0.207
-Requires:       perl(Log::Log4perl)
 Requires:       perl(MIME::Lite) >= 3.027
 Requires:       perl(Params::Validate) >= 0.92
 Requires:       perl(POE) >= 1.35
