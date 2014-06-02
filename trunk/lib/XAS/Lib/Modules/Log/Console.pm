@@ -53,7 +53,7 @@ XAS::Lib::Modules::Log::Console - A mixin class for logging
 
 =head1 DESCRIPTION
 
-This module is a mixin for logging. It logs to the console.
+This module is a mixin for logging. It logs to stderr.
 
 =head1 METHODS
 
