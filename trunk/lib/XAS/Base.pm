@@ -123,7 +123,7 @@ sub _auto_load {
 
     if ($name eq 'email') {
 
-        return sub { XAS::Factory->module('email', $params); } 
+        return sub { XAS::Factory->module('email'); } 
 
     }
 

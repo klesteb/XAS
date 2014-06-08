@@ -47,8 +47,8 @@ warn Dumper($p);
 
 package main;
 
-my $test = Test->new(-test => 'testing');
-#my $test = Test->new();
+#my $test = Test->new(-test => 'testing');
+my $test = Test->new();
 
 $test->test1(
     -param1 => 'testing',
