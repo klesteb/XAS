@@ -29,12 +29,12 @@ sub get_service_config {
     my $script = Win32::GetFullPathName($0);
 
     return {
-        name        =>  "XAS_Test",
-        display     =>  "XAS Test",
+        name        =>  $self->class->any_var('SERVICE_NAME'),
+        display     =>  $self->class->any_var('SERVICE_DISPLAY_NAME'),
         path        =>  "\"$^X\" \"$script\"",
         user        =>  '',
         password    =>  '',
-        description => 'This is a test Perl service'
+        description => $self->class->any_var('SERVICE_DESCRIPTION')
     };
 
 }

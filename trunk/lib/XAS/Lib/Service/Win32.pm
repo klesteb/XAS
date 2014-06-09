@@ -9,7 +9,7 @@ use XAS::Class
   debug    => 0,
   version  => $VERSION,
   base     => 'XAS::Base',
-  mixins   => 'initialize _current_state
+  mixins   => 'init_service _current_state
                SERVICE_START_PENDING
                SERVICE_STOP_PENDING SERVICE_PAUSE_PENDING
                SERVICE_CONTINUE_PENDING SERVICE_CONTROL_SHUTDOWN
@@ -28,16 +28,12 @@ use XAS::Class
 # Overridden Methods - semi public
 # ----------------------------------------------------------------------
 
-sub session_initialize {
+sub init_service {
     my ($self, $kernel, $session) = @_;
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: entering intialize()");
-
-    $kernel->state('poll', $self, '_poll');
-
-    $self->last_state(SERVICE_START_PENDING);
+    $self->log->debug("$alias: entering intialize() - win32");
 
     unless (Win32::Daemon::StartService()) {
 
@@ -49,11 +45,7 @@ sub session_initialize {
 
     }
 
-    $kernel->call('poll');
-
-    $self->SUPER::session_initialize($kernel, $session);
-
-    $self->log->debug("$alias: leaving intialize()");
+    $self->log->debug("$alias: leaving intialize() - win32");
 
 }
 

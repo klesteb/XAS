@@ -18,7 +18,7 @@ use XAS::Class
     SERVICE_STOPPED          => 7,
     SERVICE_PAUSED           => 8,
   },
-  mixins  => 'initialize _current_state _session_interrupt
+  mixins  => 'init_service _current_state _session_interrupt
               SERVICE_START_PENDING SERVICE_STOP_PENDING
               SERVICE_PAUSE_PENDING SERVICE_CONTINUE_PENDING
               SERVICE_CONTROL_SHUTDOWN SERVICE_RUNNING
@@ -37,26 +37,17 @@ use XAS::Class
 # Overridden Methods - semi public
 # ----------------------------------------------------------------------
 
-sub sesion_initialize {
+sub init_service {
     my ($self, $kernel, $session) = @_;
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: entering session_initialise()");
-
-    $kernel->state('poll', $self, '_poll');
+    $self->log->debug("$alias: entering session_initialise() - unix");
 
     $kernel->sig(CONT => 'session_interrupt');
     $kernel->sig(TSTP => 'session_interrupt');
 
-    $self->last_state(SERVICE_START_PENDING);
-    $self->_current_state(SERVICE_START_PENDING);
-
-    $kernel->call('poll');
-
-    $self->SUPER::session_initialize($kernel, $session);
-
-    $self->log->debug("$alias: leaving session_initialise()");
+    $self->log->debug("$alias: leaving session_initialise() - unix");
 
 }
 

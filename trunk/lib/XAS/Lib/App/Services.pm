@@ -20,28 +20,22 @@ use XAS::Class
   mixin      => $mixin,
   constants  => 'TRUE FALSE',
   filesystem => 'File',
+  accessors  => 'daemon',
   messages => {
       installed => 'The service was successfully installed.',
       removed   => 'The service was successfully deinstalled.',
       failed    => 'The service action "%s" failed; reason: %s.',
   },
+  vars => {
+    SERVICE_NAME         => 'XAS_Test',
+    SERVICE_DISPLAY_NAME => 'XAS Test',
+    SERVICE_DESCRIPTION  => 'This is a test perl service',
+  }
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
-
-sub signal_handler {
-    my $signal = shift;
-
-    my $ex = XAS::Exception->new(
-        type => 'xas.lib.app.signal_handler',
-        info => 'process intrupted by signal ' . $signal
-    );
-
-    $ex->throw();
-
-}
 
 sub define_signals {
     my $self = shift;
@@ -57,8 +51,19 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $options->{'install'}   = sub { $self->install_service(); exit 0; };
-    $options->{'deinstall'} = sub { $self->remove_service(); exit 0; };
+    $self->{daemon} = FALSE;
+    
+    $options->{'daemon'} = \$self->{daemon};
+
+    $options->{'install'}   = sub { 
+        $self->install_service(); 
+        exit 0; 
+    };
+
+    $options->{'deinstall'} = sub { 
+        $self->remove_service(); 
+        exit 0; 
+    };
 
     $options->{'pidfile=s'} = sub { 
         my cfgfile = File($_[1]); 

@@ -1,10 +1,10 @@
 package XAS::Lib::Service;
 
-our $mixin;
 our $VERSION = '0.02';
 
 use POE;
 
+my $mixin;
 BEGIN {
     $mixin = ($^O eq 'MSWin32')
         ? 'XAS::Lib::Service::Win32'
@@ -69,6 +69,28 @@ sub service_resumed {
 
 }
 
+sub session_initialize {
+    my ($self, $kernel, $session) = @_;
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering initialize()");
+
+    $self->init_service($kernel, $session);
+
+    $kernel->state('poll', $self, '_poll');
+
+    $self->last_state(SERVICE_START_PENDING);
+    $self->_current_state(SERVICE_START_PENDING);
+
+    # walk the chain
+
+    $self->SUPER::session_initialize($kernel, $session);
+
+    $self->log->debug("$alias: leaving initialize()");
+
+}
+
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
@@ -101,13 +123,8 @@ sub _session_init {
 
     $self->session_initialize($kernel, $session);
 
-    # on Win32 the SCM will tell the service to start
-
-    unless ($^O eq 'MSWin32') {
-
-        $kernel->yield('session_startup');
-
-    }
+    $kernel->post($alias, 'poll');
+    $kernel->post($alias, 'startup');
 
 }
 

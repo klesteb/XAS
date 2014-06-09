@@ -8,7 +8,8 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  mixins  => 'define_daemon get_service_config _install_service _remove_service',
+  utils   => 'daemonize',
+  mixins  => 'define_daemon get_service_config install_service remove_service',
 ;
 
 # ----------------------------------------------------------------------
@@ -19,9 +20,18 @@ sub define_daemon {
     my $self = shift;
 
     # become a daemon...
+    # interesting, "daemonize() if ($self->daemon);" doesn't work as expected
 
-    $self->SUPER::define_daemon();
-    $poe_kernel->has_forked() if ($self->daemon);
+    $self->log->debug("pid = $$");
+
+    if ($self->daemon) {
+
+        daemonize();
+        $poe_kernel->has_forked();
+
+    }
+
+    $self->log->debug("pid = $$");
 
 }
 
