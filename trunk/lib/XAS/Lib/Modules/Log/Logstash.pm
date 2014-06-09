@@ -39,6 +39,7 @@ sub output {
         '@timestamp' => $args->{datetime}->strftime('%Y-%m-%dT%H:%M:%S.%3N%z'),
         '@version'   => '1',
         '@message'   => $message,
+        type         => 'xas-log',
         message      => $args->{message},
         hostname     => $args->{hostname},
         priority     => $args->{priority},
