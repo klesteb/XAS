@@ -46,18 +46,13 @@ use XAS::Class
 sub service_startup {
     my $self = shift;
 
-    # start listening for connections
+    my $alias = $self->alias;
 
-    $self->{listener} = POE::Wheel::SocketFactory->new(
-        BindAddress    => $self->address,
-        BindPort       => $self->port,
-        SocketType     => SOCK_STREAM,
-        SocketDomain   => AF_INET,
-        SocketProtocol => 'tcp',
-        Reuse          => 1,
-        SuccessEvent   => 'client_connected',
-        FailureEvent   => 'client_connection_failed'
-    );
+    $self->log->debug("$alias: entering service_startup()");
+
+    $poe_kernel->call($alias, 'client_connection');
+
+    $self->log->debug("$alias: leavin service_startup()");
 
 }
 
@@ -121,6 +116,7 @@ sub sesion_initialize {
     $kernel->state('client_reaper',            $self, '_client_reaper');
     $kernel->state('client_output',            $self, '_client_output');
     $kernel->state('client_connected',         $self, '_client_connected');
+    $kernel->state('client_connection',        $self, '_client_connection');
     $kernel->state('client_connection_failed', $self, '_client_connection_failed');
 
     # call out for other stuff
@@ -187,28 +183,55 @@ sub process_request {
     my ($kernel, $self, $input, $ctx) = @_[KERNEL,OBJECT,ARG0,ARG1];
 
     my $output = $input;
+    my $alias = $self->alias;
 
-    $kernel->yield('process_response', $output, $ctx);
+    $kernel->post($alias, 'process_response', $output, $ctx);
 
 }
 
 sub process_response {
     my ($kernel, $self, $output, $ctx) = @_[KERNEL,OBJECT,ARG0,ARG1];
 
-    $kernel->yield('client_output', $output, $ctx->{wheel});
+    my $alias = $self->alias;
+
+    $kernel->post($alias, 'client_output', $output, $ctx->{wheel});
 
 }
 
 sub process_errors {
     my ($kernel, $self, $output, $ctx) = @_[KERNEL,OBJECT,ARG0,ARG1];
 
-    $kernel->yield('client_output', $output, $ctx->{wheel});
+    my $alias = $self->alias;
+
+    $kernel->post($alias, 'client_output', $output, $ctx->{wheel});
 
 }
 
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _client_connection {
+    my ($kernel, $self) = @_[KERNEL,OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _client_connection()");
+
+    # start listening for connections
+
+    $self->{listener} = POE::Wheel::SocketFactory->new(
+        BindAddress    => $self->address,
+        BindPort       => $self->port,
+        SocketType     => SOCK_STREAM,
+        SocketDomain   => AF_INET,
+        SocketProtocol => 'tcp',
+        Reuse          => 1,
+        SuccessEvent   => 'client_connected',
+        FailureEvent   => 'client_connection_failed'
+    );
+
+}
 
 sub _client_connected {
     my ($kernel, $self, $socket, $peeraddr, $peerport, $wheel_id) =

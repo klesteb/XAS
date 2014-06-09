@@ -52,7 +52,7 @@ sub service_startup {
 
     $self->log->debug("$alias: service_startup");
 
-    $poe_kernel->yield('server_connect');
+    $poe_kernel->post($alias, 'server_connect');
 
 }
 
@@ -67,12 +67,12 @@ sub service_paused {
 
 }
 
-sub service_unpaused {
+sub service_resumed {
     my $self = shift;
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: service continue");
+    $self->log->debug("$alias: service resumed");
 
     $poe_kernel->call($alias, 'connection_up');
 
@@ -111,7 +111,7 @@ sub session_intialize {
 
     $self->SUPER::session_initialize($kernel, $session);
 
-    $self->log->debug("$alias: entering session_initialize()");
+    $self->log->debug("$alias: leaving session_initialize()");
 
 }
 
@@ -151,7 +151,9 @@ sub connection_up {
 sub read_data {
     my ($kernel, $self, $data) = @_[KERNEL,OBJECT,ARG0];
 
-    $kernel->yield('write_data', $data);
+    my $alias = $self->alias;
+
+    $kernel->post($alias, 'write_data', $data);
 
 }
 
@@ -181,7 +183,7 @@ sub _server_message {
 
     $self->log->debug("$alias: _server_message()");
 
-    $kernel->yield('read_data', $data);
+    $kernel->post($alias, 'read_data', $data);
 
 }
 
@@ -215,7 +217,7 @@ sub _server_connected {
     $self->{host} = $host;
     $self->{port} = $peerport;
 
-    $kernel->yield('handle_connection');
+    $kernel->post($alias, 'handle_connection');
 
 }
 
@@ -271,7 +273,7 @@ sub _server_error {
     delete $self->{listner};
     delete $self->{wheel};
 
-    $kernel->yield('connection_down');
+    $kernel->post($alias, 'connection_down');
 
     foreach my $error (@ERRORS) {
 
