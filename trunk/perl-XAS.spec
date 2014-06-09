@@ -70,7 +70,7 @@ install -m 755 -d %{buildroot}/var/lib/xas
 install -m 775 -d %{buildroot}/var/run/xas
 install -m 775 -d %{buildroot}/var/log/xas
 install -m 755 -d %{buildroot}/var/spool/xas
-install -m 755 -d %{buildroot}/var/spool/xas/nmon
+install -m 755 -d %{buildroot}/var/spool/xas/alerts
 install -m 755 -d %{buildroot}/var/spool/xas/logstash
 
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
@@ -102,6 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc Changes perl-XAS.spec README
 %{perl_sitelib}/*
 /usr/local/share/man/man3/*
+/etc/profile.d/*
 
 %changelog
 * Tue Sep 24 2013 kesteb 0.07-1
