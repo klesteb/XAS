@@ -50,12 +50,12 @@ This is middleware for Perl. It is cross platform capable.
 %pre
 getent group xas >/dev/null || groupadd -f -r xas
 if ! getent passwd xas >/dev/null ; then
-    useradd -r -g xas -s /sbin/nologin -c "XAS" xas
+    useradd -r -g xas -d /var/lib/xas -s /sbin/nologin -c "XAS" xas
 else
-    useradd -r -g xas -s /sbin/nologin -c "XAS" xas
+    useradd -r -g xas -d /var/lib/xas -s /sbin/nologin -c "XAS" xas
 fi
 exit 0
-                
+
 %prep
 %setup -q -n XAS-%{version}
 
