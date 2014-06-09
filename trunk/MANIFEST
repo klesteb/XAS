@@ -39,8 +39,9 @@ lib/XAS/Lib/Stomp/Utils.pm
 lib/XAS/Lib/Stomp/POE/Client.pm
 lib/XAS/Lib/Stomp/POE/Filter.pm
 MANIFEST			This list of files
+profile.d/xas.sh
+profile.d/xas.bat
 README
 t/00-load.t
 t/manifest.t
-t/pod-coverage.t
 t/pod.t

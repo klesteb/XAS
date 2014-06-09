@@ -22,7 +22,7 @@ build-indep: Build
 	$(PERL) Build
 	$(PERL) Build test
 	$(PERL) Build install destdir=$(TMP) create_packlist=0
-	$(PERL) Build debian_postinst
+	$(PERL) Build post_install
 
 build: build-indep
 	dh_testdir

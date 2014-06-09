@@ -47,6 +47,15 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 %description
 This is middleware for Perl. It is cross platform capable.
 
+%pre
+getent group xas >/dev/null || groupadd -f -r xas
+if ! getent passwd xas >/dev/null ; then
+    useradd -r -g xas -s /sbin/nologin -c "XAS" xas
+else
+    useradd -r -g xas -s /sbin/nologin -c "XAS" xas
+fi
+exit 0
+                
 %prep
 %setup -q -n XAS-%{version}
 
@@ -57,6 +66,13 @@ This is middleware for Perl. It is cross platform capable.
 %install
 rm -rf $RPM_BUILD_ROOT
 
+install -m 755 -d %{buildroot}/var/lib/xas
+install -m 775 -d %{buildroot}/var/run/xas
+install -m 775 -d %{buildroot}/var/log/xas
+install -m 755 -d %{buildroot}/var/spool/xas
+install -m 755 -d %{buildroot}/var/spool/xas/nmon
+install -m 755 -d %{buildroot}/var/spool/xas/logstash
+
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
@@ -64,6 +80,19 @@ find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
 %check
 ./Build test
+
+%post
+chown -R xas.xas /var/lib/xas
+chown -R xas.xas /var/log/xas
+chown -R xas.xas /var/run/xas
+chown -R xas.xas /var/spool/xas
+
+chmod g+s /var/lib/xas
+chmod g+s /var/run/xas
+chmod g+s /var/log/xas
+chmod g+s /var/spool/xas
+chmod g+s /var/spool/xas/alerts
+chmod g+s /var/spool/xas/logstash
 
 %clean
 rm -rf $RPM_BUILD_ROOT
