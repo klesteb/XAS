@@ -26,14 +26,7 @@
 #
 # Version      Author                                              Date
 # -------      ----------------------------------------------      -----------
-# 0.01         Kevin Esteb                                         02-Apr-2009
-#
-# 0.02         Kevin Esteb                                         10-Jul-2012
-#              Updated the help/version/manual switches to use
-#              pod for the output text.
-#
-# 0.03         Kevin Esteb                                         08-Aug-2012
-#              Changed over to the new app framework.
+# 0.01         Kevin Esteb                                         26-May-2014
 #
 # ============================================================================
 #

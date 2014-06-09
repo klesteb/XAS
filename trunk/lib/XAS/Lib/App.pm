@@ -12,6 +12,7 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   mixin   => 'XAS::Lib::Mixins::Handlers',
+  import  => 'CLASS',
   utils   => 'dotid',
   vars => {
     PARAMS => {
@@ -129,7 +130,7 @@ sub _default_options {
         'debug'     => sub { $self->debugging(1); },
         'help|h|?'  => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
         'manual'    => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
-        'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; }
+        'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; },
         'logfile=s' => sub {
             my $logfile = File($_[1]);
             $self->env->logtype('file');

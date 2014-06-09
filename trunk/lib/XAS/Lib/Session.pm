@@ -87,7 +87,7 @@ sub init {
                 session_reload    => '_session_reload',
                 shutdown          => '_session_shutdown',
             },
-            $self => [qw( startup )]
+            $self => [qw( session_startup )]
         ]
     );
 

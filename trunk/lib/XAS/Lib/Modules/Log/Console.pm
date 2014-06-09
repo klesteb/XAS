@@ -4,8 +4,8 @@ our $VERSION = '0.01';
 
 use Params::Validate 'HASHREF';
 use XAS::Class
-  base      => 'XAS::Base',
   version   => $VERSION,
+  base      => 'XAS::Base',
   mixins    => 'init_log output destroy',
 ;
 
@@ -18,7 +18,7 @@ sub output {
 
     $self = $self->prototype() unless ref $self;
 
-    my $args = $self->validate_params(\@_, [
+    my ($args) = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -31,7 +31,7 @@ sub output {
 
 sub destroy {
     my $self = shift;
-    
+
 }
 
 # ----------------------------------------------------------------------

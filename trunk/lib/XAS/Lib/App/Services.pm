@@ -66,12 +66,12 @@ sub _default_options {
     };
 
     $options->{'pidfile=s'} = sub { 
-        my cfgfile = File($_[1]); 
-        $self->env->pidfile($cfgfile);
+        my $pidfile = File($_[1]); 
+        $self->env->pidfile($pidfile);
     };
 
     $options->{'cfgfile=s'} = sub { 
-        my cfgfile = File($_[1]); 
+        my $cfgfile = File($_[1]); 
         $self->env->cfgfile($cfgfile);
     };
 
