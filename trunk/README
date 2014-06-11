@@ -16,7 +16,7 @@ On Unix like systems, run the following commands:
 
 This will install the software into /usr/local and /var. 
 
-If you are DEB based, then a debian build files has been provided.
+If you are DEB based, then debian build files has been provided.
 If you have a debian build environment, then you can do the following:
 
     # debuild -uc -us
@@ -28,7 +28,7 @@ rpm build environment then you can do the following:
     # rpmbuild -ta xas-0.07.tar.gz
     # yum localinstall perl-XAS-0.07-1.noarch.rpm
 
-On Windows systems, do the following:
+On Windows, do the following:
 
     $ perl Build.PL
     $ Build
@@ -36,10 +36,10 @@ On Windows systems, do the following:
     $ Build install
     $ Build post_install
 
-This wil create the directory structure C:\xas. To change this, set the
-XAS_ROOT environment variable to something else. This varaible should
-also be set at the system level so it survives reboots. It is recommeded
-that you use Strawberry Perl, ActiveState Perl dosen't have all of the
+This will create the directory structure C:\xas. To change this, set the
+XAS_ROOT environment variable to something else. This variable should
+also be set at the system level so it survives reboots. It is recommended
+that you use Strawberry Perl, ActiveState Perl doesn't have all of the
 necessary modules available.
 
 WARNING
