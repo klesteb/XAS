@@ -3,13 +3,13 @@ package XAS::Lib::Modules::Environment;
 our $VERSION = '0.01';
 
 use File::Basename;
-use XAS::Constants ':logging';
 use Net::Domain qw(hostdomain);
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base Badger::Prototype',
+  constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username',
   mutators   => 'mqserver mqport mxserver mxport mxtimeout',
@@ -383,6 +383,10 @@ is "localhost".
 
 The port that server is listening on. Default is "61613".
 
+=item B<XAS_MQLEVL>
+
+This sets the STOMP protocol level. The default is v1.0.
+
 =item B<XAS_MXSERVER>
 
 The server where a SMTP based mail server resides. Default is "localhost".
@@ -455,10 +459,15 @@ Example
 This method will return the port for the message queue server, or you store
 a differant port number for that server.
 
+=head2 mqlevel
+
+This method will returns the STOMP protocol level. or you store
+a differant level. It can use 1.0, 1.1 or 1.2.
+
 Example
 
-    $mqport = $xas->mqport;
-    $xas->mqport('61613');
+    $mqlevel = $xas->mqlevel;
+    $xas->mqlevel('1.0');
 
 =head2 mxserver
 
