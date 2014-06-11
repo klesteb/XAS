@@ -14,8 +14,6 @@ On Unix like systems, run the following commands:
     # ./Build install
     # ./Build post_install
 
-This will install the software into /usr/local and /var. 
-
 If you are DEB based, then debian build files has been provided.
 If you have a debian build environment, then you can do the following:
 
@@ -23,10 +21,12 @@ If you have a debian build environment, then you can do the following:
     # dpkg -i ../libxas-perl_0.07-1_all.deb
 
 If you are RPM based, then a spec file has been included. If you have a
-rpm build environment then you can do the following:
+rpm build environment, then you can do the following:
 
     # rpmbuild -ta xas-0.07.tar.gz
     # yum localinstall perl-XAS-0.07-1.noarch.rpm
+
+This will install the software into /usr/local and overlay /var. 
 
 On Windows, do the following:
 
@@ -47,7 +47,7 @@ WARNING
     Not all of the Perl modules have been included to make the software 
     run. You may need to load additional modules. How you do this, is
     dependent on how you manage your systems. This software requires 
-    Perl 5.8.2 or higher to operate.
+    Perl 5.8.8 or higher to operate.
 
 POST INSTALLATION
 
@@ -61,8 +61,21 @@ environment variables for the XAS system. They are not set at the system
 level. You may wish to do so.
 
 In either environment, if your network name resolution is slow, you
-may want to define the XAS_HOST and XAS_DOMAIN variables. This will
-speed up start times considerably.
+may want to define the XAS_HOSTNAME and XAS_DOMAIN environment variables. 
+This will speed up start times considerably. 
+
+This software requires a STOMP compatible message queue server. If it is
+not running on the local host, then you will need to define the XAS_MQSERVER
+environment variable to point to it. If it is not listening on the
+default port, then you need to define the XAS_MQPORT environment
+variable. The default STOMP protocol level is v1.0. If you want to change
+this, you need to set the XAS_MQLEVEL environment variable. The XAS
+system supports v1.0, v1.1 and v1.2.
+
+This software also requires a SMTP based mail server. If it is not running 
+on the local host, then you will need to define the XAS_MXSERVER environment
+variable to point to it. If it is not listening on the default port,
+then you need to define the XAS_MXPORT environment variable. 
 
 SUPPORT AND DOCUMENTATION
 

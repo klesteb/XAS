@@ -34,6 +34,21 @@ sub mxmailer {
 
 }
 
+sub mqlevel {
+    my $self = shift;
+
+    $self = $self->prototype() unless ref $self;
+
+    my ($level) = $self->validate_params(\@_, [
+        { optional => 1, default => undef, regex => qr/(1\.0|1\.1|1\.2)/ },
+    ]);
+
+    $self->{mqlevel} = $level if (defined($level));
+
+    return $self->{mqlevel};
+
+}
+
 sub logtype {
     my $self = shift;
 
@@ -66,32 +81,38 @@ sub init {
     # Initialize variables - these are defaults
 
     $self->{mqserver} = defined($ENV{'XAS_MQSERVER'}) 
-      ? $ENV{'XAS_MQSERVER'} 
-      : 'localhost';
+        ? $ENV{'XAS_MQSERVER'} 
+        : 'localhost';
 
     $self->{mqport} = defined($ENV{'XAS_MQPORT'}) 
-      ? $ENV{'XAS_MQPORT'} 
-      : '61613';
+        ? $ENV{'XAS_MQPORT'} 
+        : '61613';
+
+    $self->{mqlevel} = defined ($ENV{'XAS_MQLEVEL'})
+        ? $ENV{'XAS_MQLEVEL'}
+        : '1.0';
 
     $self->{mxserver} = defined($ENV{'XAS_MXSERVER'}) 
-      ? $ENV{'XAS_MXSERVER'} 
-      : 'localhost';
+        ? $ENV{'XAS_MXSERVER'} 
+        : 'localhost';
 
     $self->{mxport} = defined($ENV{'XAS_MXPORT'}) 
-      ? $ENV{'XAS_MXPORT'} 
-      : '25';
-
+        ? $ENV{'XAS_MXPORT'} 
+        : '25';
+    
     $self->{domain} = defined($ENV{'XAS_DOMAIN'}) 
-      ? $ENV{'XAS_DOMAIN'} 
-      : hostdomain();
+        ? $ENV{'XAS_DOMAIN'} 
+        : hostdomain();
 
     # platform specific
 
-    if ($^O eq "aix") {
+    my $OS = $^O;
+
+    if (($os eq "aix") or ($OS eq 'linux')) {
 
         $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
-          ? $ENV{'XAS_HOSTNAME'} 
-          : `hostname -s`;
+            ? $ENV{'XAS_HOSTNAME'} 
+            : `hostname -s`;
 
         chomp($self->{host});
 
@@ -129,55 +150,13 @@ sub init {
 
         $self->{username} = getpwuid($<);
 
-    } elsif ($^O eq "linux"){
-
-        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
-          ? $ENV{'XAS_HOSTNAME'} 
-          : `hostname -s`;
-
-        chomp($self->{host});
-
-        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
-            ? $ENV{'XAS_ROOT'} 
-            : ['/', 'usr', 'local']);
-
-        $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
-            ? $ENV{'XAS_TMP'} 
-            : ['/', 'tmp']);
-
-        $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
-            ? $ENV{'XAS_VAR'}   
-            : ['/', 'var']);
-
-        $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
-            ? $ENV{'XAS_LIB'}   
-            : ['/', 'var', 'lib', 'xas']);
-
-        $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
-            ? $ENV{'XAS_LOG'}   
-            : ['/', 'var', 'log', 'xas']);
-
-        $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
-            ? $ENV{'XAS_RUN'}   
-            : ['/', 'var', 'run', 'xas']);
-
-        $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
-            ? $ENV{'XAS_SPOOL'} 
-            : ['/', 'var', 'spool', 'xas']);
-
-        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
-          ? $ENV{'XAS_MXMAILER'} 
-          : 'sendmail';
-
-        $self->{username} = getpwuid($<);
-
-    } elsif ($^O eq "MSWin32") {
+    } elsif ($OS eq "MSWin32") {
 
         require Win32;
 
         $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
-          ? $ENV{'XAS_HOSTNAME'} 
-          : Win32::NodeName();
+            ? $ENV{'XAS_HOSTNAME'} 
+            : Win32::NodeName();
 
         $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
@@ -208,8 +187,8 @@ sub init {
             : [$self->{root}, 'var', 'spool']);
 
         $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
-          ? $ENV{'XAS_MXMAILER'} 
-          : 'smtp';
+            ? $ENV{'XAS_MXMAILER'} 
+            : 'smtp';
 
         $self->{username} = Win32::LoginName();
 

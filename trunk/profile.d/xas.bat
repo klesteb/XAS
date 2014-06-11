@@ -10,10 +10,13 @@ rem
 rem set XAS_HOSTNAME="localhost"
 rem set XAS_DOMAIN="example.com"
 
-rem set XAS_MQPORT="25"
+rem set XAS_MXPORT="25"
 rem set XAS_MXSERVER="localhost"
+rem set XAS_MXMAILER='smtp'
+
 rem set XAS_MQPORT="61613"
 rem set XAS_MQSERVER="localhost"
+rem set XAS_MQLEVEL="1.0"
 
 rem set XAS_ROOT="D:\XAS"
 rem set XAS_SBIN="D:\XAS\sbin"

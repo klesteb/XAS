@@ -8,10 +8,13 @@
 #export XAS_HOSTNAME="localhost"
 #export XAS_DOMAIN="example.com"
 #
-#export XAS_MQPORT="25"
+#export XAS_MXPORT="25"
 #export XAS_MXSERVER="localhost"
+#export XAS_MXMAILER='smtp'
+#
 #export XAS_MQPORT="61613"
 #export XAS_MQSERVER="localhost"
+#export XAS_MQLEVEL="1.0"
 #
 #export XAS_ROOT="/usr/local"
 #export XAS_SBIN="/usr/local/sbin"
