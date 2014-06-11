@@ -105,28 +105,28 @@ my $class = Module::Build->subclass(code => <<'EOC');
             my $base = defined($ENV{'XAS_ROOT'}) ? $ENV{'XAS_ROOT'} : 'C:\\xas';
 
             $dir = catdir($base, 'tmp');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'log');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'run');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'lib');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'spool');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'spool', 'alerts');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'spool', 'logstash');
-            system("mkdir $dir");
+            system("mkdir $dir") unless ( -e $dir);
 
         }
 
