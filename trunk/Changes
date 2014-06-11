@@ -34,4 +34,5 @@ Revision history for XAS
           be distributed. This lead to breaking everything up
           into smaller chunks for easier maintence. This also lead to a
           rewrite and simplification of the code base itself.
+        Now using git as the source repository.
 

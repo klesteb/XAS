@@ -1,5 +1,5 @@
 Name:           perl-XAS
-Version:        0.06
+Version:        0.07
 Release:        1%{?dist}
 Summary:        XAS Perl module
 License:        GPL+ or Artistic

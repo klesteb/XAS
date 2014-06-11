@@ -2,71 +2,67 @@ XAS v0.07
 
 XAS is middleware for Perl. It provides standardized methods, modules
 and philosophy for constructing large distributed applications. This 
-system is based on production code that has been running for over five 
-years without any problems.
+system is based on production level code.
 
 INSTALLATION
 
-To install this module, run the following commands:
+On Unix like systems, run the following commands:
 
-    # perl Build.PL
+    # perl Build.PL installdirs=site
     # ./Build
     # ./Build test
     # ./Build install
     # ./Build post_install
 
-On a Linux system this will install the software into /usr/local. This can
-be overridden with the --install_base option to Build.PL. 
+This will install the software into /usr/local and /var. 
 
-You can also use the Debian package manager to install this software. Use the
-following commands to do so:
+If you are DEB based, then a debian build files has been provided.
+If you have a debian build environment, then you can do the following:
 
     # debuild -uc -us
-    # dpkg -i ../libxas-base-perl_0.05-1_all.deb
+    # dpkg -i ../libxas-perl_0.07-1_all.deb
 
-If you are RPM based then a spec file has been included. If you have a
+If you are RPM based, then a spec file has been included. If you have a
 rpm build environment then you can do the following:
 
-   # rpmbuild -ta xas-0.07.tar.gz
-   # yum localinstall perl-XAS-0.07-1.noarch.rpm
+    # rpmbuild -ta xas-0.07.tar.gz
+    # yum localinstall perl-XAS-0.07-1.noarch.rpm
 
-The above will install the software into /usr/local. This package uses CPAN
-modules that may not be supported from debian/rpm repositories.  
+On Windows systems, do the following:
+
+    $ perl Build.PL
+    $ Build
+    $ Build test
+    $ Build install
+    $ Build post_install
+
+This wil create the directory structure C:\xas. To change this, set the
+XAS_ROOT environment variable to something else. This varaible should
+also be set at the system level so it survives reboots. It is recommeded
+that you use Strawberry Perl, ActiveState Perl dosen't have all of the
+necessary modules available.
 
 WARNING
 
-    These installation instructions presupposes some sort of Linux box.
-    Persumably a Debian based distribution. The perl based installation
-    steps will work on Redhat based distributions. They will also work,
-    to a certain extent, on generic Unix based systems. With these, the 
-    specialized startup scripts will need to be modified to work on them.
-    This software requires Perl 5.8.8 or higher to operate.
+    Not all of the Perl modules have been included to make the software 
+    run. You may need to load additional modules. How you do this, is
+    dependent on how you manage your systems. This software requires 
+    Perl 5.8.2 or higher to operate.
 
 POST INSTALLATION
 
-This installation also creates a "xas" user and group. This is used to
-set permissions on files and for user context with running daemons.
+On Unix like systems, this installation also creates a "xas" user and group.
+This is used to set permissions on files and for user context when running 
+daemons. A xas.sh file is placed in the /etc/profile.d directory to define 
+environment variables for the XAS system. 
 
-A xas.sh file is created and placed in the /etc/profile.d directory to define 
-environment variables for the system. 
+On Windows, a xas.bat file is placed in %XAS_ROOT%/etc. This defines the
+environment variables for the XAS system. They are not set at the system
+level. You may wish to do so.
 
-A xas file is created and placed in the /etc/logrotate.d directory to
-help manage log files.
-
-Start up scripts for various daemons are created in /etc/init.d. Since the 
-LSB is rather liberally interrupted by the various distributors, these scripts 
-are for Debian based systems. Porting them to other distributions is rather
-trivial and if you have a fool proof way to determine the Linux distribution,
-please forward it to me. Thanks.
-
-This system uses a Message Queue. This queue needs to be STOMP 1.0 compatible.
-RabbitMQ and POE::Component::MessageQueue have been tested. 
-
-This system uses a database. The default install assumes PostgreSQL.
-It has been tested with SQLite. You need to run /opt/xas/bin/create_db.pl 
-to create a schema for the database. Once the schema is loaded you may
-need to modify /opt/xas/etc/database.ini to reflect your database
-environment. 
+In either environment, if your network name resolution is slow, you
+may want to define the XAS_HOST and XAS_DOMAIN variables. This will
+speed up start times considerably.
 
 SUPPORT AND DOCUMENTATION
 
@@ -77,11 +73,11 @@ perldoc command.
 
 Extended documentation is available here:
 
-    http://svn.kesteb.us/trac
+    http://scm.kesteb.us/trac
 
 The latest and greatest is always available at:
 
-    http://svn.kesteb.us/repos/XAS/trunk
+    http://scm.kesteb.us/git/XAS
 
 LICENSE AND COPYRIGHT
 
