@@ -118,7 +118,7 @@ sub _session_init {
     $self->session_initialize();
 
     $poe_kernel->post($alias, 'poll');
-    $poe_kernel->post($alias, 'startup');
+    $poe_kernel->post($alias, 'session_startup');
 
 }
 
@@ -274,7 +274,7 @@ sub _service_shutdown {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _service_shutdown);
+    $self->log->debug("$alias: _service_shutdown");
 
     foreach my $session (@{$self->sessions}) {
 
@@ -304,7 +304,7 @@ sub _service_paused {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: __service_paused");
+    $self->log->debug("$alias: _service_paused");
 
     foreach my $session (@{$self->sessions}) {
 
@@ -319,7 +319,7 @@ sub _service_resumed {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: __service_resumed");
+    $self->log->debug("$alias: _service_resumed");
 
     foreach my $session (@{$self->sessions}) {
         
