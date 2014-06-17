@@ -1,6 +1,6 @@
 package XAS::Lib::Stomp::POE::Client;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use POE;
 use Try::Tiny;
@@ -37,7 +37,6 @@ use XAS::Class
 sub session_initalize {
     my $self = shift;
 
-    my ($kernel, $session) = $self->validate_params(\@_, [1,1]);
     my $alias = $self->alias;
 
     $self->log->debug("$alias: session_initialize()");
@@ -46,29 +45,29 @@ sub session_initalize {
 
     $self->log->debug("$alias: doing public events");
 
-    $kernel->state('handle_noop',       $self);
-    $kernel->state('handle_error',      $self);
-    $kernel->state('handle_message',    $self);
-    $kernel->state('handle_receipt',    $self);
-    $kernel->state('handle_connected',  $self);
+    $poe_kernel->state('handle_noop',       $self);
+    $poe_kernel->state('handle_error',      $self);
+    $poe_kernel->state('handle_message',    $self);
+    $poe_kernel->state('handle_receipt',    $self);
+    $poe_kernel->state('handle_connected',  $self);
 
     # walk the chain
 
-    $self->SUPER::session_initialize($kernel, $session);
+    $self->SUPER::session_initialize();
 
-    $self->log->debug("$alias: leaving initialize()");
+    $self->log->debug("$alias: leaving session_initialize()");
 
 }
 
 sub session_cleanup {
-    my ($self, $kernel, $session) = @_;
+    my $self = shift;
 
     my $frame = $self->stomp->disconnect(
         -receipt => 'disconnecting'
     );
 
-    $kernel->call($session, 'write_data', $frame);
-    $self->SUPER::session_cleanup($kernel, $session);
+    $poe_kernel->call($session, 'write_data', $frame);
+    $self->SUPER::session_cleanup();
 
 }
 
@@ -77,7 +76,7 @@ sub session_cleanup {
 # ---------------------------------------------------------------------
 
 sub handle_connection {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
     my $frame = $self->frame->connect(
@@ -86,31 +85,31 @@ sub handle_connection {
     );
 
     $self->log->info($self->message('connected', $alias, $self->host, $self->port));
-    $kernel->yield('write_data', $frame);
+    $poe_kernel->post($alias, 'write_data', $frame);
     
 }
 
 sub handle_connected {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
 
-    $kernel->yield('connection_up');
+    $poe_kernel->post($alias, 'connection_up');
 
 }
 
 sub handle_message {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
 }
 
 sub handle_receipt {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
 }
 
 sub handle_error {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
 
@@ -124,7 +123,7 @@ sub handle_error {
 }
 
 sub handle_noop {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
 }
 
@@ -133,7 +132,7 @@ sub handle_noop {
 # ---------------------------------------------------------------------
 
 sub _server_message {
-    my ($kernel, $self, $frame, $wheel_id) = @_[KERNEL, OBJECT, ARG0, ARG1];
+    my ($self, $frame, $wheel_id) = @_[OBJECT, ARG0, ARG1];
 
     my $alias = $self->alias;
 
@@ -142,27 +141,27 @@ sub _server_message {
     if ($frame->command eq 'CONNECTED') {
 
         $self->log->debug("$alias: received a \"CONNECTED\" message");
-        $kernel->yield('handle_connected', $frame);
+        $poe_kernel->post($alias, 'handle_connected', $frame);
 
     } elsif ($frame->command eq 'MESSAGE') {
 
         $self->log->debug("$alias: received a \"MESSAGE\" message");
-        $kernel->yield('handle_message', $frame);
+        $poe_kernel->post($alias, 'handle_message', $frame);
 
     } elsif ($frame->command eq 'RECEIPT') {
 
         $self->log->debug("$alias: received a \"RECEIPT\" message");
-        $kernel->yield('handle_receipt', $frame);
+        $poe_kernel->post($alias, 'handle_receipt', $frame);
 
     } elsif ($frame->command eq 'ERROR') {
 
         $self->log->debug("$alias: received an \"ERROR\" message");
-        $kernel->yield('handle_error', $frame);
+        $poe_kernel->post($alias, 'handle_error', $frame);
 
     } elsif ($frame->command eq 'NOOP') {
 
         $self->log->debug("$alias: received an \"NOOP\" message");
-        $kernel->yield('handle_noop', $frame);
+        $poe_kernel->post($alias, 'handle_noop', $frame);
 
     } else {
 
@@ -218,37 +217,37 @@ look as follows:
  ;
 
  sub handle_connection {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
  
     my $nframe = $self->stomp->connect(
         -login    => 'testing',
         -passcode => 'testing'
     ); 
 
-    $kernel->yield('send_data', $nframe);
+    $poe_kernel->yield('send_data', $nframe);
 
  }
 
  sub handle_connected {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $nframe = $self->stomp->subscribe(
         -queue => $self->queue,
         -ack   => 'client'
     );
 
-    $kernel->yield('send_data', $nframe);
+    $poe_kernel->yield('send_data', $nframe);
 
  }
  
  sub handle_message {
-    my ($kernel, $self, $frame) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $nframe = $self->stomp->ack(
        -message_id => $frame->header->message_id
     );
 
-    $kernel->yield('send_data', $nframe);
+    $poe_kernel->yield('send_data', $nframe);
 
  }
 
@@ -338,14 +337,14 @@ connection to the message server. For the most part you should send a
  Example
 
     sub handle_connection {
-        my ($kernel, $self) = @_[KERNEL,$OBJECT];
+        my ($self) = @_[$OBJECT];
  
        my $nframe = $self->stomp->connect(
            -login => 'testing',
            -passcode => 'testing'
        );
 
-       $kernel->yield('send_data', $nframe);
+       $poe_kernel->yield('send_data', $nframe);
 
     }
 
@@ -358,14 +357,14 @@ generating/processing frames.
  Example
 
     sub handle_connected {
-        my ($kernel, $self, $frame) = @_[KERNEL,$OBJECT,ARG0];
+        my ($self, $frame) = @_[OBJECT,ARG0];
 
         my $nframe = $self->stomp->subscribe(
             -queue => $self->queue,
             -ack => 'client'
         );
 
-        $kernel->yield('send_data', $nframe);
+        $poe_kernel->yield('send_data', $nframe);
 
     }
 
@@ -379,13 +378,13 @@ This event and corresponding method is used to process "MESSAGE" frames.
  Example
 
     sub handle_message {
-        my ($kernel, $self, $frame) = @_[KERNEL,OBJECT,ARG0];
+        my ($self, $frame) = @_[OBJECT,ARG0];
  
         my $nframe = $self->stomp->ack(
             -message_id => $frame->header->message_id
         );
 
-        $kernel->yield('send_data', $nframe);
+        $poe_kernel->yield('send_data', $nframe);
 
     }
 
@@ -399,7 +398,7 @@ This event and corresponding method is used to process "RECEIPT" frames.
  Example
 
     sub handle_receipt {
-        my ($kernel, $self, $frame) = @_[KERNEL,$OBJECT,ARG0];
+        my ($self, $frame) = @_[OBJECT,ARG0];
 
         my $receipt = $frame->header->receipt;
 
@@ -416,7 +415,7 @@ This event and corresponding method is used to process "ERROR" frames.
  Example
 
     sub handle_error {
-        my ($kernel, $self, $frame) = @_[KERNEL,$OBJECT,ARG0];
+        my ($self, $frame) = @_[OBJECT,ARG0];
  
     }
 
@@ -430,7 +429,7 @@ This event and corresponding method is used to process "NOOP" frames.
  Example
 
     sub handle_noop {
-        my ($kernel, $self, $frame) = @_[KERNEL,$OBJECT,ARG0];
+        my ($self, $frame) = @_[OBJECT,ARG0];
  
     }
 
@@ -444,11 +443,11 @@ is up to your program. But usually a "send_data" event is generated.
  Example
 
     sub gather_data {
-        my ($kernel, $self) = @_[KERNEL,$OBJECT];
+        my ($self) = @_[OBJECT];
  
         # doing something here
 
-        $kernel->yield('send_data', $frame);
+        $poe_kernel->yield('send_data', $frame);
 
     }
 
@@ -462,7 +461,7 @@ whatever it is currently doing.
  Example
 
     sub connection_down {
-        my ($kernel, $self) = @_[KERNEL,OBJECT];
+        my ($self) = @_[OBJECT];
 
         # do something here
 
@@ -478,37 +477,39 @@ whatever it supposed to do.
  Example
 
     sub connection_up {
-       my ($kernel, $self) = @_[KERNEL,OBJECT];
+       my ($self) = @_[OBJECT];
 
        # do something here
 
     }
 
-=head2 cleanup
+=head2 session_cleanup
 
 This method is a hook and should be overidden to do "shutdown" stuff. By
 default it sends a "DISCONNECT" message to the message queue server.
 
  Example
 
-    sub handle_shutdown {
-        my ($self, $kernel, $session) = @_;
+    sub session_cleanup {
+        my $self = shift;
 
         # do something here
 
+        $self->SUPER::session_cleanup();
+
     }
 
-=head2 reload
+=head2 session_reload
 
 This method is a hook and should be overidden to do "reload" stuff. By
 default it executes POE's sig_handled() method.
 
  Example
 
-    sub reload {
-        my ($self, $kernel, $session) = @_;
+    sub session_reload {
+        my $self = shift;
 
-        $kernel->sig_handled();
+        $poe_kernel->sig_handled();
 
     }
 
@@ -526,7 +527,7 @@ object. This is very useful for creating STOMP frames.
          -passcode => 'testing'
     );
 
-    $kernel->yield('send_data', $frame);
+    $poe_kernel->yield('send_data', $frame);
 
 =head1 SEE ALSO
 
