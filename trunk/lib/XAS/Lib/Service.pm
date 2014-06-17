@@ -1,252 +1,83 @@
 package XAS::Lib::Service;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use POE;
 
-my $mixin;
-BEGIN {
-    $mixin = ($^O eq 'MSWin32')
-        ? 'XAS::Lib::Service::Win32'
-        : 'XAS::Lib::Service::Unix';
-}
-
 use XAS::Class
-  debug    => 0,
-  version  => $VERSION,
-  base     => 'XAS::Lib::Session',
-  mixin    => $mixin,
-  mutators => 'last_state',
-  messages => {
-    noservice => 'unable to start service; reason: %s',
-    paused    => 'the service is already paused',
-    unpaused  => 'the service is not paused',
-  },
-  vars => {
-    PARAMS => {
-      -poll_interval     => { optional => 1, default => 2 },
-      -shutdown_interval => { optional => 1, default => 25 },
-    }
-  }
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Lib::Session',
 ;
-
-# ----------------------------------------------------------------------
-# Public Methods
-# ----------------------------------------------------------------------
-
-sub service_startup {
-    my $self = shift;
-
-    $self->log->debug('service startup');
-
-}
-
-sub service_shutdown {
-    my $self = shift;
-
-    $self->log->debug('service shutdown');
-
-}
-
-sub service_idle {
-    my $self = shift;
-
-    $self->log->debug('service idle');
-
-}
-
-sub service_paused {
-    my $self = shift;
-
-    $self->log->debug('service paused');
-
-}
-
-sub service_resumed {
-    my $self = shift;
-
-    $self->log->debug('service continue');
-
-}
-
-sub session_initialize {
-    my ($self, $kernel, $session) = @_;
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering initialize()");
-
-    $self->init_service($kernel, $session);
-
-    $kernel->state('poll', $self, '_poll');
-
-    $self->last_state(SERVICE_START_PENDING);
-    $self->_current_state(SERVICE_START_PENDING);
-
-    # walk the chain
-
-    $self->SUPER::session_initialize($kernel, $session);
-
-    $self->log->debug("$alias: leaving initialize()");
-
-}
 
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
 
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
-# ----------------------------------------------------------------------
-
-sub session_cleanup {
-    my ($self, $kernel, $session) = @_;
-
-    $kernel->delay('poll');
-
-    # walk the chain
-
-    $self->SUPER::session_cleanup($kernel, $session);
-
-}
-
-# ----------------------------------------------------------------------
-# Private Events
-# ----------------------------------------------------------------------
-
-sub _session_init {
-    my ($kernel, $self, $session) = @_[KERNEL,OBJECT,SESSION];
+sub session_idle {
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _session_init()");
-
-    $self->session_initialize($kernel, $session);
-
-    $kernel->post($alias, 'poll');
-    $kernel->post($alias, 'startup');
+    $self->log->debug("$alias: session_idle()");
 
 }
 
-sub _poll {
-    my ($kernel, $self, $session) = @_[KERNEL,OBJECT,SESSION];
+sub session_pause {
+    my ($self) = @_[OBJECT];
 
-    my $stat;
-    my $delay = 0;
-    my $state = $self->_current_state();
+    my $alias = $self->alias;
 
-    $self->log->debug('entering _poll()');
-    $self->log->debug("state = $state");
+    $self->log->debug("$alias: session_pause()");
 
-    if ($state == SERVICE_START_PENDING) {
+}
 
-        $self->log->debug('state = SERVICE_START_PENDING');
+sub session_resume {
+    my ($self) = @_[OBJECT];
 
-        # Initialization code
+    my $alias = $self->alias;
 
-        $self->last_state(SERVICE_START_PENDING);
-        $self->_current_state(SERVICE_START_PENDING, 6000);
+    $self->log->debug("$alias: session_resume()");
 
-        # Initialization code
-        # ...do whatever you need to do to start...
+}
 
-        $self->service_startup();
-        $self->last_state(SERVICE_RUNNING);
+sub session_shutdown {
+    my ($self) = @_[OBJECT];
 
-    } elsif ($state == SERVICE_STOP_PENDING) {
+    my $alias = $self->alias;
 
-        $self->log->debug('state = SERVICE_STOP_PENDING');
-
-        # Stopping...
-
-        $self->service_shutdown();
-        $self->last_state(SERVICE_STOPPED);
-
-    } elsif ($state == SERVICE_PAUSE_PENDING) {
-
-        $self->log->debug('state = SERVICE_PAUSE_PENDING');
-
-        # Pausing...
-
-        $self->service_paused();
-        $self->last_state(SERVICE_PAUSED);
-
-    } elsif ($state == SERVICE_CONTINUE_PENDING) {
-
-        $self->log->debug('state = SERVICE_CONTINUE_PENDING');
-
-        # Resuming...
-
-        if ($self->last_state == SERVICE_PAUSED) {
-
-            $self->service_resumed();
-            $self->last_state(SERVICE_RUNNING);
-
-        } else {
-
-            $self->log->info($self->message('unpaused'));
-
-        }
-
-    } elsif ($state == SERVICE_RUNNING) {
-
-        $self->log->debug('state = SERVICE_RUNNING');
-
-        # Running...
-        #
-        # Note that here you want to check that the state
-        # is indeed SERVICE_RUNNING. Even though the Running
-        # callback is called it could have done so before
-        # calling the "Start" callback.
-        #
-
-        if ($self->last_state == SERVICE_RUNNING) {
-
-            $self->service_idle();
-            $self->last_state(SERVICE_RUNNING);
-
-        }
-
-    } elsif ($state == SERVICE_STOPPED) {
-
-        $self->log->debug('state = SERVICE_STOPPED');
-
-        # stopped...
-
-        $delay = $self->poll_interval + 1000;
-        $kernel->yield('shutdown');
-        $self->last_state(SERVICE_STOPPED);
-
-    } elsif ($state == SERVICE_CONTROL_SHUTDOWN) {
-
-        $self->log->debug('state = SERVICE_CONTROL_SHUTDOWN');
-
-        # shutdown...
-
-        unless ($self->last_state == SERVICE_PAUSED) {
-
-            $delay = $self->shutdown_interval;
-            $self->last_state(SERVICE_STOP_PENDING);
-
-        }
-
-    }
-
-    # tell the SCM what is going on
-
-    $self->_current_state($self->last_state, $delay);
-
-    # queue the next polling interval
-
-    $stat = $kernel->delay('poll', $self->poll_interval);
-    $self->log->error("unable to queue delay - $stat") if ($stat != 0);
-
-    $self->log->debug('leaving _poll()');
+    $self->log->debug("$alias: session_shutdown()");
 
 }
 
 # ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub session_initialize {
+    my $self = shift;
+
+    $poe_kernel->state('session_idle',     $self);
+    $poe_kernel->state('session_pause',    $self);
+    $poe_kernel->state('session_resume',   $self);
+    $poe_kernel->state('session_shutdown', $self);
+
+    $poe_kernel->sig('HUP', 'session_interrupt');
+
+    $self->SUPER::session_initialize();
+
+}
+
+# ----------------------------------------------------------------------
+# Public Accessors
+# ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
 # Private Methods
+# ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# Private Events
 # ----------------------------------------------------------------------
 
 1;
@@ -255,77 +86,69 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Service - A base class for Services
+XAS::Lib::Service - The base class for all POE Sessions.
 
 =head1 SYNOPSIS
 
- use XAS::Lib::Service;
-
- my $sevice = XAS::Lib::Service->new(
-    -alias             => 'session',
-    -poll_interval     => 2,
-    -shutdown_interval => 25
+ my $session = XAS::Lib::Session->new(
+     -alias => 'name',
  );
 
 =head1 DESCRIPTION
 
-This module provides a generic interface to "Services". A Service is
-a managed background process. It reponds to external stimuli. On Windows
-this would be responding to commands from the SCM. On Unix this would be
-responding to a special set of signals. A service can be stopped, started,
-paused and resumed.
+This module provides an object based POE session. This object will perform
+the necessary actions for the lifetime of the session. This includes handling
+signals. The following signals INT, TERM, QUIT will trigger the 'shutdown'
+event which invokes the session_cleanup() method. The HUP signal will invoke 
+the session_reload() method. This module inherits from XAS::Base.
 
 =head1 METHODS
 
-=head2 new()
+=head2 session_initialize
 
-This method is used to initialize the service. It takes the following
-parameters:
+This is where the session should do whatever initialization it needs. This
+initialization may include defining additional events.
 
-=over 4
+=head2 session_cleanup
 
-=item B<-alias>
+This method should perform cleanup actions for the session. This is triggered
+by a "shutdown" event.
 
-The name of this POE session.
+=head2 session_reload
 
-=item B<-poll_interval>
+This method should perform reload actions for the session. By default it
+calls $kernel->sig_handled() which terminates further handling of the HUP
+signal.
 
-This is the interval were the SCM sends SERVICE_RUNNING message. The
-default is every 2 seconds.
+=head2 session_stop
 
-=item B<-shutdown_interval>
+This method should perform stop actions for the session. This is triggered
+by a "_stop" event.
 
-This is the interval to pause the system shutdown so that the service
-can cleanup after itself. The default is 25 seconds.
+=head1 PUBLIC EVENTS
 
-=back
+The following public events are defined for the session.
 
-It also use parameters from L<XAS::Lib::Session>.
+=head2 session_startup
 
-=head2 service_startup()
+This event should start whatever processing the session will do. It is passed
+two parameters:
 
-This method should be overridden, it is called when the service is
-starting up.
+=head2 session_shutdown
 
-=head2 service_shutdown()
+When you send this event to the session, it will invoke the session_cleanup() 
+method.
 
-This method should be overridden, it is called when the service has
-been stopped or when the system is shutting down.
+=head1 PRIVATE EVENTS
 
-=head2 service_idle()
+The following events are used internally:
 
-This method should be overridden, it is called every B<--poll_interval>.
-This is where the work of the service can be done.
+ session_init
+ session_interrupt
+ session_reload
+ shutdown
 
-=head2 service_paused()
-
-This method should be overridden, it is called when the service has been
-paused.
-
-=head2 service_resumed()
-
-This method should be overridden, it is called when the service has been
-resumed.
+They should only be used with caution.
 
 =head1 SEE ALSO
 
@@ -344,7 +167,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
+it under the same terms as Perl itself, either Perl version 5.8.5 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
