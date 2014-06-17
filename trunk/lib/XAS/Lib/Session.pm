@@ -12,7 +12,7 @@ use XAS::Class
   accessors => 'session',
   messages => {
     noalias    => 'can not set session alias %s',
-    noaliasdef => 'no Alias defined',
+    noaliasdef => 'no alias defined',
     signaled   => '%s: recieved signal %s',
   },
   vars => {
@@ -42,6 +42,13 @@ sub session_cleanup {
 
 sub session_initialize {
     my $self = shift;
+
+    $poe_kernel->sig(HUP  => 'session_interrupt');
+    $poe_kernel->sig(INT  => 'session_interrupt');
+    $poe_kernel->sig(TERM => 'session_interrupt');
+    $poe_kernel->sig(QUIT => 'session_interrupt');
+
+    $self->SUPER::session_initialize();
 
 }
 
@@ -117,11 +124,6 @@ sub _session_start {
         );
 
     }
-
-    $poe_kernel->sig(HUP  => 'session_interrupt');
-    $poe_kernel->sig(INT  => 'session_interrupt');
-    $poe_kernel->sig(TERM => 'session_interrupt');
-    $poe_kernel->sig(QUIT => 'session_interrupt');
 
     $poe_kernel->post($alias, 'session_init');
 

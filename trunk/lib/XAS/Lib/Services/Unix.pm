@@ -1,4 +1,4 @@
-package XAS::Lib::Service::Unix;
+package XAS::Lib::Services::Unix;
 
 our $VERSION = '0.01';
 
@@ -38,14 +38,14 @@ use XAS::Class
 # ----------------------------------------------------------------------
 
 sub init_service {
-    my ($self, $kernel, $session) = @_;
+    my $self = shift;
 
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_initialise() - unix");
 
-    $kernel->sig(CONT => 'session_interrupt');
-    $kernel->sig(TSTP => 'session_interrupt');
+    $poe_kernel->sig(CONT => 'session_interrupt');
+    $poe_kernel->sig(TSTP => 'session_interrupt');
 
     $self->log->debug("$alias: leaving session_initialise() - unix");
 
@@ -56,7 +56,7 @@ sub init_service {
 # ----------------------------------------------------------------------
 
 sub _session_interrupt {
-    my ($kernel, $self, $session, $signal) = @_[KERNEL,OBJECT,SESSION,ARG0];
+    my ($self, $signal) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
 
@@ -68,12 +68,12 @@ sub _session_interrupt {
 
     } elsif ($signal eq 'CONT') {
 
-        $kernel->sig_handled();
+        $poe_kernel->sig_handled();
         $self->_current_state(SERVICE_CONTINUE_PENDING);
 
     } elsif ($signal eq 'TSTP') {
 
-        $kernel->sig_handled();
+        $poe_kernel->sig_handled();
         $self->_current_state(SERVICE_STOP_PENDING);
 
     } else {
@@ -111,7 +111,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Service::Unix - A mixin class for Unix Services
+XAS::Lib::Services::Unix - A mixin class for Unix Services
 
 =head1 DESCRIPTION
 

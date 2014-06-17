@@ -12,6 +12,7 @@ BEGIN {
 use Try::Tiny;
 use File::Pid;
 use Pod::Usage;
+use WPM::Lib::Services;
 
 use XAS::Class
   debug      => 0,
@@ -20,7 +21,7 @@ use XAS::Class
   mixin      => $mixin,
   constants  => 'TRUE FALSE',
   filesystem => 'File',
-  accessors  => 'daemon',
+  accessors  => 'daemon service',
   messages => {
       installed => 'The service was successfully installed.',
       removed   => 'The service was successfully deinstalled.',
@@ -42,9 +43,23 @@ sub define_signals {
 
 }
 
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub init {
+    my $class = shift;
+
+    my $self->SUPER::init(@_);
+
+    $self->{service} = WPM::Lib::Services->new(
+        -alias => 'services'
+    );
+
+    return $self;
+
+}
 
 sub _default_options {
     my $self = shift;
@@ -52,7 +67,7 @@ sub _default_options {
     my $options = $self->SUPER::_default_options();
 
     $self->{daemon} = FALSE;
-    
+
     $options->{'daemon'} = \$self->{daemon};
 
     $options->{'install'}   = sub { 

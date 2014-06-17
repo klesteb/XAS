@@ -1,4 +1,4 @@
-package XAS::Lib::Service::Win32;
+package XAS::Lib::Services::Win32;
 
 our $VERSION = '0.01';
 
@@ -29,7 +29,7 @@ use XAS::Class
 # ----------------------------------------------------------------------
 
 sub init_service {
-    my ($self, $kernel, $session) = @_;
+    my $self = shift;
 
     my $alias = $self->alias;
 
@@ -81,7 +81,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Service::Win32 - A mixin class for Win32 Services
+XAS::Lib::Services::Win32 - A mixin class for Win32 Services
 
 =head1 DESCRIPTION
 
