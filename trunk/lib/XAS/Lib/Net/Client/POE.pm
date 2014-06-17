@@ -41,47 +41,46 @@ our @RECONNECTIONS = qw(60 120 240 480 960 1920 3840);
 # Public Methods
 # ---------------------------------------------------------------------
 
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
-# ----------------------------------------------------------------------
-
-sub service_startup {
-    my $self = shift;
+sub session_startup {
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: service_startup");
+    $self->log->debug("$alias: session_startup");
 
     $poe_kernel->post($alias, 'server_connect');
 
 }
 
-sub service_paused {
-    my $self = shift;
+sub session_pause {
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: service paused");
+    $self->log->debug("$alias: session_pause");
 
     $poe_kernel->call($alias, 'connection_down');
 
 }
 
-sub service_resumed {
-    my $self = shift;
+sub session_resume {
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: service resumed");
+    $self->log->debug("$alias: session_resume");
 
     $poe_kernel->call($alias, 'connection_up');
 
 }
 
+# ----------------------------------------------------------------------
+# Overridden Methods - semi public
+# ----------------------------------------------------------------------
+
 sub session_intialize {
     my $self = shift;
-    
-    my ($kernel, $session) = $self->validate_params(\@_, [1,1]);
+
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_initialize()");
@@ -92,24 +91,24 @@ sub session_intialize {
 
     # private events
 
-    $kernel->state('server_connected', $self, '_server_connected');
-    $kernel->state('server_connect',   $self, '_server_connect');
-    $kernel->state('server_error',     $self, '_server_error');
-    $kernel->state('server_message',   $self, '_server_message');
+    $poe_kernel->state('server_connected', $self, '_server_connected');
+    $poe_kernel->state('server_connect',   $self, '_server_connect');
+    $poe_kernel->state('server_error',     $self, '_server_error');
+    $poe_kernel->state('server_message',   $self, '_server_message');
 
     # public events
 
     $self->log->debug("$alias: doing public events");
 
-    $kernel->state('read_data',         $self);
-    $kernel->state('write_data',        $self);
-    $kernel->state('connection_up',     $self);
-    $kernel->state('connection_down',   $self);
-    $kernel->state('handle_connection', $self);
+    $poe_kernel->state('read_data',         $self);
+    $poe_kernel->state('write_data',        $self);
+    $poe_kernel->state('connection_up',     $self);
+    $poe_kernel->state('connection_down',   $self);
+    $poe_kernel->state('handle_connection', $self);
 
     # walk the chain
 
-    $self->SUPER::session_initialize($kernel, $session);
+    $self->SUPER::session_initialize();
 
     $self->log->debug("$alias: leaving session_initialize()");
 
@@ -118,14 +117,12 @@ sub session_intialize {
 sub session_cleanup {
     my $self = shift;
     
-    my ($kernel, $session) = $self->validate_params(\@_, [1,1]);
-
     $self->{wheel}    = undef;
     $self->{listener} = undef;
 
     # walk the chain
 
-    $self->SUPER::session_cleanup($kernel, $session);
+    $self->SUPER::session_cleanup();
 
 }
 
@@ -134,31 +131,31 @@ sub session_cleanup {
 # ---------------------------------------------------------------------
 
 sub handle_connection {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
 }
 
 sub connection_down {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
 }
 
 sub connection_up {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
 }
 
 sub read_data {
-    my ($kernel, $self, $data) = @_[KERNEL,OBJECT,ARG0];
+    my ($self, $data) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
 
-    $kernel->post($alias, 'write_data', $data);
+    $poe_kernel->post($alias, 'write_data', $data);
 
 }
 
 sub write_data {
-    my ($kernel, $self, $data) = @_[KERNEL, OBJECT, ARG0];
+    my ($self, $data) = @_[OBJECT, ARG0];
 
     my @packet;
 
@@ -177,19 +174,18 @@ sub write_data {
 # ---------------------------------------------------------------------
 
 sub _server_message {
-    my ($kernel, $self, $data, $wheel_id) = @_[KERNEL, OBJECT, ARG0, ARG1];
+    my ($self, $data, $wheel_id) = @_[OBJECT, ARG0, ARG1];
 
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _server_message()");
 
-    $kernel->post($alias, 'read_data', $data);
+    $poe_kernel->post($alias, 'read_data', $data);
 
 }
 
 sub _server_connected {
-    my ($kernel, $self, $socket, $peeraddr, $peerport, $wheel_id) =
-       @_[KERNEL, OBJECT, ARG0 .. ARG3];
+    my ($self, $socket, $peeraddr, $peerport, $wheel_id) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
 
@@ -217,12 +213,12 @@ sub _server_connected {
     $self->{host} = $host;
     $self->{port} = $peerport;
 
-    $kernel->post($alias, 'handle_connection');
+    $poe_kernel->post($alias, 'handle_connection');
 
 }
 
 sub _server_connect {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -242,8 +238,7 @@ sub _server_connect {
 }
 
 sub _server_connection_failed {
-    my ($kernel, $self, $operation, $errnum, $errstr, $wheel_id) =
-        @_[KERNEL, OBJECT, ARG0 .. ARG3];
+    my ($self, $operation, $errnum, $errstr, $wheel_id) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
 
@@ -262,8 +257,7 @@ sub _server_connection_failed {
 }
 
 sub _server_error {
-    my ($kernel, $self, $operation, $errnum, $errstr, $wheel_id) =
-        @_[KERNEL, OBJECT, ARG0 .. ARG3];
+    my ($self, $operation, $errnum, $errstr, $wheel_id) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
 
@@ -273,7 +267,7 @@ sub _server_error {
     delete $self->{listner};
     delete $self->{wheel};
 
-    $kernel->post($alias, 'connection_down');
+    $poe_kernel->post($alias, 'connection_down');
 
     foreach my $error (@ERRORS) {
 
@@ -311,7 +305,7 @@ sub init {
 }
 
 sub _reconnect {
-    my ($self, $kernel) = @_;
+    my ($self) = shift;
 
     my $retry;
     my $alias = $self->alias;
@@ -323,7 +317,7 @@ sub _reconnect {
         my $delay = $RECONNECTIONS[$self->{attempts}];
         $self->log->warn("$alias: attempting reconnection: $self->{attempts}, waiting: $delay seconds");
         $self->{attempts}++;
-        $kernel->delay('server_connect', $delay);
+        $poe_kernel->delay('server_connect', $delay);
 
     } else {
 
@@ -333,12 +327,12 @@ sub _reconnect {
 
             $self->log->warn("$alias: cycling reconnection attempts, but not shutting down...");
             $self->{attempts} = 0;
-            $kernel->yield('server_connect');
+            $poe_kernel->yield('server_connect');
 
         } else {
 
             $self->log->warn("$alias: shutting down, to many reconnection attempts");
-            $kernel->yield('shutdown');
+            $poe_kernel->yield('shutdown');
 
         }
 
