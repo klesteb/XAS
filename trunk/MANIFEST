@@ -30,8 +30,9 @@ lib/XAS/Lib/Net/Server.pm
 lib/XAS/Lib/Net/Client/Default.pm
 lib/XAS/Lib/Net/Client/POE.pm
 lib/XAS/Lib/Service.pm
-lib/XAS/Lib/Service/Unix.pm
-lib/XAS/Lib/Service/Win32.pm
+lib/XAS/Lib/Services.pm
+lib/XAS/Lib/Services/Unix.pm
+lib/XAS/Lib/Services/Win32.pm
 lib/XAS/Lib/Session.pm
 lib/XAS/Lib/Stomp/Frame.pm
 lib/XAS/Lib/Stomp/Parser.pm
