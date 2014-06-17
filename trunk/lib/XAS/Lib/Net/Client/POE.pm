@@ -327,12 +327,12 @@ sub _reconnect {
 
             $self->log->warn("$alias: cycling reconnection attempts, but not shutting down...");
             $self->{attempts} = 0;
-            $poe_kernel->yield('server_connect');
+            $poe_kernel->post($alias, 'server_connect');
 
         } else {
 
             $self->log->warn("$alias: shutting down, to many reconnection attempts");
-            $poe_kernel->yield('shutdown');
+            $poe_kernel->post($alias, 'shutdown');
 
         }
 
@@ -361,11 +361,11 @@ This module is a class used to create network clients.
  ;
 
  sub handle_connection {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my ($self) = @_[OBJECT];
 
     my $packet = "hello!";
 
-    $kernel->yield('write_data', $packet);
+    $poe_kernel->yield('write_data', $packet);
 
  }
 

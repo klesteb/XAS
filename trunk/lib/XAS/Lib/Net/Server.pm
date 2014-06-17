@@ -57,7 +57,7 @@ sub reaper {
 # ----------------------------------------------------------------------
 
 sub session_initialize {
-    my ($self) = @_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
 
@@ -86,7 +86,7 @@ sub session_initialize {
 }
 
 sub session_cleanup {
-    my ($self) = @_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
     my $clients = $self->{clients};
@@ -105,48 +105,6 @@ sub session_cleanup {
     $self->SUPER::session_cleanup();
 
     $self->log->debug("$alias: leaving session_cleanup()");
-
-}
-
-sub session_startup {
-    my ($self) = @_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering service_startup()");
-
-    $poe_kernel->call($alias, 'client_connection');
-
-    $self->log->debug("$alias: leavin service_startup()");
-
-}
-
-sub session_pause {
-    my ($self) = @_[OBJECT];
-
-    my $clients = $self->{clients};
-
-    while (my $wheel = keys %$clients) {
-
-        $wheel->pause_input();
-        $poe_kernel->alarm_remove($wheel->{watchdog});
-
-    }
-
-}
-
-sub session_resume {
-    my ($self) = @_[OBJECT];
-
-    my $clients = $self->{clients};
-    my $inactivity = $self->inactivity_timer;
-
-    while (my $wheel = keys %$clients) {
-
-        $wheel->resume_input();
-        $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
-
-    }
 
 }
 
@@ -178,6 +136,48 @@ sub client {
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
+
+sub session_startup {
+    my ($self) = @_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering service_startup()");
+
+    $poe_kernel->call($alias, 'client_connection');
+
+    $self->log->debug("$alias: leaving service_startup()");
+
+}
+
+sub session_pause {
+    my ($self) = @_[OBJECT];
+
+    my $clients = $self->{clients};
+
+    while (my $wheel = keys %$clients) {
+
+        $wheel->pause_input();
+        $poe_kernel->alarm_remove($wheel->{watchdog});
+
+    }
+
+}
+
+sub session_resume {
+    my ($self) = @_[OBJECT];
+
+    my $clients = $self->{clients};
+    my $inactivity = $self->inactivity_timer;
+
+    while (my $wheel = keys %$clients) {
+
+        $wheel->resume_input();
+        $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
+
+    }
+
+}
 
 sub process_request {
     my ($self, $input, $ctx) = @_[OBJECT,ARG0,ARG1];
@@ -234,7 +234,7 @@ sub _client_connection {
 }
 
 sub _client_connected {
-    my ($self, $socket, $peeraddr, $peerport, $wheel_id) = @_[OBJECT,ARG0 .. ARG3];
+    my ($self, $socket, $peeraddr, $peerport, $wheel_id) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
     my $inactivity = $self->inactivity_timer;
@@ -270,7 +270,7 @@ sub _client_connected {
 }
 
 sub _client_connection_failed {
-    my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0 .. ARG3];
+    my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
 
@@ -319,7 +319,7 @@ sub _client_output {
 }
 
 sub _client_error {
-    my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0 .. ARG3];
+    my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
 
