@@ -9,7 +9,8 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'daemonize dotid',
-  mixins  => 'define_daemon get_service_config install_service remove_service',
+  mixins  => 'define_daemon define_pidfile get_service_config 
+              install_service remove_service',
 ;
 
 # ----------------------------------------------------------------------

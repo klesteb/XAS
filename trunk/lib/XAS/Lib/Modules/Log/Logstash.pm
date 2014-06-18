@@ -6,7 +6,7 @@ use XAS::Factory;
 use Params::Validate 'HASHREF';
 
 use XAS::Class
-  base       => 'XAS::Hub',
+  base       => 'XAS::Base',
   version    => $VERSION,
   codecs     => 'JSON',
   accessors  => 'spool',
