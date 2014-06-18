@@ -13,7 +13,6 @@ use XAS::Class
   messages => {
     noalias    => 'can not set session alias %s',
     noaliasdef => 'no alias defined',
-    signaled   => '%s: recieved signal %s',
   },
   vars => {
     PARAMS => {
@@ -27,7 +26,7 @@ use XAS::Class
 # ----------------------------------------------------------------------
 
 sub session_startup {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
 }
 
@@ -47,8 +46,6 @@ sub session_initialize {
     $poe_kernel->sig(INT  => 'session_interrupt');
     $poe_kernel->sig(TERM => 'session_interrupt');
     $poe_kernel->sig(QUIT => 'session_interrupt');
-
-    $self->SUPER::session_initialize();
 
 }
 
@@ -109,7 +106,7 @@ sub init {
 # ----------------------------------------------------------------------
 
 sub _session_start {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -130,7 +127,7 @@ sub _session_start {
 }
 
 sub _session_stop {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -143,7 +140,7 @@ sub _session_stop {
 }
 
 sub _session_shutdown {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -154,7 +151,7 @@ sub _session_shutdown {
 }
 
 sub _session_reload {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -165,7 +162,7 @@ sub _session_reload {
 }
 
 sub _session_init {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 

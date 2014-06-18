@@ -16,15 +16,12 @@ use XAS::Class
   auto_can => '_auto_load',
   messages => {
     exception     => '%s: %s',
-    dberror       => 'a database error has occurred: %s',
     invparams     => 'invalid parameters passed, reason: %s',
     invmethod     => 'invalid method "%s", unable to auto load',
     nospooldir    => 'no spool directory defined',
-    noschema      => 'no database schema was defined',
     unknownos     => 'unknown OS: %s',
     unexpected    => 'unexpected error: %s',
     unknownerror  => 'unknown error: %s',
-    nodbaccess    => 'unable to access database: %s; reason %s',
     undeliverable => 'unable to send mail to %s; reason: %s',
     noserver      => 'unable to connect to %s; reason: %s',
     nodelivery    => 'unable to send message to %s; reason: %s',
@@ -34,11 +31,7 @@ use XAS::Class
     lock_error    => 'unable to acquire a lock on %s',
     invperms      => 'unable to change file permissions on %s',
     badini        => 'unable to load config file: %s',
-    expiredacct   => 'this accounts expiration day has passed',
-    expiredpass   => 'this accounts password has expired',
-    sessionend    => 'the session has expired',
-    noaccess      => 'you are not able to access the system at this time',
-    loginattempts => 'you have exceeded your login attempts',
+    signaled      => '%s: recieved signal %s',
   },
   vars => {
     PARAMS => {

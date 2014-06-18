@@ -15,7 +15,7 @@ use XAS::Class
 # ----------------------------------------------------------------------
 
 sub session_idle {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -24,7 +24,7 @@ sub session_idle {
 }
 
 sub session_pause {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -33,7 +33,7 @@ sub session_pause {
 }
 
 sub session_resume {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -42,7 +42,7 @@ sub session_resume {
 }
 
 sub session_shutdown {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 

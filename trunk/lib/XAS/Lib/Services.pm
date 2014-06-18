@@ -7,8 +7,8 @@ use POE;
 my $mixin;
 BEGIN {
     $mixin = ($^O eq 'MSWin32')
-        ? 'XAS::Lib::Service::Win32'
-        : 'XAS::Lib::Service::Unix';
+        ? 'XAS::Lib::Services::Win32'
+        : 'XAS::Lib::Services::Unix';
 }
 
 use XAS::Class
@@ -18,7 +18,7 @@ use XAS::Class
   mixin     => $mixin,
   accessors => 'sessions',
   mutators  => 'last_state',
-  constants => 'ARRAYREF DELIMITER',
+  constants => 'DELIMITER',
   messages => {
     noservice => 'unable to start service; reason: %s',
     paused    => 'the service is already paused',
@@ -52,8 +52,6 @@ sub session_initialize {
 
     # walk the chain
 
-    $self->SUPER::session_initialize();
-
     $self->log->debug("$alias: leaving session_initialize()");
 
 }
@@ -63,7 +61,7 @@ sub register {
 
     my ($sessions) = $self->validate_params(\@_, [1]);
 
-    if (ref($sessions) eq ARRAYREF) {
+    if (ref($sessions) eq 'ARRAYREF') {
 
         foreach my $session (@$sessions) {
 
@@ -73,7 +71,7 @@ sub register {
 
     } else {
 
-        my @parts = split(DELIMITER, $sessiones);
+        my @parts = split(DELIMITER, $sessions);
 
         foreach my $session (@parts) {
 
@@ -97,9 +95,6 @@ sub session_cleanup {
     my $self = shift;
 
     $poe_kernel->delay('poll');
-
-    # walk the chain
-
     $self->SUPER::session_cleanup();
 
 }
@@ -109,7 +104,7 @@ sub session_cleanup {
 # ----------------------------------------------------------------------
 
 sub _session_init {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -118,23 +113,23 @@ sub _session_init {
     $self->session_initialize();
 
     $poe_kernel->post($alias, 'poll');
-    $poe_kernel->post($alias, 'session_startup');
 
 }
 
 sub _poll {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $stat;
     my $delay = 0;
+    my $alias = $self->alias;
     my $state = $self->_current_state();
 
-    $self->log->debug('entering _poll()');
-    $self->log->debug("state = $state");
+    $self->log->debug("$alias: entering _poll()");
+    $self->log->debug("$alias: state = $state");
 
     if ($state == SERVICE_START_PENDING) {
 
-        $self->log->debug('state = SERVICE_START_PENDING');
+        $self->log->debug("$alias: state = SERVICE_START_PENDING");
 
         # Initialization code
 
@@ -149,7 +144,7 @@ sub _poll {
 
     } elsif ($state == SERVICE_STOP_PENDING) {
 
-        $self->log->debug('state = SERVICE_STOP_PENDING');
+        $self->log->debug("$alias: state = SERVICE_STOP_PENDING");
 
         # Stopping...
 
@@ -158,7 +153,7 @@ sub _poll {
 
     } elsif ($state == SERVICE_PAUSE_PENDING) {
 
-        $self->log->debug('state = SERVICE_PAUSE_PENDING');
+        $self->log->debug("$alias: state = SERVICE_PAUSE_PENDING");
 
         # Pausing...
 
@@ -167,7 +162,7 @@ sub _poll {
 
     } elsif ($state == SERVICE_CONTINUE_PENDING) {
 
-        $self->log->debug('state = SERVICE_CONTINUE_PENDING');
+        $self->log->debug("$alias: state = SERVICE_CONTINUE_PENDING");
 
         # Resuming...
 
@@ -184,7 +179,7 @@ sub _poll {
 
     } elsif ($state == SERVICE_RUNNING) {
 
-        $self->log->debug('state = SERVICE_RUNNING');
+        $self->log->debug("$alias: state = SERVICE_RUNNING");
 
         # Running...
         #
@@ -203,17 +198,17 @@ sub _poll {
 
     } elsif ($state == SERVICE_STOPPED) {
 
-        $self->log->debug('state = SERVICE_STOPPED');
+        $self->log->debug("$alias: state = SERVICE_STOPPED");
 
         # stopped...
 
         $delay = $self->poll_interval + 1000;
-        $poe_kernel->yield('shutdown');
+        $poe_kernel->post($alias, 'shutdown');
         $self->last_state(SERVICE_STOPPED);
 
     } elsif ($state == SERVICE_CONTROL_SHUTDOWN) {
 
-        $self->log->debug('state = SERVICE_CONTROL_SHUTDOWN');
+        $self->log->debug("$alias: state = SERVICE_CONTROL_SHUTDOWN");
 
         # shutdown...
 
@@ -235,7 +230,7 @@ sub _poll {
     $stat = $poe_kernel->delay('poll', $self->poll_interval);
     $self->log->error("unable to queue delay - $stat") if ($stat != 0);
 
-    $self->log->debug('leaving _poll()');
+    $self->log->debug("$alias: leaving _poll()");
 
 }
 
@@ -248,7 +243,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{sessions} = ();
+    $self->{sessions} = [];
 
     return $self;
 
@@ -322,9 +317,9 @@ sub _service_resumed {
     $self->log->debug("$alias: _service_resumed");
 
     foreach my $session (@{$self->sessions}) {
-        
+
         $poe_kernel->post($session, 'session_resume');
-        
+
     }
 
 }
@@ -335,25 +330,68 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Services - A base class for Services
+XAS::Lib::Services - A class to interact with Services
 
 =head1 SYNOPSIS
 
+ use POE;
  use XAS::Lib::Service;
+ use XAS::Lib::Services;
 
- my $sevice = XAS::Lib::Services->new(
-    -alias             => 'session',
+ my $service = XAS::Lib::Services->new(
+    -alias             => 'service',
     -poll_interval     => 2,
     -shutdown_interval => 25
  );
 
+ my $task = XAS::Lib::Service->new(
+     -alias => 'task'
+ );
+
+ $service->register('task');
+ $poe_kernel->run();
+
 =head1 DESCRIPTION
 
 This module provides a generic interface to "Services". A Service is
-a managed background process. It reponds to external stimuli. On Windows
-this would be responding to commands from the SCM. On Unix this would be
-responding to a special set of signals. A service can be stopped, started,
-paused and resumed.
+a managed background process. It reponds to external events. On Windows
+this would be responding to commands from the Service Control Manager. 
+On Unix this would be responding to a special set of signals. This module 
+provides an event loop that can interact those external events. 
+
+When an external event happens this module will trap it and generate a POE 
+event. This event is then sent to all interested modules. The following POE 
+events have been defined:
+
+=over 4
+
+=item B<session_startup> 
+
+This is fired when your process starts up and is used to initialize what ever
+processing you are going to do. On a network server, this may be opening a
+port to listen on.
+
+=item B<session_shutdown>
+
+This is fired when your process is shutting down. 
+
+=item B<session_pause>
+
+This is fired when your process needs to "pause".
+
+=item B<session_resume>
+
+This is fired when your process needs to "resume".
+
+=item B<session_idle>
+
+This is fired at every poll_interval.
+
+=back
+
+These events follow closely the model defined by the Windows Service 
+Control Manager interface. To use these events it is best to inherit from
+L<XAS::Lib::Service>. 
 
 =head1 METHODS
 
@@ -382,30 +420,19 @@ can cleanup after itself. The default is 25 seconds.
 
 It also use parameters from L<XAS::Lib::Session>.
 
-=head2 service_startup()
+=head2 register($session)
 
-This method should be overridden, it is called when the service is
-starting up.
+This allows your process to register whatever modules you want events sent too.
 
-=head2 service_shutdown()
+=over 4
 
-This method should be overridden, it is called when the service has
-been stopped or when the system is shutting down.
+=item B<$session>
 
-=head2 service_idle()
+This can be an array reference or a text string. The text string may be 
+delimited with commas.
 
-This method should be overridden, it is called every B<--poll_interval>.
-This is where the work of the service can be done.
+=back
 
-=head2 service_paused()
-
-This method should be overridden, it is called when the service has been
-paused.
-
-=head2 service_resumed()
-
-This method should be overridden, it is called when the service has been
-resumed.
 
 =head1 SEE ALSO
 

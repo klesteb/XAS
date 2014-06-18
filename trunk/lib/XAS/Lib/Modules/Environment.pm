@@ -108,7 +108,7 @@ sub init {
 
     my $OS = $^O;
 
-    if (($os eq "aix") or ($OS eq 'linux')) {
+    if (($OS eq "aix") or ($OS eq 'linux')) {
 
         $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
             ? $ENV{'XAS_HOSTNAME'} 

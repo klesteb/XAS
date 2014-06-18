@@ -64,7 +64,7 @@ sub _session_interrupt {
 
     if ($signal eq 'HUP') {
 
-        $self->session_reload($kernel, $session);
+        $self->session_reload();
 
     } elsif ($signal eq 'CONT') {
 
@@ -78,7 +78,7 @@ sub _session_interrupt {
 
     } else {
 
-        $self->session_cleanup($kernel, $session);
+        $self->session_cleanup();
 
     }
 

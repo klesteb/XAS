@@ -12,7 +12,7 @@ BEGIN {
 use Try::Tiny;
 use File::Pid;
 use Pod::Usage;
-use WPM::Lib::Services;
+use XAS::Lib::Services;
 
 use XAS::Class
   debug      => 0,
@@ -51,9 +51,9 @@ sub define_signals {
 sub init {
     my $class = shift;
 
-    my $self->SUPER::init(@_);
+    my $self = $class->SUPER::init(@_);
 
-    $self->{service} = WPM::Lib::Services->new(
+    $self->{service} = XAS::Lib::Services->new(
         -alias => 'services'
     );
 
