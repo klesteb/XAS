@@ -61,7 +61,7 @@ sub _session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_interrupt()");
-    $self->log('warn', "$alias: received a $signal signal");
+    $self->log->warn_msg('signaled', $alias, $signal);
 
     if ($signal eq 'HUP') {
 
