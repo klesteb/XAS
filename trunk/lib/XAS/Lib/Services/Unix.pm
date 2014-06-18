@@ -61,6 +61,7 @@ sub _session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_interrupt()");
+    $self->log('warn', "$alias: received a $signal signal");
 
     if ($signal eq 'HUP') {
 
@@ -74,11 +75,12 @@ sub _session_interrupt {
     } elsif ($signal eq 'TSTP') {
 
         $poe_kernel->sig_handled();
-        $self->_current_state(SERVICE_STOP_PENDING);
+        $self->_current_state(SERVICE_PAUSE_PENDING);
 
     } else {
 
-        $self->session_cleanup();
+        $poe_kernel->sig_handled();
+        $self->_current_state(SERVICE_CONTROL_SHUTDOWN);
 
     }
 

@@ -43,13 +43,6 @@ sub session_initialize {
 
     $self->log->debug("$alias: entering session_initialize()");
 
-    $self->init_service();
-
-    $poe_kernel->state('poll', $self, '_poll');
-
-    $self->last_state(SERVICE_START_PENDING);
-    $self->_current_state(SERVICE_START_PENDING);
-
     # walk the chain
 
     $self->log->debug("$alias: leaving session_initialize()");
@@ -110,6 +103,12 @@ sub _session_init {
 
     $self->log->debug("$alias: _session_init()");
 
+    $poe_kernel->state('poll', $self, '_poll');
+
+    $self->last_state(SERVICE_START_PENDING);
+    $self->_current_state(SERVICE_START_PENDING);
+
+    $self->init_service();
     $self->session_initialize();
 
     $poe_kernel->post($alias, 'poll');
@@ -120,8 +119,8 @@ sub _poll {
     my ($self) = $_[OBJECT];
 
     my $stat;
-    my $delay = 0;
     my $alias = $self->alias;
+    my $delay = $self->poll_interval;
     my $state = $self->_current_state();
 
     $self->log->debug("$alias: entering _poll()");
@@ -148,7 +147,6 @@ sub _poll {
 
         # Stopping...
 
-        $self->_service_shutdown();
         $self->last_state(SERVICE_STOPPED);
 
     } elsif ($state == SERVICE_PAUSE_PENDING) {
@@ -202,8 +200,8 @@ sub _poll {
 
         # stopped...
 
-        $delay = $self->poll_interval + 1000;
-        $poe_kernel->post($alias, 'shutdown');
+        $delay = 0;
+        $poe_kernel->post($alias, 'session_shutdown');
         $self->last_state(SERVICE_STOPPED);
 
     } elsif ($state == SERVICE_CONTROL_SHUTDOWN) {
@@ -214,6 +212,7 @@ sub _poll {
 
         unless ($self->last_state == SERVICE_PAUSED) {
 
+            $self->_service_shutdown():
             $delay = $self->shutdown_interval;
             $self->last_state(SERVICE_STOP_PENDING);
 
@@ -227,8 +226,12 @@ sub _poll {
 
     # queue the next polling interval
 
-    $stat = $poe_kernel->delay('poll', $self->poll_interval);
-    $self->log->error("unable to queue delay - $stat") if ($stat != 0);
+    unless ($delay == 0) {
+
+        $stat = $poe_kernel->delay('poll', $self->poll_interval);
+        $self->log->error("unable to queue delay - $stat") if ($stat != 0);
+
+    }
 
     $self->log->debug("$alias: leaving _poll()");
 

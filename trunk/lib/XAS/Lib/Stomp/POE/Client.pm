@@ -62,11 +62,12 @@ sub session_initalize {
 sub session_cleanup {
     my $self = shift;
 
+    my $alias = $self->alias;
     my $frame = $self->stomp->disconnect(
         -receipt => 'disconnecting'
     );
 
-    $poe_kernel->call($session, 'write_data', $frame);
+    $poe_kernel->call($alias, 'write_data', $frame);
     $self->SUPER::session_cleanup();
 
 }

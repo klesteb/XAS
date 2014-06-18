@@ -89,7 +89,7 @@ sub init {
                 session_init      => '_session_init',
                 session_interrupt => '_session_interrupt',
                 session_reload    => '_session_reload',
-                shutdown          => '_session_shutdown',
+                session_shutdown  => '_session_shutdown',
             },
             $self => [qw( session_startup )]
         ]

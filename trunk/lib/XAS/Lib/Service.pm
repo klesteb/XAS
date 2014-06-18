@@ -8,6 +8,11 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::Session',
+  vars => {
+    PARAMS => {
+      -alias => { optional => 1, default => 'service' }
+    }
+  }
 ;
 
 # ----------------------------------------------------------------------
@@ -41,15 +46,6 @@ sub session_resume {
 
 }
 
-sub session_shutdown {
-    my ($self) = $_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: session_shutdown()");
-
-}
-
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -60,11 +56,8 @@ sub session_initialize {
     $poe_kernel->state('session_idle',     $self);
     $poe_kernel->state('session_pause',    $self);
     $poe_kernel->state('session_resume',   $self);
-    $poe_kernel->state('session_shutdown', $self);
 
     $poe_kernel->sig('HUP', 'session_interrupt');
-
-    $self->SUPER::session_initialize();
 
 }
 
