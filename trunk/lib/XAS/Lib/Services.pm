@@ -36,19 +36,6 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub session_initialize {
-    my $self = shift;
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering session_initialize()");
-
-    # walk the chain
-
-    $self->log->debug("$alias: leaving session_initialize()");
-
-}
-
 sub register {
     my $self = shift;
 
@@ -78,10 +65,6 @@ sub register {
 
 # ----------------------------------------------------------------------
 # Public Events
-# ----------------------------------------------------------------------
-
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
 # ----------------------------------------------------------------------
 
 sub session_cleanup {
