@@ -56,12 +56,6 @@ sub run {
 sub init {
     my $class = shift;
 
-    # initialize POE, this removes an error message if a failure happens later
-
-    $poe_kernel->run();
-
-    # walk the chain
-
     my $self = $class->SUPER::init(@_);
 
     $self->{service} = XAS::Lib::Services->new(
