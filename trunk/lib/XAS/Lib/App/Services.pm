@@ -27,11 +27,6 @@ use XAS::Class
       removed   => 'The service was successfully deinstalled.',
       failed    => 'The service action "%s" failed; reason: %s.',
   },
-  vars => {
-    SERVICE_NAME         => 'XAS_Test',
-    SERVICE_DISPLAY_NAME => 'XAS Test',
-    SERVICE_DESCRIPTION  => 'This is a test perl service',
-  }
 ;
 
 # ----------------------------------------------------------------------
@@ -60,6 +55,12 @@ sub run {
 
 sub init {
     my $class = shift;
+
+    # initialize POE, this removes an error message if a failure happens later
+
+    $poe_kernel->run();
+
+    # walk the chain
 
     my $self = $class->SUPER::init(@_);
 
