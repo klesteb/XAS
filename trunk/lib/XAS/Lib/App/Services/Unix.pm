@@ -46,49 +46,37 @@ sub define_pidfile {
     $self->log->debug("entering define_pidfile()");
     $self->log->debug("pid file = " . $self->env->pidfile);
 
-    try {
+    $self->{pid} = File::Pid->new({file => $self->env->pidfile->path});
 
-        $self->{pid} = File::Pid->new({file => $self->env->pidfile->path});
+    if ((my $num = $self->pid->running()) || 
+        ($self->env->pidfile->exists)) {
 
-        if ((my $num = $self->pid->running()) || 
-            ($self->env->pidfile->exists)) {
+        if ($num) {
 
-            if ($num) {
+            $self->throw_msg(
+                dotid($self->class) . '.define_pidfile.runerr',
+                'runerr',
+                $script, $num
+            );
 
-                $self->throw_msg(
-                    dotid($self->class) . '.pidfile.runerr',
-                    'runerr',
-                    $script, $num
-                );
+        } else {
 
-            } else {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.pidfile.piderr',
-                    'piderr',
-                    $script
-                );
-
-            }
+            $self->throw_msg(
+                dotid($self->class) . '.define_pidfile.piderr',
+                'piderr',
+                $script
+            );
 
         }
-
-        $self->pid->write() or 
-          $self->throw_msg(
-              dotid($self->class) . '.pidfile.writerr',
-              'wrterr',
-              $self->pid->file
-          );
-
-    } catch {
-
-        my $ex = $_;
-
-        print STDERR "$ex\n";
-
-        exit 2;
-
-    };
+        
+    }
+    
+    $self->pid->write() or 
+      $self->throw_msg(
+          dotid($self->class) . '.define_pidfile.wrterr',
+          'wrterr',
+          $self->pid->file
+      );
 
     $self->log->debug("leaving define_pidfile()");
 

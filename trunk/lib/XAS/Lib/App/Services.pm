@@ -43,6 +43,16 @@ sub define_signals {
 
 }
 
+sub run {
+    my $self = shift;
+
+    my $rc = $self->SUPER::run();
+
+    $self->pid->remove() if ($self->pidfile->exists);
+
+    return $rc;
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods

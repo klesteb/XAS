@@ -66,6 +66,10 @@ sub run {
 
     try {
 
+        $self->define_signals();
+        $self->define_daemon();
+        $self->define_pidfile();
+
         $self->main();
 
     } catch {
@@ -109,10 +113,6 @@ sub init {
     my $defaults = $self->_default_options();
 
     $self->_parse_cmdline($defaults, $options);
-
-    $self->define_signals();
-    $self->define_daemon();
-    $self->define_pidfile();
 
     return $self;
 

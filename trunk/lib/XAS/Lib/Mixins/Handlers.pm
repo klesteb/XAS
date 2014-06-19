@@ -41,10 +41,8 @@ sub exit_handler {
     my $self = shift;
 
     my ($ex) = $self->validate_params(\@_, [1]);
-
-    my $rc = 1;
-    my $errors = $self->parse_exception($ex);
     my $script = $self->class->any_var('SCRIPT');
+    my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->fatal($errors);
 
@@ -78,6 +76,7 @@ sub parse_exception {
 
     my ($ex) = $self->validate_params(\@_, [1]);
 
+    my $rc = 0;
     my $errors;
     my $ref = ref($ex);
 
@@ -94,6 +93,7 @@ sub parse_exception {
 
                 if ($info =~ m/(.*) XAS::Database::Model::dbix_exception/) {
 
+                    $rc = 1;
                     $info = $1;  # strip off the dbix stack dump
    
                 }
@@ -104,21 +104,29 @@ sub parse_exception {
 
             }
 
+            if ($ex->type =~ /pidfile\./) {
+
+                $rc = 2;
+
+            }
+
             $errors = $self->message('exception', $type, $info);
 
         } else {
 
+            $rc = 1;
             $errors = $self->message('unexpected', compress($ex));
 
         }
 
     } else {
 
+        $rc = 1;
         $errors = $self->message('unknownerror', compress($ex));
 
     }
 
-    return $errors;
+    return $errors, $rc;
 
 }
 
