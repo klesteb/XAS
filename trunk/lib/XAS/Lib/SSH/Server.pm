@@ -7,8 +7,9 @@ use POE::Filter::Line;
 use POE::Wheel::ReadWrite;
 
 use XAS::Class
-  base      => 'XAS::Lib::Service',
+  debug     => 0,
   version   => $VERSION,
+  base      => 'XAS::Lib::Service',
   accessors =>'client filter host port',
   messages => {
     'client_error'      => '%s: the client experienced error %s, reason %s',
@@ -52,10 +53,10 @@ sub session_initialize {
     # Find the remote host and port.
 
     my ($rhost, $rport, $lhost, $lport) = split(' ', $ENV{SSH_CONNECTION});
-    
+
     $self->{host} = $rhost;
     $self->{port} = $rport;
-  
+
     # walk the chain
 
     $self->SUPER::session_initialize();
@@ -224,13 +225,14 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::SSH::Subsystem - A SSH Subsystem based server
+XAS::Lib::SSH::Server - A SSH Subsystem based server
 
 =head1 SYNOPSIS
 
- use XAS::Lib::SSH::Subsystem;
+ use XAS::Lib::SSH::Server;
 
  my $sub = XAS::Lib::SSH::Server->new();
+
  $sub->run();
 
 =head1 DESCRIPTION
@@ -287,11 +289,11 @@ This method sets the EOL for reads. It defaults to LF - "\012".
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by WSIPC
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

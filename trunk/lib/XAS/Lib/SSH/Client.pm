@@ -7,8 +7,9 @@ use Errno 'EAGAIN';
 use Net::SSH2 ':all';
 
 use XAS::Class
-  base      => 'XAS::Base',
+  debug     => 0,
   version   => $VERSION,
+  base      => 'XAS::Base',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
   messages => {
@@ -390,11 +391,11 @@ error occurs. The default is 5 times.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kesteb@wsipc.orgE<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by WSIPC
+Copyright (C) 2014 by Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
