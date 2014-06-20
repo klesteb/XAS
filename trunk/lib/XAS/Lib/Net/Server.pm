@@ -43,19 +43,6 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub reaper {
-    my ($self, $wheel) = @_;
-
-    my $alias = $self->alias;
-
-    $self->log->debug($self->message('reaper', $alias, $self->host($wheel), $self->peerport($wheel)));
-
-}
-
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
-# ----------------------------------------------------------------------
-
 sub session_initialize {
     my $self = shift;
 
@@ -77,7 +64,7 @@ sub session_initialize {
     $poe_kernel->state('client_connection',        $self, '_client_connection');
     $poe_kernel->state('client_connection_failed', $self, '_client_connection_failed');
 
-    # call out for other stuff
+    # walk the chain
 
     $self->SUPER::session_initialize();
 
@@ -93,6 +80,10 @@ sub session_startup {
     $self->log->debug("$alias: entering session_startup()");
 
     $poe_kernel->call($alias, 'client_connection');
+
+    # walk the chain
+
+    $self->SUPER::session_startup();
 
     $self->log->debug("$alias: leaving session_startup()");
 
@@ -114,6 +105,8 @@ sub session_shutdown {
     }
 
     delete $self->{listener};
+
+    # walk the chain
 
     $self->SUPER::session_shutdown();
 
@@ -168,6 +161,15 @@ sub session_resume {
 
 }
 
+sub reaper {
+    my ($self, $wheel) = @_;
+
+    my $alias = $self->alias;
+
+    $self->log->debug($self->message('reaper', $alias, $self->host($wheel), $self->peerport($wheel)));
+
+}
+
 # ----------------------------------------------------------------------
 # Public Accessors
 # ----------------------------------------------------------------------
@@ -212,7 +214,7 @@ sub process_response {
 
     my $alias = $self->alias;
 
-    $poe_kernel->post($alias, 'client_output', $output, $ctx->{wheel});
+    $poe_kernel->post($alias, 'client_output', $output, $ctx);
 
 }
 
@@ -221,7 +223,7 @@ sub process_errors {
 
     my $alias = $self->alias;
 
-    $poe_kernel->post($alias, 'client_output', $output, $ctx->{wheel});
+    $poe_kernel->post($alias, 'client_output', $output, $ctx);
 
 }
 
@@ -315,16 +317,16 @@ sub _client_input {
 }
 
 sub _client_output {
-    my ($self, $data, $wheel) = @_[OBJECT,ARG0,ARG1];
+    my ($self, $data, $ctx) = @_[OBJECT,ARG0,ARG1];
 
-    my $alias = $self->alias;
     my @packet;
+    my $alias = $self->alias;
 
     push(@packet, $data);
 
     $self->log->debug("$alias: _client_output()");
 
-    if (defined($wheel)) {
+    if (my $wheel = $ctx->{wheel})) {
 
         $self->{clients}->{$wheel}->{client}->put(@packet);
 

@@ -196,16 +196,16 @@ sub _client_input {
 sub _client_output {
     my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
 
-    my $alias = $self->alias;
     my @packet;
+    my $alias = $self->alias;
 
     push(@packet, $output);
 
     $self->log->debug("$alias: _client_output()");
 
-    if (defined($ctx->{wheel})) {
+    if (my $wheel = $ctx->{wheel})) {
 
-        $ctx->{wheel}->put(@packet);
+        $wheel->put(@packet);
 
     } else {
 
