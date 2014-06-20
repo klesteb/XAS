@@ -95,7 +95,7 @@ sub session_pause {
 
     # walk the chain
 
-    $self->SUPER::session_pausep();
+    $self->SUPER::session_pause();
 
     $self->log->debug("$alias: entering session_pause()");
 
@@ -171,7 +171,7 @@ sub _client_connection {
 
     $self->{client} = POE::Wheel::ReadWrite->new(
         InputHandle  => \*STDIN,
-		OutputHandle => \*STDOUT,
+        OutputHandle => \*STDOUT,
         Filter       => $self->filter,
         InputEvent   => 'client_input',
         ErrorEvent   => 'client_error'
