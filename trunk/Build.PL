@@ -33,6 +33,7 @@ my $requires = {
     'Pod::Usage'                  => 1.51,
     'Try::Tiny::Retry'            => 0.003,
     'Set::Light'                  => 0.04,
+    'Net::SSH2'                   => 0.44,
 };
 
 # Needed for Win32 installations
