@@ -25,19 +25,9 @@ use XAS::Class
 # Public Events
 # ----------------------------------------------------------------------
 
-sub session_startup {
-    my ($self) = $_[OBJECT];
-
-}
-
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
-
-sub session_cleanup {
-    my $self = shift;
-
-}
 
 sub session_initialize {
     my $self = shift;
@@ -49,10 +39,41 @@ sub session_initialize {
 
 }
 
+sub session_startup {
+    my $self = shift;
+
+}
+
+sub session_shutdown {
+    my $self = shift;
+
+}
+
 sub session_reload {
     my $self = shift;
 
     $poe_kernel->sig_handled();
+
+}
+
+sub session_interrupt {
+    my $self   = shift;
+    my $signal = shift;
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_interrupt()");
+    $self->log->warn_msg('signaled', $alias, $signal);
+
+    if ($signal eq 'HUP') {
+
+        $self->session_reload();
+
+    } else {
+
+        $self->session_shutdown();
+
+    }
 
 }
 
@@ -67,10 +88,6 @@ sub run {
     $poe_kernel->run();
 
 }
-
-# ----------------------------------------------------------------------
-# Public Accessors
-# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -95,11 +112,11 @@ sub init {
                 _start            => '_session_start',
                 _stop             => '_session_stop',
                 session_init      => '_session_init',
-                session_interrupt => '_session_interrupt',
                 session_reload    => '_session_reload',
+                session_startup   => '_session_startup',
                 session_shutdown  => '_session_shutdown',
+                session_interrupt => '_session_interrupt',
             },
-            $self => [qw( session_startup )]
         ]
     );
 
@@ -134,16 +151,27 @@ sub _session_start {
 
 }
 
-sub _session_stop {
+sub _session_init {
     my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _session_stop()");
+    $self->log->debug("$alias: _session_init()");
 
-    $self->session_stop();
+    $self->session_initialize();
 
-    $poe_kernel->alias_remove($self->alias);
+    $poe_kernel->post($alias, 'session_startup');
+
+}
+
+sub _session_startup {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _session_startup()");
+
+    $self->session_startup();
 
 }
 
@@ -154,7 +182,7 @@ sub _session_shutdown {
 
     $self->log->debug("$alias: _session_shutdown()");
 
-    $self->session_cleanup();
+    $self->session_shutdown();
 
 }
 
@@ -169,16 +197,16 @@ sub _session_reload {
 
 }
 
-sub _session_init {
+sub _session_stop {
     my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _session_init()");
+    $self->log->debug("$alias: _session_stop()");
 
-    $self->session_initialize();
+    $self->session_stop();
 
-    $poe_kernel->post($alias, 'session_startup');
+    $poe_kernel->alias_remove($self->alias);
 
 }
 
@@ -188,17 +216,6 @@ sub _session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_interrupt()");
-    $self->log->warn_msg('signaled', $alias, $signal);
-
-    if ($signal eq 'HUP') {
-
-        $self->session_reload();
-
-    } else {
-
-        $self->session_cleanup();
-
-    }
 
 }
 

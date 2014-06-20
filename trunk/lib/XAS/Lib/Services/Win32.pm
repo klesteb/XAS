@@ -33,7 +33,7 @@ sub init_service {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: entering intialize() - win32");
+    $self->log->debug("$alias: entering init_service() - win32");
 
     unless (Win32::Daemon::StartService()) {
 
@@ -45,7 +45,7 @@ sub init_service {
 
     }
 
-    $self->log->debug("$alias: leaving intialize() - win32");
+    $self->log->debug("$alias: leaving init_service() - win32");
 
 }
 

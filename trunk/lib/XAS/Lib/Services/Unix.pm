@@ -18,7 +18,7 @@ use XAS::Class
     SERVICE_STOPPED          => 7,
     SERVICE_PAUSED           => 8,
   },
-  mixins  => 'init_service _current_state _session_interrupt
+  mixins  => 'init_service _current_state session_interrupt
               SERVICE_START_PENDING SERVICE_STOP_PENDING
               SERVICE_PAUSE_PENDING SERVICE_CONTINUE_PENDING
               SERVICE_CONTROL_SHUTDOWN SERVICE_RUNNING
@@ -29,38 +29,27 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-# ----------------------------------------------------------------------
-# Public Events
-# ----------------------------------------------------------------------
-
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
-# ----------------------------------------------------------------------
-
 sub init_service {
     my $self = shift;
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: entering session_initialise() - unix");
+    $self->log->debug("$alias: entering init_service() - unix");
 
-    $poe_kernel->sig(CONT => 'session_interrupt');
-    $poe_kernel->sig(TSTP => 'session_interrupt');
+    $poe_kernel->sig('CONT', 'session_interrupt');
+    $poe_kernel->sig('TSTP', 'session_interrupt');
 
-    $self->log->debug("$alias: leaving session_initialise() - unix");
+    $self->log->debug("$alias: leaving int_service() - unix");
 
 }
 
-# ----------------------------------------------------------------------
-# Private Events
-# ----------------------------------------------------------------------
-
-sub _session_interrupt {
-    my ($self, $signal) = @_[OBJECT,ARG0];
+sub session_interrupt {
+    my $self   = shift;
+    my $signal = shift;
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _session_interrupt()");
+    $self->log->debug("$alias: session_interrupt()");
     $self->log->warn_msg('signaled', $alias, $signal);
 
     if ($signal eq 'HUP') {
@@ -77,7 +66,7 @@ sub _session_interrupt {
         $poe_kernel->sig_handled();
         $self->_current_state(SERVICE_PAUSE_PENDING);
 
-    } else {
+    } else { # INT, TERM, QUIT
 
         $poe_kernel->sig_handled();
         $self->_current_state(SERVICE_CONTROL_SHUTDOWN);
@@ -85,6 +74,14 @@ sub _session_interrupt {
     }
 
 }
+
+# ----------------------------------------------------------------------
+# Public Events
+# ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# Private Events
+# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Private Methods

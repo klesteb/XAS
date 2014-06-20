@@ -67,11 +67,11 @@ sub register {
 # Public Events
 # ----------------------------------------------------------------------
 
-sub session_cleanup {
+sub session_shutdown {
     my $self = shift;
 
     $poe_kernel->delay('poll');
-    $self->SUPER::session_cleanup();
+    $self->SUPER::session_shutdown();
 
 }
 

@@ -19,8 +19,24 @@ use XAS::Class
 # Public Events
 # ----------------------------------------------------------------------
 
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub session_initialize {
+    my $self = shift;
+
+    $poe_kernel->state('session_idle',   $self, '_session_idle');
+    $poe_kernel->state('session_pause',  $self, '_session_pause');
+    $poe_kernel->state('session_resume', $self, '_session_resume');
+    $poe_kernel->state('session_status', $self, '_session_status');
+
+    $poe_kernel->sig('HUP', 'session_interrupt');
+
+}
+
 sub session_idle {
-    my ($self) = $_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
 
@@ -29,7 +45,7 @@ sub session_idle {
 }
 
 sub session_pause {
-    my ($self) = $_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
 
@@ -38,7 +54,7 @@ sub session_pause {
 }
 
 sub session_resume {
-    my ($self) = $_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
 
@@ -46,18 +62,17 @@ sub session_resume {
 
 }
 
-# ----------------------------------------------------------------------
-# Public Methods
-# ----------------------------------------------------------------------
+sub session_status {
+    my $self   = shift;
+    my $status = shift;
 
-sub session_initialize {
-    my $self = shift;
+    my $alias = $self->alias;
 
-    $poe_kernel->state('session_idle',     $self);
-    $poe_kernel->state('session_pause',    $self);
-    $poe_kernel->state('session_resume',   $self);
+    $self->log->debug("$alias: session_status()");
 
-    $poe_kernel->sig('HUP', 'session_interrupt');
+    $self->{'__status'} = $status if (defined($status));
+
+    return $self->{'__status'};
 
 }
 
@@ -72,6 +87,50 @@ sub session_initialize {
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _session_idle {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_idle()");
+
+    $self->session_idle();
+
+}
+
+sub _session_pause {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_pause()");
+
+    $self->session_pause();
+
+}
+
+sub _session_resume {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _session_resume()");
+
+    $self->session_resume();
+
+}
+
+sub _session_status {
+    my ($self, $status) = $_[OBJECT, ARG0];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _session_status()");
+
+    $self->session_status($status);
+
+}
 
 1;
 
@@ -102,7 +161,7 @@ the session_reload() method. This module inherits from XAS::Base.
 This is where the session should do whatever initialization it needs. This
 initialization may include defining additional events.
 
-=head2 session_cleanup
+=head2 session_shutdown
 
 This method should perform cleanup actions for the session. This is triggered
 by a "shutdown" event.
