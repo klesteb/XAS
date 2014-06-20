@@ -84,6 +84,40 @@ sub session_startup {
 
 }
 
+sub session_pause {
+    my $self = shift;
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering session_pause()");
+
+    $self->client->pause_input();
+
+    # walk the chain
+
+    $self->SUPER::session_pausep();
+
+    $self->log->debug("$alias: entering session_pause()");
+
+}
+
+sub session_resume {
+    my $self = shift;
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering session_resume()");
+
+    $self->client->resume_input();
+
+    # walk the chain
+
+    $self->SUPER::session_resume();
+
+    $self->log->debug("$alias: leaving session_resume()");
+
+}
+
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
@@ -107,7 +141,7 @@ sub process_response {
 
     $self->log->debug("$alias: process_response()");
 
-    $poe_kernel->post($alias, 'client_output', $output, $ctx->{wheel});
+    $poe_kernel->post($alias, 'client_output', $output, $ctx);
 
 }
 
@@ -118,7 +152,7 @@ sub process_errors {
 
     $self->log->debug("$alias: process_errors()");
 
-    $poe_kernel->post($alias, 'client_output', $output, $ctx->{wheel});
+    $poe_kernel->post($alias, 'client_output', $output, $ctx);
 
 }
 
@@ -128,7 +162,7 @@ sub process_errors {
 
 sub _client_connection {
     my ($self) = $_[OBJECT];
-  
+
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _client_connection()");
@@ -160,15 +194,18 @@ sub _client_input {
 }
 
 sub _client_output {
-    my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
+    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
 
     my $alias = $self->alias;
+    my @packet;
+
+    push(@packet, $output);
 
     $self->log->debug("$alias: _client_output()");
 
-    if (defined($wheel)) {
+    if (defined($ctx->{wheel})) {
 
-        $self->client->put($output);
+        $ctx->{wheel}->put(@packet);
 
     } else {
 
