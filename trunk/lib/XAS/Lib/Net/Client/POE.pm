@@ -41,43 +41,6 @@ our @RECONNECTIONS = qw(60 120 240 480 960 1920 3840);
 # Public Methods
 # ---------------------------------------------------------------------
 
-sub session_startup {
-    my ($self) = @_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: session_startup");
-
-    $poe_kernel->post($alias, 'server_connect');
-
-}
-
-sub session_pause {
-    my ($self) = @_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: session_pause");
-
-    $poe_kernel->call($alias, 'connection_down');
-
-}
-
-sub session_resume {
-    my ($self) = @_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: session_resume");
-
-    $poe_kernel->call($alias, 'connection_up');
-
-}
-
-# ----------------------------------------------------------------------
-# Overridden Methods - semi public
-# ----------------------------------------------------------------------
-
 sub session_intialize {
     my $self = shift;
 
@@ -114,7 +77,18 @@ sub session_intialize {
 
 }
 
-sub session_cleanup {
+sub session_startup {
+    my ($self) = @_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_startup");
+
+    $poe_kernel->post($alias, 'server_connect');
+
+}
+
+sub session_shutdown {
     my $self = shift;
     
     $self->{wheel}    = undef;
@@ -122,7 +96,29 @@ sub session_cleanup {
 
     # walk the chain
 
-    $self->SUPER::session_cleanup();
+    $self->SUPER::session_shutdown();
+
+}
+
+sub session_pause {
+    my ($self) = @_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_pause");
+
+    $poe_kernel->call($alias, 'connection_down');
+
+}
+
+sub session_resume {
+    my ($self) = @_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_resume");
+
+    $poe_kernel->call($alias, 'connection_up');
 
 }
 

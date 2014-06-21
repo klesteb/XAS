@@ -7,9 +7,9 @@ use Try::Tiny;
 use XAS::Factory;
 
 use XAS::Class
+  debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base Badger::Prototype',
-  debug      => 0,
   accessors  => 'spooler env',
   codec      => 'JSON',
   utils      => 'dt2db',

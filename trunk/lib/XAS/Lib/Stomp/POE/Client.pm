@@ -59,7 +59,7 @@ sub session_initalize {
 
 }
 
-sub session_cleanup {
+sub session_shutdown {
     my $self = shift;
 
     my $alias = $self->alias;
@@ -68,7 +68,7 @@ sub session_cleanup {
     );
 
     $poe_kernel->call($alias, 'write_data', $frame);
-    $self->SUPER::session_cleanup();
+    $self->SUPER::session_shutdown();
 
 }
 
