@@ -17,8 +17,8 @@ use XAS::Class
   accessors => 'session',
   constants => 'ARRAY',
   messages => {
-    'connection_failed' => '%s: the client connection failed with %s, reason %s',
-    'client_error'      => '%s: the client experienced error %s, reason %s',
+    'connection_failed' => '%s: the client connection failed with: %s, reason: %s',
+    'client_error'      => '%s: the client experienced error: %s, reason: %s',
     'client_connect'    => '%s: a connection from %s on port %s',
     'client_disconnect' => '%s: client disconnected from %s on port %s',
     'nowheel'           => '%s: no wheel defined for output',

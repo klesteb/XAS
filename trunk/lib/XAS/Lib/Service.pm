@@ -88,6 +88,17 @@ sub session_status {
 # Private Events
 # ----------------------------------------------------------------------
 
+sub _session_init {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _session_init()");
+
+    $self->session_initialize();
+
+}
+
 sub _session_idle {
     my ($self) = $_[OBJECT];
 
