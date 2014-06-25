@@ -24,16 +24,18 @@ use XAS::Class
     all => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
-            env_store env_restore env_create env_parse env_dump',
+            env_store env_restore env_create env_parse env_dump
+            left right mid instr',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
-            env_store env_restore env_create env_parse env_dump',
+            env_store env_restore env_create env_parse env_dump
+            left right mid instr',
     tags => {
       dates   => 'db2dt dt2db',
       env     => 'env_store env_restore env_create env_parse env_dump',
       modules => 'init_module load_module',
-      strings => 'trim ltrim rtrim compress',
+      strings => 'trim ltrim rtrim compress left right mid instr',
       process => 'daemonize spawn kill_proc exitcode _do_fork',
     }
   }
@@ -173,6 +175,56 @@ sub compress {
     $string =~ s/\s+/ /gms;
 
     return $string;
+
+}
+
+# emulate Basics string function left()
+sub left {
+    my $string = shift;
+    my $offset = shift;
+
+    return substr($string, 0, $offset);
+
+}
+
+# emulate Basics string function right()
+sub right {
+    my $string = shift;
+    my $offset = shift;
+
+    return substr($string, -($offset));
+
+}
+
+# emulate Basics string function mid()
+sub mid {
+    my $string = shift;
+    my $start  = shift;
+    my $length = shift;
+
+    return substr($string, $start - 1, $length);
+
+}
+
+# emulate Basics string function instr()
+sub instr {
+    my $start   = shift;
+    my $string  = shift;
+    my $compare = shift;
+
+    if ($start =~ /^[0-9\-]+/) {
+
+        $start++;
+
+    } else {
+
+        $compare = $string;
+        $string = $start;
+        $start = 0;
+
+    }
+
+    return index($string, $compare, $start) + 1;
 
 }
 
@@ -651,19 +703,43 @@ string: YYYY-MM-DD HH:MM:SS
 
 =head2 trim($string)
 
-Trim the whitespace from the beginning and end of a string.
+Trim the whitespace from the beginning and end of $string.
 
 =head2 ltrim($string)
 
-Trim the whitespace from the end of a string.
+Trim the whitespace from the end of $string.
 
 =head2 rtrim($string)
 
-Trim the whitespace from the beginning of a string.
+Trim the whitespace from the beginning of $string.
 
 =head2 compress($string)
 
-Reduces multiple whitespace to a single space.
+Reduces multiple whitespace to a single space in $string.
+
+=head2 left($string, $offset)
+
+Return the left chunk of $string up to $offset. Useful for porting
+VBS code. Makes allowances that VBS strings are ones based while 
+Perls are zero based.
+
+=head2 right($string, $offset)
+
+Return the right chunk of $string starting at $offset. Useful for porting 
+VBS code. Makes allowances that VBS strings are ones based while Perls 
+are zero based.
+
+=head2 mid($string, $offset, $length)
+
+Return the chunk of $string starting at $offset for $length characters.
+Useful for porting VBS code. Makes allowances that VBS strings are ones
+based while Perls are zero based.
+
+=head2 instr($start, $string, $compare)
+
+Return the position in $string of $compare. You may offset within the
+string with $start. Useful for porting VBS code. Makes allowances that
+VBS strings are one based while Perls are zero based.
 
 =head2 spawn
 
