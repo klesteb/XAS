@@ -12,6 +12,8 @@ communication with well defined interfaces. These are the base modules that
 make up the system. They represent a "best practice" on how to write 
 distributed systems in Perl. 
 
+Extended documentation is available at: http://scn.kesteb.us/trac
+
 Enjoy...
 
 Kevin

@@ -8,7 +8,7 @@ __END__
 
 =head1 NAME
 
-XAS - The Middleware Framework for Perl
+XAS - Middleware for Perl
 
 =head1 DESCRIPTION
 
@@ -28,7 +28,7 @@ method for writting distributed applications.
 
 =item L<XAS::Exceptions>
 
-=iem L<XAS::Factory>
+=item L<XAS::Factory>
 
 =item L<XAS::Utils>
 
@@ -70,9 +70,11 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Modules::Spool>
 
-=item L<XAS::Lib::Net::Client::Default>
+=item L<XAS::Lib::Net::Client>
 
-=item L<XAS::Lib::Net::Client::POE>
+=item L<XAS::Lib::Net::Server>
+
+=item L<XAS::Lib::Net::POE::Client>
 
 =item L<XAS::Lib::Service>
 
@@ -98,7 +100,7 @@ method for writting distributed applications.
 
 Additional support is available at:
 
-  http://www.kesteb.us/trac
+  http://scm.kesteb.us/trac
 
 =head1 AUTHOR
 
@@ -106,11 +108,11 @@ Kevin Esteb, C<< <kevin at kesteb.us> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2014 Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
 
 See L<http://dev.perl.org/licenses/> for more information.
 

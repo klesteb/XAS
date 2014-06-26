@@ -1,4 +1,4 @@
-package XAS::Lib::Net::Client::POE;
+package XAS::Lib::Net::POE::Client;
 
 our $VERSION = '0.01';
 
@@ -342,7 +342,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Net::Client::POE - An asynchronise network client based on POE
+XAS::Lib::Net::POE::Client - An asynchronise network client based on POE
 
 =head1 SYNOPSIS
 
@@ -353,7 +353,7 @@ This module is a class used to create network clients.
  use POE;
  use XAS::Class
    version => '1.0',
-   base    => 'XAS::Lib::Net::Client::POE'
+   base    => 'XAS::Lib::Net::POE::Client'
  ;
 
  sub handle_connection {
@@ -442,10 +442,12 @@ Kevin L. Esteb, E<lt>kevin@kesteb.us<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut

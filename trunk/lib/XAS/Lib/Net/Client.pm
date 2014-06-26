@@ -1,4 +1,4 @@
-package XAS::Lib::Net::Client::Default;
+package XAS::Lib::Net::Client;
 
 our $VERSION = '0.02';
 
@@ -107,6 +107,13 @@ sub put {
 
 }
 
+sub setup {
+    my $self = shift;
+
+    warn "setup() needs to be overridden\n";
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -194,10 +201,12 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
