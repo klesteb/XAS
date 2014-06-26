@@ -181,7 +181,7 @@ sub peerport {
 
 }
 
-sub host {
+sub peerhost {
     my ($self, $wheel) = @_;
 
     return $self->{clients}->{$wheel}->{host};
@@ -347,7 +347,7 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('client_disconnect', $alias, $self->host($wheel), $self->port($wheel));
+        $self->log->info_msg('client_disconnect', $alias, $self->peerhost($wheel), $self->peerport($wheel));
 
     } else {
 
