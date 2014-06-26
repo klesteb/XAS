@@ -84,6 +84,10 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Session>
 
+=item L<XAS::Lib::SSH::Client>
+
+=item L<XAS::Lib::SSH::Server>
+
 =item L<XAS::Lib::Stomp::Frame>
 
 =item L<XAS::Lib::Stomp::Parser>
