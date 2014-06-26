@@ -10,18 +10,12 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base Badger::Prototype',
+  constants  => ':alerts',
   accessors  => 'spooler env',
   codec      => 'JSON',
   utils      => 'dt2db',
   filesystem => 'Dir'
 ;
-
-# ------------------------------------------------------------------------
-# Private Variables
-# ------------------------------------------------------------------------
-
-my $priority = qr/low|medium|high|info/i;
-my $facility = qr/systems/i;
 
 # ------------------------------------------------------------------------
 # Public Methods
@@ -35,8 +29,8 @@ sub send {
     my $p = $self->validate_params(\@_, { 
         -message  => 1,
         -process  => 1,
-        -facility => { optional => 1, default => 'systems', regex => $facility },
-        -priority => { optional => 1, default => 'low', regex => $priority }, 
+        -facility => { optional => 1, default => 'systems', regex => ALERT_FACILITY },
+        -priority => { optional => 1, default => 'low', regex => ALERT_PRIORITY }, 
     });
 
     my $dt = DateTime->now(time_zone => 'local');
