@@ -9,9 +9,10 @@
 #
 # ABSTRACT:
 #
-# ENVIRONMENT: XAS Perl Environment
+# ENVIRONMENT: The XAS Middleware Environment
 #
 # PARAMETERS:
+#              --logtype toggles the log type
 #              --help    prints out a helpful help message
 #              --manual  prints out the procedures manual
 #              --version prints out the procedures version
@@ -25,13 +26,6 @@
 # Version      Author                                              Date
 # -------      ----------------------------------------------      -----------
 # 0.01         Kevin Esteb                                         02-Apr-2009
-#
-# 0.02         Kevin Esteb                                         10-Jul-2012
-#              Updated the help/version/manual switches to use
-#              pod for the output text.
-#
-# 0.03         Kevin Esteb                                         08-Aug-2012
-#              Changed over to the new app framework.
 #
 # ============================================================================
 #
@@ -66,6 +60,7 @@ changeme [--help] [--debug] [--manual] [--version]
    --manual   outputs the procedures manual
    --version  outputs the apps version
    --debug    toogles debugging output
+   --logtype  toggles the log type
    --alerts   toogles alert notifications
 
 =head1 DESCRIPTION
@@ -88,6 +83,11 @@ Turns on debbuging.
 
 Togggles alert notification.
 
+=item B<--logtype>
+
+Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
+'logstash' or 'syslog'.
+
 =item B<--manual>
 
 The complete documentation.
@@ -107,7 +107,7 @@ Prints out the apps version
 
 =over 4
 
-=item L<XAS::Apps::Rotate>
+=item L<XAS>
 
 =back
 
@@ -117,10 +117,12 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
