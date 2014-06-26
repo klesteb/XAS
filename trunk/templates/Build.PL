@@ -168,18 +168,20 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
     }
 
-    sub find_etc_files { shift->find_all_files_no_svn('etc'); }
-    sub find_sbin_files { shift->find_all_files_no_svn('sbin'); }
-    sub find_initd_files { shift->find_all_files_no_svn('init.d'); }
-    sub find_sysconf_files { shift->find_all_files_no_svn('sysconfig'); }
-    sub find_profiled_files { shift->find_all_files_no_svn('profile.d'); }
-    sub find_logrotated_files { shift->find_all_files_no_svn('logrotate.d'); }
+    sub find_etc_files { shift->find_all_files_no_scm('etc'); }
+    sub find_sbin_files { shift->find_all_files_no_scm('sbin'); }
+    sub find_initd_files { shift->find_all_files_no_scm('init.d'); }
+    sub find_sysconf_files { shift->find_all_files_no_scm('sysconfig'); }
+    sub find_profiled_files { shift->find_all_files_no_scm('profile.d'); }
+    sub find_logrotated_files { shift->find_all_files_no_scm('logrotate.d'); }
 
-    sub find_all_files_no_svn {
+    sub find_all_files_no_scm {
         my ($self, $dir) = @_;
 
         my $sub = sub {
-            return 1 if ($File::Find::dir !~ /SVN/i and -f $File::Find::name);
+            return 1 if (($File::Find::dir !~ /SVN/i or
+                          $File::Find::dir !~ /GIT/i ) and 
+                          -f $File::Find::name);
         };
 
         return { map {$_, $_} @{ $self->rscan_dir($dir, $sub) } };
