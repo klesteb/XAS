@@ -157,9 +157,9 @@ sub write_data {
 
     push(@packet, $data);
 
-    if (defined($self->wheel)) {
+    if (my $wheel = $self->wheel) {
 
-        $self->wheel->put(@packet);
+        $wheel->put(@packet);
 
     }
 
