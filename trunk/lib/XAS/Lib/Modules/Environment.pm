@@ -216,8 +216,11 @@ sub init {
         ? $ENV{'XAS_BIN'}   
         : [$self->{root}, 'bin']);
 
+    $self->{logtype} = defined($ENV{'XAS_LOGTYPE'}
+        ? $ENV{'XAS_LOGTYPE'}
+        : 'console';
+
     $self->{path}      = $ENV{'PATH'};
-    $self->{logtype}   = 'console';
     $self->{mxtimeout} = 60;
 
     # create some common file names

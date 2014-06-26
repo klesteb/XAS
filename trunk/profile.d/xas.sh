@@ -16,6 +16,8 @@
 #export XAS_MQSERVER="localhost"
 #export XAS_MQLEVEL="1.0"
 #
+#export XAS_LOGTYPE="console"
+#
 #export XAS_ROOT="/usr/local"
 #export XAS_SBIN="/usr/local/sbin"
 #export XAS_BIN="/usr/local/bin"
