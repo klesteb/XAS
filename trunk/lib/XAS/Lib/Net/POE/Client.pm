@@ -438,7 +438,7 @@ to the server is restored.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kevin@kesteb.us<gt>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

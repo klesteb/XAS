@@ -104,11 +104,15 @@ method for writting distributed applications.
 
 Additional support is available at:
 
-  http://scm.kesteb.us/trac
+=over 4
+
+=item  L<http://scm.kesteb.us/trac>
+
+=back
 
 =head1 AUTHOR
 
-Kevin Esteb, C<< <kevin at kesteb.us> >>
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
