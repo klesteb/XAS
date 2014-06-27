@@ -58,27 +58,27 @@ The following modules have been defined.
 
 =item B<alert>
 
-This will load L<XAS::Lib::Modules::Alerts>.
+This will load L<XAS::Lib::Modules::Alerts|XAS::Lib::Modules::Alerts>.
 
 =item B<email>
 
-This will load L<XAS::Lib::Modules::Email>.
+This will load L<XAS::Lib::Modules::Email|XAS::Lib::Modules::Email>.
 
 =item B<environment>
 
-This will load L<XAS::Lib::Modules::Environment>
+This will load L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment>
 
 =item B<log logger>
 
-This will load L<XAS::Lib::Modules::Log>
+This will load L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
 
 =item B<locking lockmgr>
 
-This will load L<XAS::Lib::Modules::Locking>.
+This will load L<XAS::Lib::Modules::Locking|XAS::Lib::Modules::Locking>.
 
 =item B<spool spooler>
 
-This will load L<XAS::Lib::Modules::Spool>.
+This will load L<XAS::Lib::Modules::Spool|XAS::Lib::Modules::Spool>.
 
 =back
 

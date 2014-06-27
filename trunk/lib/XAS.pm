@@ -20,83 +20,83 @@ method for writting distributed applications.
 
 =over 4
 
-=item L<XAS::Base>
+=item L<XAS::Base|XAS::Base>
 
-=item L<XAS::Class>
+=item L<XAS::Class|XAS::Class>
 
-=item L<XAS::Constants>
+=item L<XAS::Constants|XAS::Constants>
 
-=item L<XAS::Exceptions>
+=item L<XAS::Exception|XAS::Exception>
 
-=item L<XAS::Factory>
+=item L<XAS::Factory|XAS::Factory>
 
-=item L<XAS::Utils>
+=item L<XAS::Utils|XAS::Utils>
 
-=item L<XAS::Apps::Logger>
+=item L<XAS::Apps::Logger|XAS::Apps::Logger>
 
-=item L<XAS::Apps::Rotate>
+=item L<XAS::Apps::Rotate|XAS::Apps::Rotate>
 
-=item L<XAS::Lib::App>
+=item L<XAS::Lib::App|XAS::Lib::App>
 
-=item L<XAS::Lib::App::Daemon>
+=item L<XAS::Lib::App::Daemon|XAS::Lib::App::Daemon>
 
-=item L<XAS::Lib::App::Services>
+=item L<XAS::Lib::App::Services|XAS::Lib::App::Services>
 
-=item L<XAS::Lib::App::Services::Unix>
+=item L<XAS::Lib::App::Services::Unix|XAS::Lib::App::Services::Unix>
 
-=item L<XAS::Lib::App::Services::Win32>
+=item L<XAS::Lib::App::Services::Win32|XAS::Lib::App::Services::Win32>
 
-=item L<XAS::Lib::Mixins::Handlers>
+=item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
 
-=item L<XAS::Lib::Mixins::Keepalive>
+=item L<XAS::Lib::Mixins::Keepalive|XAS::Lib::Mixins::Keepalive>
 
-=item L<XAS::Lib::Modules::Alerts>
+=item L<XAS::Lib::Modules::Alerts|XAS::Lib::Modules::Alerts>
 
-=item L<XAS::Lib::Modules::Email>
+=item L<XAS::Lib::Modules::Email|XAS::Lib::Modules::Email>
 
-=item L<XAS::Lib::Modules::Environment>
+=item L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment>
 
-=item L<XAS::Lib::Modules::Locking>
+=item L<XAS::Lib::Modules::Locking|XAS::Lib::Modules::Locking>
 
-=item L<XAS::Lib::Modules::Log>
+=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
 
-=item L<XAS::Lib::Modules::Log::Console>
+=item L<XAS::Lib::Modules::Log::Console|XAS::Lib::Modules::Log::Console>
 
-=item L<XAS::Lib::Modules::Log::Files>
+=item L<XAS::Lib::Modules::Log::Files|XAS::Lib::Modules::Log::Files>
 
-=item L<XAS::Lib::Modules::Log::Logstash>
+=item L<XAS::Lib::Modules::Log::Logstash|XAS::Lib::Modules::Log:::Logstash>
 
-=item L<XAS::Lib::Modules::Log::Syslog>
+=item L<XAS::Lib::Modules::Log::Syslog|XAS::Lib::Modules::Log::Syslog>
 
-=item L<XAS::Lib::Modules::Spool>
+=item L<XAS::Lib::Modules::Spool|XAS::Lib::Modules::Spool>
 
-=item L<XAS::Lib::Net::Client>
+=item L<XAS::Lib::Net::Client|XAS::Lib::Net::Client>
 
-=item L<XAS::Lib::Net::Server>
+=item L<XAS::Lib::Net::Server|XAS::Lib::Net::Server>
 
-=item L<XAS::Lib::Net::POE::Client>
+=item L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>
 
-=item L<XAS::Lib::Service>
+=item L<XAS::Lib::Service|XAS::Lib::Service>
 
-=item L<XAS::Lib::Service::Unix>
+=item L<XAS::Lib::Service::Unix|XAS::Lib::Service::Unix>
 
-=item L<XAS::Lib::Service::Win32>
+=item L<XAS::Lib::Service::Win32|XAS::Lib::Service::Win32>
 
-=item L<XAS::Lib::Session>
+=item L<XAS::Lib::Session|XAS::Lib::Session>
 
-=item L<XAS::Lib::SSH::Client>
+=item L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>
 
-=item L<XAS::Lib::SSH::Server>
+=item L<XAS::Lib::SSH::Server|XAS::Lib::SSH::Server>
 
-=item L<XAS::Lib::Stomp::Frame>
+=item L<XAS::Lib::Stomp::Frame|XAS::Lib::Stomp::Frame>
 
-=item L<XAS::Lib::Stomp::Parser>
+=item L<XAS::Lib::Stomp::Parser|XAS::Lib::Stomp::Parser>
 
-=item L<XAS::Lib::Stomp::POE::Client>
+=item L<XAS::Lib::Stomp::POE::Client|XAS::Lib::Stomp::POE::Client>
 
-=item L<XAS::Lib::Stomp::POE::Filter>
+=item L<XAS::Lib::Stomp::POE::Filter|XAS::Lib::Stomp::POE::Filter>
 
-=item L<XAS::Lib::Stomp::Utils>
+=item L<XAS::Lib::Stomp::Utils|XAS::Lib::Stomp::Utils>
 
 =back
 
