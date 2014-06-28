@@ -3,13 +3,15 @@ package XAS::Lib::Modules::Log;
 our $VERSION = '0.01';
 
 use DateTime;
-use XAS::Constants ':logging';
+use Config::IniFiles;
 use Params::Validate 'HASHREF';
 
 use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Base Badger::Prototype',
-  filesystem => 'File',
+  utils      => 'dir_walk',
+  constants  => ':logging',
+  filesystem => 'Dir File',
   vars => {
     LEVELS => {
       trace => 0,
@@ -80,6 +82,47 @@ sub build {
 
 }
 
+sub load_msgs {
+    my $self = shift;
+
+    $self = $self->prototype() unless ref $self;
+
+    my $messages;
+
+    foreach my $path (@INC) {
+
+        my $dir = Dir($path, 'XAS', 'Msgs');
+
+        if ($dir->exists) {
+
+            dir_walk(
+                -directory => $dir, 
+                -filter    => $self->env->msgs, 
+                -callback  => sub {
+                    my $file = shift;
+
+                    my $cfg = Config::IniFiles->new(-file => $file->path);
+                    if (my @names = $cfg->Parameters('messages')) {
+                        
+                        foreach my $name (@names) {
+                            
+                            $messages->{$name} = $cfg->val('messages', $name);
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    $self->class->vars('MESSAGES', $messages);
+
+}
+
 # ------------------------------------------------------------------------
 # Private Methods
 # ------------------------------------------------------------------------
@@ -107,6 +150,48 @@ sub init {
 
     }
 
+    # autogenerate some methods, saves typing
+
+    foreach my $level (keys %$LEVELS) {
+
+        $self->class->methods($level => sub {
+            my $self = shift;
+
+            $self = $self->prototype() unless ref $self;
+
+            return $self->{$level} unless @_;
+
+            if ($self->{$level}) {
+
+                my $args = $self->build("$level", join(" ", @_));
+                $self->output($args);
+
+            }
+
+        });
+
+        $self->class->methods($level . '_msg' => sub {
+            my $self = shift;
+
+            $self = $self->prototype() unless ref $self;
+
+            return $self->{$level} unless @_;
+
+            if ($self->{$level}) {
+
+                my $args = $self->build("$level", $self->message(@_));
+                $self->output($args);
+
+            }
+
+        });
+
+    }
+
+    # load the message files
+
+    $self->load_msgs();
+
     # load and initialize our output mixin
 
     $self->class->mixin($mixins->{$type});
@@ -118,51 +203,8 @@ sub init {
 
 sub DESTROY {
     my $self = shift;
-    
+
     $self->destroy();
-    
-}
-
-# ------------------------------------------------------------------------
-# autogenerate some methods, saves typing
-# ------------------------------------------------------------------------
-
-foreach my $level (keys %$LEVELS) {
-
-    no strict "refs";                 # to register new methods in package
-    no warnings;                      # turn off warnings
-
-    *$level = sub {
-        my $self = shift;
-
-        $self = $self->prototype() unless ref $self;
-
-        return $self->{$level} unless @_;
-
-        if ($self->{$level}) {
-
-            my $args = $self->build("$level", join(" ", @_));
-            $self->output($args);
-
-        }
-
-    };
-
-    *$level . '_msg' => sub {
-        my $self = shift;
-
-        $self = $self->prototype() unless ref $self;
-
-        return $self->{$level} unless @_;
-
-        if ($self->{$level}) {
-
-            my $args = $self->build("$level", $self->message(@_));
-            $self->output($args);
-
-        }
-
-    };
 
 }
 

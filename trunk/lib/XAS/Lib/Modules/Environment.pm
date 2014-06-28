@@ -11,7 +11,7 @@ use XAS::Class
   base       => 'XAS::Base Badger::Prototype',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
-  accessors  => 'path host domain username',
+  accessors  => 'path host domain username msgs',
   mutators   => 'mqserver mqport mxserver mxport mxtimeout',
 ;
 
@@ -99,10 +99,15 @@ sub init {
     $self->{mxport} = defined($ENV{'XAS_MXPORT'}) 
         ? $ENV{'XAS_MXPORT'} 
         : '25';
-    
+
     $self->{domain} = defined($ENV{'XAS_DOMAIN'}) 
         ? $ENV{'XAS_DOMAIN'} 
         : hostdomain();
+
+    $self->{msgs} = defined($ENV{'XAS_MSGS'}) 
+        ? qr/$ENV{'XAS_MSGS'}/i 
+        : qr/.*\.msg$/i;
+
 
     # platform specific
 
@@ -216,7 +221,7 @@ sub init {
         ? $ENV{'XAS_BIN'}   
         : [$self->{root}, 'bin']);
 
-    $self->{logtype} = defined($ENV{'XAS_LOGTYPE'}
+    $self->{logtype} = defined($ENV{'XAS_LOGTYPE'})
         ? $ENV{'XAS_LOGTYPE'}
         : 'console';
 
@@ -403,6 +408,10 @@ The port it is listening on. Default is "25".
 The mailer to use for sending email. On Unix like boxes this will be "sendmail"
 on Windows this will be "smtp".
 
+=item B<XAS_MSGS>
+
+The regex to use when searching for message files. Defaults to /.*\.msg/i.
+
 =back
 
 =head2 logtype
@@ -566,6 +575,10 @@ This access returns the domain name of the local host.
 =head2 username
 
 This accessor returns the effective username of the current process.
+
+=head2 msgs
+
+The accessor to return the regex for messages files.
 
 =head1 SEE ALSO
 
