@@ -12,11 +12,6 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
-  messages => {
-    conerr   => 'unable to connect: %s, reason - %s',
-    autherr  => 'unable to authenticate: %s, reason - %s',
-    protoerr => 'unexpected protocol error: %s, reason - %s',
-  },
   vars => {
     PARAMS => {
       -port      => { optional => 1, default => 22 },

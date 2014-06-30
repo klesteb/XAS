@@ -22,11 +22,6 @@ use XAS::Class
   constants  => 'TRUE FALSE',
   filesystem => 'File',
   accessors  => 'daemon service',
-  messages => {
-      installed => 'The service was successfully installed.',
-      removed   => 'The service was successfully deinstalled.',
-      failed    => 'The service action "%s" failed; reason: %s.',
-  },
 ;
 
 # ----------------------------------------------------------------------

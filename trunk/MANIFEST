@@ -27,8 +27,8 @@ lib/XAS/Lib/Modules/Log/Logstash.pm
 lib/XAS/Lib/Modules/Log/Syslog.pm
 lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Server.pm
-lib/XAS/Lib/Net/Client/Default.pm
-lib/XAS/Lib/Net/Client/POE.pm
+lib/XAS/Lib/Net/Client.pm
+lib/XAS/Lib/Net/POE/Client.pm
 lib/XAS/Lib/Service.pm
 lib/XAS/Lib/Services.pm
 lib/XAS/Lib/Services/Unix.pm
@@ -41,6 +41,7 @@ lib/XAS/Lib/Stomp/Parser.pm
 lib/XAS/Lib/Stomp/Utils.pm
 lib/XAS/Lib/Stomp/POE/Client.pm
 lib/XAS/Lib/Stomp/POE/Filter.pm
+lib/XAS/Msgs/Base.msg
 MANIFEST			This list of files
 profile.d/xas.sh
 profile.d/xas.bat
@@ -48,3 +49,6 @@ README
 t/00-load.t
 t/manifest.t
 t/pod.t
+Makefile.PL
+META.yml
+META.json

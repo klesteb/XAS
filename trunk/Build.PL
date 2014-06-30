@@ -30,7 +30,7 @@ my $requires = {
     'LockFile::Simple'            => 0.207,
     'MIME::Lite'                  => 3.027,
     'Params::Validate'            => 0.92,
-    'Pod::Usage'                  => 1.51,
+    'Pod::Usage'                  => 1.35,
     'Try::Tiny::Retry'            => 0.003,
     'Set::Light'                  => 0.04,
     'Net::SSH2'                   => 0.44,
@@ -299,5 +299,6 @@ my $builder = $class->new(
 );
 
 $builder->add_build_element('profiled');
+$builder->add_build_element('msg');
 $builder->create_build_script();
 

@@ -14,10 +14,6 @@ use XAS::Class
       LF  => "\n",
       EOF => "\000",
   },
-  messages => {
-      badval => 'invalid header value',
-      badkey => 'invalid header key',
-  },
   vars => {
     PARAMS => {
       -body    => { optional => 1, default => undef },

@@ -14,25 +14,6 @@ use XAS::Class
   base     => 'Badger::Base',
   utils    => 'dotid',
   auto_can => '_auto_load',
-  messages => {
-    exception     => '%s: %s',
-    invparams     => 'invalid parameters passed, reason: %s',
-    invmethod     => 'invalid method "%s", unable to auto load',
-    nospooldir    => 'no spool directory defined',
-    unknownos     => 'unknown OS: %s',
-    unexpected    => 'unexpected error: %s',
-    unknownerror  => 'unknown error: %s',
-    undeliverable => 'unable to send mail to %s; reason: %s',
-    noserver      => 'unable to connect to %s; reason: %s',
-    nodelivery    => 'unable to send message to %s; reason: %s',
-    sequence      => 'unable to retrieve sequence number from %s',
-    write_packet  => 'unable to write a packet to %s',
-    read_packet   => 'unable to read a packet from %s',
-    lock_error    => 'unable to acquire a lock on %s',
-    invperms      => 'unable to change file permissions on %s',
-    badini        => 'unable to load config file: %s',
-    signaled      => '%s: recieved signal %s',
-  },
   vars => {
     PARAMS => {
       -xdebug => { optional => 1, default => 0 }

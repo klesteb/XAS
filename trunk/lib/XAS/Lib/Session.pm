@@ -10,10 +10,6 @@ use XAS::Class
   base      => 'XAS::Base',
   utils     => 'weaken',
   accessors => 'session',
-  messages => {
-    noalias    => 'can not set session alias %s',
-    noaliasdef => 'no alias defined',
-  },
   vars => {
     PARAMS => {
       -alias  => { optional => 1, default => 'session' },

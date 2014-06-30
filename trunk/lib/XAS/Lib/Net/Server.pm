@@ -16,15 +16,6 @@ use XAS::Class
   utils     => 'weaken params',
   accessors => 'session',
   constants => 'ARRAY',
-  messages => {
-    'connection_failed' => '%s: the client connection failed with: %s, reason: %s',
-    'client_error'      => '%s: the client experienced error: %s, reason: %s',
-    'client_connect'    => '%s: a connection from %s on port %s',
-    'client_disconnect' => '%s: client disconnected from %s on port %s',
-    'nowheel'           => '%s: no wheel defined for output',
-    'recmsg'            => '%s: received message \"%s\" from %s on port %s',
-    'reaper'            => '%s: reaper invoked for %s on port %s',
-  },
   vars => {
     PARAMS => {
       -port             => 1,
@@ -166,7 +157,7 @@ sub reaper {
 
     my $alias = $self->alias;
 
-    $self->log->debug($self->message('reaper', $alias, $self->host($wheel), $self->peerport($wheel)));
+    $self->log->debug_msg('reaper', $alias, $self->host($wheel), $self->peerport($wheel));
 
 }
 
@@ -285,7 +276,7 @@ sub _client_connected {
     $self->{clients}->{$wheel}->{active} = time();
     $self->{clients}->{$wheel}->{watchdog} = $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
 
-    $self->log->info($self->message('client_connect', $alias, $host, $peerport));
+    $self->log->info_msg('client_connect', $alias, $host, $peerport);
 
 }
 
@@ -294,7 +285,7 @@ sub _client_connection_failed {
 
     my $alias = $self->alias;
 
-    $self->log->error($self->message('connection_failed', $alias, $errnum, $errstr));
+    $self->log->error_msg('connection_failed', $alias, $errnum, $errstr);
 
     delete $self->{listener};
 
@@ -332,7 +323,7 @@ sub _client_output {
 
     } else {
 
-        $self->log->error($self->message('nowheel', $alias));
+        $self->log->error_msg('nowheel', $alias);
 
     }
 

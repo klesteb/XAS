@@ -11,13 +11,6 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::Service',
   accessors =>'client filter host port',
-  messages => {
-    'client_error'      => '%s: the client experienced error %s, reason %s',
-    'client_connect'    => '%s: a connection from %s on port %s',
-    'client_disconnect' => '%s: client disconnected from %s on port %s',
-    'nowheel'           => '%s: no wheel defined for output',
-    'recmsg'            => '%s: received message \"%s\" from %s on port %s',
-  },
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
@@ -209,7 +202,7 @@ sub _client_output {
 
     } else {
 
-        $self->log->error($self->message('nowheel', $alias));
+        $self->log->error_msg('nowheel', $alias);
 
     }
 
@@ -224,11 +217,11 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info($self->message('client_disconnect', $alias, $self->host(), $self->port()));
+        $self->log->info_msg('client_disconnect', $alias, $self->host(), $self->port()));
 
     } else {
 
-        $self->log->error($self->message('client_error', $alias, $errnum, $errstr));
+        $self->log->error_msg('client_error', $alias, $errnum, $errstr);
 
     }
 

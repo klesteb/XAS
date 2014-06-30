@@ -8,13 +8,6 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  messages => {
-    noid  => 'v%s requires an id',
-    nosub => 'v%s requires a subscription',
-    noque => 'v%s requires a destination',
-    nosup => "v%s doesn't support this frame type: %s",
-    nopar => "you have invalid paramters for v%s",
-  },
   vars => {
     PARAMS => {
       -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },

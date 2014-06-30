@@ -91,7 +91,7 @@ sub load_msgs {
 
     foreach my $path (@INC) {
 
-        my $dir = Dir($path, 'XAS', 'Msgs');
+        my $dir = Dir($path, 'XAS');
 
         if ($dir->exists) {
 
@@ -284,6 +284,18 @@ This would set the debug level of logging, depending on the value of
 $self->debugging.
 
 =back
+
+=head2 load_msgs
+
+This method loads the message files. It searchs @INC for the XAS 
+installation. When found, it loads any message files found into the package 
+variable MESSAGES. A message file has the following format:
+
+ [messages]
+ exception = %s: %s
+
+Where "exception" is the name of the message and rest is the text that will
+be used for the message. 
 
 =head2 level($level, $boolean)
 

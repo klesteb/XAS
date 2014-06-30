@@ -17,11 +17,6 @@ use XAS::Class
   utils     => ':process',
   constants => 'TRUE FALSE',
   accessors => 'daemon',
-  messages => {
-    'runerr' => '%s is already running: %d',
-    'piderr' => '%s has left a pid file behind, exiting',
-    'wrterr' => 'unable to create pid file %s',
-  },
 ;
 
 # ----------------------------------------------------------------------

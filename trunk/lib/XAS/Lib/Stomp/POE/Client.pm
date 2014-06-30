@@ -85,7 +85,7 @@ sub handle_connection {
         -passcode => $self->passcode
     );
 
-    $self->log->info($self->message('connected', $alias, $self->host, $self->port));
+    $self->log->info_msg('connected', $alias, $self->host, $self->port);
     $poe_kernel->post($alias, 'write_data', $frame);
     
 }

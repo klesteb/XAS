@@ -11,10 +11,6 @@ use XAS::Class
   utils     => 'trim',
   accessors => 'handle',
   mutators  => 'timeout',
-  messages => {
-      connection => "unable to connect to %s on port %s",
-      network    => "a network communication error has occured, reason: %s",
-  },
   vars => {
     PARAMS => {
       -port    => 1,

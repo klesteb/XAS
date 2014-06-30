@@ -19,11 +19,6 @@ use XAS::Class
   accessors => 'sessions',
   mutators  => 'last_state',
   constants => 'DELIMITER',
-  messages => {
-    noservice => 'unable to start service; reason: %s',
-    paused    => 'the service is already paused',
-    unpaused  => 'the service is not paused',
-  },
   vars => {
     PARAMS => {
       -poll_interval     => { optional => 1, default => 2 },
@@ -154,7 +149,7 @@ sub _poll {
 
         } else {
 
-            $self->log->info($self->message('unpaused'));
+            $self->log->info_msg('unpaused');
 
         }
 
