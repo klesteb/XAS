@@ -51,8 +51,6 @@ This is middleware for Perl. It is cross platform capable.
 getent group xas >/dev/null || groupadd -f -r xas
 if ! getent passwd xas >/dev/null ; then
     useradd -r -g xas -d /var/lib/xas -s /sbin/nologin -c "XAS" xas
-else
-    useradd -r -g xas -d /var/lib/xas -s /sbin/nologin -c "XAS" xas
 fi
 exit 0
 
@@ -66,6 +64,7 @@ exit 0
 %install
 rm -rf $RPM_BUILD_ROOT
 
+install -m 755 -d %{buildroot}/etc/xas
 install -m 755 -d %{buildroot}/var/lib/xas
 install -m 775 -d %{buildroot}/var/run/xas
 install -m 775 -d %{buildroot}/var/log/xas
@@ -82,10 +81,11 @@ find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 ./Build test
 
 %post
-chown -R xas.xas /var/lib/xas
-chown -R xas.xas /var/log/xas
-chown -R xas.xas /var/run/xas
-chown -R xas.xas /var/spool/xas
+chown -R root.xas /etc/xas
+chown -R xas.xas  /var/lib/xas
+chown -R xas.xas  /var/log/xas
+chown -R xas.xas  /var/run/xas
+chown -R xas.xas  /var/spool/xas
 
 chmod g+s /var/lib/xas
 chmod g+s /var/run/xas
@@ -93,6 +93,15 @@ chmod g+s /var/log/xas
 chmod g+s /var/spool/xas
 chmod g+s /var/spool/xas/alerts
 chmod g+s /var/spool/xas/logstash
+
+%postun
+if [ "$1" = 0 ]; then
+    rm -Rf /etc/xas
+    rm -Rf /var/lib/xas
+    rm -Rf /var/run/xas
+    rm -Rf /var/log/xas
+    rm -Rf /var/spool/xas
+fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT

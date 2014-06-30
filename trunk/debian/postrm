@@ -18,8 +18,6 @@ case "$1" in
         rm -Rf /var/run/xas
         rm -Rf /var/log/xas
         rm -Rf /var/spool/xas
-        rm -Rf /var/spool/xas/alerts
-        rm -Rf /var/spool/xas/logstash
     ;;
 
     purge|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
