@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # File: xas.sh
 # Date: 19-Feb-2014

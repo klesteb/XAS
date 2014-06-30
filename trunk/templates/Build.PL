@@ -9,14 +9,15 @@ use warnings FATAL => 'all';
 use Module::Build;
 
 my $requires = {
-    'XAS' => '0.06',
+    'XAS' => '0.07',
 };
     
+my $sysconfig = ( -e '/etc/default' ) ? '/etc/default' : '/etc/sysconfig';
 my $install_path = {
-    etc           => '/usr/local/etc',
-    sbin          => '/usr/local/sbin',
-    script        => '/usr/local/bin',
-    sysconfig     => '/etc/sysconfig',
+    etc           => '/etc/xas',
+    sbin          => '/usr/sbin',
+    script        => '/usr/bin',
+    sysconfig     => $sysconfig,
     'init.d'      => '/etc/init.d',
     'profile.d'   => '/etc/profile.d',
     'logrotate.d' => '/etc/logrotate.d'
@@ -208,5 +209,6 @@ my $builder = $class->new(
     requires           => $requires
 );
 
+$builder->add_build_element('msg');
 $builder->create_build_script();
 

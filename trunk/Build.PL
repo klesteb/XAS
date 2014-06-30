@@ -5,11 +5,12 @@ use Module::Build;
 
 # Installation paths
 
+my $sysconfig = ( -e '/etc/default' ) ? '/etc/default' : '/etc/sysconfig';
 my $install_path = {
-    etc           => '/usr/local/etc',
-    sbin          => '/usr/local/sbin',
-    script        => '/usr/local/bin',
-    sysconfig     => '/etc/sysconfig',
+    etc           => '/etc/xas',
+    sbin          => '/usr/sbin',
+    script        => '/usr/bin',
+    sysconfig     => $sysconfig,
     'init.d'      => '/etc/init.d',
     'profile.d'   => '/etc/profile.d',
     'logrotate.d' => '/etc/logrotate.d',
@@ -80,6 +81,7 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
             # using the standard filesystem layout
 
+            system("mkdir /etc/xas")       unless ( -e '/etc/xas');
             system("mkdir /var/log/xas")   unless ( -e '/var/log/xas');
             system("mkdir /var/lib/xas")   unless ( -e '/var/lib/xas');
             system("mkdir /var/run/xas")   unless ( -e '/var/run/xas');
@@ -92,10 +94,11 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
             # set ownership/permissions on the files/directories
 
-            system("chown -R xas.xas /var/log/xas");
-            system("chown -R xas.xas /var/lib/xas");
-            system("chown -R xas.xas /var/run/xas");
-            system("chown -R xas.xas /var/spool/xas");
+            system("chown -R root:xas /etc/xas");
+            system("chown -R xas:xas  /var/log/xas");
+            system("chown -R xas:xas  /var/lib/xas");
+            system("chown -R xas:xas  /var/run/xas");
+            system("chown -R xas:xas  /var/spool/xas");
 
             system("chmod 0664 /var/spool/xas/alerts");
             system("chmod 0664 /var/spool/xas/logstash");
