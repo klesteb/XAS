@@ -17,12 +17,13 @@
 #export XAS_MQSERVER="localhost"
 #export XAS_MQLEVEL="1.0"
 #
+#export XAS_MSGS=".*\.msg$"
 #export XAS_LOGTYPE="console"
 #
-#export XAS_ROOT="/usr/local"
-#export XAS_SBIN="/usr/local/sbin"
-#export XAS_BIN="/usr/local/bin"
-#export XAS_ETC="/usr/local/etc"
+#export XAS_ROOT="/usr"
+#export XAS_SBIN="/usr/sbin"
+#export XAS_BIN="/usr/bin"
+#export XAS_ETC="/etc/xas"
 #export XAS_VAR="/var'
 #export XAS_LOG="/var/log/xas"
 #export XAS_RUN="/var/run/xas"

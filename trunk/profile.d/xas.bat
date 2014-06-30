@@ -18,6 +18,7 @@ rem set XAS_MQPORT="61613"
 rem set XAS_MQSERVER="localhost"
 rem set XAS_MQLEVEL="1.0"
 
+rem set XAS_MSGS=".*\.msg$"
 rem set XAS_LOGTYPE="console"
 
 rem set XAS_ROOT="D:\XAS"
