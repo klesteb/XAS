@@ -133,7 +133,7 @@ sub _session_resume {
 }
 
 sub _session_status {
-    my ($self, $status) = $_[OBJECT, ARG0];
+    my ($self, $status) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
 

@@ -7,6 +7,7 @@
 #
 
 [messages]
+messages_loaded   = don't remove this...
 exception         = %s: %s
 invparams         = invalid parameters passed, reason: %s
 invmethod         = invalid method "%s", unable to auto load

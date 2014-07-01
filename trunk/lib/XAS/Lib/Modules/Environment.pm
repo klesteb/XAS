@@ -8,7 +8,7 @@ use Net::Domain qw(hostdomain);
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
-  base       => 'XAS::Base Badger::Prototype',
+  base       => 'XAS::Singleton',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username msgs',
@@ -21,8 +21,6 @@ use XAS::Class
 
 sub mxmailer {
     my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
 
     my ($mailer) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/sendmail|smtp/ }
@@ -37,8 +35,6 @@ sub mxmailer {
 sub mqlevel {
     my $self = shift;
 
-    $self = $self->prototype() unless ref $self;
-
     my ($level) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/(1\.0|1\.1|1\.2)/ },
     ]);
@@ -51,8 +47,6 @@ sub mqlevel {
 
 sub logtype {
     my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
 
     my ($type) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
@@ -236,6 +230,38 @@ sub init {
     $self->{pidfile} = File($self->{run}, $name . '.pid');
     $self->{cfgfile} = File($self->{etc}, $name . '.ini');
 
+    for my $datum (qw( logfile pidfile cfgfile )) {
+
+        $self->class->method($datum => sub {
+            my $self = shift;
+            my ($p) = $self->validate_params(\@_, [
+                {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
+            ]);
+
+            $self->{$datum} = $p if (defined($p));
+
+            return $self->{$datum};
+
+        });
+
+    }
+
+    for my $datum (qw( root etc sbin tmp var bin lib log run spool )) {
+
+        $self->class->method($datum => sub {
+            my $self = shift;
+            my ($p) = $self->validate_params(\@_, [
+                {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
+            ]);
+
+            $self->{$datum} = $p if (defined($p));
+
+            return $self->{$datum};
+
+        });
+
+    }
+    
     return $self;
 
 }
@@ -248,53 +274,11 @@ sub init {
 # make sure that the passed paramemter is a Badger::Filesystem::File object
 # ------------------------------------------------------------------------
 
-for my $datum (qw( logfile pidfile cfgfile  )) {
-
-    no strict "refs";                 # to register new methods in package
-    no warnings;                      # turn off warnings
-
-    *$datum = sub {
-        my $self = shift;
-
-        $self = $self->prototype() unless ref $self;
-
-        my ($p) = $self->validate_params(\@_, [
-            {optional => 1, isa => 'Badger::Filesystem::File' }
-        ]);
-
-        $self->{$datum} = $p if (defined($p));
-
-        return $self->{$datum};
-
-    }
-
-}
 
 # ------------------------------------------------------------------------
 # make sure that the passed paramemter is a Badger::Filesystem::Dir object
 # ------------------------------------------------------------------------
 
-for my $datum (qw( root etc sbin tmp var bin lib log run spool )) {
-
-    no strict "refs";                 # to register new methods in package
-    no warnings;                      # turn off warnings
-
-    *$datum = sub {
-        my $self = shift;
-
-        $self = $self->prototype() unless ref $self;
-
-        my ($p) = $self->validate_params(\@_, [
-            {optional => 1, isa => 'Badger::Filesystem::Directory'}
-        ]);
-
-        $self->{$datum} = $p if (defined($p));
-
-        return $self->{$datum};
-
-    }
-
-}
 
 1;
 

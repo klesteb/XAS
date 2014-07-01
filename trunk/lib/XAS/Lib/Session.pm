@@ -213,7 +213,7 @@ sub _session_interrupt {
 
     $self->log->debug("$alias: _session_interrupt()");
 
-    $self->session_interrupt();
+    $self->session_interrupt($signal);
 
 }
 

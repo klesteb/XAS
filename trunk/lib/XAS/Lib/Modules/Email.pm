@@ -9,7 +9,7 @@ use File::Basename;
 use XAS::Class
   debug   => 0,
   version => $VERSION,
-  base    => 'XAS::Base Badger::Prototype',
+  base    => 'XAS::Singleton',
   utils   => 'dotid',
 ;
 
@@ -19,8 +19,6 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
 
     my $p = $self->validate_params(\@_, {
         -to         => 1, 

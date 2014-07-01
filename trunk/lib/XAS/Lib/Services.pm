@@ -190,7 +190,7 @@ sub _poll {
 
         unless ($self->last_state == SERVICE_PAUSED) {
 
-            $self->_service_shutdown():
+            $self->_service_shutdown();
             $delay = $self->shutdown_interval;
             $self->last_state(SERVICE_STOP_PENDING);
 

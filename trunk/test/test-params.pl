@@ -5,6 +5,7 @@ package Test;
 use XAS::Class
   version => '0.01',
   base    => 'XAS::Base',
+  import  => 'class',
   vars => {
       PARAMS => {
           -test => 1,
@@ -13,6 +14,16 @@ use XAS::Class
 ;
 
 use Data::Dumper;
+
+# sub init {
+#     my $class = shift;
+#     my $self = $class->SUPER::init(@_);
+#     warn Dumper($self);
+#     my $messages = $self->class->var('MESSAGES');
+#     warn Dumper($messages);
+#     warn class($self)->hash_value('MESSAGES', 'invparams');
+#     return $self;
+# }
 
 sub test1 {
     my $self = shift;
@@ -47,8 +58,8 @@ warn Dumper($p);
 
 package main;
 
-#my $test = Test->new(-test => 'testing');
-my $test = Test->new();
+my $test = Test->new(-test => 'testing');
+#my $test = Test->new();
 
 $test->test1(
     -param1 => 'testing',
@@ -60,6 +71,4 @@ $test->test2('testing', 'test2');
 $test->test3('testing');
 
 1;
-
-
   

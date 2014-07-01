@@ -1,9 +1,6 @@
 use lib '../lib';
+use Data::Dumper;
 use XAS::Factory;
-
-our $MESSAGES = {
-    testing => 'this is a test'
-};
 
 my $log = XAS::Factory->module('log');
 
@@ -14,4 +11,7 @@ $log->debug('debug works');
 $log->trace('trace works');
 $log->info("this is", "a test");
 $log->info_msg('exception', 'first', 'second');
+
+my $messages = $log->class->var('MESSAGES');
+warn Dumper($messages);
 

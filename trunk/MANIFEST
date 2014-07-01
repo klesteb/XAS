@@ -6,6 +6,7 @@ lib/XAS/Class.pm
 lib/XAS/Constants.pm
 lib/XAS/Exception.pm
 lib/XAS/Factory.pm
+lib/XAS/Singleton.pm
 lib/XAS/Utils.pm
 lib/XAS/Apps/Logger.pm
 lib/XAS/Apps/Rotate.pm

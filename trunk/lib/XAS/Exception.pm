@@ -36,8 +36,14 @@ XAS::Exception - The base exception class for the XAS environment
 =head1 DESCRIPTION
 
 This module defines a base exception class for the XAS Environment and 
-inherits from L<Badger::Exception|http://search.cpan.org/~abw/Badger-0.09/lib/Badger/Exception.pm>. The only differences is that it turns
-stack tracing on by default.
+inherits from L<Badger::Exception|https://metacpan.org/pod/Badger::Exception>. 
+The only differences is that it turns stack tracing on by default.
+
+=head1 METHODS
+
+=head2 stack_trace
+
+Removes any reference to Try::Tiny in the stack trace.
 
 =head1 SEE ALSO
 

@@ -4,14 +4,13 @@ our $VERSION = '0.01';
 
 use DateTime;
 use Config::IniFiles;
+use XAS::Constants ':logging';
 use Params::Validate 'HASHREF';
 
 use XAS::Class
   version    => $VERSION,
-  base       => 'XAS::Base Badger::Prototype',
-  utils      => 'dir_walk',
-  constants  => ':logging',
-  filesystem => 'Dir File',
+  base       => 'XAS::Singleton',
+  filesystem => 'File',
   vars => {
     LEVELS => {
       trace => 0,
@@ -47,8 +46,6 @@ my $mixins = {
 sub level {
     my $self  = shift;
 
-    $self = $self->prototype() unless ref $self;
-
     my ($level, $action) = $self->validate_params(\@_, [
         { regex => LOG_LEVELS },
         { optional => 1, default => undef , regex => qr/0|1/ },
@@ -63,8 +60,6 @@ sub level {
 sub build {
     my $self = shift;
 
-    $self = $self->prototype() unless ref $self;
-
     my ($level, $message) = $self->validate_params(\@_, [
         { regex => LOG_LEVELS },
         1
@@ -75,51 +70,11 @@ sub build {
         datetime => DateTime->now(time_zone => 'local'),
         process  => $self->process,
         pid      => $$,
+        msgid    => 0,
         facility => $self->facility,
         priority => $level,
         message  => $message,
     };
-
-}
-
-sub load_msgs {
-    my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
-
-    my $messages;
-
-    foreach my $path (@INC) {
-
-        my $dir = Dir($path, 'XAS');
-
-        if ($dir->exists) {
-
-            dir_walk(
-                -directory => $dir, 
-                -filter    => $self->env->msgs, 
-                -callback  => sub {
-                    my $file = shift;
-
-                    my $cfg = Config::IniFiles->new(-file => $file->path);
-                    if (my @names = $cfg->Parameters('messages')) {
-                        
-                        foreach my $name (@names) {
-                            
-                            $messages->{$name} = $cfg->val('messages', $name);
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-    $self->class->vars('MESSAGES', $messages);
 
 }
 
@@ -157,8 +112,6 @@ sub init {
         $self->class->methods($level => sub {
             my $self = shift;
 
-            $self = $self->prototype() unless ref $self;
-
             return $self->{$level} unless @_;
 
             if ($self->{$level}) {
@@ -173,8 +126,6 @@ sub init {
         $self->class->methods($level . '_msg' => sub {
             my $self = shift;
 
-            $self = $self->prototype() unless ref $self;
-
             return $self->{$level} unless @_;
 
             if ($self->{$level}) {
@@ -187,10 +138,6 @@ sub init {
         });
 
     }
-
-    # load the message files
-
-    $self->load_msgs();
 
     # load and initialize our output mixin
 

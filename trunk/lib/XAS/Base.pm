@@ -1,19 +1,22 @@
 package XAS::Base;
 
+our $MESSAGES;
 our $VERSION = '0.03';
 our $EXCEPTION = 'XAS::Exception';
 our ($SCRIPT)  = ( $0 =~ m#([^\\/]+)$# );
 
 use XAS::Factory;
 use XAS::Exception;
+use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
-  debug    => 0,
-  version  => $VERSION,
-  base     => 'Badger::Base',
-  utils    => 'dotid',
-  auto_can => '_auto_load',
+  debug      => 0,
+  version    => $VERSION,
+  base       => 'Badger::Base',
+  utils      => 'dotid dir_walk',
+  auto_can   => '_auto_load',
+  filesystem => 'Dir',
   vars => {
     PARAMS => {
       -xdebug => { optional => 1, default => 0 }
@@ -69,6 +72,50 @@ sub validate_params {
 
 }
 
+sub load_msgs {
+    my $self = shift;
+
+    my $messages;
+
+    # my $messages = $self->class->any_var('MESSAGES');
+    # return if (defined($messages->{messages_loaded}));
+
+    # $messages = {};
+
+    foreach my $path (@INC) {
+
+        my $dir = Dir($path, 'XAS');
+
+        if ($dir->exists) {
+
+            dir_walk(
+                -directory => $dir, 
+                -filter    => $self->env->msgs, 
+                -callback  => sub {
+                    my $file = shift;
+
+                    my $cfg = Config::IniFiles->new(-file => $file->path);
+                    if (my @names = $cfg->Parameters('messages')) {
+                        
+                        foreach my $name (@names) {
+                            
+                            $messages->{$name} = $cfg->val('messages', $name);
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    $MESSAGES = $messages;
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -91,6 +138,7 @@ sub _auto_load {
 
     if ($name eq 'env') {
 
+warn "auto load 'env'\n";
         return sub { XAS::Factory->module('environment'); } 
 
     }
@@ -152,6 +200,7 @@ sub init {
 
     }
 
+    $self->load_msgs();
     $self->debugging($self->xdebug);
 
     return $self;

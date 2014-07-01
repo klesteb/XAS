@@ -30,6 +30,8 @@ method for writting distributed applications.
 
 =item L<XAS::Factory|XAS::Factory>
 
+=item L<XAS::Singleton|XAS::Singleton>
+
 =item L<XAS::Utils|XAS::Utils>
 
 =item L<XAS::Apps::Logger|XAS::Apps::Logger>

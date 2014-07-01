@@ -21,7 +21,7 @@ use XAS::Class
   mixin      => $mixin,
   constants  => 'TRUE FALSE',
   filesystem => 'File',
-  accessors  => 'daemon service',
+  accessors  => 'daemon service pid',
 ;
 
 # ----------------------------------------------------------------------
@@ -38,7 +38,7 @@ sub run {
 
     my $rc = $self->SUPER::run();
 
-    $self->pid->remove() if ($self->pidfile->exists);
+    $self->pid->remove() if ($self->env->pidfile->exists);
 
     return $rc;
 

@@ -9,7 +9,7 @@ use XAS::Factory;
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
-  base       => 'XAS::Base Badger::Prototype',
+  base       => 'XAS::Singleton',
   constants  => ':alerts',
   accessors  => 'spooler env',
   codec      => 'JSON',
@@ -23,8 +23,6 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-
-    $self = $self->prototype() unless ref $self;
 
     my $p = $self->validate_params(\@_, { 
         -message  => 1,
