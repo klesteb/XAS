@@ -4,8 +4,7 @@ package Test;
 
 use XAS::Class
   version => '0.01',
-  base    => 'XAS::Base',
-  import  => 'class',
+  base    => 'XAS::Hub',
   vars => {
       PARAMS => {
           -test => 1,

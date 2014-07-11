@@ -11,8 +11,8 @@ use XAS::Class
   base       => 'XAS::Singleton',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
-  accessors  => 'path host domain username msgs',
-  mutators   => 'mqserver mqport mxserver mxport mxtimeout',
+  accessors  => 'path host domain username',
+  mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs',
 ;
 
 # ------------------------------------------------------------------------
@@ -21,7 +21,6 @@ use XAS::Class
 
 sub mxmailer {
     my $self = shift;
-
     my ($mailer) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/sendmail|smtp/ }
     ]);
@@ -34,7 +33,6 @@ sub mxmailer {
 
 sub mqlevel {
     my $self = shift;
-
     my ($level) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/(1\.0|1\.1|1\.2)/ },
     ]);
@@ -47,7 +45,6 @@ sub mqlevel {
 
 sub logtype {
     my $self = shift;
-
     my ($type) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
@@ -63,14 +60,12 @@ sub logtype {
 # ------------------------------------------------------------------------
 
 sub init {
-    my ($self, $config) = @_;
+    my $self = shift;
 
     my $temp;
     my $name;
     my $path;
     my $suffix;
-
-    $self->{config} = $config;
 
     # Initialize variables - these are defaults
 
@@ -230,6 +225,8 @@ sub init {
     $self->{pidfile} = File($self->{run}, $name . '.pid');
     $self->{cfgfile} = File($self->{etc}, $name . '.ini');
 
+    # build some methods, saves typing
+
     for my $datum (qw( logfile pidfile cfgfile )) {
 
         $self->class->method($datum => sub {
@@ -265,20 +262,6 @@ sub init {
     return $self;
 
 }
-
-# ------------------------------------------------------------------------
-# Mutators - uses a closure to set/return data items
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
-# make sure that the passed paramemter is a Badger::Filesystem::File object
-# ------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------
-# make sure that the passed paramemter is a Badger::Filesystem::Dir object
-# ------------------------------------------------------------------------
-
 
 1;
 

@@ -1,0 +1,266 @@
+package XAS::Lib::Curses::Root;
+
+my $mixin; 
+BEGIN {
+    $mixin = 'XAS::Lib::Curses::Unix';
+    $mixin = 'XAS::Lib::Curses::Win32' if ($^O eq 'MSWin32');
+}
+
+use POE;
+use Curses;
+use POE::Component::Curses::MainLoop;
+
+use XAS::Class
+  version => '0.01',
+  base    => 'XAS::Base',
+  mixin   => $mixin,
+; 
+
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub key_handler {
+    my ( $kernel, $heap, $keystroke ) = @_[ KERNEL, HEAP, ARG0 ];
+ 
+    if ( $keystroke ne -1 ) {
+
+        if ( $keystroke lt ' ' ) {
+
+            $keystroke = '<' . uc( unctrl($keystroke) ) . '>';
+
+        } elsif ( $keystroke =~ /^\d{2,}$/ ) {
+
+            $keystroke = '<' . uc( keyname($keystroke) ) . '>';
+
+        }
+
+        if ( $keystroke eq '<KEY_RESIZE>' ) {
+ 
+            # don't handle this here, it's handled in window_resize
+
+            return;
+
+        } elsif ( $keystroke eq '<KEY_MOUSE>' ) {
+ 
+            # the mouse is handled differently depending on platform
+
+            my $mouse_curses_event = 0;
+ 
+            getmouse($mouse_curses_event);
+
+            # $mouse_curses_event is a struct. From curses.h (note: this might change!):
+            #
+            # typedef struct
+            # {
+            #    short id;           /* ID to distinguish multiple devices */
+            #        int x, y, z;        /* event coordinates (character-cell) */
+            #        mmask_t bstate;     /* button state bits */
+            # } MEVENT;
+            #
+            # ---------------
+            # s signed short
+            # x null byte
+            # x null byte
+            # ---------------
+            # i integer
+            # ---------------
+            # i integer
+            # ---------------
+            # i integer
+            # ---------------
+            # l long
+            # ---------------
+
+            my ( $id, $x, $y, $z, $bstate ) = unpack( "sx2i3l", $mouse_curses_event );
+ 
+            # @button_events is supplied by the mixin
+
+            foreach my $possible_event_name (@button_events) {
+
+                my $possible_event = eval($possible_event_name);
+
+                if ( !$@ && $bstate == $possible_event ) {
+
+                    my ( $button, $type2 ) = $possible_event_name =~ /^([^_]+)_(.+)$/;
+
+                    $heap->{mainloop}->event_mouse(
+                        type   => 'click',
+                        type2  => lc($type2),
+                        button => lc($button),
+                        x      => $x,
+                        y      => $y,
+                        z      => $z,
+                    );
+
+                }
+ 
+            }
+        
+        } else {
+ 
+            if ( $keystroke eq '<^L>' ) {
+
+                $kernel->yield('window_resize');
+
+            } elsif ( $keystroke eq '<^C>' ) {
+
+                exit();
+
+            } else {
+
+                $heap->{mainloop}->event_key(
+                    type => 'stroke',
+                    key  => $keystroke,
+                );
+
+            }
+
+        }
+
+    }
+    
+}
+
+sub pre_window_resize {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+ 
+    # This is a hack : it seems the window resize is one event
+    # late, so we issue an additional one a bit later
+
+    $kernel->yield('window_resize');
+    $kernel->delay( window_resize => 1 / 10 );
+
+}
+
+sub window_resize {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+
+    $heap->{mainloop}->event_resize();
+
+}
+
+sub rebuild_all {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+
+    $heap->{mainloop}->event_rebuild_all();
+
+}
+ 
+# Now the Mainloop signals
+
+sub redraw {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+
+    $heap->{mainloop}->event_redraw();
+
+}
+
+sub add_delay_handler {
+    my $seconds = $_[ARG0];
+    my $code    = $_[ARG1];
+
+    $_[KERNEL]->delay_set( 'delay_handler', $seconds, $code, @_[ ARG2 .. $#_ ] );
+
+}
+
+sub delay_handler {
+    my $code = $_[ARG0];
+    
+    $code->( @_[ ARG1 .. $#_ ] );
+
+}
+
+sub stack_event {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+
+    $heap->{mainloop}->event_generic( @_[ ARG0 .. $#_ ] );
+
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub init {
+    my $self = shift;
+ 
+    my %params = $self->validate_params(@_, {
+        alias => { default  => 'curses' },
+        args  => { optional => 1, type => HASHREF }
+    });
+ 
+    # setup mainloop and root toolkit object
+
+    my $mainloop = POE::Component::Curses::MainLoop->new(
+        session_name => $params{alias},
+        defined $params{args} ? ( args => $params{args} ) : ()
+    );
+
+    POE::Session->create(
+        inline_states => {
+            _start => sub {
+                my ( $kernel, $session, $heap ) = @_[ KERNEL, SESSION, HEAP ];
+                # give a name to the session
+                $kernel->alias_set($params{alias});
+                # save the mainloop
+                $heap->{mainloop} = $mainloop;
+                # listen for window resize signals
+                $kernel->sig( WINCH => 'pre_window_resize' );
+                # start keyboard/mouse handler
+                $kernel->yield('startup');
+                # ask the mainloop to rebuild_all coordinates
+                $kernel->yield('rebuild_all');
+            },
+            startup           => \&startup,
+            keyin             => \&keyin,
+            key_handler       => \&key_handler,
+            pre_window_resize => \&pre_window_resize,
+            window_resize     => \&window_resize,
+            rebuild_all       => \&rebuild_all,
+            redraw            => \&redraw,
+            add_delay_handler => \&add_delay_handler,
+            delay_handler     => \&delay_handler,
+            stack_event       => \&stack_event,
+        }
+    );
+
+    return $mainloop->get_toolkit_root();
+
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+XAS::xxx - A class for the XAS environment
+
+=head1 SYNOPSIS
+
+ use XAS::XXX;
+
+=head1 DESCRIPTION
+
+=head1 METHODS
+
+=head2 method1
+
+=head1 SEE ALSO
+
+=head1 AUTHOR
+
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 Kevin L. Esteb
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
+
+=cut
