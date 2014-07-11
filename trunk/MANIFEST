@@ -15,6 +15,9 @@ lib/XAS/Lib/App/Daemon.pm
 lib/XAS/Lib/App/Services.pm
 lib/XAS/Lib/App/Services/Unix.pm
 lib/XAS/Lib/App/Services/Win32.pm
+lib/XAS/Lib/Curses/Root.pm
+lib/XAS/Lib/Curses/Unix.pm
+lib/XAS/Lib/Curses/Win32.pm
 lib/XAS/Lib/Mixins/Handlers.pm
 lib/XAS/Lib/Mixins/Keepalive.pm
 lib/XAS/Lib/Modules/Alerts.pm

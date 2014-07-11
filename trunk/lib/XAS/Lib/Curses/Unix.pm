@@ -5,23 +5,14 @@ our $VERSION = '0.01';
 use POE;
 use Curses;
 use POE::Wheel::Curses;
-use Params::Validate qw(SCALAR ARRAYREF HASHREF CODEREF GLOB GLOBREF SCALARREF HANDLE BOOLEAN UNDEF validate validate_pos);
 
 use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
-  mixins  => 'startup keyin @button_events',
+  mixins  => 'startup keyin get_mouse_event handle_mouse_event',
 ;
 
-Params::Validate::validation_options(
-    on_fail => sub {
-        my $params = shift;
-        my $class  = __PACKAGE__;
-        XAS::Base::validation_exception($params, $class);
-    }
-);
-
-our @button_events = qw(
+my @button_events = qw(
     BUTTON1_PRESSED BUTTON1_RELEASED BUTTON1_CLICKED
     BUTTON1_DOUBLE_CLICKED BUTTON1_TRIPLE_CLICKED
     BUTTON2_PRESSED BUTTON2_RELEASED BUTTON2_CLICKED
@@ -41,7 +32,7 @@ our @button_events = qw(
 
 sub startup {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
-    
+
     # now listen to the keys
     $heap->{console} = POE::Wheel::Curses->new(
         InputEvent => 'key_handler',
@@ -51,13 +42,73 @@ sub startup {
 
 sub keyin {
     my ($kernel) = $_[KERNEL];
- 
+
+}
+
+sub get_mouse_event {
+
+    my $mouse_curses_event = 0;
+
+    getmouse($mouse_curses_event);
+
+    # $mouse_curses_event is a struct. From curses.h (note: this might change!):
+    #
+    # typedef struct
+    # {
+    #    short id;           /* ID to distinguish multiple devices */
+    #        int x, y, z;        /* event coordinates (character-cell) */
+    #        mmask_t bstate;     /* button state bits */
+    # } MEVENT;
+    #
+    # ---------------
+    # s signed short
+    # x null byte
+    # x null byte
+    # ---------------
+    # i integer
+    # ---------------
+    # i integer
+    # ---------------
+    # i integer
+    # ---------------
+    # l long
+    # ---------------
+
+    my ($id, $x, $y, $z, $bstate) = unpack( "sx2i3l", $mouse_curses_event );
+
+    return ($id, $x, $y, $z, $bstate);
+
+}
+
+sub handle_mouse_event {
+    my ( $id, $x, $y, $z, $bstate, $heap ) = @_;
+
+    foreach my $possible_event_name (@button_events) {
+
+        my $possible_event = eval($possible_event_name);
+
+        if ( !$@ && $bstate == $possible_event ) {
+
+            my ($button, $type2) = $possible_event_name =~ /^([^_]+)_(.+)$/;
+
+            $heap->{mainloop}->event_mouse(
+                type   => 'click',
+                type2  => lc($type2),
+                button => lc($button),
+                x      => $x,
+                y      => $y,
+                z      => $z,
+            );
+
+        }
+
+    }
+
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
 
 1;
 
@@ -65,19 +116,67 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
-
-=head1 SYNOPSIS
-
- use XAS::XXX;
+XAS::Lib::Curses::Unix - A mixin class for Curses on Unix
 
 =head1 DESCRIPTION
 
+This is the mixin class for working with Curses on Linux\Unix.
+
 =head1 METHODS
 
-=head2 method1
+In the following methods: $kernel, $session, $heap are standard variables
+from POE.
+
+=head2 startup($kernel, $session, $heap)
+
+This will initialize the screen, keyboard.
+
+=head2 keyin($kernel)
+
+This doess nothing.
+
+=head2 get_mouse_event
+
+The will parse the mouse event and return the following variables.
+
+=over 4
+
+=item $id
+
+This is the id of the event, this is always 0.
+
+=item $x
+
+The position of the mouse on the X plain of the screen.
+
+=item $y 
+
+The position of the mouse on the Y plain of the screen.
+
+=item $z 
+
+Not, sure, but it is always 0.
+
+=item $bstate
+
+The state of the mouse.
+
+=back
+
+=head2 handle_mounse_event($id, $x, $y, $z, $bstate, $heap)
+
+This will take $id, $x, $y, $z, $bstate and $heap variable and create 
+the approbiate event to dispatch within Curses::Toolkit.
 
 =head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=item L<Curses::Toolkit>
+
+=back
 
 =head1 AUTHOR
 

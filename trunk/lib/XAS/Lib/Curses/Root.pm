@@ -45,58 +45,9 @@ sub key_handler {
  
             # the mouse is handled differently depending on platform
 
-            my $mouse_curses_event = 0;
- 
-            getmouse($mouse_curses_event);
+            my ($id, $x, $y, $z, $bstate) = get_mouse_event();
+            handle_mouse_event($id, $x, $y, $z, $bstate, $heap);
 
-            # $mouse_curses_event is a struct. From curses.h (note: this might change!):
-            #
-            # typedef struct
-            # {
-            #    short id;           /* ID to distinguish multiple devices */
-            #        int x, y, z;        /* event coordinates (character-cell) */
-            #        mmask_t bstate;     /* button state bits */
-            # } MEVENT;
-            #
-            # ---------------
-            # s signed short
-            # x null byte
-            # x null byte
-            # ---------------
-            # i integer
-            # ---------------
-            # i integer
-            # ---------------
-            # i integer
-            # ---------------
-            # l long
-            # ---------------
-
-            my ( $id, $x, $y, $z, $bstate ) = unpack( "sx2i3l", $mouse_curses_event );
- 
-            # @button_events is supplied by the mixin
-
-            foreach my $possible_event_name (@button_events) {
-
-                my $possible_event = eval($possible_event_name);
-
-                if ( !$@ && $bstate == $possible_event ) {
-
-                    my ( $button, $type2 ) = $possible_event_name =~ /^([^_]+)_(.+)$/;
-
-                    $heap->{mainloop}->event_mouse(
-                        type   => 'click',
-                        type2  => lc($type2),
-                        button => lc($button),
-                        x      => $x,
-                        y      => $y,
-                        z      => $z,
-                    );
-
-                }
- 
-            }
-        
         } else {
  
             if ( $keystroke eq '<^L>' ) {
@@ -235,19 +186,59 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Curses::Root - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Lib::Curses::Root;
+ use Curses::Toolki::Widget::Window;
+ use Curses::Toolkit::Widget::Button;
+
+ my $root = XAS::Lib::Curses::Root->new();
+ $root->add_window(
+    my $window = Curses::Toolkit::Widget::Window
+      ->new()
+      ->set_name('main_window')
+      ->add_widget(
+        my $button = Curses::Toolkit::Widget::Button
+          ->new()
+          ->set_name('my_button')
+          ->signal_connect(clicked => sub { exit(0); })
+      )
+      ->set_coordinates( x1 => 0, y1 => 0, x2 => '100%', y2 => '100%')
+ )
+
+ POE:Kernel->run();
 
 =head1 DESCRIPTION
 
-=head1 METHODS
+This is an alternative event loop for the L<Curses::Toolkit>. I developed this 
+when I decided to write curses based progams that would also run on Windows.
 
-=head2 method1
+Curses::Toolkit has an external event loop that is based on POE, which uses
+L<POE::Wheel::Curses>. This module uses select() to read STDIN. Windows 
+doesn't support this, so an alternative was needed. The alternative was a 
+polling POE task to read STDIN. While this will work on other platforms it 
+is not optimal. So this module loads mixins to handle those alternatives. 
+
+You can read L<XAS::Lib::Curses::Win32> for the gory details on how to get
+Curses.pm to work correctly on Windows.
+
+This module will allow all of the examples from Curses::Toolkit to run under
+Windows. There are differences with color selection, which this module won't 
+address.
 
 =head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=item L<Curses::Toolkit>
+
+=item L<POE::Component::Curses>
+
+=back
 
 =head1 AUTHOR
 
