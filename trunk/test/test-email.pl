@@ -12,7 +12,7 @@ package main;
 
 my $test = Test->new();
 
-$test->email->mailer('smtp');
+$test->env->mxmailer('smtp');
 $test->email->send(
     -to => 'kevin',
     -from => 'testing',

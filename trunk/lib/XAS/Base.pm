@@ -1,10 +1,13 @@
 package XAS::Base;
 
+our $MESSAGES;
 our $VERSION = '0.03';
 our $EXCEPTION = 'XAS::Exception';
 our ($SCRIPT)  = ( $0 =~ m#([^\\/]+)$# );
 
+use XAS::Factory;
 use XAS::Exception;
+use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
@@ -26,6 +29,50 @@ use XAS::Class
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
+
+sub load_msgs {
+    my $self = shift;
+
+    # my $messages;
+
+     my $messages = $self->class->any_var('MESSAGES');
+     return if (defined($messages->{messages_loaded}));
+
+    # $messages = {};
+
+    foreach my $path (@INC) {
+
+        my $dir = Dir($path, 'XAS');
+
+        if ($dir->exists) {
+
+            dir_walk(
+                -directory => $dir, 
+                -filter    => $self->env->msgs, 
+                -callback  => sub {
+                    my $file = shift;
+
+                    my $cfg = Config::IniFiles->new(-file => $file->path);
+                    if (my @names = $cfg->Parameters('messages')) {
+                        
+                        foreach my $name (@names) {
+                            
+                            $messages->{$name} = $cfg->val('messages', $name);
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    $MESSAGES = $messages;
+
+}
 
 sub validation_exception {
     my $param = shift;
@@ -73,8 +120,64 @@ sub validate_params {
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub _auto_load {
+    my $self = shift;
+    my $name = shift;
+
+    if ($name eq 'alert') {
+
+        return sub { XAS::Factory->module('alert'); } 
+
+    }
+
+    if ($name eq 'alerts') {
+
+        return sub { XAS::Alerts->new(); } 
+
+    }
+
+    if ($name eq 'env') {
+
+        return sub { XAS::Factory->module('environment'); } 
+
+    }
+
+    if ($name eq 'email') {
+
+        return sub { XAS::Factory->module('email'); } 
+
+    }
+
+    if ($name eq 'log') {
+
+        return sub { 
+
+            XAS::Factory->module('logger', {
+                -type     => $self->env->logtype,
+                -filename => $self->env->logfile,
+                -levels => {
+                    debug => $self->debugging ? 1 : 0,
+                }
+            }); 
+
+        }
+
+    }
+
+    $self->throw_msg(
+        dotid($self->class) . '.auto_load.invmethod',
+        'invmethod',
+        $name
+    );
+
+}
+
 sub init {
     my $self = shift;
+
+    # load the messages
+    
+    $self->load_msgs();
 
     # process PARAMS
 
@@ -100,7 +203,6 @@ sub init {
 
     }
 
-    $self->load_msgs();
     $self->debugging($self->xdebug);
 
     return $self;

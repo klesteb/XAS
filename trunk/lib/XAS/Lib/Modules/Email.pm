@@ -10,7 +10,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Singleton',
-  utils   => 'dotid',
+  utils   => 'dotid compress',
 ;
 
 # ------------------------------------------------------------------------
@@ -74,7 +74,7 @@ sub send {
             dotid($self->class) . '.send.undeliverable',
             'undeliverable', 
             $p->{'to'}, 
-            $ex
+            compress($ex)
         ); 
 
     };

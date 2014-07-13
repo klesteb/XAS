@@ -47,7 +47,7 @@ sub startup {
     intrflush(0);
     meta(1);
     typeahead(-1);
-    curs_set(0);
+    curs_set(0);                # these seems to be needed on PDCurses
 
     nodelay(1);                 # set terminal input to non blocking
     timeout(0);
@@ -157,9 +157,11 @@ XAS::Lib::Curses::Win32 - A mixin for handling PDCurses issues on Win32
 
 Who in there right minds would want to run Curses on Windows? I guess I did.
 To start with you need to download and install PDCurses. You can get that 
-here: http://sourceforge.net/projects/pdcurses/files/pdcurses/3.4/
+here:
 
-You want the pdc34dllw.zip file. This is compatiable with current release of
+  http://sourceforge.net/projects/pdcurses/files/pdcurses/3.4/
+
+You want the pdc34dllw.zip file. This is compatible with current release of
 Curses.pm. The package from the GnuWin32 site is not. To install, do the 
 following:
 
@@ -175,20 +177,20 @@ following:
 
 =back
 
-Thats it, PDCurses is now installed. Now for the fun part. Actually making it 
+That's it, PDCurses is now installed. Now for the fun part. Actually making it 
 work correctly with Curses.pm. Start by downloading it from CPAN. Do
 not do a default install.
 
 Curses.pm is designed to be used with Ncurses. Which is a standard 
-install on most Linux's and some Unix's. PDCurses is "compatiable" with
+install on most Linuxes and some Unixes. PDCurses is "compatible" with
 Ncurses, with the exception of the mouse handling functions. 
 
 PDCurses supports the Ncurses mouse handling and an older set of
-SYSV mouse handling rountines. The problem lies with the getmouse() call. 
-This is a name clash with the Ncurses rountine of the same name. PDCurses 
+SYSV mouse handling routines. The problem lies with the getmouse() call. 
+This is a name clash with the Ncurses routine of the same name. PDCurses 
 solves this by providing a nc_getmouse() call. Curses.pm doesn't check for 
-this functon, only getmouse() which exists, but has a different call 
-interface. So the mouse dosen't work.
+this function, only getmouse() which exists, but has a different call 
+interface. So the mouse doesn't work.
 
 To fix this problem you need to edit some files. Start with list.syms and add
 the following line around the getmouse(0) line.
@@ -290,7 +292,7 @@ The state of the mouse.
 =head2 handle_mounse_event($id, $x, $y, $z, $bstate, $heap)
 
 This will take $id, $x, $y, $z, $bstate and $heap variable and create 
-the approbiate event to dispatch within Curses::Toolkit.
+the appropriate event to dispatch within Curses::Toolkit.
 
 =head1 SEE ALSO
 

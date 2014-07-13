@@ -124,20 +124,20 @@ This is the mixin class for working with Curses on Linux\Unix.
 
 =head1 METHODS
 
-In the following methods: $kernel, $session, $heap are standard variables
+In the following methods: $kernel, $session and $heap are standard variables
 from POE.
 
 =head2 startup($kernel, $session, $heap)
 
-This will initialize the screen, keyboard.
+This will initialize the screen and keyboard.
 
 =head2 keyin($kernel)
 
-This doess nothing.
+This does nothing.
 
 =head2 get_mouse_event
 
-The will parse the mouse event and return the following variables.
+This will parse the mouse eventx and return the following variables.
 
 =over 4
 
@@ -147,11 +147,11 @@ This is the id of the event, this is always 0.
 
 =item $x
 
-The position of the mouse on the X plain of the screen.
+The position of the mouse on the X axis of the screen.
 
 =item $y 
 
-The position of the mouse on the Y plain of the screen.
+The position of the mouse on the Y axis of the screen.
 
 =item $z 
 
@@ -166,7 +166,7 @@ The state of the mouse.
 =head2 handle_mounse_event($id, $x, $y, $z, $bstate, $heap)
 
 This will take $id, $x, $y, $z, $bstate and $heap variable and create 
-the approbiate event to dispatch within Curses::Toolkit.
+the appropriate event to dispatch within Curses::Toolkit.
 
 =head1 SEE ALSO
 

@@ -11,7 +11,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Singleton',
   constants  => ':alerts',
-  accessors  => 'spooler env',
+  accessors  => 'spooler',
   codec      => 'JSON',
   utils      => 'dt2db',
   filesystem => 'Dir'
@@ -38,6 +38,7 @@ sub send {
         datetime => dt2db($dt),
         process  => $p->{'process'},
         pid      => $$,
+        msgid    => 0,
         priority => $p->{'priority'},
         facility => $p->{'facility'},
         message  => $p->{'message'},

@@ -15,4 +15,6 @@ printf("debug = %s\n", $log->level('debug'));
 $log->debug('debug works');
 $log->trace('trace works');
 $log->info("this is", "a test");
+$log->info_msg('exception', 'this is', 'a test');
+
     
