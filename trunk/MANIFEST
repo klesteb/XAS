@@ -1,5 +1,15 @@
 Build.PL
 Changes
+debian/changelog
+debian/compat
+debian/control
+debian/copyright
+debian/libxas-perl.docs
+debian/postinst
+debian/postrm
+debian/preinst
+debian/rules
+debian/watch
 lib/XAS.pm
 lib/XAS/Base.pm
 lib/XAS/Class.pm
@@ -47,6 +57,7 @@ lib/XAS/Lib/Stomp/POE/Client.pm
 lib/XAS/Lib/Stomp/POE/Filter.pm
 lib/XAS/Msgs/Base.msg
 MANIFEST			This list of files
+perl-XAS.spec
 profile.d/xas.sh
 profile.d/xas.bat
 README
