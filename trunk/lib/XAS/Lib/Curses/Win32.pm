@@ -243,7 +243,7 @@ you need to build Curses.pm. You do this in the usually fashion.
 
  Note: You need the "PANELS" qualifier. Curses.pm will build without it, but it
  will automatically find the panel routines in PDCurses. Doing so, without the
- qualifier will cause Perl to crash.
+ qualifier, will cause Perl to crash.
 
 At this point, you have a fully functional curses on Windows.
 
