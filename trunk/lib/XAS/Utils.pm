@@ -916,7 +916,7 @@ Take the items from the current $ENV variable and create a formated string.
 
 =item L<XAS|XAS>
 
-=item L<Badger::Utils|http://search.cpan.org/~abw/Badger-0.09/lib/Badger/Utils.pm>
+=item L<Badger::Utils|http://badgerpower.com/docs/Badger/Utils.html>
 
 =back
 

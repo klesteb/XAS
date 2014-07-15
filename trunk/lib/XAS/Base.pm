@@ -33,12 +33,8 @@ use XAS::Class
 sub load_msgs {
     my $self = shift;
 
-    # my $messages;
-
-     my $messages = $self->class->any_var('MESSAGES');
-     return if (defined($messages->{messages_loaded}));
-
-    # $messages = {};
+    my $messages = $self->class->any_var('MESSAGES');
+    return if (defined($messages->{messages_loaded});
 
     foreach my $path (@INC) {
 
@@ -268,12 +264,12 @@ XAS::Base - The base class for the XAS environment
 =head1 DESCRIPTION
 
 This module defines a base class for the XAS Environment and inherits from
-L<Badger::Base>. The package variable $PARAMS is used to hold 
-the parameters that this class uses for initialization. Due to the psuedo 
-inheritence of package variables provided by L<Badger::Class>, these 
+L<Badger::Base|http://http://badgerpower.com/docs/Badger/Base.html>. The package variable $PARAMS is used to hold 
+the parameters that this class uses for initialization. Due to the pseudo 
+inheritance of package variables provided by L<Badger::Class|http://badgerpower.com/docs/Badger/Class.html>, these 
 parameters can be changed or extended by inheriting classes. The parameters 
-are validated using L<Params::Validate>. Any parameters defined in $PARAMS 
-automagically become accessors toward their values.
+are validated using L<Params::Validate|https://metacpan.org/pod/Params::Validate>. Any parameters defined in $PARAMS 
+auto-magically become accessors toward their values.
 
 =head1 METHODS
 
@@ -285,9 +281,21 @@ the validate_params() method.
 By default the parameter -xdebug is set to 0. This parameter is used to
 turn on debugging output.
 
+=head2 load_msgs
+
+This method loads the message files. It searches @INC for the XAS 
+installation. When found, it loads any message files found into the package 
+variable MESSAGES. A message file has the following format:
+
+ [messages]
+ exception = %s: %s
+
+Where "exception" is the name of the message and rest is the text that will
+be used for the message. 
+
 =head2 validate_params($params, $spec, $class)
 
-This method is used to validate paramters. Internally this uses 
+This method is used to validate parameters. Internally this uses 
 Params::Validate::validate_with() for the parameter validation. 
 
 By convention, all named parameters have a leading dash. This method will 
@@ -307,7 +315,7 @@ An array ref to a set of parameters.
 
 =item B<$spec>
 
-A vaildation spec as defined by L<Params::Validate>.
+A validation spec as defined by L<Params::Validate>.
 
 =item B<$class>
 
@@ -329,34 +337,34 @@ The error message returned by L<Params::Validate>.
 
 =item B<$class>
 
-The rountine that the error occured in.
+The routine that the error occurred in.
 
 =back
 
 =head1 AUTOLOADING
 
-Specific modules can be autoloaded when a method name is invoked. The 
+Specific modules can be auto-loaded when a method name is invoked. The 
 following methods have been defined:
 
 =head2 alert
 
-This will autoload L<XAS::Lib::Modules::Alerts>. Please see that module
-for more details.
+This will auto-load L<XAS::Lib::Modules::Alerts|XAS::Lib::Modules::Alerts>.
+Please see that module for more details.
 
 =head2 env
 
-This will autoload L<XAS::Lib::Modules::Environment>. Please see that module
-for more details.
+This will auto-load L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment>.
+Please see that module for more details.
 
 =head2 email
 
-This will autoload L<XAS::Lib::Modules::Email>. Please see that module
-for more details.
+This will auto load L<XAS::Lib::Modules::Email|XAS::Lib::Modules::Email>.
+Please see that module for more details.
 
 =head2 log
 
-This will autoload L<XAS::Lib::Modules::Log>. Please see that module 
-for more details.
+This will auto load L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>.
+Please see that module for more details.
 
 =head1 SEE ALSO
 

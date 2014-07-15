@@ -112,13 +112,13 @@ XAS::Lib::App::Services - The base class to write services within the XAS enviro
 
 =head1 DESCRIPTION
 
-This module defines an opeating environment for Services. A service is a 
+This module defines an operating environment for Services. A service is a 
 managed daemon. They behave differently depending on what platform they
 are running on. On Windows, they will run under the SCM, on Unix like boxes, 
 they may be standalone daemons. These differences are handled by mixins.
 
 The proper mixin is loaded when the process starts, so all the interaction
-happens in the background. It inherits from L<XAS::Lib::App>. Please see 
+happens in the background. It inherits from L<XAS::Lib::App|XAS::Lib::App>. Please see 
 that module for additional documentation.
 
 =head1 OPTIONS

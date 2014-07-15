@@ -94,7 +94,7 @@ Your program can use this module in the following fashion:
 
 This is the module for sending alerts within the XAS environment. It will write
 an "alert" to the alerts spool directory. It is implemented as a singleton 
-and will autoload when invoked.
+and will auto-load when invoked.
 
 =head1 METHODS
 

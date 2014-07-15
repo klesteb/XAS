@@ -106,27 +106,8 @@ This method does nothing on Win32.
 =head2 get_service_config
 
 This method defines how the service is configured. This is used with the
---install and --deintall command line options. The format is important
-and should follow this:
-
- sub get_service_config {
-     my $self = shift;
-
-     my $script = Win32::GetFullPathName($0);
-
-     return {
-         name        =>  "XAS_Test",
-         display     =>  "XAS Test",
-         path        =>  "\"$^X\" \"$script\"",
-         user        =>  '',
-         password    =>  '',
-         description => 'This is a test Perl service'
-     };
-
- }
-
-The user and password can be defined, the path should not be changed. See
-L<Win32::Daemon> for more details.
+--install and --deinstall command line options. See
+L<Win32::Daemon|https://metacpan.org/pod/Win32::Daemon> for more details.
 
 =head2 install_service
 

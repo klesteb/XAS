@@ -120,7 +120,7 @@ XAS::Lib::Mixin::Keepalive - A mixin to implement TCP keepalive
 
 =head1 DESCRIPTION
 
-This module is a mixin class to share code for initilizing TCP level
+This module is a mixin class to share code for initializing TCP level
 keepalives.
 
 =head1 METHODS
@@ -128,7 +128,7 @@ keepalives.
 =head2 init_keepalive
 
 This will attempt to define the necessary variables to allow TCP keepalive
-to function. Not all Perl's and OS's define the neccessary values.
+to function. Not all Perl's and OS's define the necessary values.
 
 =head2 enable_keepalive($socket)
 

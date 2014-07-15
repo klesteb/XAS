@@ -288,7 +288,7 @@ Your program can use this module in the following fashion:
 =head1 DESCRIPTION
 
 This module describes the base environment for XAS. This module is implemented 
-as a singleton and will be autoloaded when invoked.
+as a singleton and will be auto-loaded when invoked.
 
 =head1 METHODS
 
@@ -332,16 +332,16 @@ and on Windows this will be %XAS_ROOT%\etc
 =item B<XAS_BIN>
 
 The path to the bin directory. On Unix like boxes this will be /usr/local/bin
-and on Windoes this will be %XAS_ROOT%\bin.
+and on Windows this will be %XAS_ROOT%\bin.
 
 =item B<XAS_SBIN>
 
-The path to the sbin directory. On UNix like boex this will be /usr/local/sbin
+The path to the sbin directory. On Unix like boxes this will be /usr/local/sbin
 and on Windows this will be %XAS_ROOT%\sbin.
 
 =item B<XAS_HOSTNAME>
 
-The hostname of the system. If not provided, on Unix the "hostname -s" command
+The host name of the system. If not provided, on Unix the "hostname -s" command
 will be used and on Windows Win32::NodeName() will be called. 
 
 =item B<XAS_DOMAIN>
@@ -426,7 +426,7 @@ Example
 =head2 mqserver
 
 This method will return the name of the message queue server. Or you can
-store a differant name for the server.
+store a different name for the server.
 
 Example
 
@@ -436,12 +436,12 @@ Example
 =head2 mqport
 
 This method will return the port for the message queue server, or you store
-a differant port number for that server.
+a different port number for that server.
 
 =head2 mqlevel
 
 This method will returns the STOMP protocol level. or you store
-a differant level. It can use 1.0, 1.1 or 1.2.
+a different level. It can use 1.0, 1.1 or 1.2.
 
 Example
 
@@ -451,7 +451,7 @@ Example
 =head2 mxserver
 
 This method will return the name of the mail server. Or you can
-store a differant name for the server.
+store a different name for the server.
 
 Example
 
@@ -461,7 +461,7 @@ Example
 =head2 mxport
 
 This method will return the port for the mail server, or you store
-a differant port number for that server.
+a different port number for that server.
 
 Example
 
@@ -514,12 +514,12 @@ Application configuration files should go into this directory.
 
 =head2 lib
 
-This accessor returns the lib directory of the XAS environemnt. This
-directory is used to store supporting file for the enviroment.
+This accessor returns the lib directory of the XAS environment. This
+directory is used to store supporting file for the environment.
 
 =head2 spool
 
-This accessor returns the spool directory of the XAS environemnt. This
+This accessor returns the spool directory of the XAS environment. This
 directory is used to store spool files generated within the environment.
 
 =head2 tmp

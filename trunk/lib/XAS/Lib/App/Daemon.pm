@@ -165,10 +165,10 @@ XAS::Lib::App::Daemon - The base class to write daemons within the XAS environme
 
 =head1 DESCRIPTION
 
-This module defines an opeating environment for daemons. A daemon is a 
+This module defines an operating environment for daemons. A daemon is a 
 Unix background process without a controlling terminal. Windows really
 doesn't have a concept for this behavior. For running background jobs
-on Windows please see L<XAS::Lib::App::Services>. 
+on Windows please see L<XAS::Lib::App::Services|XAS::Lib::App::Services>. 
 
 This module is also single threaded, it doesn't use POE to provide an 
 async environment. If you need that, the see the above module. This inherits 
@@ -180,7 +180,7 @@ documentation.
 =head2 define_pidfile
 
 This method sets up the pid file for the process. By default, this file
-is named $XAS_RUN/<$0>.pid. This can be overridded by the --pidfile option.
+is named $XAS_RUN/<$0>.pid. This can be overridden by the --pidfile option.
 
 =head2 define_signals
 

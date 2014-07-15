@@ -175,7 +175,7 @@ the appropriate event to dispatch within Curses::Toolkit.
 
 =item L<XAS|XAS>
 
-=item L<Curses::Toolkit>
+=item L<Curses::Toolkit|https://metacpan.org/pod/Curses::Toolkit>
 
 =back
 

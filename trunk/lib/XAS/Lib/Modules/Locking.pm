@@ -163,7 +163,7 @@ XAS::Lib::Modules::Locking - A module to provide discretionary directory locking
 
 This module provides discretionary directory locking. This is used to 
 coordinate access to shared resources. It is implemented as a singleton. 
-This moudule will also autoload if "lockmgr" is used as a method invokation.
+This module will also auto-load if "lockmgr" is used as a method invocation.
 
 =head1 METHODS
 
@@ -183,13 +183,13 @@ The optional number of retries. This defaults to 20.
 
 =item B<-delay>
 
-The number of seconds to delay before retrying to aquire the lock. This
-defauls to 1 second.
+The number of seconds to delay before retrying to acquire the lock. This
+defaults to 1 second.
 
 =item B<-hold>
 
 The amount of time to hold a lock. After this time the lock is considered 
-"stale". Thid defaults to 900 seconds.
+"stale". This defaults to 900 seconds.
 
 =back
 
@@ -217,7 +217,7 @@ The directory to use when unlocking.
 
 =back
 
-=head2 lock_directories($source, $destionation)
+=head2 lock_directories($source, $destination)
 
 This method will attempt to lock the source and destination directories.
 It takes these parameters:
@@ -253,7 +253,7 @@ The destination directory.
 
 =head2 lock_file_name($directory)
 
-This method returns the locks filename. It can be overridden if needed.
+This method returns the locks file name. It can be overridden if needed.
 The default name is 'locked'. It takes the following parameters:
 
 =over 4

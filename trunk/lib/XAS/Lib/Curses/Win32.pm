@@ -166,17 +166,13 @@ You want the pdc34dllw.zip file. This is compatible with current release of
 Curses.pm. The package from the GnuWin32 site is not. To install, do the 
 following:
 
-=over 4
+ 1) Unpack the zip archive.
 
-=item 1) Unpack the zip archive.
+ 2) Copy the .h files to \strawberry\c\include
 
-=item 2) Copy the .h files to \strawberry\c\include
+ 3) Copy the .lib file to \strawberry\c\lib
 
-=item 3) Copy the .lib file to \strawberry\c\lib
-
-=item 4) copy the .dll file to \strawberry\c\bin
-
-=back
+ 4) copy the .dll file to \strawberry\c\bin
 
 That's it, PDCurses is now installed. Now for the fun part. Actually making it 
 work correctly with Curses.pm. Start by downloading it from CPAN. Do
@@ -196,11 +192,7 @@ interface. So the mouse doesn't work.
 To fix this problem you need to edit some files. Start with list.syms and add
 the following line around the getmouse(0) line.
 
-=over 4
-
-=item   "E  nc_getmouse(0)"
-
-=back
+"E  nc_getmouse(0)"
 
 Next change some code in CursesFun.c. Replace the original code for the 
 XS_Curses_getmouse with this:
@@ -301,7 +293,7 @@ the appropriate event to dispatch within Curses::Toolkit.
 
 =item L<XAS|XAS>
 
-=item L<Curses::Toolkit>
+=item L<Curses::Toolkit|https://metacpan.org/pod/Curses::Toolkit>
 
 =back
 

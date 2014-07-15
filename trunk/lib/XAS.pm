@@ -48,11 +48,11 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::App::Services::Win32|XAS::Lib::App::Services::Win32>
 
-=item <XAS::Lib::Curses::Root|XAS::Lib::Curses::Root>
+=item L<XAS::Lib::Curses::Root|XAS::Lib::Curses::Root>
 
-=item <XAS::Lib::Curses::Unix|XAS::Lib::Curses::Unix>
+=item L<XAS::Lib::Curses::Unix|XAS::Lib::Curses::Unix>
 
-=item <XAS::Lib::Curses::Win32|XAS::Lib::Curses::Win32>
+=item L<XAS::Lib::Curses::Win32|XAS::Lib::Curses::Win32>
 
 =item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
 

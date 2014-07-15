@@ -112,7 +112,7 @@ XAS::Constants - A Perl extension for the XAS environment
 =head1 DESCRIPTION
 
 This module provides various constants for the XAS enviromnet. It inherits from
-L<Badger::Constants|http://search.cpan.org/~abw/Badger-0.09/lib/Badger/Utils.pm> and also provides these additional
+L<Badger::Constants|http://badgerpower.com/docs/Badger/Constants.html> and also provides these additional
 constants.
 
 =head2 EXPORT
@@ -123,12 +123,15 @@ constants.
 
  LOG_TYPES LOG_FACILITY LOG_LEVELS
 
+ ALERT_PRIORITY ALERT_FACILITY
+ 
  Along with these tags
 
  jsonrpc
  supervisor
  logging
-
+ alerts
+ 
 =head1 SEE ALSO
 
 =over 4

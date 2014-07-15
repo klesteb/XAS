@@ -120,15 +120,15 @@ Your program can use this module in the following fashion:
 =head1 DESCRIPTION
 
 This is the the module for sending email within the XAS environment. It is
-implemented as a singleton. It can also be autoloaded when the method 'email'
-is invokded.
+implemented as a singleton. It can also be auto-loaded when the method 'email'
+is invoked.
 
 =head1 METHODS
 
 =head2 new
 
 This method initializes the module. It uses parameters from 
-L<XAS::Lib::Modules::Environment> to set defaults.
+L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment> to set defaults.
 
 =head2 send
 
@@ -138,11 +138,11 @@ This method will send an email. It takes the following parameters:
 
 =item B<-to>
 
-The SMTP address of the receipent.
+The SMTP address of the recipient.
 
 =item B<-from>
 
-The SMTP adderss of the sender.
+The SMTP address of the sender.
 
 =item B<-subject>
 
@@ -154,7 +154,7 @@ The text of the message.
 
 =item B<-attachment>
 
-A filename to append to the message.
+A file name to append to the message.
 
 =back
 
@@ -172,10 +172,12 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut

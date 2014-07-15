@@ -213,16 +213,16 @@ XAS::Lib::Curses::Root - A class for the XAS environment
 
 =head1 DESCRIPTION
 
-This is an alternative event loop for the L<Curses::Toolkit>. I developed this 
-when I decided to write curses based progams that would also run on Windows.
+This is an alternative event loop for the L<Curses::Toolkit|https://metacpan.org/pod/Curses::Toolkit>. I developed this 
+when I decided to write curses based programs that would also run on Windows.
 
 Curses::Toolkit has an external event loop that is based on POE, which uses
-L<POE::Wheel::Curses>. This module uses select() to read STDIN. Windows 
+L<POE::Wheel::Curses|https://metacpan.org/pod/POE::Wheel::Curses>. This module uses select() to read STDIN. Windows 
 doesn't support this, so an alternative was needed. The alternative was a 
 polling POE task to read STDIN. While this will work on other platforms it 
 is not optimal. So this module loads mixins to handle those alternatives. 
 
-You can read L<XAS::Lib::Curses::Win32> for the gory details on how to get
+You can read L<XAS::Lib::Curses::Win32|XAS::Lib::Curses::Win32> for the gory details on how to get
 Curses.pm to work correctly on Windows.
 
 This module will allow all of the examples from Curses::Toolkit to run under
@@ -235,9 +235,9 @@ address.
 
 =item L<XAS|XAS>
 
-=item L<Curses::Toolkit>
+=item L<Curses::Toolkit|https://metacpan.org/pod/Curses::Toolkit>
 
-=item L<POE::Component::Curses>
+=item L<POE::Component::Curses|https://metacpan.org/pod/POE::Component::Curses>
 
 =back
 
