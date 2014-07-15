@@ -7,6 +7,7 @@ use Curses;
 use POE::Wheel::Curses;
 
 use XAS::Class
+  debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
   mixins  => 'startup keyin get_mouse_event handle_mouse_event',

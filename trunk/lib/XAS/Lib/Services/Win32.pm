@@ -3,6 +3,7 @@ package XAS::Lib::Services::Win32;
 our $VERSION = '0.01';
 
 use POE;
+use Win32;
 use Win32::Daemon;
 
 use XAS::Class
@@ -32,7 +33,7 @@ sub init_service {
         $self->throw_msg(
             'xas.lib.service.win32.startup.startservice',
             'noservice',
-            $self->_get_error()
+            _get_error()
         );
 
     }
@@ -52,6 +53,12 @@ sub init_service {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub _get_error {
+
+    return(Win32::FormatMessage(Win32::Daemon::GetLastError()));
+
+}
 
 sub _current_state {
     my $self = shift;

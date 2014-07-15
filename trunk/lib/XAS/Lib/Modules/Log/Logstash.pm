@@ -6,8 +6,8 @@ use XAS::Factory;
 use Params::Validate 'HASHREF';
 
 use XAS::Class
-  base       => 'XAS::Base',
   version    => $VERSION,
+  base       => 'XAS::Base',
   codecs     => 'JSON',
   accessors  => 'spool',
   filesystem => 'Dir',

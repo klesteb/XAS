@@ -6,8 +6,8 @@ use Params::Validate 'HASHREF';
 use Sys::Syslog qw(:standard :extended);
 
 use XAS::Class
-  base       => 'XAS::Base',
   version    => $VERSION,
+  base       => 'XAS::Base',
   mixins     => 'init_log output destroy',
 ;
 

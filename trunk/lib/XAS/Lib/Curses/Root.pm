@@ -11,6 +11,7 @@ use Curses;
 use POE::Component::Curses::MainLoop;
 
 use XAS::Class
+  debug   => 0,
   version => '0.01',
   base    => 'XAS::Base',
   mixin   => $mixin,
