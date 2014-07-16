@@ -103,6 +103,7 @@ structure has the following fields:
     message        - the log line
     hostname       - the hostname
     pid            - the pid of the process
+    msgid          - message id
     priority       - the priority from -priority
     facility       - the facility from -facility
     process        - the process  from -process

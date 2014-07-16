@@ -130,7 +130,7 @@ from said object.
 
 =head2 new
 
-This method intilaizles the module. It takes these parameters:
+This method initializes the module. It takes these parameters:
 
 =over 4
 

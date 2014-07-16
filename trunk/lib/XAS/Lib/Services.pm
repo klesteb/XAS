@@ -335,7 +335,7 @@ XAS::Lib::Services - A class to interact with Services
 =head1 DESCRIPTION
 
 This module provides a generic interface to "Services". A Service is
-a managed background process. It reponds to external events. On Windows
+a managed background process. It responds to external events. On Windows
 this would be responding to commands from the Service Control Manager. 
 On Unix this would be responding to a special set of signals. This module 
 provides an event loop that can interact those external events. 

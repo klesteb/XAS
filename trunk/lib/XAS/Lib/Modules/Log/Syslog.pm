@@ -87,7 +87,7 @@ the pid be included.
 
 =head2 output($hashref)
 
-This method translate the log level to an appropiate syslog priority and
+This method translate the log level to an appropriate syslog priority and
 writes out the log line. The translation is a follows:
 
     info  => 'info',

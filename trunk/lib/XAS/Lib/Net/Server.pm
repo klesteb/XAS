@@ -409,7 +409,7 @@ XAS::Lib::Net::Server - A basic network server for the XAS Environment
 =head1 DESCRIPTION
 
 This module implements a simple text orientated network protocol. Data is
-sent out as "packetts". Which means everything is delimited with a consistent
+sent out as "packets". Which means everything is delimited with a consistent
 EOL. These packets may be formatted strings, such as JSON. This module inherits
 from L<XAS::Lib::Session>.
 

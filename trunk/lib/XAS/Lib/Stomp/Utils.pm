@@ -558,7 +558,7 @@ This module uses XAS::Lib::Stomp::Frame to create STOMP frames.
 =head1 DESCRIPTION
 
 This module is an easy way to create STOMP frames without worrying about
-the various differances between the protocol versions.
+the various differences between the protocol versions.
 
 =head1 METHODS
 
@@ -618,7 +618,7 @@ STOMP v1.1 and later clients. The default is '1.0,1.1,1.2'.
 =head2 stomp
 
 This method creates a "STOMP" frame, this works the same as connect(), but 
-only works for STOMP v1.1 and later tagets. Please see the documentation for 
+only works for STOMP v1.1 and later targets. Please see the documentation for 
 connect().
 
 =head2 disconnect
@@ -656,7 +656,7 @@ has no meaning for STOMP v1.0 servers.
 
 =item B<-ack>
 
-The type of acknowledgement you would like to recieve when messages are sent
+The type of acknowledgement you would like to receive when messages are sent
 to a queue. It defaults to 'auto'. It understands 'auto', 'client' and 
 'client-individual'. Please refer to the STOMP protocol reference for 
 what this means.
@@ -683,7 +683,7 @@ on v1.1 and later targets.
 
 =item B<-subscription>
 
-The id of the subscribtion, this should be the same as the one used 
+The id of the subscription, this should be the same as the one used 
 with subscribe(). This is optional on STOMP v1.0 servers and mandatory
 on v1.1 and later targets.
 
@@ -765,7 +765,7 @@ The message to be sent. No attempt is made to serializes the message.
 
 =item B<-transaction>
 
-An optional tranasction number. This should be the same as for begin().
+An optional transaction number. This should be the same as for begin().
 
 =item B<-length>
 
@@ -779,7 +779,7 @@ will be used. This only has meaning for STOMP v1.1 and later targets.
 
 =item B<-persistent>
 
-An optional header for indicating that this frame should be 'presisted' by
+An optional header for indicating that this frame should be 'persisted' by
 the server. What this means, is highly server specific.
 
 =item B<-receipt>
@@ -819,7 +819,7 @@ An optional receipt that will be returned by the server.
 
 This method creates a "NACK" frame. It notifies the server that the message 
 was rejected. It has meaning on STOMP v1.1 and later targets. This method
-takes the following paramters:
+takes the following parameters:
 
 =over 4
 
@@ -851,9 +851,9 @@ later targets.
 
 =over 4
 
-=item Net::Stomp
+=item L<Net::Stomp|https://metacpan.org/pod/Net::Stomp>
 
-=item Net::Stomp::Frame
+=item L<Net::Stomp::Frame|https://metacpan.org/pod/Net::Stomp::Frame>
 
 =item L<XAS|XAS>
 

@@ -62,7 +62,7 @@ This module is a test for logging.
 
 =over 4
 
-=item <XAS|XAS>
+=item L<XAS|XAS>
 
 =back
 

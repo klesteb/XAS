@@ -326,7 +326,7 @@ XAS::Lib::Stomp::Frame - A STOMP Frame
 
 =head1 DESCRIPTION
 
-This module encapulates a STOMP frame. STOMP is the Streaming Text
+This module encapsulates a STOMP frame. STOMP is the Streaming Text
 Orientated Messaging Protocol (or the Protocol Briefly Known as TTMP
 and Represented by the symbol :ttmp). It's a simple and easy to
 implement protocol for working with Message Orientated Middleware from
@@ -372,7 +372,7 @@ A body for the command.
 
 =head2 as_string
 
-Create a buffer from the serialised frame.
+Create a buffer from the serialized frame.
 
   my $buffer = $frame->as_string;
 
@@ -451,7 +451,7 @@ The name of the header to remove.
 
 =head1 ACKNOWLEDGEMENTS
 
-This module is based on L<Net::Stomp::Frame> by Leon Brocard <acme@astray.com>.
+This module is based on L<Net::Stomp::Frame|https://metacpan.org/pod/Net::Stomp::Frame> by Leon Brocard <acme@astray.com>.
 
 =head1 SEE ALSO
 

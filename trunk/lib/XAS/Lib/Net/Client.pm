@@ -120,7 +120,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Net::Client::Default - The network client interface for the XAS environment
+XAS::Lib::Net::Client - The network client interface for the XAS environment
 
 =head1 SYNOPSIS
 
@@ -131,15 +131,15 @@ XAS::Lib::Net::Client::Default - The network client interface for the XAS enviro
 
 =head1 DESCRIPTION
 
-This module implements a simple text orientated nework protocol. All "packets" 
-will have an explict "\012\015" appended. This delineates the "packets" and is
-network netural. No attempt is made to decipher these "packets". 
+This module implements a simple text orientated network protocol. All "packets" 
+will have an explicit "\012\015" appended. This delineates the "packets" and is
+network neutral. No attempt is made to decipher these "packets". 
 
 =head1 METHODS
 
 =head2 new
 
-This initilaizes the module and can take three parameters. It doesn't actually
+This initializes the module and can take three parameters. It doesn't actually
 make a network connection.
 
 =over 4
@@ -151,7 +151,7 @@ The port number to attach too.
 =item B<-host>
 
 The host to use for the connection. This can be an IP address or
-a hostname.
+a host name.
 
 =item B<-timeout>
 

@@ -86,15 +86,21 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Service|XAS::Lib::Service>
 
-=item L<XAS::Lib::Service::Unix|XAS::Lib::Service::Unix>
+=item L<XAS::Lib::Services|XAS::Lib::Services>
 
-=item L<XAS::Lib::Service::Win32|XAS::Lib::Service::Win32>
+=item L<XAS::Lib::Services::Unix|XAS::Lib::Services::Unix>
+
+=item L<XAS::Lib::Services::Win32|XAS::Lib::Services::Win32>
 
 =item L<XAS::Lib::Session|XAS::Lib::Session>
 
 =item L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>
 
+=item L<XAS::Lib::SSH::Exec|XAS::Lib::SSH::Exec>
+
 =item L<XAS::Lib::SSH::Server|XAS::Lib::SSH::Server>
+
+=item L<XAS::Lib::SSH::Shell|XAS::Lib::SSH::Shell>
 
 =item L<XAS::Lib::Stomp::Frame|XAS::Lib::Stomp::Frame>
 

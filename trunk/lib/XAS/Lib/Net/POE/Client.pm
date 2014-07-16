@@ -312,7 +312,7 @@ sub _reconnect {
 
         my $delay = $RECONNECTIONS[$self->{attempts}];
         $self->log->warn("$alias: attempting reconnection: $self->{attempts}, waiting: $delay seconds");
-        $self->{attempts}++;
+        $self->{attempts} += 1;
         $poe_kernel->delay('server_connect', $delay);
 
     } else {
@@ -342,7 +342,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Net::POE::Client - An asynchronise network client based on POE
+XAS::Lib::Net::POE::Client - An asynchronous network client based on POE
 
 =head1 SYNOPSIS
 
@@ -372,7 +372,7 @@ channel to a server. You will need to sub-class this module with your own for
 it to be useful.
 
 An attempt to maintain that channel will be made when/if that server should
-happen to disappear off the network. There is nothing more unpleasent then
+happen to disappear off the network. There is nothing more unpleasant then
 having to go around to dozens of servers and restarting processes.
 
 =head1 METHODS
@@ -390,7 +390,7 @@ The session alias, defaults to 'client'.
 
 =item B<-server>
 
-The servers hostname.
+The servers host name.
 
 =item B<-port>
 
@@ -408,7 +408,7 @@ For those pesky firewalls, defaults to false
 
 =head2 read_data
 
-This event is triggered when data is recieved for the server.
+This event is triggered when data is received for the server.
 
 =head2 write_data
 

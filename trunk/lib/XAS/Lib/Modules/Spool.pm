@@ -6,10 +6,10 @@ use Try::Tiny;
 use XAS::Factory;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Handlers',
-  debug     => 0,
   accessors => 'lockmgr',
   utils     => 'dotid',
   vars => {
@@ -382,7 +382,7 @@ control access. This is an important requirement to prevent possible race
 conditions between those processes.
 
 A sequence number is stored in the .SEQ file within each sub directory. Each 
-spool file will use the ever increasing sequence number as the filename with 
+spool file will use the ever increasing sequence number as the file name with 
 a .pkt extension. To reset the sequence number, just delete the .SEQ file. A 
 new file will automatically be created.
 
@@ -454,7 +454,7 @@ This method will return a count of the items in the spool directory.
 
 =head2 get
 
-This method will retreive a filename from the spool directory.
+This method will retrieve a file name from the spool directory.
 
 =head1 ACCESORS
 
@@ -468,7 +468,7 @@ This method will get the current lock file name.
 
 =head2 segfile
 
-This method will get the current seguence file name.
+This method will get the current sequence file name.
 
 =head1 SEE ALSO
 

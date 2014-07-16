@@ -274,12 +274,12 @@ channel to a message queue server. You will need to sub-class this module
 with your own for it to be useful.
 
 An attempt to maintain that channel will be made when/if that server should 
-happen to disappear off the network. There is nothing more unpleasent then 
+happen to disappear off the network. There is nothing more unpleasant then 
 having to go around to dozens of servers and restarting processes.
 
 When messages are received, specific events are generated. Those events are 
 based on the message type. If you are interested in those events you should 
-override the default behaviour for those events. The default behaviour is to 
+override the default behavior for those events. The default behavior is to 
 do nothing.
 
 =head1 METHODS
@@ -297,7 +297,7 @@ The session alias, defaults to 'stomp-client'.
 
 =item B<-server>
 
-The servers hostname, defaults to 'localhost'.
+The servers host name, defaults to 'localhost'.
 
 =item B<-port>
 
@@ -351,7 +351,7 @@ connection to the message server. For the most part you should send a
 
 =head2 handled_connected
 
-This event and corresponing method is called when a "CONNECT" frame is 
+This event and corresponding method is called when a "CONNECT" frame is 
 received from the server. This means the server will allow you to start
 generating/processing frames.
 
@@ -456,7 +456,7 @@ is up to your program. But usually a "send_data" event is generated.
 
 This event and corresponding method is a hook to allow you to be notified if 
 the connection to the server is currently down. By default it does nothing. 
-But it would be usefull to notify "gather_data" to temporaily stop doing 
+But it would be useful to notify "gather_data" to temporarily stop doing 
 whatever it is currently doing.
 
  Example
@@ -472,7 +472,7 @@ whatever it is currently doing.
 
 This event and corresponding method is a hook to allow you to be notified 
 when the connection to the server up. By default it does nothing. 
-But it would be usefull to notify "gather_data" to start doing 
+But it would be useful to notify "gather_data" to start doing 
 whatever it supposed to do.
 
  Example
@@ -486,7 +486,7 @@ whatever it supposed to do.
 
 =head2 session_cleanup
 
-This method is a hook and should be overidden to do "shutdown" stuff. By
+This method is a hook and should be overridden to do "shutdown" stuff. By
 default it sends a "DISCONNECT" message to the message queue server.
 
  Example
@@ -502,7 +502,7 @@ default it sends a "DISCONNECT" message to the message queue server.
 
 =head2 session_reload
 
-This method is a hook and should be overidden to do "reload" stuff. By
+This method is a hook and should be overridden to do "reload" stuff. By
 default it executes POE's sig_handled() method.
 
  Example
@@ -518,7 +518,7 @@ default it executes POE's sig_handled() method.
 
 =head2 stomp
 
-This returns an object to the interal XAS::Lib::Stomp::Utils 
+This returns an object to the internal XAS::Lib::Stomp::Utils 
 object. This is very useful for creating STOMP frames.
 
  Example

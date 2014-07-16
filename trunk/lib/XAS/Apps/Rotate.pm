@@ -696,7 +696,7 @@ The command to run.
 
 =head2 get_extension
 
-Return the file extension base on compresor type.
+Return the file extension base on compressor type.
 
 =head2 is_true($param)
 
@@ -720,7 +720,7 @@ that. We return TRUE if a file is too big.
 
 =head2 compress_file($filename)
 
-Compress the file based on choosen compression type.
+Compress the file based on chosen compression type.
 
 =over 4
 
@@ -769,7 +769,7 @@ Process the selected files. It preforms the following actions:
 
 =item 3 Recreate the new file.
 
-=item 4 Compress the roated file
+=item 4 Compress the rotated file
 
 =item 5 Process the epilog command.
 

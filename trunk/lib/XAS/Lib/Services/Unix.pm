@@ -115,7 +115,7 @@ XAS::Lib::Services::Unix - A mixin class for Unix Services
 =head1 DESCRIPTION
 
 This module is a mixin that provides an interface between a Unix like system 
-and a Service. It responds to these additonal signals.
+and a Service. It responds to these additional signals.
 
  TSTP - pause the session
  CONT - resume the session
