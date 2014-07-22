@@ -339,7 +339,7 @@ Returns the contents of the internal buffer.
 
 =over 4
 
-=item L< XAS|XAS>
+=item L<XAS|XAS>
 
 =back
 

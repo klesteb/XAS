@@ -781,7 +781,7 @@ Scan the local directory looking for files to rotate.
 
 =head1 SEE ALSO
 
-L< Rotate|Rotate>
+L<Rotate|Rotate>
 
 =head1 AUTHOR
 

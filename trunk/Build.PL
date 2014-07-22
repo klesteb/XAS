@@ -32,9 +32,11 @@ my $requires = {
     'MIME::Lite'                  => 3.027,
     'Params::Validate'            => 0.92,
     'Pod::Usage'                  => 1.35,
+    'Try::Tiny'                   => 0.0,
     'Try::Tiny::Retry'            => 0.003,
     'Set::Light'                  => 0.04,
     'Net::SSH2'                   => 0.44,
+    'Curses'                      => 1.28
 };
 
 # Needed for Win32 installations
