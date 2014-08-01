@@ -64,3 +64,6 @@ README
 t/00-load.t
 t/manifest.t
 t/pod.t
+Makefile.PL
+META.yml
+META.json
