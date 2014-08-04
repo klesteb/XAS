@@ -18,7 +18,7 @@ use XAS::Class
     SERVICE_STOPPED          => 7,
     SERVICE_PAUSED           => 8,
   },
-  mixins  => 'init_service _current_state session_interrupt
+  mixins  => 'init_service _current_state session_interrupt poll
               SERVICE_START_PENDING SERVICE_STOP_PENDING
               SERVICE_PAUSE_PENDING SERVICE_CONTINUE_PENDING
               SERVICE_CONTROL_SHUTDOWN SERVICE_RUNNING
@@ -82,6 +82,128 @@ sub session_interrupt {
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub poll {
+    my ($self) = $_[OBJECT];
+
+    my $stat;
+    my $alias = $self->alias;
+    my $delay = $self->poll_interval;
+    my $state = $self->_current_state();
+
+    $self->log->debug("$alias: entering _poll()");
+    $self->log->debug("$alias: state = $state");
+
+    if ($state == SERVICE_START_PENDING) {
+
+        $self->log->debug("$alias: state = SERVICE_START_PENDING");
+
+        # Initialization code
+
+        $self->last_state(SERVICE_START_PENDING);
+        $self->_current_state(SERVICE_START_PENDING, 6000);
+
+        # Initialization code
+        # ...do whatever you need to do to start...
+
+        $self->_service_startup();
+        $self->last_state(SERVICE_RUNNING);
+
+    } elsif ($state == SERVICE_STOP_PENDING) {
+
+        $self->log->debug("$alias: state = SERVICE_STOP_PENDING");
+
+        # Stopping...
+
+        $self->last_state(SERVICE_STOPPED);
+
+    } elsif ($state == SERVICE_PAUSE_PENDING) {
+
+        $self->log->debug("$alias: state = SERVICE_PAUSE_PENDING");
+
+        # Pausing...
+
+        $self->_service_paused();
+        $self->last_state(SERVICE_PAUSED);
+
+    } elsif ($state == SERVICE_CONTINUE_PENDING) {
+
+        $self->log->debug("alias: state = SERVICE_CONTINUE_PENDING");
+
+        # Resuming...
+
+        if ($self->last_state == SERVICE_PAUSED) {
+
+            $self->_service_resumed();
+            $self->last_state(SERVICE_RUNNING);
+
+        } else {
+
+            $self->log->info_msg('unpaused');
+
+        }
+
+    } elsif ($state == SERVICE_RUNNING) {
+
+        $self->log->debug("$alias: state = SERVICE_RUNNING");
+
+        # Running...
+        #
+        # Note that here you want to check that the state
+        # is indeed SERVICE_RUNNING. Even though the Running
+        # callback is called it could have done so before
+        # calling the "Start" callback.
+        #
+
+        if ($self->last_state == SERVICE_RUNNING) {
+
+            $self->_service_running();
+            $self->last_state(SERVICE_RUNNING);
+
+        }
+
+    } elsif ($state == SERVICE_STOPPED) {
+
+        $self->log->warn("$alias: state = SERVICE_STOPPED");
+
+        # stopped...
+
+        $delay = 0;
+        $poe_kernel->post($alias, 'session_shutdown');
+        $self->last_state(SERVICE_STOPPED);
+
+    } elsif ($state == SERVICE_CONTROL_SHUTDOWN) {
+
+        $self->log->warn("$alias: state = SERVICE_CONTROL_SHUTDOWN");
+
+        # shutdown...
+
+        unless ($self->last_state == SERVICE_PAUSED) {
+
+            $self->_service_shutdown();
+            $delay = $self->shutdown_interval;
+            $self->last_state(SERVICE_STOP_PENDING);
+
+        }
+
+    }
+
+    # tell the SCM what is going on
+
+    $self->_current_state($self->last_state, $delay);
+
+    # queue the next polling interval
+
+    unless ($delay == 0) {
+
+        $stat = $poe_kernel->delay('poll', $delay);
+        $self->log->error("unable to queue delay - $stat") if ($stat != 0);
+
+    }
+
+    $self->log->debug("$alias: leaving _poll()");
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods

@@ -5,6 +5,7 @@ our $VERSION = '0.01';
 use POE;
 use Try::Tiny;
 use Socket ':all';
+use Errno ':POSIX';
 use POE::Filter::Line;
 use POE::Wheel::ReadWrite;
 use POE::Wheel::SocketFactory;
@@ -28,7 +29,7 @@ use XAS::Class
   }
 ;
 
-our @ERRORS = qw(0 32 68 73 78 79 110 104 111);
+our @ERRORS = qw(0 EPIPE, ETIMEDOUT, ECONNRESET, ECONNREFUSED);
 our @RECONNECTIONS = qw(60 120 240 480 960 1920 3840);
 
 #use Data::Dumper;
@@ -54,10 +55,11 @@ sub session_intialize {
 
     # private events
 
-    $poe_kernel->state('server_connected', $self, '_server_connected');
-    $poe_kernel->state('server_connect',   $self, '_server_connect');
     $poe_kernel->state('server_error',     $self, '_server_error');
     $poe_kernel->state('server_message',   $self, '_server_message');
+    $poe_kernel->state('server_connect',   $self, '_server_connect');
+    $poe_kernel->state('server_connected', $self, '_server_connected');
+    $poe_kernel->state('server_reconnect', $self, '_server_reconnect');
 
     # public events
 
@@ -246,7 +248,12 @@ sub _server_connection_failed {
 
     foreach my $error (@ERRORS) {
 
-        $self->_reconnect($kernel) if ($errnum == $error);
+        if ($errnum == $error) {
+
+            $poe_kernel->post($alias, 'server_reconnect');
+            last;
+
+        }
 
     }
 
@@ -267,41 +274,19 @@ sub _server_error {
 
     foreach my $error (@ERRORS) {
 
-        $self->_reconnect($kernel) if ($errnum == $error);
+        if ($errnum == $error) {
+
+            $poe_kernel->post($alias, 'server_reconnect');
+            last;
+
+        }
 
     }
 
 }
 
-# ---------------------------------------------------------------------
-# Private Methods
-# ---------------------------------------------------------------------
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->{attempts} = 0;
-    $self->{count} = scalar(@RECONNECTIONS);
-
-    $self->init_keepalive();     # init tcp keepalive definations
-
-    unless (defined($self->{filter})) {
-
-        $self->{filter} = POE::Filter::Line->new(
-            InputLiteral  => $self->eol,
-            OutputLiteral => $self->eol,
-        );
-
-    }
-
-    return $self;
-
-}
-
-sub _reconnect {
-    my ($self) = shift;
+sub _server_reconnect {
+    my ($self) = $_[OBJECT];
 
     my $retry;
     my $alias = $self->alias;
@@ -333,6 +318,33 @@ sub _reconnect {
         }
 
     }
+
+}
+
+# ---------------------------------------------------------------------
+# Private Methods
+# ---------------------------------------------------------------------
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    $self->{attempts} = 0;
+    $self->{count} = scalar(@RECONNECTIONS);
+
+    $self->init_keepalive();     # init tcp keepalive definations
+
+    unless (defined($self->{filter})) {
+
+        $self->{filter} = POE::Filter::Line->new(
+            InputLiteral  => $self->eol,
+            OutputLiteral => $self->eol,
+        );
+
+    }
+
+    return $self;
 
 }
 
