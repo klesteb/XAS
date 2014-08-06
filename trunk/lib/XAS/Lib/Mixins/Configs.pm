@@ -3,38 +3,34 @@ package XAS::Lib::Mixins::Configs;
 our $VERSION = '0.01';
 
 use Config::IniFiles;
-use Params::Validate ':all';
 
 use XAS::Class
+  debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'dotid compress',
-  mixins  => 'load_configs',
+  mixins  => 'load_config',
 ;
-
-Params::Validate::validation_options(
-    on_fail => sub {
-        my $params = shift;
-        my $class  = __PACKAGE__;
-        XAS::Base::validation_exception($params, $class);
-    }
-);
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub load_configs {
+sub load_config {
     my $self = shift;
+    my ($filename, $handler) = $self->validate_params(\@_, [
+        { isa => 'Badger::Filesystem::File' },
+        { optional => 1, default => 'cfg' },
+    ]);
     
-    $self->{cfg} = Config::IniFiles->new(
-        -file => $self->cfgfile->path,
+    $self->{$handle} = Config::IniFiles->new(
+        -file => $self->filename->path,
     ) or do {
-        $self->log('warn', compress(join('', @Config::IniFiles::errors)));
+        $self->log->warn(compress(join('', @Config::IniFiles::errors)));
         $self->throw_msg(
-            dotid($self->class) . '.init.badini',
+            dotid($self->class} . '.load_config.badini',
             'badini',
-            $self->cfgfile->path
+            $self->filename->path
         );
     };
 
@@ -67,18 +63,24 @@ This mixin provides a standardized way to load .ini files.
 
 =head1 METHODS
 
-=head2 load_configs()
+=head2 load_config($filename, $handle)
 
-This method will load a config file. It needs the following accessors
-available to work correctly:
+This method will load a .ini style configuration file. It uses the following 
+parameters:
 
- $self->cfgfile
- 
-It initializes this item in the object hash:
+=over 4
 
- $self->{cfg}
+=item B<$filename>
 
-It is best to call this method in the classes init() routine.
+The file name for the configuration file.
+
+=item B<$handle>
+
+An optional name to the accessor that will access the 
+L<https://metacpan.org/pod/Config::IniFiles|Config::IniFiles> 
+object in the current self. This name defaults to 'cfg'.
+
+=back
 
 =head1 SEE ALSO
 
@@ -94,10 +96,12 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Kevin L. Esteb
+Copyright (C) 2014 Kevin L. Esteb
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
