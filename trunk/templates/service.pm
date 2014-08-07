@@ -5,7 +5,7 @@ our $VERSION = '0.01';
 use XAS::Class
   debug   => 0,
   version => $VERSION,
-  base    => 'XAS::Base',
+  base    => 'XAS::Lib::App::Service',
   vars => {
     SERVICE_NAME         => 'XAS_Test',
     SERVICE_DISPLAY_NAME => 'XAS Text',
