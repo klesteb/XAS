@@ -21,59 +21,6 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub key_handler {
-    my ( $kernel, $heap, $keystroke ) = @_[ KERNEL, HEAP, ARG0 ];
- 
-    if ( $keystroke ne -1 ) {
-
-        if ( $keystroke lt ' ' ) {
-
-            $keystroke = '<' . uc( unctrl($keystroke) ) . '>';
-
-        } elsif ( $keystroke =~ /^\d{2,}$/ ) {
-
-            $keystroke = '<' . uc( keyname($keystroke) ) . '>';
-
-        }
-
-        if ( $keystroke eq '<KEY_RESIZE>' ) {
- 
-            # don't handle this here, it's handled in window_resize
-
-            return;
-
-        } elsif ( $keystroke eq '<KEY_MOUSE>' ) {
- 
-            # the mouse is handled differently depending on platform
-
-            my ($id, $x, $y, $z, $bstate) = get_mouse_event();
-            handle_mouse_event($id, $x, $y, $z, $bstate, $heap);
-
-        } else {
- 
-            if ( $keystroke eq '<^L>' ) {
-
-                $kernel->yield('window_resize');
-
-            } elsif ( $keystroke eq '<^C>' ) {
-
-                exit();
-
-            } else {
-
-                $heap->{mainloop}->event_key(
-                    type => 'stroke',
-                    key  => $keystroke,
-                );
-
-            }
-
-        }
-
-    }
-    
-}
-
 sub pre_window_resize {
     my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
  
