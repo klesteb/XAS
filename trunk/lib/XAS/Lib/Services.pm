@@ -1,14 +1,25 @@
 package XAS::Lib::Services;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use POE;
 
-my $mixin;
+my ($mixin, $shutdown);
+
 BEGIN {
-    $mixin = ($^O eq 'MSWin32')
-        ? 'XAS::Lib::Services::Win32'
-        : 'XAS::Lib::Services::Unix';
+
+    if ($^O eq 'MSWin32') {
+
+        $mixin = 'XAS::Lib::Service::Win32';
+        $shutdown = 25;
+
+    } else {
+   
+        $mixin = 'XAS::Lib::Service::Unix';
+        $shutdown = 2;
+
+    }
+
 }
 
 use XAS::Class
@@ -22,7 +33,8 @@ use XAS::Class
   vars => {
     PARAMS => {
       -poll_interval     => { optional => 1, default => 2 },
-      -shutdown_interval => { optional => 1, default => 25 },
+      -shutdown_interval => { optional => 1, default => $shutdown },
+      -alias             => { optional => 1, default => 'services' },
     }
   }
 ;
@@ -58,15 +70,28 @@ sub register {
 
 }
 
-# ----------------------------------------------------------------------
-# Public Events
-# ----------------------------------------------------------------------
-
 sub session_shutdown {
     my $self = shift;
 
     $poe_kernel->delay('poll');
     $self->SUPER::session_shutdown();
+
+}
+
+# ----------------------------------------------------------------------
+# Public Events
+# ----------------------------------------------------------------------
+
+sub inject {
+    my ($self) = $_[OBJECT];
+    my ($action) = $self->validate_params($_[ARG0], [
+        { regex => qr/start|stop|pause|resume/ }
+    ]);
+
+    $self->_current_state(SERVICE_START_PENDING)    if ($action eq 'start');
+    $self->_current_state(SERVICE_STOP_PENDING)     if ($action eq 'stop');
+    $self->_current_start(SERVICE_PAUSE_PENDING)    if ($action eq 'pause');
+    $self->_current_state(SERVICE_CONTINUE_PENDING) if ($action eq 'resume');
 
 }
 
@@ -81,7 +106,8 @@ sub _session_init {
 
     $self->log->debug("$alias: _session_init()");
 
-    $poe_kernel->state('poll', $self,);
+    $poe_kernel->state('poll', $self);
+    $poe_kernel->state('inject', $self);
 
     $self->last_state(SERVICE_START_PENDING);
     $self->_current_state(SERVICE_START_PENDING);
@@ -198,7 +224,7 @@ XAS::Lib::Services - A class to interact with Services
  use XAS::Lib::Services;
 
  my $service = XAS::Lib::Services->new(
-    -alias             => 'service',
+    -alias             => 'services',
     -poll_interval     => 2,
     -shutdown_interval => 25
  );
@@ -263,7 +289,7 @@ parameters:
 
 =item B<-alias>
 
-The name of this POE session.
+The name of this POE session. Defaults to 'services';
 
 =item B<-poll_interval>
 
@@ -291,7 +317,6 @@ This can be an array reference or a text string. The text string may be
 delimited with commas.
 
 =back
-
 
 =head1 SEE ALSO
 
