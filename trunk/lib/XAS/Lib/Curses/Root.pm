@@ -8,7 +8,7 @@ BEGIN {
 
 use POE;
 use Curses;
-use POE::Component::Curses::MainLoop;
+use XAS::Lib::Curses::MainLoop;
 
 use XAS::Class
   debug   => 0,
@@ -83,17 +83,17 @@ sub stack_event {
 
 sub init {
     my $self = shift;
- 
-    my %params = $self->validate_params(@_, {
-        alias => { default  => 'curses' },
-        args  => { optional => 1, type => HASHREF }
+
+    my %params = $self->validate_params(\@_, {
+        -alias => { default  => 'curses' },
+        -args  => { optional => 1, type => HASHREF }
     });
- 
+
     # setup mainloop and root toolkit object
 
-    my $mainloop = POE::Component::Curses::MainLoop->new(
-        session_name => $params{alias},
-        defined $params{args} ? ( args => $params{args} ) : ()
+    my $mainloop = XAS::Lib::Curses::MainLoop->new(
+        -session_name => $params{alias},
+        -args         => $params{args},
     );
 
     POE::Session->create(
