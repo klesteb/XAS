@@ -313,7 +313,7 @@ sub _server_reconnect {
         } else {
 
             $self->log->warn("$alias: shutting down, to many reconnection attempts");
-            $poe_kernel->post($alias, 'shutdown');
+            $poe_kernel->post($alias, 'session_shutdown');
 
         }
 

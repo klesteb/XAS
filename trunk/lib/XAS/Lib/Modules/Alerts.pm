@@ -38,6 +38,7 @@ sub send {
         datetime => dt2db($dt),
         process  => $p->{'process'},
         pid      => $$,
+        tid      => 0,
         msgid    => 0,
         priority => $p->{'priority'},
         facility => $p->{'facility'},

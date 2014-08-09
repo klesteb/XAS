@@ -10,7 +10,7 @@ use XAS::Lib::Stomp::POE::Filter;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Net::Client::POE',
+  base      => 'XAS::Lib::Net::POE::Client',
   accessors => 'stomp',
   vars => {
     PARAMS => {
@@ -542,7 +542,7 @@ object. This is very useful for creating STOMP frames.
 
 =head1 AUTHOR
 
-Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
+Kevin L. Esteb, E<lt>=[@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
