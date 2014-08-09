@@ -24,7 +24,7 @@ use XAS::Class
   }
 ;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -34,7 +34,7 @@ sub load_msgs {
     my $self = shift;
 
     my $messages = $self->class->any_var('MESSAGES');
-    return if (defined($messages->{messages_loaded});
+    return if (defined($messages->{messages_loaded}));
 
     foreach my $path (@INC) {
 

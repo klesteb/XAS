@@ -8,6 +8,7 @@ BEGIN {
 
 use POE;
 use Curses;
+use Params::Validate 'HASHREF';
 use XAS::Lib::Curses::MainLoop;
 
 use XAS::Class
@@ -15,7 +16,13 @@ use XAS::Class
   version => '0.01',
   base    => 'XAS::Base',
   mixin   => $mixin,
-; 
+  vars => {
+    PARAMS => {
+      -alias => { optional => 1, default => 'curses' },
+      -args  => { optional => 1, default => {}, type => HASHREF },  
+    }
+  }
+;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -82,18 +89,21 @@ sub stack_event {
 # ----------------------------------------------------------------------
 
 sub init {
-    my $self = shift;
+    my $class = shift;
 
-    my %params = $self->validate_params(\@_, {
-        -alias => { default  => 'curses' },
-        -args  => { optional => 1, type => HASHREF }
-    });
+    my $self = $class->SUPER::init(@_);
+
+    # initialize POE, it does nothing, but does remove an
+    # annoying error message if POE exits without creating any
+    # sessions
+
+    $poe_kernel->run();
 
     # setup mainloop and root toolkit object
 
     my $mainloop = XAS::Lib::Curses::MainLoop->new(
-        -session_name => $params{alias},
-        -args         => $params{args},
+        -session_name => $self->alias,
+        -args         => $self->args,
     );
 
     POE::Session->create(
@@ -101,7 +111,7 @@ sub init {
             _start => sub {
                 my ( $kernel, $session, $heap ) = @_[ KERNEL, SESSION, HEAP ];
                 # give a name to the session
-                $kernel->alias_set($params{alias});
+                $kernel->alias_set($self->alias);
                 # save the mainloop
                 $heap->{mainloop} = $mainloop;
                 # listen for window resize signals

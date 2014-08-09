@@ -13,11 +13,11 @@ use Curses::Toolkit::Object::Coordinates;
 use XAS::Class
   debug   => 0,
   version => $VERSION,
-  base    => 'XAS::Base'
+  base    => 'XAS::Base',
   vars => {
     PARAMS => {
       -session_name => 1,
-      -args         => { optional => 1, default => {}, type => HASHREF }
+      -args         => { optional => 1, default => {}, type => HASHREF },
     }
   }
 ;
@@ -109,7 +109,7 @@ sub event_resize {
 sub event_key {
     my $self = shift;
 
-    my %params = $self->validate_params(\@_, {   
+    my $params = $self->validate_params(\@_, {   
         type => 1,
         key  => 1,
     });
@@ -118,7 +118,7 @@ sub event_key {
 
     my $event = Curses::Toolkit::Event::Key->new(
         type        => 'stroke',
-        params      => { key => $params{key} },
+        params      => { key => $params->{key} },
         root_window => $self->get_toolkit_root,
     );
 
@@ -131,7 +131,7 @@ sub event_key {
 sub event_mouse {
     my $self = shift;
 
-    my %params = $self->validate_params(\@_, {   
+    my $params = $self->validate_params(\@_, {   
         type   => 1,
         type2  => 1,
         button => 1,
@@ -140,20 +140,22 @@ sub event_mouse {
         z      => 1,
     });
 
-    $params{type} eq 'click' or return;
-    $params{type} = delete $params{type2};
+    $params->{type} eq 'click' or return;
+    $params->{type} = delete $params->{type2};
 
-    $params{coordinates} = Curses::Toolkit::Object::Coordinates->new(
-        x1 => $params{x},
-        x2 => $params{x},
-        y1 => $params{y},
-        y2 => $params{y},
+    $params->{coordinates} = Curses::Toolkit::Object::Coordinates->new(
+        x1 => $params->{x},
+        x2 => $params->{x},
+        y1 => $params->{y},
+        y2 => $params->{y},
     );
 
-    delete @params{qw(x y z)};
+    delete $params->{x};
+    delete $params->{y};
+    delete $params->{z};
 
     my $event = Curses::Toolkit::Event::Mouse::Click->new( 
-        %params, 
+        %$params, 
         root_window => $self->get_toolkit_root 
     );
 
@@ -179,7 +181,7 @@ sub event_generic {
 sub init {
     my $class = shift;
 
-    my $self = $class->SUPER::(@_);
+    my $self = $class->SUPER::init(@_);
 
     $self->{redraw_needed} = 0;
 
