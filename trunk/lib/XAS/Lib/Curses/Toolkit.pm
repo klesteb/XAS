@@ -1,4 +1,4 @@
-package XAS::Lib::Curses::MainLoop;
+package XAS::Lib::Curses::Toolkit;
 
 our $VERSION = '0.01';
 
@@ -16,7 +16,7 @@ use XAS::Class
   base    => 'XAS::Base',
   vars => {
     PARAMS => {
-      -session_name => 1,
+      -session_name => { optional => 1, default => 'curses' },
       -args         => { optional => 1, default => {}, type => HASHREF },
     }
   }
@@ -198,30 +198,143 @@ __END__
 
 =head1 NAME
 
-POE::Component::Curses::MainLoop - <FIXME>
-
-=head1 VERSION
-
-version 0.211
+XAS::Lib::Curses::Toolkit - A class for the XAS environment
 
 =head1 SYNOPSIS
 
-This module is not for you !
+ use POE;
+ use XAS::Lib::Curses::Root;
+ use XAS::Lib::Curses::Toolkit;
 
-You should not use this module directly. It's used by L<POE::Component::Curses>
-as a MainLoop interface to L<Curses::Toolkit>
+ my $root = XAS::Lib::Curses::Root->new(
+     -interface => XAS::Lib::Curses::Toolkit->new(
+         -session_name => 'curses',
+         -args => {}
+     )
+ );
 
-Please look at L<POE::Component::Curses>. Thanks !
+ $root->add_window(...);
+
+ POE::Kernel->run();
+
+=head1 DESCRIPTION
+
+This is the interface module between the event loop provided by 
+L<XAS::Lib::Curses::Root|XAS::Lib::Curses::Root> and the Curses::Toolkit. 
+
+=head1 METHODS
+
+=head2 new
+
+This method initializes the interface. It takes the following parameters:
+
+=over 4
+
+=item B<-session_name>
+
+The session name of the event loop. Defaults to 'curses'.
+
+=item B<-args>
+
+An optional set of args to pass to the Curses::Toolkit.
+
+=back
+
+=head2 get_session_name
+
+Returns the session name of the event loop.
+
+=head2 set_session_name($name)
+
+Sets the session name of the event loop. Not very useful as it dosen't actually
+change the event loops session name.
+
+=head2 get_toolkit_root
+
+Returns a handle to the Curses::Toolkit.
+
+=head2 get_redraw_needed
+
+Returns wither a redraw is needed.
+
+=head2 set_redraw_needed
+
+Toggles wither a redraw is needed.
+
+=head2 redraw_needed
+
+A callback to the event loop to issue a 'redraw' event.
+
+=head2 add_delay
+
+A callback to the event loop to add a delay handler.
+
+=head2 stack_event
+
+A callback to the event loop to issue a 'stack_event' event.
+
+=head2 event_rebuild_all
+
+A callforward from the event loop to rebuild the screen.
+
+=head2 event_redraw
+
+A callforward from the event loop to redraw the screen.
+
+=head2 event_resize
+
+A callforward from the event loop that the screen has been resized. 
+
+=head2 event_key(type => '', key => '')
+
+A callforward when a key has been pressed.
+
+=over 4
+
+=item B<type>
+
+The event type. Should be 'stroke'.
+
+=item B<key>
+
+The key that was pressed.
+
+=back
+
+=head2 event_mouse(type => '', type2 => '', button => '', x => '', y => '', z =>'')
+
+A callforward from the event loop for when the mouse has been used.
+
+The named parameters are what is returned by the Curses getmouse() function.
+
+=head2 event_generic(@_)
+
+A callforward from the event loop for a generic event. 
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=item L<Curses::Toolkit|https://metacpan.org/pod/Curses::Toolkit>
+
+=item L<POE::Component::Curses|https://metacpan.org/pod/POE::Component::Curses>
+
+=back
 
 =head1 AUTHOR
 
-Damien "dams" Krotkine
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Damien "dams" Krotkine.
+Copyright (C) 2014 Kevin L. Esteb
 
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut

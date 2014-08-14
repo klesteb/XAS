@@ -232,14 +232,14 @@ following:
  4) copy the .dll file to \strawberry\c\bin
 
 That's it, PDCurses is now installed. Now for the fun part. Actually making it 
-work correctly with Curses.pm. Start by downloading it from CPAN. Do
+work correctly with Curses.pm. Start by downloading Curses.pm from CPAN. Do
 not do a default install.
 
-Curses.pm is designed to be used with Ncurses. Which is a standard 
+Curses.pm is designed to be used with NCurses. Which is a standard 
 install on most Linuxes and some Unixes. PDCurses is "compatible" with
 Ncurses, with the exception of the mouse handling functions. 
 
-PDCurses supports the Ncurses mouse handling and an older set of
+PDCurses supports the NCurses mouse handling and an older set of
 SYSV mouse handling routines. The problem lies with the getmouse() call. 
 This is a name clash with the Ncurses routine of the same name. PDCurses 
 solves this by providing a nc_getmouse() call. Curses.pm doesn't check for 
