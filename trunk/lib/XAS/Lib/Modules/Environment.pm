@@ -231,9 +231,12 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, [
-                {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
-            ]);
+            my ($p) = $self->validate_params(\@_, 
+                [
+                    {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
+                ],
+                "xas.lib.modules.environment.$datum"
+            );
 
             $self->{$datum} = $p if (defined($p));
 
@@ -247,9 +250,12 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, [
-                {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
-            ]);
+            my ($p) = $self->validate_params(\@_, 
+                [
+                    {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
+                ],
+                "xas.lib.modules.environment.$datum"
+            );
 
             $self->{$datum} = $p if (defined($p));
 

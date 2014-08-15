@@ -168,22 +168,9 @@ sub _auto_load {
 
 }
 
-sub init {
+sub _create_methods {
     my $self = shift;
-
-    # load the messages
-    
-    $self->load_msgs();
-
-    # process PARAMS
-
-    my $class = $self->class;
-    my $params = $self->class->hash_vars('PARAMS');
-    my $p = $self->validate_params(\@_, $params, $class);
-
-    # build our object
-
-    $self->{config} = $p;
+    my $p = shift;
 
     no strict "refs";               # to register new methods in package
     no warnings;                    # turn off warnings
@@ -199,6 +186,25 @@ sub init {
 
     }
 
+}
+
+sub init {
+    my $self = shift;
+
+    # load the messages
+
+    $self->load_msgs();
+
+    # process PARAMS
+
+    my $class = $self->class;
+    my $params = $self->class->hash_vars('PARAMS');
+    my $p = $self->validate_params(\@_, $params, $class);
+
+    # build our object
+
+    $self->{config} = $p;
+    $self->_create_methods($p);
     $self->debugging($self->xdebug);
 
     return $self;
