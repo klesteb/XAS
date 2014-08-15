@@ -34,7 +34,10 @@ my @button_events = qw(
 sub startup {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
+    slk_init(1) if ($self->softkeys);
+
     # now listen to the keys
+
     $heap->{console} = POE::Wheel::Curses->new(
         InputEvent => 'key_handler',
     );

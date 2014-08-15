@@ -17,6 +17,7 @@ use XAS::Class
   vars => {
     PARAMS => {
       -interface => 1,
+      -softkeys  => { optional => 1, default => 0 },
       -alias     => { optional => 1, default => 'curses' },
     }
   }

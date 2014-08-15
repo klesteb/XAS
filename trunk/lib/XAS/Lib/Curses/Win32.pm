@@ -31,6 +31,8 @@ sub startup {
     my $junk = 0;
     my $event = ALL_MOUSE_EVENTS;
 
+    slk_init(1) if ($self->softkeys);
+
     initscr();
 
     if (has_color()) {
