@@ -35,21 +35,36 @@ sub read {
     ]);
 
     my $packet;
+    my $locked = 0;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    try {
 
-        $packet = $self->read_packet($filename);
-        $self->lockmgr->unlock_directory($self->directory);
+        if ($self->lockmgr->lock_directory($self->directory)) {
 
-    } else { 
+            $locked = 1;
 
-        $self->throw_msg(
-            dotid($self->class) . '.read.lock_error',
-            'lock_error', 
-            $self->directory->path
-        );
+            $packet = $self->read_packet($filename);
+            $self->lockmgr->unlock_directory($self->directory);
 
-    }
+        } else { 
+
+            $self->throw_msg(
+                dotid($self->class) . '.read.lock_error',
+                'lock_error', 
+                $self->directory->path
+            );
+
+        }
+        
+    } catch {
+
+        my $ex = $_;
+
+        $self->lockmgr->unlock_directory($self->directory) if ($locked);
+
+        die $ex;
+
+    };
 
     return $packet;
 

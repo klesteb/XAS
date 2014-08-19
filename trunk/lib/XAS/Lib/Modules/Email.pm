@@ -32,11 +32,16 @@ sub send {
 
     try {
 
-        MIME::Lite->send(
-            $self->env->mxmailer, 
-            $self->env->mxserver, 
-            Timeout => $self->env->mxtimeout
-        );
+        if ($self->env-mxmailer eq 'smtp') {
+
+            MIME::Lite->send(
+                $self->env->mxmailer, 
+                $self->env->mxserver, 
+                Timeout => $self->env->mxtimeout,
+                Port    => $self->env->mxport,
+            );
+
+        }
 
         $msg = MIME::Lite->new(
             To      => $p->{'to'},

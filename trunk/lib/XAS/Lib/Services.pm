@@ -52,6 +52,7 @@ sub register {
 
         foreach my $session (@$sessions) {
 
+            next if ($session eq '');
             push(@{$self->{sessions}}, $session);
 
         }
@@ -62,6 +63,7 @@ sub register {
 
         foreach my $session (@parts) {
 
+            next if ($session eq '');
             push(@{$self->{sessions}}, $session);
 
         }

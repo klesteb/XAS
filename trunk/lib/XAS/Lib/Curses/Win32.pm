@@ -26,7 +26,7 @@ my @button_events = qw(
 # ----------------------------------------------------------------------
 
 sub startup {
-    my ( $kernel, $session, $heap ) = @_[ KERNEL, SESSION, HEAP ];
+    my ( $kernel, $heap, $self ) = @_[ KERNEL, HEAP, OBJECT ];
 
     my $junk = 0;
     my $event = ALL_MOUSE_EVENTS;

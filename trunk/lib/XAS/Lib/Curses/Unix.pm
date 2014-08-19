@@ -32,7 +32,7 @@ my @button_events = qw(
 # ----------------------------------------------------------------------
 
 sub startup {
-    my ($kernel, $heap) = @_[KERNEL, HEAP];
+    my ($kernel, $heap, $self) = @_[KERNEL, HEAP, OBJECT];
 
     slk_init(1) if ($self->softkeys);
 
