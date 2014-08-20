@@ -110,6 +110,8 @@ sub init {
                 $kernel->alias_set($self->alias);
                 # save the mainloop
                 $heap->{mainloop} = $mainloop;
+                # set softkeys usage
+                $heap->{softkeys} = $self->softkeys;
                 # listen for window resize signals
                 $kernel->sig( WINCH => 'pre_window_resize' );
                 # start keyboard/mouse handler

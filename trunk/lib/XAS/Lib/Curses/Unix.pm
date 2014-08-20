@@ -32,9 +32,9 @@ my @button_events = qw(
 # ----------------------------------------------------------------------
 
 sub startup {
-    my ($kernel, $heap, $self) = @_[KERNEL, HEAP, OBJECT];
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    slk_init(1) if ($self->softkeys);
+    slk_init(1) if ($heap->{'softkeys'});
 
     # now listen to the keys
 

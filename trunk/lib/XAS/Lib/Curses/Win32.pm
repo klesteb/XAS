@@ -26,12 +26,12 @@ my @button_events = qw(
 # ----------------------------------------------------------------------
 
 sub startup {
-    my ( $kernel, $heap, $self ) = @_[ KERNEL, HEAP, OBJECT ];
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
 
     my $junk = 0;
     my $event = ALL_MOUSE_EVENTS;
 
-    slk_init(1) if ($self->softkeys);
+    slk_init(1) if ($heap->{'softkeys'});
 
     initscr();
 
