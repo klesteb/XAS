@@ -35,36 +35,33 @@ sub read {
     ]);
 
     my $packet;
-    my $locked = 0;
 
-    try {
+    if ($self->lockmgr->lock_directory($self->directory)) {
 
-        if ($self->lockmgr->lock_directory($self->directory)) {
-
-            $locked = 1;
+        try {
 
             $packet = $self->read_packet($filename);
             $self->lockmgr->unlock_directory($self->directory);
 
-        } else { 
+        } catch {
 
-            $self->throw_msg(
-                dotid($self->class) . '.read.lock_error',
-                'lock_error', 
-                $self->directory->path
-            );
+            my $ex = $_;
 
-        }
-        
-    } catch {
+            $self->lockmgr->unlock_directory($self->directory);
 
-        my $ex = $_;
+            die $ex;
 
-        $self->lockmgr->unlock_directory($self->directory) if ($locked);
+        };
 
-        die $ex;
+    } else { 
 
-    };
+        $self->throw_msg(
+            dotid($self->class) . '.read.lock_error',
+            'lock_error', 
+            $self->directory->path
+        );
+
+    }
 
     return $packet;
 
@@ -79,10 +76,22 @@ sub write {
 
     if ($self->lockmgr->lock_directory($self->directory)) {
 
-        $seqnum = $self->sequence();
+        try {
 
-        $self->write_packet($packet, $seqnum);
-        $self->lockmgr->unlock_directory($self->directory);
+            $seqnum = $self->sequence();
+
+            $self->write_packet($packet, $seqnum);
+            $self->lockmgr->unlock_directory($self->directory);
+
+        } catch {
+
+            my $ex = $_;
+
+            $self->lockmgr->unlock_directory($self->directory);
+
+            die $ex;
+
+        }
 
     } else { 
 
@@ -125,7 +134,6 @@ sub scan {
 
 sub delete {
     my $self = shift;
-
     my ($file) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' },
     ]);
@@ -135,16 +143,17 @@ sub delete {
         try {
 
             $file->delete;
+            $self->lockmgr->unlock_directory($self->directory);
 
         } catch {
 
             my $ex = $_;
 
-            $self->exception_handler($ex);
+            $self->lockmgr->unlock_directory($self->directory);
+
+            die $ex;
 
         };
-
-        $self->lockmgr->unlock_directory($self->directory);
 
     } else { 
 
