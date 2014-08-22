@@ -115,7 +115,7 @@ sub init {
                 # listen for window resize signals
                 $kernel->sig( WINCH => 'pre_window_resize' );
                 # start keyboard/mouse handler
-                $kernel->yield('startup');
+                $kernel->call('startup');
                 # ask the mainloop to rebuild_all coordinates
                 $kernel->yield('rebuild_all');
             },
