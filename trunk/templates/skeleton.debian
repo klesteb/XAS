@@ -28,6 +28,10 @@ SCRIPTNAME=/etc/init.d/$NAME
 
 [ -x "$PROGRAM" ] || exit 0
 
+# Load the XAS environment
+
+[ -r /etc/profile.d/xas.sh ] && . /etc/profile.d/xas.sh
+
 # Read configuration variable file if it is present
 
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME

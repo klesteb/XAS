@@ -19,14 +19,16 @@ PIDFILE="/var/run/xas/$NAME.pid"
 LOGFILE="/var/log/xas/$NAME.log"
 CFGFILE="/etc/xas/$NAME.ini"
 
+# Load the XAS environment
+
+if [ -f /etc/profile.d/xas.sh ]; then
+    . /etc/profile.d/xas.sh
+fi
+
 # integrate the overrides
 
 if [ -f /etc/sysconfig/$NAME ];then
     . /etc/sysconfig/$NAME
-fi
-
-if [ -f /etc/profile.d/xas.sh ]; then
-    . /etc/profile.d/xas.sh
 fi
 
 PROGRAM="/usr/sbin/$NAME"
