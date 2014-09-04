@@ -1,8 +1,9 @@
 package XAS::Lib::Net::Client;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use IO::Socket;
+use Params::Validate ':all';
 
 use XAS::Class
   debug     => 0,
@@ -11,12 +12,20 @@ use XAS::Class
   utils     => 'trim',
   accessors => 'handle',
   mutators  => 'timeout',
+  import    => 'class',
+  messages => {
+    connection => "unable to connect to %s on port %s, reason: %s",
+    network    => "a network communication error has occured, reason: %s",
+  },
   vars => {
     PARAMS => {
       -port    => 1,
       -host    => 1,
       -timeout => { optional => 1, default => 60 },
-    }
+      -eol     => { optional => 1, default => "\012\015" },
+    },
+    ERRNO  => 0,
+    ERRSTR => '',
   }
 ;
 
@@ -29,16 +38,30 @@ use XAS::Class
 sub connect {
     my $self = shift;
 
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
     $self->{handle} = IO::Socket::INET->new(
         Proto    => 'tcp',
         PeerPort => $self->port,
         PeerAddr => $self->host,
-    ) or $self->throw_msg(
-        'xas.lib.net.client.connect.noconnect',
-        'connection', 
-        $self->host, 
-        $self->port
-    );
+    ) or do {
+
+        my $errno = $! + 0;
+        my $errstr = $!;
+
+        $self->class->var('ERRNO', $errno);
+        $self->class->var('ERRSTR', $errstr);
+
+        $self->throw_msg(
+            'xas.lib.net.client.connect.noconnect',
+            'connection',
+            $self->host,
+            $self->port,
+            $errstr
+        );
+
+    };
 
 }
 
@@ -56,26 +79,39 @@ sub disconnect {
 sub get {
     my $self = shift;
 
-    my $packet;
+    my $packet = '';
     my $timeout = $self->handle->timeout;
 
     $self->handle->timeout($self->timeout) if ($self->timeout);
 
     # temporarily set the INPUT_RECORD_SEPERATOR
 
-    local $/ = "\012\015";
+    local $/ = $self->eol;
 
-    $self->handle->clearerr;
-    $packet = $self->handle->getline();
+    $self->handle->clearerr();
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+    $packet = $self->handle->getline() || '';
+
     chomp($packet);
 
-#    $self->log->debug(hexdump($packet));
+#    $self->log('debug', hexdump($packet));
 
-    $self->throw_msg(
-        'xas.lib.net.client.get', 
-        'network',
-        $!
-    ) if ($self->handle->error);
+    if ($self->handle->error) {
+
+        my $errno = $! + 0;
+        my $errstr = $!;
+
+        $self->class->var('ERRNO', $errno);
+        $self->class->var('ERRSTR', $errstr);
+
+        $self->throw_msg(
+            'xas.lib.net.client.get',
+            'network',
+            $errstr
+        );
+
+    }
 
     $self->handle->timeout($timeout);
 
@@ -85,28 +121,65 @@ sub get {
 
 sub put {
     my $self = shift;
-    
-    my ($packet) = $self->validate_params(\@_, [1]);
+    my ($packet) = validate_pos(@_, 1, );
+
     my $timeout = $self->handle->timeout;
 
     $self->handle->timeout($self->timeout) if ($self->timeout);
-    $self->handle->clearerr;
-    $self->handle->printf("%s\012\015", trim($packet));
+    $self->handle->clearerr();
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+    $self->handle->printf("%s%s", trim($packet), $self->eol);
 
-    $self->throw_msg(
-        'xas.lib.net.client.put', 
-        'network',
-        $!
-    ) if ($self->handle->error);
+    if ($self->handle->error) {
+
+        my $errno = $! + 0;
+        my $errstr = $!;
+
+        $self->class->var('ERRNO', $errno);
+        $self->class->var('ERRSTR', $errstr);
+
+        $self->throw_msg(
+            'xas.lib.net.client.put',
+            'network',
+            $errstr
+        );
+
+    }
 
     $self->handle->timeout($timeout);
 
 }
 
-sub setup {
-    my $self = shift;
+sub errno {
+    my ($class, $value) = validate_pos(@_,
+        1,
+        { optional => 1, default => undef }
+    );
 
-    warn "setup() needs to be overridden\n";
+    if (defined($value)) {
+
+        class->var('ERRNO', $value);
+
+    }
+
+    return class->var('ERRNO');
+
+}
+
+sub errstr {
+    my ($class, $value) = validate_pos(@_,
+        1,
+        { optional => 1, default => undef }
+    );
+
+    if (defined($value)) {
+
+        class->var('ERRSTR', $value);
+
+    }
+
+    return class->var('ERRSTR');
 
 }
 
@@ -131,15 +204,15 @@ XAS::Lib::Net::Client - The network client interface for the XAS environment
 
 =head1 DESCRIPTION
 
-This module implements a simple text orientated network protocol. All "packets" 
+This module implements a simple text orientated network protocol. All "packets"
 will have an explicit "\012\015" appended. This delineates the "packets" and is
-network neutral. No attempt is made to decipher these "packets". 
+network neutral. No attempt is made to decipher these "packets".
 
 =head1 METHODS
 
 =head2 new
 
-This initializes the module and can take three parameters. It doesn't actually
+This initializes the module and can take these parameters. It doesn't actually
 make a network connection.
 
 =over 4
@@ -157,6 +230,10 @@ a host name.
 
 An optional timeout, it defaults to 60 seconds.
 
+=item B<-eol>
+
+An optional eol. The default is "\012\015". Which is network netural.
+
 =back
 
 =head2 connect
@@ -169,19 +246,27 @@ Disconnect from the defined socket.
 
 =head2 put($packet)
 
-This writes a "packet" to the socket. 
+This writes a "packet" to the socket.
 
 =over 4
 
 =item B<$packet>
 
-The "packet" to send over the socket. 
+The "packet" to send over the socket.
 
 =back
 
 =head2 get
 
-This reads a "packet" from the socket. 
+This reads a "packet" from the socket.
+
+=head2 errno
+
+A class method to return the error number code.
+
+=head2 errstr
+
+A class method to return the error number string.
 
 =head1 SEE ALSO
 
@@ -194,8 +279,6 @@ This reads a "packet" from the socket.
 =head1 AUTHOR
 
 Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
-
-=head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014 Kevin L. Esteb
 
