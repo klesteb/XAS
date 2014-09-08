@@ -3,20 +3,17 @@ package XAS::Lib::Net::Client;
 our $VERSION = '0.03';
 
 use IO::Socket;
-use Params::Validate ':all';
+use IO::Select;
+use Errno ':POSIX';
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  utils     => 'trim',
-  accessors => 'handle',
+  utils     => 'trim dotid',
+  accessors => 'handle select attempts',
   mutators  => 'timeout',
   import    => 'class',
-  messages => {
-    connection => "unable to connect to %s on port %s, reason: %s",
-    network    => "a network communication error has occured, reason: %s",
-  },
   vars => {
     PARAMS => {
       -port    => 1,
@@ -28,6 +25,7 @@ use XAS::Class
     ERRSTR => '',
   }
 ;
+
 
 #use Data::Hexdumper;
 
@@ -45,6 +43,7 @@ sub connect {
         Proto    => 'tcp',
         PeerPort => $self->port,
         PeerAddr => $self->host,
+        Timeout  => $self->timeout,
     ) or do {
 
         my $errno = $! + 0;
@@ -54,7 +53,7 @@ sub connect {
         $self->class->var('ERRSTR', $errstr);
 
         $self->throw_msg(
-            'xas.lib.net.client.connect.noconnect',
+            dotid($self->class) . '.connect.noconnect',
             'connection',
             $self->host,
             $self->port,
@@ -62,6 +61,9 @@ sub connect {
         );
 
     };
+
+    $self->handle->blocking(0);
+    $self->{select} = IO::Select->new($self->handle);
 
 }
 
@@ -79,41 +81,70 @@ sub disconnect {
 sub get {
     my $self = shift;
 
-    my $packet = '';
+    my $packet  = '';
+    my $counter = 0;
+    my $working = 1;
     my $timeout = $self->handle->timeout;
 
-    $self->handle->timeout($self->timeout) if ($self->timeout);
-
-    # temporarily set the INPUT_RECORD_SEPERATOR
-
-    local $/ = $self->eol;
-
-    $self->handle->clearerr();
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
-    $packet = $self->handle->getline() || '';
 
-    chomp($packet);
+    while ($working) {
 
-#    $self->log('debug', hexdump($packet));
+        my $buf;
 
-    if ($self->handle->error) {
+        $self->handle->clearerr();
 
-        my $errno = $! + 0;
-        my $errstr = $!;
+        if ($self->select->can_read($timeout)) {
 
-        $self->class->var('ERRNO', $errno);
-        $self->class->var('ERRSTR', $errstr);
+            if ($self->handle->read($buf, 512)) {
 
-        $self->throw_msg(
-            'xas.lib.net.client.get',
-            'network',
-            $errstr
-        );
+                $self->{buffer} .= $buf;
+
+                if ($packet = $self->_get_line()) {
+
+                    $working = 0;
+
+                }
+
+            } else {
+
+                if ($self->handle->error) {
+
+                    my $errno = $! + 0;
+                    my $errstr = $!;
+
+                    $self->log->debug("get: errno = $errno");
+
+                    if ($errno == EAGIN) {
+
+                        $counter++;
+                        $working = 0 if ($counter > $self->attempts);
+
+                    } else {
+
+                        $self->class->var('ERRNO', $errno);
+                        $self->class->var('ERRSTR', $errstr);
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.get',
+                            'network',
+                            $errstr
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $working = 0;
+
+        }
 
     }
-
-    $self->handle->timeout($timeout);
 
     return $packet;
 
@@ -121,63 +152,89 @@ sub get {
 
 sub put {
     my $self = shift;
-    my ($packet) = validate_pos(@_, 1, );
+    my ($packet) = $self->validate_params(\@_, [1]);
 
-    my $timeout = $self->handle->timeout;
+    my $counter = 0;
+    my $working = 1;
+    my $written = 0;
+    my $bufsize = length($packet);
+    my $timeout = $self->timeout;
 
-    $self->handle->timeout($self->timeout) if ($self->timeout);
-    $self->handle->clearerr();
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
-    $self->handle->printf("%s%s", trim($packet), $self->eol);
 
-    if ($self->handle->error) {
+    while ($working) {
 
-        my $errno = $! + 0;
-        my $errstr = $!;
+        $self->handle->cleaerr();
 
-        $self->class->var('ERRNO', $errno);
-        $self->class->var('ERRSTR', $errstr);
+        if ($self->select->can_write($timeout)) {
 
-        $self->throw_msg(
-            'xas.lib.net.client.put',
-            'network',
-            $errstr
-        );
+            if (my $bytes = $self->handle->write($packet, $bufsize)) {
+
+                $written += $bytes;
+                $packet = substr($packet, $bytes);
+                $working = 0 if ($written >= $bufsize);
+
+            } else {
+
+                if ($self->handle->error) {
+
+                    $errno = $! + 0;
+                    $errstr = $!;
+
+                    if ($errno = EAGAIN) {
+
+                        $counter++;
+                        $working = 0 if ($counter > $self->attempts);
+
+                    } else {
+
+                        $self->class->var('ERRNO', $errno);
+                        $self->class->var('ERRSTR', $errstr);
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.put',
+                            'network',
+                            $errstr
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $working = 0;
+
+        }
 
     }
 
-    $self->handle->timeout($timeout);
+    return $written;
 
 }
 
 sub errno {
-    my ($class, $value) = validate_pos(@_,
-        1,
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
         { optional => 1, default => undef }
-    );
+    ]);
 
-    if (defined($value)) {
-
-        class->var('ERRNO', $value);
-
-    }
+    class->var('ERRNO', $value) if (defined($value));
 
     return class->var('ERRNO');
 
 }
 
 sub errstr {
-    my ($class, $value) = validate_pos(@_,
-        1,
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
         { optional => 1, default => undef }
-    );
+    ]);
 
-    if (defined($value)) {
-
-        class->var('ERRSTR', $value);
-
-    }
+    class->var('ERRSTR', $value) if (defined($value));
 
     return class->var('ERRSTR');
 
@@ -186,6 +243,52 @@ sub errstr {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub _slurp {
+    my $self = shift;
+    my $pos  = shift;
+
+    my $buffer;
+
+    if (buffer = substr($self->{buffer}, 0, $pos)) {
+
+        substr($self->{buffer}, 0, $pos) = '';
+
+    }
+
+    return $buffer;
+
+}
+
+sub _get_line {
+    my $self = shift;
+
+    my $pos;
+    my $buffer;
+    my $eol = $self->eol;
+
+    if ($self->{buffer} =~ m/$eol/g) {
+
+        $pos = pos($self->{buffer});
+        $buffer = $self->_slurp($pos);
+
+    }
+
+    return $buffer;
+
+}
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    $self->{attempts} = 5;
+    $self->{buffer}   = '';
+
+    return $self;
+
+}
 
 1;
 
@@ -246,7 +349,7 @@ Disconnect from the defined socket.
 
 =head2 put($packet)
 
-This writes a "packet" to the socket.
+This writes a "packet" to the socket. Returns the number of bytes written.
 
 =over 4
 
