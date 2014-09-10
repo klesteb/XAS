@@ -46,7 +46,7 @@ sub connect {
         Timeout  => $self->timeout,
     ) or do {
 
-        my $errno = $! + 0;
+        my $errno  = $! + 0;
         my $errstr = $!;
 
         $self->class->var('ERRNO', $errno);
@@ -97,7 +97,7 @@ sub get {
 
         if ($self->select->can_read($timeout)) {
 
-            if ($self->handle->read($buf, 512)) {
+            if ($self->handle->sysread($buf, 512)) {
 
                 $self->{buffer} .= $buf;
 
@@ -111,7 +111,7 @@ sub get {
 
                 if ($self->handle->error) {
 
-                    my $errno = $! + 0;
+                    my $errno  = $! + 0;
                     my $errstr = $!;
 
                     $self->log->debug("get: errno = $errno");
@@ -157,8 +157,9 @@ sub put {
     my $counter = 0;
     my $working = 1;
     my $written = 0;
-    my $bufsize = length($packet);
     my $timeout = $self->timeout;
+    my $data = sprintf("%s%s", trim($packet), $self->eol);
+    my $bufsize = length($data);
 
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
@@ -169,18 +170,18 @@ sub put {
 
         if ($self->select->can_write($timeout)) {
 
-            if (my $bytes = $self->handle->write($packet, $bufsize)) {
+            if (my $bytes = $self->handle->syswrite($data, $bufsize)) {
 
                 $written += $bytes;
-                $packet = substr($packet, $bytes);
+                $data = substr($data, $bytes);
                 $working = 0 if ($written >= $bufsize);
 
             } else {
 
                 if ($self->handle->error) {
 
-                    $errno = $! + 0;
-                    $errstr = $!;
+                    my $errno  = $! + 0;
+                    my $errstr = $!;
 
                     if ($errno = EAGAIN) {
 
@@ -238,6 +239,11 @@ sub errstr {
 
     return class->var('ERRSTR');
 
+}
+
+sub setup {
+    my $self = shift;
+    
 }
 
 # ----------------------------------------------------------------------
