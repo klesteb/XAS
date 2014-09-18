@@ -25,7 +25,7 @@ BEGIN {
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Session',
+  base      => 'XAS::Lib::POE::Session',
   mixin     => $mixin,
   accessors => 'sessions',
   mutators  => 'last_state',

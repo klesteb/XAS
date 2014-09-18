@@ -46,11 +46,12 @@ lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Server.pm
 lib/XAS/Lib/Net/Client.pm
 lib/XAS/Lib/Net/POE/Client.pm
-lib/XAS/Lib/Service.pm
+lib/XAS/Lib/POE/Service.pm
+lib/XAS/Lib/POE/Session.pm
+lib/XAS/Lib/POE/PubSub.pm
 lib/XAS/Lib/Services.pm
 lib/XAS/Lib/Services/Unix.pm
 lib/XAS/Lib/Services/Win32.pm
-lib/XAS/Lib/Session.pm
 lib/XAS/Lib/SSH/Client.pm
 lib/XAS/Lib/SSH/Server.pm
 lib/XAS/Lib/Stomp/Frame.pm

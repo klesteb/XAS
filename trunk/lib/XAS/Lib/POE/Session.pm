@@ -1,4 +1,4 @@
-package XAS::Lib::Session;
+package XAS::Lib::POE::Session;
 
 our $VERSION = '0.03';
 
