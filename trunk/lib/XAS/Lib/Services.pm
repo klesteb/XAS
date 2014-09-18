@@ -84,19 +84,6 @@ sub session_shutdown {
 # Public Events
 # ----------------------------------------------------------------------
 
-sub inject {
-    my ($self) = $_[OBJECT];
-    my ($action) = $self->validate_params($_[ARG0], [
-        { regex => qr/start|stop|pause|resume/ }
-    ]);
-
-    $self->_current_state(SERVICE_START_PENDING)    if ($action eq 'start');
-    $self->_current_state(SERVICE_STOP_PENDING)     if ($action eq 'stop');
-    $self->_current_start(SERVICE_PAUSE_PENDING)    if ($action eq 'pause');
-    $self->_current_state(SERVICE_CONTINUE_PENDING) if ($action eq 'resume');
-
-}
-
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------

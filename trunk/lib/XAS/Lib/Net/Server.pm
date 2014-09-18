@@ -11,7 +11,7 @@ use POE::Wheel::SocketFactory;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Service',
+  base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Keepalive',
   utils     => 'weaken params',
   accessors => 'session',
