@@ -157,14 +157,14 @@ sub poll {
 
         if ($self->last_state == SERVICE_RUNNING) {
 
-            $self->_service_running();
+            $self->_service_idle();
             $self->last_state(SERVICE_RUNNING);
 
         }
 
     } elsif ($state == SERVICE_STOPPED) {
 
-        $self->log->warn("$alias: state = SERVICE_STOPPED");
+        $self->log->debug("$alias: state = SERVICE_STOPPED");
 
         # stopped...
 
@@ -174,7 +174,7 @@ sub poll {
 
     } elsif ($state == SERVICE_CONTROL_SHUTDOWN) {
 
-        $self->log->warn("$alias: state = SERVICE_CONTROL_SHUTDOWN");
+        $self->log->debug("$alias: state = SERVICE_CONTROL_SHUTDOWN");
 
         # shutdown...
 

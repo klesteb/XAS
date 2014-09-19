@@ -10,12 +10,12 @@ BEGIN {
 
     if ($^O eq 'MSWin32') {
 
-        $mixin = 'XAS::Lib::Service::Win32';
+        $mixin = 'XAS::Lib::Services::Win32';
         $shutdown = 25;
 
     } else {
    
-        $mixin = 'XAS::Lib::Service::Unix';
+        $mixin = 'XAS::Lib::Services::Unix';
         $shutdown = 2;
 
     }
@@ -39,29 +39,30 @@ use XAS::Class
   }
 ;
 
+#use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
 sub register {
     my $self = shift;
+    my $sessions = $self->validate_params(\@_, [
+        (0) x (@_)
+    ]);
 
-    my ($sessions) = $self->validate_params(\@_, [1]);
+    foreach my $session (@$sessions) {
 
-    if (ref($sessions) eq 'ARRAYREF') {
+        if (my @parts = split(DELIMITER, $session)) {
 
-        foreach my $session (@$sessions) {
+            foreach my $part (@parts) {
 
-            next if ($session eq '');
-            push(@{$self->{sessions}}, $session);
+                next if ($part eq '');
+                push(@{$self->{sessions}}, $part);
 
-        }
+            }
 
-    } else {
-
-        my @parts = split(DELIMITER, $sessions);
-
-        foreach my $session (@parts) {
+        } else {
 
             next if ($session eq '');
             push(@{$self->{sessions}}, $session);
@@ -96,7 +97,6 @@ sub _session_init {
     $self->log->debug("$alias: _session_init()");
 
     $poe_kernel->state('poll', $self);
-    $poe_kernel->state('inject', $self);
 
     $self->last_state(SERVICE_START_PENDING);
     $self->_current_state(SERVICE_START_PENDING);

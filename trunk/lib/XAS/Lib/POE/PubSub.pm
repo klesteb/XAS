@@ -10,13 +10,15 @@ use XAS::Class
   base    => 'XAS::Singleton',
 ;
 
+#use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
 sub subscribe {
     my $self = shift;
-    my ($session, $channel) = self->validate_params(\@_, [
+    my ($session, $channel) = $self->validate_params(\@_, [
         1,
         { optional => 1, default => 'default' }
     ]);
@@ -38,15 +40,19 @@ sub unsubscribe {
 
 sub publish {
     my $self = shift;
-    my ($event, $channel, @args) = $self->validate_params(\@_, [
-       1,
-       { optional => 1, default => 'default' },
-       (0) x (@_ - 2) 
-    ]);
+    my $p = $self->validate_params(\@_, {
+       -event   => 1,
+       -args    => { optional => 1, default => undef },
+       -channel => { optional => 1, default => 'default' },
+    });
+
+    my $event   = $p->{event};
+    my $channel = $p->{channel};
+    my $args    = $p->{args};
 
     foreach my $session (keys %{$self->{registry}->{$channel}}) {
 
-        $poe_kernel->post($session, $event, @args);
+        $poe_kernel->post($session, $event, $args);
 
     }
 
@@ -83,7 +89,10 @@ XAS::Lib::POE::PubSub - A class for the XAS environment
  my $pubsub = XAS::Lib::POE::PubSub->new();
 
  $pubsub->subscribe('session', 'channel');
- $pubusb->publish('channel', 'event');
+ $pubusb->publish(
+    -event   => 'event',
+    -channel => 'channel', 
+ );
 
 =head1 DESCRIPTION
 
@@ -125,24 +134,31 @@ The optional channel to unsubscribe from. Defaults to 'default'.
 
 =back
 
-=head2 publish($event, $channel, @args)
+=head2 publish
 
 This method allows you to publish an event to a specified channel. Additional
-aruguments can be supplied.
+aruguments can be supplied. It takes the following parameters:
 
 =over 4
 
-=item B<$event>
+=item B<-event>
 
 The event to send.
 
-=item B<$channel>
+=item B<-channel>
 
-Optional channel to send the event too. Defaults to 'default'.
+Optional channel. Defaults to 'default'.
 
-=item B<@args>
+=item B<-args>
 
-Optional additional arugments to send with the event.
+Optional additional arugments to send with the event. The context of the 
+arguments is determined by the method that is handling the event. For example:
+
+ -args => ['this', 'is', 'neat']
+ -args => { this => 'is neat' }
+ -args => 'this is neat'
+
+Are all valid arguments. 
 
 =back
 

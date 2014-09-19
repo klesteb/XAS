@@ -94,7 +94,7 @@ sub init {
 
     # initialize POE, this removes an error message if a failure happens later
 
-    $poe_kernel->run();
+#    $poe_kernel->run();
 
     # walk the chain
 
