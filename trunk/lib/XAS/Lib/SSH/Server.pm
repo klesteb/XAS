@@ -9,7 +9,7 @@ use POE::Wheel::ReadWrite;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Service',
+  base      => 'XAS::Lib::POE::Service',
   accessors =>'client filter host port',
   vars => {
     PARAMS => {
