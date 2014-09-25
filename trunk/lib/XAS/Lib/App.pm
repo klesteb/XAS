@@ -8,12 +8,13 @@ use Hash::Merge;
 use Getopt::Long;
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  mixin   => 'XAS::Lib::Mixins::Handlers',
-  import  => 'CLASS',
-  utils   => 'dotid',
+  debug      => 0,
+  version    => $VERSION,
+  base       => 'XAS::Base',
+  mixin      => 'XAS::Lib::Mixins::Handlers',
+  import     => 'CLASS',
+  utils      => 'dotid',
+  filesystem => 'File',
   vars => {
     PARAMS => {
       -throws   => { optional => 1, default => 'changeme' },

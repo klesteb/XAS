@@ -131,7 +131,7 @@ sub subscribe {
     $header->{'destination'} = $p->{'destination'};
     $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
 
-    if (defined($p{'-id'})) {
+    if (defined($p->{'-id'})) {
 
         $header->{'id'} = $p->{'id'};
 

@@ -116,7 +116,7 @@ sub get {
 
                     $self->log->debug("get: errno = $errno");
 
-                    if ($errno == EAGIN) {
+                    if ($errno == EAGAIN) {
 
                         $counter++;
                         $working = 0 if ($counter > $self->attempts);
@@ -256,7 +256,7 @@ sub _slurp {
 
     my $buffer;
 
-    if (buffer = substr($self->{buffer}, 0, $pos)) {
+    if ($buffer = substr($self->{buffer}, 0, $pos)) {
 
         substr($self->{buffer}, 0, $pos) = '';
 

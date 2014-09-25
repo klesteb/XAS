@@ -77,7 +77,7 @@ sub session_shutdown {
 # ---------------------------------------------------------------------
 
 sub handle_connection {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
     my $frame = $self->frame->connect(
@@ -183,7 +183,7 @@ sub init {
 
     $self->{stomp} = XAS::Lib::Stomp::Utils->new();
 
-    unless defined($self->{filter}) {
+    unless (defined($self->{filter})) {
 
         $self->{filter} = XAS::Lib::Stomp::POE::Filter->new(
             -target => $self->target

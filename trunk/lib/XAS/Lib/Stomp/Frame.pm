@@ -118,7 +118,8 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
     
-    $headers = $self->headers || {};
+    my $headers = $self->headers || {};
+
     $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
 
     $self->_decode_headers(\$headers) if ($self->target > 1.1);

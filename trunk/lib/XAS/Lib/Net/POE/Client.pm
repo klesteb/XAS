@@ -80,7 +80,7 @@ sub session_intialize {
 }
 
 sub session_startup {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -103,7 +103,7 @@ sub session_shutdown {
 }
 
 sub session_pause {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -114,7 +114,7 @@ sub session_pause {
 }
 
 sub session_resume {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -129,22 +129,22 @@ sub session_resume {
 # ---------------------------------------------------------------------
 
 sub handle_connection {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
 }
 
 sub connection_down {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
 }
 
 sub connection_up {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
 }
 
 sub read_data {
-    my ($self, $data) = @_[OBJECT,ARG0];
+    my ($self, $data) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
 
@@ -216,7 +216,7 @@ sub _server_connected {
 }
 
 sub _server_connect {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -369,7 +369,7 @@ This module is a class used to create network clients.
  ;
 
  sub handle_connection {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $packet = "hello!";
 

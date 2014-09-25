@@ -1,6 +1,6 @@
 package XAS::Apps::Test::Service;
 
-use XAS::Lib::Service;
+use XAS::Lib::POE::Service;
 
 use XAS::Class
   version => '0.01',

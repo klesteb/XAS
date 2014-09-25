@@ -223,7 +223,7 @@ sub process_errors {
 # ----------------------------------------------------------------------
 
 sub _client_connection {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
@@ -317,7 +317,7 @@ sub _client_output {
 
     $self->log->debug("$alias: _client_output()");
 
-    if (my $wheel = $ctx->{wheel})) {
+    if (my $wheel = $ctx->{wheel}) {
 
         $self->{clients}->{$wheel}->{client}->put(@packet);
 

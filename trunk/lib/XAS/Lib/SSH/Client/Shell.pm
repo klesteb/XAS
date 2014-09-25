@@ -1,7 +1,8 @@
-package XAS::Lib::SSH::Shell;
+package XAS::Lib::SSH::Client::Shell;
 
 our $VERSION = '0.01';
 
+use Params::Validate qw(SCALAR CODEREF);
 use XAS::Class
   debug    => 0,
   version  => $VERSION,
@@ -140,13 +141,13 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::SSH::Shell - A class to execute commands over SSH
+XAS::Lib::SSH::Client::Shell - A class to interact with the SSH Shell facility
 
 =head1 SYNOPSIS
 
- use XAS::Lib::SSH::Shell;
+ use XAS::Lib::SSH::Client::Shell;
 
- my $client = XAS::Lib::SSH::Shell->new(
+ my $client = XAS::Lib::SSH::Client::Shell->new(
     -server   => 'test-xen-01',
     -username => 'root',
     -password => 'secret',

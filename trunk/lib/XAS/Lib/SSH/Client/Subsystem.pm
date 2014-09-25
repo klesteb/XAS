@@ -1,7 +1,8 @@
-package XAS::Lib::RPC::SSH::Subsystem;
+package XAS::Lib::SSH::Client::Subsystem;
 
 our $VERSION = '0.01';
 
+use Params::Validate qw(CODEREF SCALAR);;
 use XAS::Class
   debug    => 0,
   version  => $VERSION,
@@ -77,13 +78,13 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::RPC::SSH::Subsystem - A RPC client based on SSH Subsystems
+XAS::Lib::SSH::Client::Subsystem - A class to interact with the SSH Subsystem facility
 
 =head1 SYNOPSIS
 
- use XAS::Lib::RPC::SSH::Subsystem;
+ use XAS::Lib::SSH::Client::Subsystem;
 
- my $client = XAS::Lib::RPC::SSH::Subsystem->new(
+ my $client = XAS::Lib::SSH::Client::Subsystem->new(
     -server    => 'auburn-xen-01',
     -username  => 'root',
     -password  => 'secret',

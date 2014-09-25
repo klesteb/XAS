@@ -67,7 +67,7 @@ sub init_log {
     my $self = shift;
 
     $self->{spool} = XAS::Factory->module('spool', {
-        -directory = Dir($self->env->spool, 'logstash')
+        -directory => Dir($self->env->spool, 'logstash')
     });
 
 }

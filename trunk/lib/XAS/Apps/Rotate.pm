@@ -329,7 +329,7 @@ sub recreate_file {
             }
 
             $self->run_cmd($cmd);
-            $self->log->error_msg(('notail', $line_count, $filename) if $?;
+            $self->log->error_msg('notail', $line_count, $filename) if $?;
 
         }
 
@@ -594,7 +594,7 @@ sub options {
 
     return {
         'cfgfile=s' => sub { 
-            $cfgfile} = File($_[1]); 
+            my $cfgfile = File($_[1]); 
             $self->env->cfgfile($cfgfile);
         },
     };

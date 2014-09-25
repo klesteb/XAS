@@ -32,7 +32,7 @@ sub send {
 
     try {
 
-        if ($self->env-mxmailer eq 'smtp') {
+        if ($self->env->mxmailer eq 'smtp') {
 
             MIME::Lite->send(
                 $self->env->mxmailer, 

@@ -1,5 +1,5 @@
 Name:           perl-XAS
-Version:        0.07
+Version:        0.08
 Release:        1%{?dist}
 Summary:        XAS Perl module
 License:        GPL+ or Artistic
@@ -93,6 +93,7 @@ chmod g+s /var/log/xas
 chmod g+s /var/spool/xas
 chmod g+s /var/spool/xas/alerts
 chmod g+s /var/spool/xas/logstash
+rm -F /etc/profile.d/xas.bat
 
 %postun
 if [ "$1" = 0 ]; then

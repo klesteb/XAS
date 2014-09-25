@@ -163,7 +163,7 @@ sub _client_output {
 
     $self->log->debug("$alias: _client_output()");
 
-    if (my $wheel = $ctx->{wheel})) {
+    if (my $wheel = $ctx->{wheel}) {
 
         $wheel->put(@packet);
 
@@ -184,7 +184,7 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('client_disconnect', $alias, $self->peerhost(), $self->peerport()));
+        $self->log->info_msg('client_disconnect', $alias, $self->peerhost, $self->peerport);
 
     } else {
 
