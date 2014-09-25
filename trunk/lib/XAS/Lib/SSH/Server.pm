@@ -10,7 +10,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Session',
-  accessors => 'client filter peerhost peerport',
+  accessors => 'client peerhost peerport',
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
@@ -48,8 +48,8 @@ sub session_initialize {
 
     my ($rhost, $rport, $lhost, $lport) = split(' ', $ENV{SSH_CONNECTION});
 
-    $self->{host} = $rhost;
-    $self->{port} = $rport;
+    $self->{peerhost} = $rhost;
+    $self->{peerport} = $rport;
 
     # walk the chain
 
@@ -184,7 +184,7 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('client_disconnect', $alias, $self->host(), $self->port()));
+        $self->log->info_msg('client_disconnect', $alias, $self->peerhost(), $self->peerport()));
 
     } else {
 
