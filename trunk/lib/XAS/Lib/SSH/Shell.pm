@@ -88,22 +88,34 @@ sub setup {
 
 }
 
+sub run {
+    my $self = shift;
+    my ($command) = $self->validate_params(\@_, [1] );
+
+    my $buffer = sprintf("%s%s", $command, $self->eol);
+
+    $self->put($buffer);      # send the command
+    $self->get();             # remove the echo back
+
+}
+
 sub call {
     my $self = shift;
-    my ($command, $parser) = $self->validate_params(\@_,
+    my ($command, $parser) = $self->validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
-    );
+    ]);
 
     my $output;
     my $buffer = sprintf("%s%s", $command, $self->eol);
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->put($buffer);
-    $output = $self->get();
+    $self->put($buffer);        # this will be echoed back
+    $output = $self->get();     # get the output
+    $output =~ s/$command//;    # strip the original buffer;
 
-    return $parser->($output);
+    return $parser->(trim($output));    # remove line endings
 
 }
 
@@ -151,7 +163,7 @@ XAS::Lib::SSH::Shell - A class to execute commands over SSH
 
 =head1 DESCRIPTION
 
-The module uses the SSH Shell subsystem to execute commands. Which means it 
+This module uses the SSH Shell subsystem to execute commands. Which means it 
 executes a procedure on a remote host and parses the resulting output. This 
 module inherits from XAS::Lib::SSH::Client.
 
@@ -162,15 +174,33 @@ module inherits from XAS::Lib::SSH::Client.
 This method will set up the environment to execute commands using the shell
 subsystem on a remote system.
 
-=head2 call($command, $parser)
+=head2 run($command)
 
-This method executes the command on the remote host and parses the output.
+Run a command. The purpose is to run a procedure on the remote host
+that will interact with your process over STDIN/STDOUT. This is a work around
+for SSH Servers that don't support subsystems.
 
 =over 4
 
 =item B<$command>
 
-The command string to be executed.
+The command to run on the remote system.
+
+=back
+
+=head2 call($buffer, $parser)
+
+This method sends a buffer to the remote host and parses the output. 
+
+The assumption with this method is that some sort of parsable data stream will
+be returned. After the data has been parsed the results are returned to the 
+caller.
+
+=over 4
+
+=item B<$buffer>
+
+The buffer to send.
 
 =item B<$parser>
 
@@ -178,10 +208,6 @@ A coderef to the parser that will parse the returned data. The parser
 will accept one parameter which is a reference to that data.
 
 =back
-
-The assumption with this method is that the remote command will return some
-sort of parsable data stream. After the data has been parsed the results is
-returned to the caller.
 
 =head1 MUTATORS
 

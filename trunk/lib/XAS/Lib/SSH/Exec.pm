@@ -25,6 +25,12 @@ sub setup {
 
 }
 
+sub run {
+    my $self = shift;
+    my ($command) = $self->validate_params(\@_, [1] );
+
+}
+
 sub call {
     my $self = shift;
     my ($command, $parser) = $self->validate_params(\@_,
@@ -86,6 +92,10 @@ module inherits from XAS::Lib::SSH::Client.
 
 This method will set up the environment to execute commands using the exec
 subsystem on a remote system.
+
+=head2 run($command)
+
+This method does nothing.
 
 =head2 call($command, $parser)
 

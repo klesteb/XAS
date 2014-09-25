@@ -9,11 +9,12 @@ use POE::Wheel::ReadWrite;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::POE::Service',
-  accessors =>'client filter host port',
+  base      => 'XAS::Lib::POE::Session',
+  accessors => 'client filter peerhost peerport',
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
+      -eol    => { optional => 1, default => "\012\015" },
     }
   }
 ;
@@ -74,40 +75,6 @@ sub session_startup {
     $self->SUPER::session_startup();
 
     $self->log->debug("$alias: leaving session_startup()");
-
-}
-
-sub session_pause {
-    my $self = shift;
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering session_pause()");
-
-    $self->client->pause_input();
-
-    # walk the chain
-
-    $self->SUPER::session_pause();
-
-    $self->log->debug("$alias: entering session_pause()");
-
-}
-
-sub session_resume {
-    my $self = shift;
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering session_resume()");
-
-    $self->client->resume_input();
-
-    # walk the chain
-
-    $self->SUPER::session_resume();
-
-    $self->log->debug("$alias: leaving session_resume()");
 
 }
 
@@ -239,8 +206,8 @@ sub init {
     unless (defined($self->filter)) {
 
         $self->{filter} = POE::Filter::Line->new(
-            InputLiteral  => "\012\015",
-            OutputLiteral => "\012\015"
+            InputLiteral  => $self->eol,
+            OutputLiteral => $self->eol
         );
 
     }
@@ -261,53 +228,125 @@ XAS::Lib::SSH::Server - A SSH Subsystem based server
 
  use XAS::Lib::SSH::Server;
 
- my $sub = XAS::Lib::SSH::Server->new();
+ my $server = XAS::Lib::SSH::Server->new(
+     -filter => POE::Filter::Line->new(),
+     -eol    => "\012\015",
+ );
 
- $sub->run();
+ $server->run();
 
 =head1 DESCRIPTION
 
-The module provides basic I/O for a SSH subsystem. A SSH subsystem reads from
-stdin, writes to stdout and stderr.
+The module provides a POE based framework for a SSH subsystem. A SSH subsystem
+reads from stdin, writes to stdout or stderr. This modules emulates 
+L<XAS::Lib::Net::Server> to provide a consistent interface.
 
 =head1 METHODS
 
 =head2 new
 
-This initializes the object.
-
-=head2 connect
-
-This method redirects the stdin, stdout and stderr file streams
-to the SSH server.
-
-=head2 get
-
-This method reads data from stdin. It uses blocking reads. It
-will attempt to read all pending data up to EOL.
-
-=head2 put($buffer)
-
-This method will write data to stdout. It uses blocking writes.
-It will attempt to write all the data in the buffer.
+This initializes the module and starts listening for requests. The following
+parametrs are used:
 
 =over 4
 
-=item B<$buffer>
+=item B<-alias>
 
-The buffer to be written.
+The name of the POE session.
+
+=item B<-filter>
+
+An optional filter to use, defaults to POE::Filter::Line
+
+=item B<-eol>
+
+An optional EOL, defaults to "\012\015";
 
 =back
 
-=head2 disconnect
+=head1 ACCESSORS
 
-This method closes the connection.
+=head2 peerport
+
+This returns the peers port number.
+
+=head2 peerhost
+
+This returns the peers host name.
 
 =head1 MUTATORS
 
 =head2 eol
 
-This method sets the EOL for reads. It defaults to LF - "\012".
+This method sets the EOL for reads. It defaults to CRLF - "\015\012".
+
+=head1 PUBLIC EVENTS
+
+=head2 process_request(OBJECT, ARG0, ARG1)
+
+This event will process the input from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+A handle to the current object.
+
+=item B<ARG0>
+
+The input received from the socket.
+
+=item B<ARG1>
+
+A hash variable to maintain context. This will be initialized with a "wheel"
+field. Others fields may be added as needed.
+
+=back
+
+=head2 process_response(OBJECT, ARG0, ARG1)
+
+This event will process the output from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+A handle to the current object.
+
+=item B<ARG0>
+
+The output to be sent to the socket.
+
+=item B<ARG1>
+
+A hash variable to maintain context. This uses the "wheel" field to direct output
+to the correct socket. Others fields may have been added as needed.
+
+=back
+
+=head2 process_errors(OBJECT, ARG0, ARG1)
+
+This event will process the error output from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+A handle to the current object.
+
+=item B<ARG0>
+
+The output to be sent to the socket.
+
+=item B<ARG1>
+
+A hash variable to maintain context. This uses the "wheel" field to direct output
+to the correct socket. Others fields may have been added as needed.
+
+=back
 
 =head1 SEE ALSO
 
