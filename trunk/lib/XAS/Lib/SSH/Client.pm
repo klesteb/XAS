@@ -12,24 +12,25 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
+  utils     => 'trim',
   import    => 'class',
   vars => {
     PARAMS => {
       -port      => { optional => 1, default => 22 },
-      -timeout   => { optional => 1, default => 60 },
+      -timeout   => { optional => 1, default => 0.2 },
       -username  => { optional => 1, default => undef},
       -server    => { optional => 1, default => 'localhost' },
       -eol       => { optional => 1, default => "\015\012" },
-      -password  => { optional => 1, default => undef, depends => [ '-username' ] },
-      -priv_key  => { optional => 1, default => undef, depends => [ '-pub_key', '-username' ] },
-      -pub_key   => { optional => 1, default => undef, depends => [ '-priv_key', '-username' ] },
+      -password  => { optional => 1, default => undef, depends => [ 'username' ] },
+      -priv_key  => { optional => 1, default => undef, depends => [ 'pub_key', 'username' ] },
+      -pub_key   => { optional => 1, default => undef, depends => [ 'priv_key', 'username' ] },
     },
     ERRNO  => 0,
     ERRSTR => '',
   }
 ;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -48,7 +49,7 @@ sub connect {
         if ($self->pub_key) {
 
             unless ($self->ssh->auth_publickey($self->username,
-                $self->pub_key, $self->priv_key, $self->password)) {
+                    $self->pub_key, $self->priv_key)) {
 
                 ($errno, $name, $errstr) = $self->ssh->error();
 
@@ -155,7 +156,7 @@ sub get {
             $self->{buffer} .= $buf;
             $read += $bytes;
 
-            if ($read >= $length)) {
+            if ($read >= $length) {
 
                 $working = 0;
                 $output  = $self->_slurp($length);
@@ -166,12 +167,21 @@ sub get {
 
             my $syserr = $! + 0;
             my ($errno, $name, $errstr) = $self->ssh->error();
+
             if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
 
                 $counter++;
  
-                $working = 0         if ($counter > $self->attempts);
-                $self->_waitsocket() if ($counter <= $self->attempts);
+                if ($counter > $self->attempts) {
+
+                    $working = 0;
+                    $output = $self->_slurp($read);
+
+                } else {
+
+                    $self->_waitsocket();
+                    
+                }
 
             } else {
 
@@ -220,7 +230,7 @@ sub gets {
 
         my $buf;
 
-        if ($self->chan->read($buf, $length)) {
+        if ($self->chan->read($buf, 512)) {
 
             $self->{buffer} .= $buf;
 
@@ -234,11 +244,12 @@ sub gets {
 
             my $syserr = $! + 0;
             my ($errno, $name, $errstr) = $self->ssh->error();
+
             if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
 
                 $counter++;
  
-                $working = 0         if ($counter > $self->attempts);
+                $working = 0         if ($counter >  $self->attempts);
                 $self->_waitsocket() if ($counter <= $self->attempts);
 
             } else {

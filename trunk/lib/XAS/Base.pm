@@ -20,11 +20,11 @@ use XAS::Class
   vars => {
     PARAMS => {
       -xdebug => { optional => 1, default => 0 }
-    }
+    },
   }
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -152,7 +152,7 @@ sub _auto_load {
                 -type     => $self->env->logtype,
                 -filename => $self->env->logfile,
                 -levels => {
-                    debug => $self->debugging ? 1 : 0,
+                    debug => $DEBUG,
                 }
             }); 
 
@@ -205,7 +205,6 @@ sub init {
 
     $self->{config} = $p;
     $self->_create_methods($p);
-    $self->debugging($self->xdebug);
 
     return $self;
 

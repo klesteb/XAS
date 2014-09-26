@@ -7,6 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::SSH::Client',
+  utils   => 'trim',
   vars => {
     PARAMS => {
       -eol => { optional => 1, default => "\012" }
@@ -40,7 +41,7 @@ sub setup {
     # announcements, motds and other assorted stuff.
 
     while ($output = $self->get()) {
-
+        
         # Parse the output looking for specific strings. There
         # must be a better way...
 
@@ -97,7 +98,7 @@ sub run {
     my ($command) = $self->validate_params(\@_, [1] );
 
     $self->puts($command);    # send the command
-    $self->gets();            # strip the echo back
+    $self->get();             # strip the echo back
 
 }
 
@@ -113,8 +114,8 @@ sub call {
     # execute a command, retrieve the output and dispatch to a parser.
 
     $self->puts($command);      # send the command
-    $self->gets();              # strip the echo back
-    $output = $self->gets();    # get the command result
+    $output = $self->get();     # get the command result
+    $output =~ s/$command//;    # strip the echo back
 
     return $parser->(trim($output));    # remove line endings
 

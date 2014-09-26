@@ -30,7 +30,7 @@ sub session_initialize {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: entering session_intialize()");
+    $self->log->debug("$alias: entering session_initialize()");
 
     # public events
 
@@ -40,9 +40,10 @@ sub session_initialize {
 
     # private events
 
-    $poe_kernel->state('client_error',  $self, '_client_error');
-    $poe_kernel->state('client_input',  $self, '_client_input');
-    $poe_kernel->state('client_output', $self, '_client_output');
+    $poe_kernel->state('client_error',      $self, '_client_error');
+    $poe_kernel->state('client_input',      $self, '_client_input');
+    $poe_kernel->state('client_output',     $self, '_client_output');
+    $poe_kernel->state('client_connection', $self, '_client_connection');
 
     # Find the remote host and port.
 
@@ -55,7 +56,7 @@ sub session_initialize {
 
     $self->SUPER::session_initialize();
 
-    $self->log->debug("$alias: leaving session_intialize()");
+    $self->log->debug("$alias: leaving session_initialize()");
 
 }
 
@@ -163,7 +164,7 @@ sub _client_output {
 
     $self->log->debug("$alias: _client_output()");
 
-    if (my $wheel = $ctx->{wheel}) {
+    if (my $wheel = $self->client) {
 
         $wheel->put(@packet);
 
