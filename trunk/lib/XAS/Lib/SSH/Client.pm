@@ -270,60 +270,7 @@ sub put {
     my $self = shift;
     my ($buffer) = $self->validate_params(\@_, [1]);
 
-    my $counter = 0;
-    my $working = 1;
-    my $written = 0;
-    my $bufsize = length($buffer);
-
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
-
-    # Setup non-blocking writes. Keep writting until nothing is left.
-    # Returns the number of bytes written, if any.
-    #
-    # Patterned after some libssh2 examples and C network programming
-    # "best practices".
-
-    $self->chan->blocking(0);
-
-    do {
-
-        if (my $bytes = $self->chan->write($buffer)) {
-
-            $written += $bytes;
-            $buffer  = substr($buffer, $bytes);
-            $working = 0 if ($written >= $bufsize);
-
-        } else {
-
-            my ($errno, $name, $errstr) = $self->ssh->error();
-            if ($errno == LIBSSH2_ERROR_EAGAIN) {
-
-                $counter++;
-
-                $working = 0         if ($counter > $self->attempts);
-                $self->_waitsocket() if ($counter <= $self->attempts);
-
-            } else {
-
-                $self->chan->blocking(1);
-
-                $self->class->var('ERRNO', $errno);
-                $self->class->var('ERRSTR', $errstr);
-
-                $self->throw_msg(
-                    'xas.lib.ssh.client.put.protoerr',
-                    'protoerr',
-                    $name, $errstr
-                );
-
-            }
-
-        }
-
-    } while ($working);
-
-    $self->chan->blocking(1);
+    my $written = $self->_put($buffer);
 
     return $written;
 
@@ -333,61 +280,8 @@ sub puts {
     my $self = shift;
     my ($buffer) = $self->validate_params(\@_, [1]);
 
-    my $counter = 0;
-    my $working = 1;
-    my $written = 0;
     my $output  = sprintf("%s%s", trim($buffer), $self->eol);
-    my $bufsize = length($output);
-
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
-
-    # Setup non-blocking writes. Keep writting until nothing is left.
-    # Returns the number of bytes written, if any.
-    #
-    # Patterned after some libssh2 examples and C network programming
-    # "best practices".
-
-    $self->chan->blocking(0);
-
-    do {
-
-        if (my $bytes = $self->chan->write($output)) {
-
-            $written += $bytes;
-            $output  = substr($output, $bytes);
-            $working = 0 if ($written >= $bufsize);
-
-        } else {
-
-            my ($errno, $name, $errstr) = $self->ssh->error();
-            if ($errno == LIBSSH2_ERROR_EAGAIN) {
-
-                $counter++;
-
-                $working = 0         if ($counter > $self->attempts);
-                $self->_waitsocket() if ($counter <= $self->attempts);
-
-            } else {
-
-                $self->chan->blocking(1);
-
-                $self->class->var('ERRNO', $errno);
-                $self->class->var('ERRSTR', $errstr);
-
-                $self->throw_msg(
-                    'xas.lib.ssh.client.put.protoerr',
-                    'protoerr',
-                    $name, $errstr
-                );
-
-            }
-
-        }
-
-    } while ($working);
-
-    $self->chan->blocking(1);
+    my $written = $self->_put($output);
 
     return $written;
 
@@ -442,6 +336,69 @@ sub init {
 
 }
 
+sub _put {
+    my $self   = shift;
+    my $buffer = shift;
+
+    my $counter = 0;
+    my $working = 1;
+    my $written = 0;
+    my $bufsize = length($buffer);
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    # Setup non-blocking writes. Keep writting until nothing is left.
+    # Returns the number of bytes written, if any.
+    #
+    # Patterned after some libssh2 examples and C network programming
+    # "best practices".
+
+    $self->chan->blocking(0);
+
+    do {
+
+        if (my $bytes = $self->chan->write($buffer)) {
+
+            $written += $bytes;
+            $buffer  = substr($buffer, $bytes);
+            $working = 0 if ($written >= $bufsize);
+
+        } else {
+
+            my ($errno, $name, $errstr) = $self->ssh->error();
+            if ($errno == LIBSSH2_ERROR_EAGAIN) {
+
+                $counter++;
+
+                $working = 0         if ($counter > $self->attempts);
+                $self->_waitsocket() if ($counter <= $self->attempts);
+
+            } else {
+
+                $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
+                $self->throw_msg(
+                    'xas.lib.ssh.client._put.protoerr',
+                    'protoerr',
+                    $name, $errstr
+                );
+
+            }
+
+        }
+
+    } while ($working);
+
+    $self->chan->blocking(1);
+
+    return $written;
+
+}
+
 sub _waitsocket {
     my $self = shift;
 
@@ -464,6 +421,40 @@ sub _waitsocket {
     }
 
     return $! + 0;
+
+}
+
+sub _slurp {
+    my $self = shift;
+    my $pos  = shift;
+
+    my $buffer;
+
+    if ($buffer = substr($self->{buffer}, 0, $pos)) {
+
+        substr($self->{buffer}, 0, $pos) = '';
+
+    }
+
+    return $buffer;
+
+}
+
+sub _get_line {
+    my $self = shift;
+
+    my $pos;
+    my $buffer;
+    my $eol = $self->eol;
+
+    if ($self->{buffer} =~ m/$eol/g) {
+
+        $pos = pos($self->{buffer});
+        $buffer = $self->_slurp($pos);
+
+    }
+
+    return $buffer;
 
 }
 

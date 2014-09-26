@@ -232,6 +232,60 @@ sub put {
     my $self = shift;
     my ($buffer) = $self->validate_params(\@_, [1]);
 
+    my $written = $self->_put($buffer);
+
+    return $written;
+
+}
+
+sub puts {
+    my $self = shift;
+    my ($buffer) = $self->validate_params(\@_, [1]);
+
+    my $data = sprintf("%s%s", trim($buffer), $self->eol);
+    my $written = $self->_put($data);
+    
+    return $written;
+
+}
+
+sub errno {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRNO', $value) if (defined($value));
+
+    return class->var('ERRNO');
+
+}
+
+sub errstr {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRSTR', $value) if (defined($value));
+
+    return class->var('ERRSTR');
+
+}
+
+sub setup {
+    my $self = shift;
+    
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub _put {
+    my $self   = shift;
+    my $buffer = shift;
+    
     my $counter = 0;
     my $working = 1;
     my $written = 0;
@@ -293,106 +347,6 @@ sub put {
     return $written;
 
 }
-
-sub puts {
-    my $self = shift;
-    my ($packet) = $self->validate_params(\@_, [1]);
-
-    my $counter = 0;
-    my $working = 1;
-    my $written = 0;
-    my $timeout = $self->timeout;
-    my $data = sprintf("%s%s", trim($packet), $self->eol);
-    my $bufsize = length($data);
-
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
-
-    while ($working) {
-
-        $self->handle->cleaerr();
-
-        if ($self->select->can_write($timeout)) {
-
-            if (my $bytes = $self->handle->syswrite($data, $bufsize)) {
-
-                $written += $bytes;
-                $data = substr($data, $bytes);
-                $working = 0 if ($written >= $bufsize);
-
-            } else {
-
-                if ($self->handle->error) {
-
-                    my $errno  = $! + 0;
-                    my $errstr = $!;
-
-                    if ($errno = EAGAIN) {
-
-                        $counter++;
-                        $working = 0 if ($counter > $self->attempts);
-
-                    } else {
-
-                        $self->class->var('ERRNO', $errno);
-                        $self->class->var('ERRSTR', $errstr);
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.put',
-                            'network',
-                            $errstr
-                        );
-
-                    }
-
-                }
-
-            }
-
-        } else {
-
-            $working = 0;
-
-        }
-
-    }
-
-    return $written;
-
-}
-
-sub errno {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRNO', $value) if (defined($value));
-
-    return class->var('ERRNO');
-
-}
-
-sub errstr {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRSTR', $value) if (defined($value));
-
-    return class->var('ERRSTR');
-
-}
-
-sub setup {
-    my $self = shift;
-    
-}
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
 
 sub _slurp {
     my $self = shift;
