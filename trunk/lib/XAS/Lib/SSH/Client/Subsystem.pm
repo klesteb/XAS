@@ -4,10 +4,9 @@ our $VERSION = '0.01';
 
 use Params::Validate qw(CODEREF SCALAR);;
 use XAS::Class
-  debug    => 0,
-  version  => $VERSION,
-  base     => 'XAS::Lib::SSH::Client',
-  mutators => 'eol',
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Lib::SSH::Client',
 ;
 
 #use Data::Dumper;
@@ -46,12 +45,11 @@ sub call {
     );
 
     my $output;
-    my $buffer = sprintf("%s%s", $command, $self->eol);
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->put($buffer);
-    $output = $self->get();
+    $self->puts($command);
+    $output = $self->gets();
 
     return $parser->($output);
 
@@ -60,17 +58,6 @@ sub call {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->eol("\012\015");
-
-    return $self;
-
-}
 
 1;
 

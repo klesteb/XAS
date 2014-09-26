@@ -44,7 +44,7 @@ sub call {
     # execute a command, retrieve the output and dispatch to a parser.
 
     $self->chan->exec($command);
-    $output = $self->get();
+    $output = $self->gets();
 
     return $parser->($output);
 

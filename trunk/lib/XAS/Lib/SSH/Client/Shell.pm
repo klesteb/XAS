@@ -4,12 +4,15 @@ our $VERSION = '0.01';
 
 use Params::Validate qw(SCALAR CODEREF);
 use XAS::Class
-  debug    => 0,
-  version  => $VERSION,
-  base     => 'XAS::Lib::SSH::Client',
-  mutators => 'eol',
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Lib::SSH::Client',
+  vars => {
+    PARAMS => {
+      -eol => { optional => 1, default => "\012" }
+    }
+  }
 ;
-
 
 #use Data::Dumper;
 
@@ -48,7 +51,7 @@ sub setup {
             # Also KpyM (cmd.exe??) needs a \r\n eol for command
             # execution. Bitvise dosen't seem to require this.
 
-            $self->eol("\015\012");
+            $self->{eol} = "\015\012";
 
             # Need to wait for the "continue" line. Pay the
             # danegield, but don't register the key, or this
@@ -70,7 +73,7 @@ sub setup {
             # be set for this code to work. DCL expects a \r\n
             # eol for command execution.
 
-            $self->eol("\015\012");
+            $self->{eol} = "\015\012";
 
             # Wait for this line, it indicates that the terminal
             # capabilities negotiation has finished.
@@ -93,10 +96,8 @@ sub run {
     my $self = shift;
     my ($command) = $self->validate_params(\@_, [1] );
 
-    my $buffer = sprintf("%s%s", $command, $self->eol);
-
-    $self->put($buffer);      # send the command
-    $self->get();             # remove the echo back
+    $self->puts($command);    # send the command
+    $self->gets();            # strip the echo back
 
 }
 
@@ -108,13 +109,12 @@ sub call {
     ]);
 
     my $output;
-    my $buffer = sprintf("%s%s", $command, $self->eol);
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->put($buffer);        # this will be echoed back
-    $output = $self->get();     # get the output
-    $output =~ s/$command//;    # strip the original buffer;
+    $self->puts($command);      # send the command
+    $self->gets();              # strip the echo back
+    $output = $self->gets();    # get the command result
 
     return $parser->(trim($output));    # remove line endings
 
@@ -123,17 +123,6 @@ sub call {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->eol("\012");
-
-    return $self;
-
-}
 
 1;
 
@@ -151,6 +140,7 @@ XAS::Lib::SSH::Client::Shell - A class to interact with the SSH Shell facility
     -server   => 'test-xen-01',
     -username => 'root',
     -password => 'secret',
+    -eol      => "\012",
  );
 
  $client->connect();
@@ -209,12 +199,6 @@ A coderef to the parser that will parse the returned data. The parser
 will accept one parameter which is a reference to that data.
 
 =back
-
-=head1 MUTATORS
-
-=head2 eol
-
-Sets the EOL for commands. Defaults to LF - "\012".
 
 =head1 SEE ALSO
 

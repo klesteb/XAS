@@ -80,6 +80,84 @@ sub disconnect {
 
 sub get {
     my $self = shift;
+    my ($length) = $self->validate_params(\@_, [
+        { optional => 1, default => 512 }
+    ]);
+
+    my $packet  = '';
+    my $counter = 0;
+    my $working = 1;
+    my $read    = 0;
+    my $timeout = $self->handle->timeout;
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    while ($working) {
+
+        my $buf;
+
+        $self->handle->clearerr();
+
+        if ($self->select->can_read($timeout)) {
+
+            if (my $bytes = $self->handle->sysread($buf, $length)) {
+
+                $self->{buffer} .= $buf;
+                $read += $bytes;
+
+                if ($read >= $length)) {
+
+                    $working = 0;
+                    $packet  = $self->_slurp($length);
+
+                }
+
+            } else {
+
+                if ($self->handle->error) {
+
+                    my $errno  = $! + 0;
+                    my $errstr = $!;
+
+                    $self->log->debug("get: errno = $errno");
+
+                    if ($errno == EAGAIN) {
+
+                        $counter++;
+                        $working = 0 if ($counter > $self->attempts);
+
+                    } else {
+
+                        $self->class->var('ERRNO', $errno);
+                        $self->class->var('ERRSTR', $errstr);
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.get',
+                            'network',
+                            $errstr
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $working = 0;
+
+        }
+
+    }
+
+    return $packet;
+
+}
+
+sub gets {
+    my $self = shift;
 
     my $packet  = '';
     my $counter = 0;
@@ -151,6 +229,72 @@ sub get {
 }
 
 sub put {
+    my $self = shift;
+    my ($buffer) = $self->validate_params(\@_, [1]);
+
+    my $counter = 0;
+    my $working = 1;
+    my $written = 0;
+    my $timeout = $self->timeout;
+    my $bufsize = length($buffer);
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    while ($working) {
+
+        $self->handle->cleaerr();
+
+        if ($self->select->can_write($timeout)) {
+
+            if (my $bytes = $self->handle->syswrite($buffer, $bufsize)) {
+
+                $written += $bytes;
+                $buffer = substr($buffer, $bytes);
+                $working = 0 if ($written >= $bufsize);
+
+            } else {
+
+                if ($self->handle->error) {
+
+                    my $errno  = $! + 0;
+                    my $errstr = $!;
+
+                    if ($errno = EAGAIN) {
+
+                        $counter++;
+                        $working = 0 if ($counter > $self->attempts);
+
+                    } else {
+
+                        $self->class->var('ERRNO', $errno);
+                        $self->class->var('ERRSTR', $errstr);
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.put',
+                            'network',
+                            $errstr
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $working = 0;
+
+        }
+
+    }
+
+    return $written;
+
+}
+
+sub puts {
     my $self = shift;
     my ($packet) = $self->validate_params(\@_, [1]);
 
@@ -353,29 +497,55 @@ Connect to the defined socket.
 
 Disconnect from the defined socket.
 
-=head2 put($packet)
+=head2 put($buffer)
 
-This writes a "packet" to the socket. Returns the number of bytes written.
+This writes a buffer to the socket. Returns the number of bytes written.
 
 =over 4
 
-=item B<$packet>
+=item B<$buffer>
 
-The "packet" to send over the socket.
+The buffer to send over the socket.
 
 =back
 
-=head2 get
+=head2 puts($buffer)
 
-This reads a "packet" from the socket.
+This writes a buffer that is terminated with eol to the socket. Returns the
+number of bytes written.
+
+=over 4
+
+=item B<$buffer>
+
+The buffer to send over the socket.
+
+=back
+
+=head2 get($length)
+
+This block reads data from the socket. A buffer is returned when it reaches
+$length or timeout, whichever is first.
+
+=over 4
+
+=item B<$length>
+
+An optional length for the buffer. Defaults to 512 bytes.
+
+=back
+
+=head2 gets
+
+This reads a buffer delimited by the eol from the socket.
 
 =head2 errno
 
-A class method to return the error number code.
+A class method to return the error number.
 
 =head2 errstr
 
-A class method to return the error number string.
+A class method to return the error string.
 
 =head1 SEE ALSO
 

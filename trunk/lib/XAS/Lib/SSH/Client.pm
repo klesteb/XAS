@@ -12,16 +12,20 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
+  import    => 'class',
   vars => {
     PARAMS => {
       -port      => { optional => 1, default => 22 },
-      -timeout   => { optional => 1, default => 0.2 },
+      -timeout   => { optional => 1, default => 60 },
       -username  => { optional => 1, default => undef},
       -server    => { optional => 1, default => 'localhost' },
+      -eol       => { optional => 1, default => "\015\012" },
       -password  => { optional => 1, default => undef, depends => [ '-username' ] },
       -priv_key  => { optional => 1, default => undef, depends => [ '-pub_key', '-username' ] },
       -pub_key   => { optional => 1, default => undef, depends => [ '-priv_key', '-username' ] },
     },
+    ERRNO  => 0,
+    ERRSTR => '',
   }
 ;
 
@@ -36,6 +40,9 @@ sub connect {
 
     my ($errno, $name, $errstr);
 
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
     if ($self->ssh->connect($self->server, $self->port)) {
 
         if ($self->pub_key) {
@@ -44,6 +51,10 @@ sub connect {
                 $self->pub_key, $self->priv_key, $self->password)) {
 
                 ($errno, $name, $errstr) = $self->ssh->error();
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
                 $self->throw_msg(
                     'xas.lib.ssh.client.connect.autherr',
                     'autherr',
@@ -57,6 +68,10 @@ sub connect {
             unless ($self->ssh->auth_password($self->username, $self->password)) {
 
                 ($errno, $name, $errstr) = $self->ssh->error();
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
                 $self->throw_msg(
                     'xas.lib.ssh.client.connect.autherr',
                     'autherr',
@@ -76,6 +91,10 @@ sub connect {
     } else {
 
         ($errno, $name, $errstr) = $self->ssh->error();
+
+        $self->class->var('ERRNO', $errno);
+        $self->class->var('ERRSTR', $errstr);
+
         $self->throw_msg(
             'xas.lib.ssh.client.connect.conerr',
             'conerr',
@@ -88,8 +107,6 @@ sub connect {
 
 sub setup {
     my $self = shift;
-
-    warn "setup() needs to be overridden\n";
 
 }
 
@@ -109,10 +126,17 @@ sub disconnect {
 
 sub get {
     my $self = shift;
+    my ($length) = $self->validate_params(\@_, [
+        { optional => 1, default => 512 }
+    ]);
 
     my $counter = 0;
     my $output = '';
     my $working = 1;
+    my $read    = 0;
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
 
     # Setup non-blocking read. Keep reading until nothing is left.
     # Return the raw output, if any. 
@@ -126,9 +150,17 @@ sub get {
 
         my $buf;
 
-        if ($self->chan->read($buf, 512)) {
+        if (my $bytes = $self->chan->read($buf, $length)) {
 
-            $output .= $buf;
+            $self->{buffer} .= $buf;
+            $read += $bytes;
+
+            if ($read >= $length)) {
+
+                $working = 0;
+                $output  = $self->_slurp($length);
+
+            }
 
         } else {
 
@@ -144,6 +176,78 @@ sub get {
             } else {
 
                 $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
+                $self->throw_msg(
+                    'xas.lib.ssh.client.get.protoerr',
+                    'protoerr',
+                    $name, $errstr
+                );
+
+            }
+
+        }
+
+    }
+
+    $self->chan->blocking(1);
+
+    return $output;
+
+}
+
+sub gets {
+    my $self = shift;
+
+    my $counter = 0;
+    my $output = '';
+    my $working = 1;
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    # Setup non-blocking read. Keep reading until nothing is left.
+    # Return the raw output, if any. 
+    #
+    # Patterned after some libssh2 examples and C network programming
+    # "best practices".
+
+    $self->chan->blocking(0);
+
+    while ($working) {
+
+        my $buf;
+
+        if ($self->chan->read($buf, $length)) {
+
+            $self->{buffer} .= $buf;
+
+            if ($output = $self->_get_line()) {
+
+                $working = 0;
+
+            }
+
+        } else {
+
+            my $syserr = $! + 0;
+            my ($errno, $name, $errstr) = $self->ssh->error();
+            if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
+
+                $counter++;
+ 
+                $working = 0         if ($counter > $self->attempts);
+                $self->_waitsocket() if ($counter <= $self->attempts);
+
+            } else {
+
+                $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
                 $self->throw_msg(
                     'xas.lib.ssh.client.get.protoerr',
                     'protoerr',
@@ -164,12 +268,15 @@ sub get {
 
 sub put {
     my $self = shift;
-    my ($buffer) = validate_pos(@_, 1);
+    my ($buffer) = $self->validate_params(\@_, [1]);
 
     my $counter = 0;
     my $working = 1;
     my $written = 0;
     my $bufsize = length($buffer);
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
 
     # Setup non-blocking writes. Keep writting until nothing is left.
     # Returns the number of bytes written, if any.
@@ -200,6 +307,10 @@ sub put {
             } else {
 
                 $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
                 $self->throw_msg(
                     'xas.lib.ssh.client.put.protoerr',
                     'protoerr',
@@ -215,6 +326,94 @@ sub put {
     $self->chan->blocking(1);
 
     return $written;
+
+}
+
+sub puts {
+    my $self = shift;
+    my ($buffer) = $self->validate_params(\@_, [1]);
+
+    my $counter = 0;
+    my $working = 1;
+    my $written = 0;
+    my $output  = sprintf("%s%s", trim($buffer), $self->eol);
+    my $bufsize = length($output);
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    # Setup non-blocking writes. Keep writting until nothing is left.
+    # Returns the number of bytes written, if any.
+    #
+    # Patterned after some libssh2 examples and C network programming
+    # "best practices".
+
+    $self->chan->blocking(0);
+
+    do {
+
+        if (my $bytes = $self->chan->write($output)) {
+
+            $written += $bytes;
+            $output  = substr($output, $bytes);
+            $working = 0 if ($written >= $bufsize);
+
+        } else {
+
+            my ($errno, $name, $errstr) = $self->ssh->error();
+            if ($errno == LIBSSH2_ERROR_EAGAIN) {
+
+                $counter++;
+
+                $working = 0         if ($counter > $self->attempts);
+                $self->_waitsocket() if ($counter <= $self->attempts);
+
+            } else {
+
+                $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
+                $self->throw_msg(
+                    'xas.lib.ssh.client.put.protoerr',
+                    'protoerr',
+                    $name, $errstr
+                );
+
+            }
+
+        }
+
+    } while ($working);
+
+    $self->chan->blocking(1);
+
+    return $written;
+
+}
+
+sub errno {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRNO', $value) if (defined($value));
+
+    return class->var('ERRNO');
+
+}
+
+sub errstr {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRSTR', $value) if (defined($value));
+
+    return class->var('ERRSTR');
 
 }
 
@@ -235,6 +434,7 @@ sub init {
     my $self = $class->SUPER::init(@_);
 
     $self->{ssh} = Net::SSH2->new();
+    $self->{buffer} = '';
 
     $self->attempts(5);       # number of EAGAIN attempts
 
@@ -346,21 +546,53 @@ This method makes a connection to the server.
 This method sets up the channel to be used. It needs to be overridden
 to be useful.
 
-=head2 get
+=head2 get($length)
 
-This method reads date from the channel. It uses non-blocking reads. It
-will attempt to read all pending data.
+This block reads data from the channel. A buffer is returned when it reaches
+$length or timeout, whichever is first.
+
+=over 4
+
+=item B<$length>
+
+An optional length for the buffer. Defaults to 512 bytes.
+
+=back
+
+=head2 gets
+
+This reads a buffer delimited by the eol from the channel.
+
+=head2 errno
+
+A class method to return the SSH error number.
+
+=head2 errstr
+
+A class method to return the SSH error string.
 
 =head2 put($buffer)
 
-This method will write data to the channel. It uses non-blocking writes.
-It will attempt to write all the data in the buffer.
-
+This method will write a buffer to the channel. Returns the number of
+bytes written.
 =over 4
 
 =item B<$buffer>
 
 The buffer to be written.
+
+=back
+
+=head2 puts($buffer)
+
+This writes a buffer that is terminated with eol to the channel. Returns the
+number of bytes written.
+
+=over 4
+
+=item B<$buffer>
+
+The buffer to send over the socket.
 
 =back
 
