@@ -2,6 +2,7 @@ package XAS::Apps::Test::Echo::Server;
 
 our $VERSION = '0.03';
 
+use XAS::Lib::Net::Server;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,

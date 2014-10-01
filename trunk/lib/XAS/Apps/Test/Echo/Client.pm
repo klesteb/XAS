@@ -31,9 +31,9 @@ sub do_echo {
     my $message;
 
     $self->handle->connect();
-    $self->handle->put($self->send);
+    $self->handle->puts($self->send);
 
-    $message = $self->handle->get();
+    $message = $self->handle->gets();
     $self->handle->disconnect();
 
     $self->log->info(sprintf("echo = %s", $message));

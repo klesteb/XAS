@@ -3,6 +3,7 @@ package XAS::Lib::Net::Server;
 our $VERSION = '0.01';
 
 use POE;
+use Try::Tiny;
 use Socket ':all';
 use POE::Filter::Line;
 use POE::Wheel::ReadWrite;
@@ -12,7 +13,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
-  mixin     => 'XAS::Lib::Mixins::Keepalive',
+  mixin     => 'XAS::Lib::Mixins::Keepalive XAS::Lib::Mixins::Handlers',
   utils     => 'weaken params',
   accessors => 'session',
   constants => 'ARRAY',
@@ -310,22 +311,35 @@ sub _client_input {
 sub _client_output {
     my ($self, $data, $ctx) = @_[OBJECT,ARG0,ARG1];
 
-    my @packet;
     my $alias = $self->alias;
-
-    push(@packet, $data);
+    my $wheel = $ctx->{wheel};
+    my @buffer;
 
     $self->log->debug("$alias: _client_output()");
 
-    if (my $wheel = $ctx->{wheel}) {
+    try {
 
-        $self->{clients}->{$wheel}->{client}->put(@packet);
+        push(@buffer, $data);
 
-    } else {
+        if (defined($wheel)) {
 
-        $self->log->error_msg('nowheel', $alias);
+            $self->{clients}->{$wheel}->{client}->put(@buffer);
 
-    }
+        } else {
+
+            $self->log->error_msg('nowheel', $alias);
+
+        }
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->execption_handler($ex);
+
+        delete $self->{clients}->{$wheel};
+
+    };
 
 }
 

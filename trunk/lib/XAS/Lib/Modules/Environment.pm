@@ -112,7 +112,11 @@ sub init {
 
         $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
-            : ['/', 'usr', 'local']);
+            : ['/']);
+
+        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
+            ? $ENV{'XAS_ETC'}   
+            : [$self->{root}, 'etc', 'xas']);
 
         $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
             ? $ENV{'XAS_TMP'} 
@@ -120,23 +124,23 @@ sub init {
 
         $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
             ? $ENV{'XAS_VAR'}   
-            : ['/', 'var']);
+            : [$self->{root}, 'var']);
 
         $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
             ? $ENV{'XAS_LIB'}   
-            : ['/', 'var', 'lib', 'xas']);
+            : [$self->{root}, 'var', 'lib', 'xas']);
 
         $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
             ? $ENV{'XAS_LOG'}   
-            : ['/', 'var', 'log', 'xas']);
+            : [$self->{root}, 'var', 'log', 'xas']);
 
         $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
             ? $ENV{'XAS_RUN'}   
-            : ['/', 'var', 'run', 'xas']);
+            : [$self->{root}, 'var', 'run', 'xas']);
 
         $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
             ? $ENV{'XAS_SPOOL'} 
-            : ['/', 'var', 'spool', 'xas']);
+            : [$self->{root}, 'var', 'spool', 'xas']);
 
         $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
           ? $ENV{'XAS_MXMAILER'} 
@@ -155,6 +159,10 @@ sub init {
         $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
             : ['C:', 'xas']);
+
+        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
+            ? $ENV{'XAS_ETC'}   
+            : [$self->{root}, 'etc']);
 
         $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
             ? $ENV{'XAS_TMP'}   
@@ -197,10 +205,6 @@ sub init {
     }
 
     # build some common paths
-
-    $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
-        ? $ENV{'XAS_ETC'}   
-        : [$self->{root}, 'etc']);
 
     $self->{sbin} = Dir(defined($ENV{'XAS_SBIN'})  
         ? $ENV{'XAS_SBIN'}  

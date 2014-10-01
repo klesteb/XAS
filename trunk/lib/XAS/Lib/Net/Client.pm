@@ -179,7 +179,7 @@ sub gets {
 
                 $self->{buffer} .= $buf;
 
-                if ($packet = $self->_get_line()) {
+                if ($packet = $self->_get_line($self->eol)) {
 
                     $working = 0;
 
@@ -205,7 +205,7 @@ sub gets {
                         $self->class->var('ERRSTR', $errstr);
 
                         $self->throw_msg(
-                            dotid($self->class) . '.get',
+                            dotid($self->class) . '.gets',
                             'network',
                             $errstr
                         );
@@ -224,7 +224,7 @@ sub gets {
 
     }
 
-    return $packet;
+    return trim($packet);
 
 }
 
@@ -232,60 +232,6 @@ sub put {
     my $self = shift;
     my ($buffer) = $self->validate_params(\@_, [1]);
 
-    my $written = $self->_put($buffer);
-
-    return $written;
-
-}
-
-sub puts {
-    my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
-
-    my $data = sprintf("%s%s", trim($buffer), $self->eol);
-    my $written = $self->_put($data);
-    
-    return $written;
-
-}
-
-sub errno {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRNO', $value) if (defined($value));
-
-    return class->var('ERRNO');
-
-}
-
-sub errstr {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRSTR', $value) if (defined($value));
-
-    return class->var('ERRSTR');
-
-}
-
-sub setup {
-    my $self = shift;
-    
-}
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
-
-sub _put {
-    my $self   = shift;
-    my $buffer = shift;
-    
     my $counter = 0;
     my $working = 1;
     my $written = 0;
@@ -297,7 +243,7 @@ sub _put {
 
     while ($working) {
 
-        $self->handle->cleaerr();
+        $self->handle->clearerr();
 
         if ($self->select->can_write($timeout)) {
 
@@ -348,6 +294,50 @@ sub _put {
 
 }
 
+sub puts {
+    my $self = shift;
+    my ($buffer) = $self->validate_params(\@_, [1]);
+
+    my $data = sprintf("%s%s", trim($buffer), $self->eol);
+    my $written = $self->put($data);
+    
+    return $written;
+
+}
+
+sub errno {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRNO', $value) if (defined($value));
+
+    return class->var('ERRNO');
+
+}
+
+sub errstr {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRSTR', $value) if (defined($value));
+
+    return class->var('ERRSTR');
+
+}
+
+sub setup {
+    my $self = shift;
+    
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
 sub _slurp {
     my $self = shift;
     my $pos  = shift;
@@ -366,10 +356,10 @@ sub _slurp {
 
 sub _get_line {
     my $self = shift;
+    my $eol  = shift;
 
     my $pos;
     my $buffer;
-    my $eol = $self->eol;
 
     if ($self->{buffer} =~ m/$eol/g) {
 

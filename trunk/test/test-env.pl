@@ -1,22 +1,38 @@
 
 use lib '../lib';
-use Data::Dumper;
 use XAS::Factory;
-use XAS::Lib::Modules::Environment;
-use Badger::Filesystem 'Dir File';
 
-#my $env = XAS::Factory->module('environment');
-my $env = XAS::Lib::Modules::Environment->new();
+my $env = XAS::Factory->module('environment');
 
-$env->pidfile(File('test.pid'));
-
-warn sprintf("pidfile = %s\n", $env->pidfile);
-warn sprintf("spool = %s\n", $env->spool);
-
-$env->spool(File('/opt/xas/spool'));
-    
-my $env1 = XAS::Factory->module('environment');
-
-warn sprintf("pidfile = %s\n", $env1->pidfile);
-warn sprintf("spool = %s\n", $env1->spool);
+printf("+------------------------------+\n");
+printf("| System                       |\n");
+printf("+------------------------------+\n");
+printf("host     = %s\n", $env->host);
+printf("domain   = %s\n", $env->domain);
+printf("username = %s\n", $env->username);
+printf("mqserver = %s\n", $env->mqserver);
+printf("mqport   = %s\n", $env->mqport);
+printf("mqlevel  = %s\n", $env->mqlevel);
+printf("mxserver = %s\n", $env->mxserver);
+printf("mxport   = %s\n", $env->mxport);
+printf("mxmailer = %s\n", $env->mxmailer);
+printf("+------------------------------+\n");
+printf("| Environment                  |\n");
+printf("+------------------------------+\n");
+printf("ROOT   = %s\n", $env->root);
+printf("ETC    = %s\n", $env->etc);
+printf("SBIN   = %s\n", $env->sbin);
+printf("BIN    = %s\n", $env->bin);
+printf("TMP    = %s\n", $env->tmp);
+printf("VAR    = %s\n", $env->var);
+printf("LIB    = %s\n", $env->lib);
+printf("LOG    = %s\n", $env->log);
+printf("RUN    = %s\n", $env->run);
+printf("SPOOL  = %s\n", $env->spool);
+printf("+------------------------------+\n");
+printf("| Files                        |\n");
+printf("+------------------------------+\n");
+printf("logfile = %s\n", $env->logfile);
+printf("pidfile = %s\n", $env->pidfile);
+printf("cfgfile = %s\n", $env->cfgfile);
 
