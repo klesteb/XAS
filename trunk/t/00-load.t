@@ -39,10 +39,10 @@ BEGIN {
     use_ok( 'XAS::Lib::POE::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client' )            || print "Bail out!\n";
-    use_ok( 'XAS::Lib::SSH::Exec' )              || print "Bail out!\n";
+    use_ok( 'XAS::Lib::SSH::Client::Exec' )      || print "Bail out!\n";
+    use_ok( 'XAS::Lib::SSH::Client::Shell' )     || print "Bail out!\n";
+    use_ok( 'XAS::Lib::SSH::Client::Subsystem' ) || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Server' )            || print "Bail out!\n";
-    use_ok( 'XAS::Lib::SSH::Shell' )             || print "Bail out!\n";
-    use_ok( 'XAS::Lib::SSH::Subsystem' )         || print "Bail out!\n";
     use_ok( 'XAS::Lib::Stomp::Frame' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Stomp::Parser' )          || print "Bail out!\n";
     use_ok( 'XAS::Lib::Stomp::POE::Client' )     || print "Bail out!\n";

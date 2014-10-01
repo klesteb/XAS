@@ -41,7 +41,7 @@ sub setup {
     # announcements, motds and other assorted stuff.
 
     while ($output = $self->get()) {
-        
+
         # Parse the output looking for specific strings. There
         # must be a better way...
 
@@ -114,8 +114,7 @@ sub call {
     # execute a command, retrieve the output and dispatch to a parser.
 
     $self->puts($command);      # send the command
-    $output = $self->get();     # get the command result
-    $output =~ s/$command//;    # strip the echo back
+    $output = $self->gets();    # get the command result
 
     return $parser->(trim($output));    # remove line endings
 

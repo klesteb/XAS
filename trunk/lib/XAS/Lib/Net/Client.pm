@@ -106,7 +106,7 @@ sub get {
                 $self->{buffer} .= $buf;
                 $read += $bytes;
 
-                if ($read >= $length)) {
+                if ($read >= $length) {
 
                     $working = 0;
                     $packet  = $self->_slurp($length);

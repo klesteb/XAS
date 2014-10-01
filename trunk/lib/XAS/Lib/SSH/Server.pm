@@ -157,16 +157,13 @@ sub _client_input {
 sub _client_output {
     my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
 
-    my @packet;
     my $alias = $self->alias;
-
-    push(@packet, $output);
 
     $self->log->debug("$alias: _client_output()");
 
     if (my $wheel = $self->client) {
 
-        $wheel->put(@packet);
+        $wheel->put([$output]);
 
     } else {
 
@@ -186,6 +183,9 @@ sub _client_error {
     if ($errnum == 0) {
 
         $self->log->info_msg('client_disconnect', $alias, $self->peerhost, $self->peerport);
+        delete $self->{client};
+
+        $poe_kernel->post($alias, 'session_shutdown');
 
     } else {
 

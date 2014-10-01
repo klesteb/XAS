@@ -7,6 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::SSH::Client',
+  utils   => 'trim',
 ;
 
 #use Data::Dumper;
@@ -39,10 +40,10 @@ sub run {
 
 sub call {
     my $self = shift;
-    my ($command, $parser) = validate_pos(@_,
+    my ($command, $parser) = $self->validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
-    );
+    ]);
 
     my $output;
 
@@ -50,10 +51,23 @@ sub call {
 
     $self->puts($command);
     $output = $self->gets();
-
-    return $parser->($output);
+    
+    return $parser->(trim($output));
 
 }
+
+# sub disconnect {
+#     my $self = shift;
+
+#     if (my $chan = $self->chan) {
+
+#         $chan->send_eof();
+
+#     }
+
+#     $self->ssh->disconnect();
+
+# }
 
 # ----------------------------------------------------------------------
 # Private Methods

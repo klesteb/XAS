@@ -24,7 +24,7 @@ sub main {
     $self->setup();
 
     my $server = XAS::Lib::SSH::Server->new(
-        -eol => "\n",
+        -eol => "\015\012",
     );
 
     $server->run();

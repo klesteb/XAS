@@ -114,10 +114,10 @@ sub setup {
 sub disconnect {
     my $self = shift;
 
-    if (defined($self->chan)) {
+    if (my $chan = $self->chan) {
 
-        $self->chan->send_eof();
-        $self->chan->close();
+        $chan->send_eof();
+        $chan->close();
 
     }
 
@@ -234,7 +234,7 @@ sub gets {
 
             $self->{buffer} .= $buf;
 
-            if ($output = $self->_get_line()) {
+            if ($output = $self->_get_line($self->eol)) {
 
                 $working = 0;
 
@@ -273,83 +273,13 @@ sub gets {
 
     $self->chan->blocking(1);
 
-    return $output;
+    return trim($output);
 
 }
 
 sub put {
     my $self = shift;
     my ($buffer) = $self->validate_params(\@_, [1]);
-
-    my $written = $self->_put($buffer);
-
-    return $written;
-
-}
-
-sub puts {
-    my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
-
-    my $output  = sprintf("%s%s", trim($buffer), $self->eol);
-    my $written = $self->_put($output);
-
-    return $written;
-
-}
-
-sub errno {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRNO', $value) if (defined($value));
-
-    return class->var('ERRNO');
-
-}
-
-sub errstr {
-    my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
-        { optional => 1, default => undef }
-    ]);
-
-    class->var('ERRSTR', $value) if (defined($value));
-
-    return class->var('ERRSTR');
-
-}
-
-sub DESTROY {
-    my $self = shift;
-
-    $self->disconnect();
-
-}
-
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->{ssh} = Net::SSH2->new();
-    $self->{buffer} = '';
-
-    $self->attempts(5);       # number of EAGAIN attempts
-
-    return $self;
-
-}
-
-sub _put {
-    my $self   = shift;
-    my $buffer = shift;
 
     my $counter = 0;
     my $working = 1;
@@ -410,6 +340,66 @@ sub _put {
 
 }
 
+sub puts {
+    my $self = shift;
+    my ($buffer) = $self->validate_params(\@_, [1]);
+
+    my $output  = sprintf("%s%s", trim($buffer), $self->eol);
+    my $written = $self->put($output);
+
+    return $written;
+
+}
+
+sub errno {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRNO', $value) if (defined($value));
+
+    return class->var('ERRNO');
+
+}
+
+sub errstr {
+    my $class = shift;
+    my ($value) = XAS::Base->validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    class->var('ERRSTR', $value) if (defined($value));
+
+    return class->var('ERRSTR');
+
+}
+
+sub DESTROY {
+    my $self = shift;
+
+    $self->disconnect();
+
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    $self->{ssh} = Net::SSH2->new();
+    $self->{buffer} = '';
+
+    $self->attempts(5);       # number of EAGAIN attempts
+
+    return $self;
+
+}
+
 sub _waitsocket {
     my $self = shift;
 
@@ -453,10 +443,10 @@ sub _slurp {
 
 sub _get_line {
     my $self = shift;
+    my $eol  = shift;
 
     my $pos;
     my $buffer;
-    my $eol = $self->eol;
 
     if ($self->{buffer} =~ m/$eol/g) {
 
@@ -577,6 +567,7 @@ A class method to return the SSH error string.
 
 This method will write a buffer to the channel. Returns the number of
 bytes written.
+
 =over 4
 
 =item B<$buffer>
