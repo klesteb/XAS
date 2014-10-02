@@ -11,6 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Session',
   accessors => 'client peerhost peerport',
+  utils     => 'trim',
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
@@ -157,13 +158,15 @@ sub _client_input {
 sub _client_output {
     my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
 
+    my @buffer;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _client_output()");
 
     if (my $wheel = $self->client) {
 
-        $wheel->put([$output]);
+        push(@buffer, $output);
+        $wheel->put(@buffer);
 
     } else {
 
@@ -179,12 +182,15 @@ sub _client_error {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _client_error()");
+    $self->log->debug(sprintf("%s: syscall: %s, errnum: %s, errstr: %s", $alias, $syscall, $errnum, $errstr));
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('client_disconnect', $alias, $self->peerhost, $self->peerport);
-        delete $self->{client};
+        # EOF detected.
 
+        $self->log->info_msg('client_disconnect', $alias, $self->peerhost, $self->peerport);
+
+        delete $self->{client};
         $poe_kernel->post($alias, 'session_shutdown');
 
     } else {

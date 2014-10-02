@@ -10,7 +10,7 @@ use XAS::Class
   utils   => 'trim',
 ;
 
-#use Data::Dumper;
+#use Data::Hexdumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -25,7 +25,6 @@ sub setup {
 
     $self->chan->ext_data('merge');
 
-
 }
 
 sub run {
@@ -34,7 +33,11 @@ sub run {
 
     # Invoke the subsystem.
 
+    $self->chan->pty('vt100');   # set up a default pty
     $self->chan->subsystem($subsystem);
+
+    $self->put($self->eol);
+    $self->get();
 
 }
 
@@ -50,24 +53,11 @@ sub call {
     # execute a command, retrieve the output and dispatch to a parser.
 
     $self->puts($command);
-    $output = $self->gets();
-    
+    $output = $self->get();
+
     return $parser->(trim($output));
 
 }
-
-# sub disconnect {
-#     my $self = shift;
-
-#     if (my $chan = $self->chan) {
-
-#         $chan->send_eof();
-
-#     }
-
-#     $self->ssh->disconnect();
-
-# }
 
 # ----------------------------------------------------------------------
 # Private Methods

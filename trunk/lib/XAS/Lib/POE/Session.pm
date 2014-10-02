@@ -273,7 +273,7 @@ two parameters:
 
 =head2 session_shutdown
 
-When you send this event to the session, it will invoke the session_cleanup() 
+When you send this event to the session, it will invoke the session_shutdown() 
 method.
 
 =head1 PRIVATE EVENTS
@@ -283,7 +283,7 @@ The following events are used internally:
  session_init
  session_interrupt
  session_reload
- shutdown
+ session_shutdown
 
 They should only be used with caution.
 

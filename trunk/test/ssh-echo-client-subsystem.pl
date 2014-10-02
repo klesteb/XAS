@@ -21,31 +21,19 @@ $shell->connect();
 
 $shell->run('testing');
 
-# sync with the server
-
-$shell->puts('noop');
-
-do {
-
-    $output = $shell->gets();
-
-} until ($output eq 'noop');
-
-# synced
-
 $shell->call("this is a test", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    printf("\"%s\"\n", $output);
 });
 
 $shell->call("this is another test", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    printf("\"%s\"\n", $output);
 });
 
 $shell->call("this is another test again", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    printf("\"%s\"\n", $output);
 });
 
 $shell->disconnect();
