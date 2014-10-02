@@ -4,11 +4,14 @@ our $VERSION = '0.01';
 
 use Params::Validate qw(SCALAR CODEREF);
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Lib::SSH::Client',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Lib::SSH::Client',
+  accessors => 'exit_code exit_signal',
+  utils     => 'trim',
 ;
 
+#use Data::Hexdumper;
 #use Data::Dumper;
 
 # ----------------------------------------------------------------------
@@ -34,19 +37,32 @@ sub run {
 
 sub call {
     my $self = shift;
-    my ($command, $parser) = $self->validate_params(\@_,
+    my ($command, $parser) = $self->validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
-    );
+    ]);
 
-    my $output;
+    my @output;
 
     # execute a command, retrieve the output and dispatch to a parser.
 
+    $self->chan->pty('vt100');
     $self->chan->exec($command);
-    $output = $self->gets();
 
-    return $parser->($output);
+    $self->{exit_code}   = $self->chan->exit_status();
+    $self->{exit_signal} = $self->chan->exit_signal();
+
+    do {
+
+        while (my $line = $self->gets()) {
+
+            push(@output, trim($line));
+
+        }
+
+    } while ($self->pending());
+
+    return $parser->(\@output);
 
 }
 
@@ -118,6 +134,14 @@ will accept one parameter which is a reference to that data.
 The assumption with this method is that the remote command will return some
 sort of parsable data stream. After the data has been parsed the results is
 returned to the caller.
+
+=head2 exit_code
+
+Return the exit code from the remote process.
+
+=head2 exit_signal
+
+Return the exit signal from the remote process.
 
 =head1 SEE ALSO
 

@@ -10,9 +10,10 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Bufops',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
-  utils     => 'trim',
+  utils     => 'trim dotid',
   import    => 'class',
   vars => {
     PARAMS => {
@@ -57,7 +58,7 @@ sub connect {
                 $self->class->var('ERRSTR', $errstr);
 
                 $self->throw_msg(
-                    'xas.lib.ssh.client.connect.autherr',
+                    dotid($self->class) . '.autherr',
                     'autherr',
                     $name, $errstr
                 );
@@ -74,7 +75,7 @@ sub connect {
                 $self->class->var('ERRSTR', $errstr);
 
                 $self->throw_msg(
-                    'xas.lib.ssh.client.connect.autherr',
+                    dotid($self->class) . '.autherr',
                     'autherr',
                     $name, $errstr
                 );
@@ -97,7 +98,7 @@ sub connect {
         $self->class->var('ERRSTR', $errstr);
 
         $self->throw_msg(
-            'xas.lib.ssh.client.connect.conerr',
+            dotid($self->class) . '.conerr',
             'conerr',
             $name, $errstr
         );
@@ -108,6 +109,13 @@ sub connect {
 
 sub setup {
     my $self = shift;
+
+}
+
+sub pending {
+    my $self = shift;
+
+    return length($self->{buffer});
 
 }
 
@@ -131,78 +139,29 @@ sub get {
         { optional => 1, default => 512 }
     ]);
 
-    my $counter = 0;
+    my $state  = 1;
     my $output = '';
     my $working = 1;
-    my $read    = 0;
 
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
-
-    # Setup non-blocking read. Keep reading until nothing is left.
-    # Return the raw output, if any. 
+    # extract $length from buffer. if the buffer size is > $length then
+    # try to refill buffer. If there is nothing to read, the return
+    # the remainder of the buffer.
     #
     # Patterned after some libssh2 examples and C network programming
     # "best practices".
 
-    $self->chan->blocking(0);
+    if ($self->pending > $length) {
 
-    while ($working) {
+        $output = $self->buf_slurp(\$self->{buffer}, $length);
 
-        my $buf;
+    } else {
 
-        if (my $bytes = $self->chan->read($buf, $length)) {
+        $self->_fill_buffer();
 
-            $self->{buffer} .= $buf;
-            $read += $bytes;
-
-            if ($read >= $length) {
-
-                $working = 0;
-                $output  = $self->_slurp($length);
-
-            }
-
-        } else {
-
-            my $syserr = $! + 0;
-            my ($errno, $name, $errstr) = $self->ssh->error();
-
-            if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
-
-                $counter++;
- 
-                if ($counter > $self->attempts) {
-
-                    $working = 0;
-                    $output = $self->_slurp($read);
-
-                } else {
-
-                    $self->_waitsocket();
-                    
-                }
-
-            } else {
-
-                $self->chan->blocking(1);
-
-                $self->class->var('ERRNO', $errno);
-                $self->class->var('ERRSTR', $errstr);
-
-                $self->throw_msg(
-                    'xas.lib.ssh.client.get.protoerr',
-                    'protoerr',
-                    $name, $errstr
-                );
-
-            }
-
-        }
+        my $l = ($self->pending > $length) ? $length : $self->pending;
+        $output = $self->buf_slurp(\$self->{buffer}, $l);
 
     }
-
-    $self->chan->blocking(1);
 
     return $output;
 
@@ -211,67 +170,18 @@ sub get {
 sub gets {
     my $self = shift;
 
-    my $counter = 0;
     my $output = '';
-    my $working = 1;
 
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
+    while (my $buffer = $self->get()) {
 
-    # Setup non-blocking read. Keep reading until nothing is left.
-    # Return the raw output, if any. 
-    #
-    # Patterned after some libssh2 examples and C network programming
-    # "best practices".
+        if ($output = $self->buf_get_line(\$buffer, $self->eol)) {
 
-    $self->chan->blocking(0);
-
-    while ($working) {
-
-        my $buf;
-
-        if ($self->chan->read($buf, 512)) {
-
-            $self->{buffer} .= $buf;
-
-            if ($output = $self->_get_line($self->eol)) {
-
-                $working = 0;
-
-            }
-
-        } else {
-
-            my $syserr = $! + 0;
-            my ($errno, $name, $errstr) = $self->ssh->error();
-
-            if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
-
-                $counter++;
- 
-                $working = 0         if ($counter >  $self->attempts);
-                $self->_waitsocket() if ($counter <= $self->attempts);
-
-            } else {
-
-                $self->chan->blocking(1);
-
-                $self->class->var('ERRNO', $errno);
-                $self->class->var('ERRSTR', $errstr);
-
-                $self->throw_msg(
-                    'xas.lib.ssh.client.get.protoerr',
-                    'protoerr',
-                    $name, $errstr
-                );
-
-            }
+            $self->{buffer} = $buffer . $self->{buffer};
+            last;
 
         }
 
     }
-
-    $self->chan->blocking(1);
 
     return trim($output);
 
@@ -323,7 +233,7 @@ sub put {
                 $self->class->var('ERRSTR', $errstr);
 
                 $self->throw_msg(
-                    'xas.lib.ssh.client._put.protoerr',
+                    dotid($self->class) . '.protoerr',
                     'protoerr',
                     $name, $errstr
                 );
@@ -400,6 +310,64 @@ sub init {
 
 }
 
+sub _fill_buffer {
+    my $self = shift;
+
+    my $read     = 0;
+    my $counter  = 0;
+    my $working  = 1;
+
+    # Setup non-blocking read. Keep reading until nothing is left.
+    # i.e. the reads timeout.
+
+    $self->chan->blocking(0);
+
+    while ($working) {
+
+        my $buf;
+
+        if (my $bytes = $self->chan->read($buf, 512)) {
+
+            $self->{buffer} .= $buf;
+            $read += $bytes;
+
+        } else {
+
+            my $syserr = $! + 0;
+            my ($errno, $name, $errstr) = $self->ssh->error();
+
+            if (($errno == LIBSSH2_ERROR_EAGAIN) || ($syserr == EAGAIN)) {
+
+                $counter++;
+ 
+                $working = 0         if ($counter >  $self->attempts);
+                $self->_waitsocket() if ($counter <= $self->attempts);
+
+            } else {
+
+                $self->chan->blocking(1);
+
+                $self->class->var('ERRNO', $errno);
+                $self->class->var('ERRSTR', $errstr);
+
+                $self->throw_msg(
+                    dotid($self->class) . '.protoerr',
+                    'protoerr',
+                    $name, $errstr
+                );
+
+            }
+
+        }
+
+    }
+
+    $self->chan->blocking(1);
+
+    return $read;
+
+}
+    
 sub _waitsocket {
     my $self = shift;
 
@@ -422,40 +390,6 @@ sub _waitsocket {
     }
 
     return $! + 0;
-
-}
-
-sub _slurp {
-    my $self = shift;
-    my $pos  = shift;
-
-    my $buffer;
-
-    if ($buffer = substr($self->{buffer}, 0, $pos)) {
-
-        substr($self->{buffer}, 0, $pos) = '';
-
-    }
-
-    return $buffer;
-
-}
-
-sub _get_line {
-    my $self = shift;
-    my $eol  = shift;
-
-    my $pos;
-    my $buffer;
-
-    if ($self->{buffer} =~ m/$eol/g) {
-
-        $pos = pos($self->{buffer});
-        $buffer = $self->_slurp($pos);
-
-    }
-
-    return $buffer;
 
 }
 

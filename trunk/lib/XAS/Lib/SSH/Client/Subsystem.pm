@@ -137,12 +137,6 @@ will accept one parameter which is a reference to that data.
 
 =back
 
-=head1 MUTATORS
-
-=head2 eol
-
-This sets the EOL. It defaults to CRLF - "\015\012";
-
 =head1 SEE ALSO
 
 =over 4
