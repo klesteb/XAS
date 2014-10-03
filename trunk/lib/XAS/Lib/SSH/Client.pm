@@ -170,9 +170,12 @@ sub get {
 sub gets {
     my $self = shift;
 
+    my $buffer;
     my $output = '';
 
-    while (my $buffer = $self->get()) {
+    while (my $buf = $self->get()) {
+
+        $buffer .= $buf;
 
         if ($output = $self->buf_get_line(\$buffer, $self->eol)) {
 

@@ -319,10 +319,9 @@ sub _client_output {
 
     try {
 
-        push(@buffer, $data);
-
         if (defined($wheel)) {
 
+            push(@buffer, $data);
             $self->{clients}->{$wheel}->{client}->put(@buffer);
 
         } else {

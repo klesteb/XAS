@@ -10,6 +10,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Bufops',
   utils     => 'trim dotid',
   accessors => 'handle select attempts',
   mutators  => 'timeout',
@@ -67,6 +68,13 @@ sub connect {
 
 }
 
+sub pending {
+    my $self = shift;
+
+    return length($self->{buffer});
+
+}
+
 sub disconnect {
     my $self = shift;
 
@@ -84,147 +92,45 @@ sub get {
         { optional => 1, default => 512 }
     ]);
 
-    my $packet  = '';
-    my $counter = 0;
-    my $working = 1;
-    my $read    = 0;
-    my $timeout = $self->handle->timeout;
+    my $output;
 
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
+    if ($self->pending > $length) {
 
-    while ($working) {
+        $output = $self->buf_slurp(\$self->{buffer}, $length);
 
-        my $buf;
+    } else {
 
-        $self->handle->clearerr();
+        $self->_fill_buffer();
 
-        if ($self->select->can_read($timeout)) {
-
-            if (my $bytes = $self->handle->sysread($buf, $length)) {
-
-                $self->{buffer} .= $buf;
-                $read += $bytes;
-
-                if ($read >= $length) {
-
-                    $working = 0;
-                    $packet  = $self->_slurp($length);
-
-                }
-
-            } else {
-
-                if ($self->handle->error) {
-
-                    my $errno  = $! + 0;
-                    my $errstr = $!;
-
-                    $self->log->debug("get: errno = $errno");
-
-                    if ($errno == EAGAIN) {
-
-                        $counter++;
-                        $working = 0 if ($counter > $self->attempts);
-
-                    } else {
-
-                        $self->class->var('ERRNO', $errno);
-                        $self->class->var('ERRSTR', $errstr);
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.get',
-                            'network',
-                            $errstr
-                        );
-
-                    }
-
-                }
-
-            }
-
-        } else {
-
-            $working = 0;
-
-        }
+        my $l = ($self->pending > $length) ? $length : $self->pending;
+        $output = $self->buf_slurp(\$self->{buffer}, $l);
 
     }
 
-    return $packet;
+    return $output;
 
 }
 
 sub gets {
     my $self = shift;
 
-    my $packet  = '';
-    my $counter = 0;
-    my $working = 1;
-    my $timeout = $self->handle->timeout;
+    my $buffer;
+    my $output = '';
 
-    $self->class->var('ERRNO', 0);
-    $self->class->var('ERRSTR', '');
+    while (my $buf = $self->get()) {
 
-    while ($working) {
+        $buffer .= $buf;
 
-        my $buf;
+        if ($output = $self->buf_get_line(\$buffer, $self->eol)) {
 
-        $self->handle->clearerr();
-
-        if ($self->select->can_read($timeout)) {
-
-            if ($self->handle->sysread($buf, 512)) {
-
-                $self->{buffer} .= $buf;
-
-                if ($packet = $self->_get_line($self->eol)) {
-
-                    $working = 0;
-
-                }
-
-            } else {
-
-                if ($self->handle->error) {
-
-                    my $errno  = $! + 0;
-                    my $errstr = $!;
-
-                    $self->log->debug("get: errno = $errno");
-
-                    if ($errno == EAGAIN) {
-
-                        $counter++;
-                        $working = 0 if ($counter > $self->attempts);
-
-                    } else {
-
-                        $self->class->var('ERRNO', $errno);
-                        $self->class->var('ERRSTR', $errstr);
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.gets',
-                            'network',
-                            $errstr
-                        );
-
-                    }
-
-                }
-
-            }
-
-        } else {
-
-            $working = 0;
+            $self->{buffer} = $buffer . $self->{buffer};
+            last;
 
         }
 
     }
 
-    return trim($packet);
+    return trim($output);
 
 }
 
@@ -260,7 +166,7 @@ sub put {
                     my $errno  = $! + 0;
                     my $errstr = $!;
 
-                    if ($errno = EAGAIN) {
+                    if ($errno == EAGAIN) {
 
                         $counter++;
                         $working = 0 if ($counter > $self->attempts);
@@ -338,40 +244,6 @@ sub setup {
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub _slurp {
-    my $self = shift;
-    my $pos  = shift;
-
-    my $buffer;
-
-    if ($buffer = substr($self->{buffer}, 0, $pos)) {
-
-        substr($self->{buffer}, 0, $pos) = '';
-
-    }
-
-    return $buffer;
-
-}
-
-sub _get_line {
-    my $self = shift;
-    my $eol  = shift;
-
-    my $pos;
-    my $buffer;
-
-    if ($self->{buffer} =~ m/$eol/g) {
-
-        $pos = pos($self->{buffer});
-        $buffer = $self->_slurp($pos);
-
-    }
-
-    return $buffer;
-
-}
-
 sub init {
     my $class = shift;
 
@@ -381,6 +253,73 @@ sub init {
     $self->{buffer}   = '';
 
     return $self;
+
+}
+
+sub _fill_buffer {
+    my $self = shift;
+    
+    my $counter = 0;
+    my $working = 1;
+    my $read    = 0;
+    my $timeout = $self->handle->timeout;
+
+    $self->class->var('ERRNO', 0);
+    $self->class->var('ERRSTR', '');
+
+    while ($working) {
+
+        my $buf;
+
+        $self->handle->clearerr();
+
+        if ($self->select->can_read($timeout)) {
+
+            if (my $bytes = $self->handle->sysread($buf, 512)) {
+
+                $self->{buffer} .= $buf;
+                $read += $bytes;
+
+            } else {
+
+                if ($self->handle->error) {
+
+                    my $errno  = $! + 0;
+                    my $errstr = $!;
+
+                    $self->log->debug("get: errno = $errno");
+
+                    if ($errno == EAGAIN) {
+
+                        $counter++;
+                        $working = 0 if ($counter > $self->attempts);
+
+                    } else {
+
+                        $self->class->var('ERRNO', $errno);
+                        $self->class->var('ERRSTR', $errstr);
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.get',
+                            'network',
+                            $errstr
+                        );
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            $working = 0;
+
+        }
+
+    }
+
+    return $read;
 
 }
 
@@ -469,7 +408,7 @@ The buffer to send over the socket.
 =head2 get($length)
 
 This block reads data from the socket. A buffer is returned when it reaches
-$length or timeout, whichever is first.
+$length or timeout.
 
 =over 4
 
@@ -482,6 +421,10 @@ An optional length for the buffer. Defaults to 512 bytes.
 =head2 gets
 
 This reads a buffer delimited by the eol from the socket.
+
+=head2 pending
+
+This returns the size of the internal read buffer.
 
 =head2 errno
 
