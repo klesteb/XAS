@@ -13,7 +13,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
-  mixin     => 'XAS::Lib::Mixins::Keepalive XAS::Lib::Mixins::Handlers',
+  mixin     => 'XAS::Lib::Mixins::Handlers',
   utils     => 'weaken params',
   accessors => 'session',
   constants => 'ARRAY',
@@ -253,14 +253,6 @@ sub _client_connected {
 
     $self->log->debug("$alias: _client_connected()");
 
-    if ($self->tcp_keepalive) {
-
-        $self->log->debug("$alias: keepalive activated");
-
-        $self->enable_keepalive($socket);
-
-    }
-
     my $client = POE::Wheel::ReadWrite->new(
         Handle     => $socket,
         Filter     => $self->filter,
@@ -384,8 +376,6 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
-
-    $self->init_keepalive();     # init tcp keepalive definations
 
     unless (defined($self->filter)) {
 

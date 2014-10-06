@@ -60,6 +60,7 @@ sub session_intialize {
     $poe_kernel->state('server_connect',   $self, '_server_connect');
     $poe_kernel->state('server_connected', $self, '_server_connected');
     $poe_kernel->state('server_reconnect', $self, '_server_reconnect');
+    $poe_kernel->state('server_connection_failed', $self, '_server_connection_failed');
 
     # public events
 
@@ -157,10 +158,9 @@ sub write_data {
 
     my @packet;
 
-    push(@packet, $data);
-
     if (my $wheel = $self->wheel) {
 
+        push(@packet, $data);
         $wheel->put(@packet);
 
     }
@@ -189,14 +189,6 @@ sub _server_connected {
 
     $self->log->debug("$alias: _server_connected()");
 
-    if ($self->tcp_keepalive) {
-
-        $self->log->debug("$alias: keepalive activated");
-
-        $self->enable_keepalive($socket);
-
-    }
-
     my $wheel = POE::Wheel::ReadWrite->new(
         Handle     => $socket,
         Filter     => $self->filter,
@@ -206,10 +198,11 @@ sub _server_connected {
 
     my $host = gethostbyaddr($peeraddr, AF_INET);
 
+    $self->{host}     = $host;
+    $self->{port}     = $peerport;
+    $self->{wheel}    = $wheel;
+    $self->{socket}   = $socket;
     $self->{attempts} = 0;
-    $self->{wheel} = $wheel;
-    $self->{host} = $host;
-    $self->{port} = $peerport;
 
     $poe_kernel->post($alias, 'handle_connection');
 
@@ -243,6 +236,7 @@ sub _server_connection_failed {
     $self->log->debug("$alias: _server_connection_failed()");
     $self->log->error("$alias: operation: $operation; reason: $errnum - $errstr");
 
+    delete $self->{socket};
     delete $self->{listner};
     delete $self->{wheel};
 
@@ -332,8 +326,6 @@ sub init {
 
     $self->{attempts} = 0;
     $self->{count} = scalar(@RECONNECTIONS);
-
-    $self->init_keepalive();     # init tcp keepalive definations
 
     unless (defined($self->{filter})) {
 

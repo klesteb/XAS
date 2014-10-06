@@ -10,10 +10,11 @@ use Try::Tiny;
 use Socket ':all';
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  mixins  => 'init_keepalive enable_keepalive',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  accessors => 'tpc_keepalive tcp_keepcnt tcp_keepintvl',
+  mixins    => 'init_keepalive enable_keepalive tpc_keepalive tcp_keepcnt tcp_keepintvl',
 ;
 
 # ----------------------------------------------------------------------
@@ -27,16 +28,16 @@ sub enable_keepalive {
     # turn keepalive on, this should send a keepalive 
     # packet once every 2 hours according to the RFC.
 
-    setsockopt($socket, SOL_SOCKET,  SO_KEEPALIVE,  1);
+    setsockopt($socket, SOL_SOCKET, SO_KEEPALIVE,  1);
 
     # adjust the system defaults, all values are in seconds.
     # so this does the following:
     #   every 15 minutes send up to 3 packets at 5 second intervals
     #     if no reply, the connection is down.
 
-    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPIDLE,  900);  # 15 minutes
-    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPINTVL, 5);    # 
-    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPCNT,   3);    # 
+    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPINTVL, $self->tcp_keepintvl); 
+    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPIDLE,  $self->tcp_keepidle);
+    setsockopt($socket, IPPROTO_TCP, $TCP_KEEPCNT,   $self->tcp_keepcnt);
 
 }
 
@@ -46,7 +47,16 @@ sub enable_keepalive {
 
 sub init_keepalive {
     my $self = shift;
-
+    my $p = $self->validate_params(\@_, {
+        -tcp_keepcnt   => { optional => 1, default => 3 },   # number of packets
+        -tcp_keepidle  => { optional => 1, default => 900 }, # 15 minutes
+        -tcp_keepintvl => { optional => 1, default => 5 },   # interval seconds
+    });
+    
+    $self->{tcp_keepcnt}   = $p->{tcp_keepcnt};
+    $self->{tcp_keepidle}  = $p->{tcp_keepalive};
+    $self->{tcp_keepintvl} = $p->{tcp_keepintvl};
+                                            
     # implement socket level keepalive, what a mess...
 
     if ( $] < 5.014 ) {               # check perl's version

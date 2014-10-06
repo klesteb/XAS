@@ -85,7 +85,6 @@ sub handle_connection {
         -passcode => $self->passcode
     );
 
-    $self->log->info_msg('connected', $alias, $self->host, $self->port);
     $poe_kernel->post($alias, 'write_data', $frame);
     
 }
@@ -94,6 +93,17 @@ sub handle_connected {
     my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
+
+    if ($self->tcp_keepalive) {
+
+        $self->log->debug("$alias: tcp_keepalive enabled");
+
+        $self->init_keepalive();
+        $self->enable_keepalice($self->socket);
+
+    }
+
+    $self->log->info_msg('connected', $alias, $self->host, $self->port);
 
     $poe_kernel->post($alias, 'connection_up');
 
