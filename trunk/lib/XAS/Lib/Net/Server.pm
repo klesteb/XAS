@@ -267,6 +267,7 @@ sub _client_connected {
     $self->{clients}->{$wheel}->{port}   = $peerport;
     $self->{clients}->{$wheel}->{client} = $client;
     $self->{clients}->{$wheel}->{active} = time();
+    $self->{clients}->{$wheel}->{socket} = $socket;
     $self->{clients}->{$wheel}->{watchdog} = $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
 
     $self->log->info_msg('client_connect', $alias, $host, $peerport);

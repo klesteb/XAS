@@ -1,6 +1,6 @@
 package XAS::Lib::Net::POE::Client;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use POE;
 use Try::Tiny;
@@ -16,6 +16,7 @@ use XAS::Class
   base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Keepalive',
   accessors => 'wheel host port listener',
+  utils     => 'dotid',
   vars => {
     PARAMS => {
       -host            => 1,
@@ -94,6 +95,7 @@ sub session_startup {
 sub session_shutdown {
     my $self = shift;
     
+    $self->{socket}   = undef;
     $self->{wheel}    = undef;
     $self->{listener} = undef;
 
@@ -157,11 +159,20 @@ sub write_data {
     my ($self, $data) = @_[OBJECT, ARG0];
 
     my @packet;
+    my $alias = $self->alias;
 
     if (my $wheel = $self->wheel) {
 
         push(@packet, $data);
         $wheel->put(@packet);
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.write_data.nowheel',
+            'nowheel',
+            $alias
+        );
 
     }
 

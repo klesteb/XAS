@@ -149,11 +149,11 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Service - The base class for all POE Sessions.
+XAS::Lib::POE::Service - The base class for all POE Sessions.
 
 =head1 SYNOPSIS
 
- my $session = XAS::Lib::Session->new(
+ my $session = XAS::Lib::POE::Session->new(
      -alias => 'name',
  );
 

@@ -84,7 +84,11 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>
 
-=item L<XAS::Lib::Service|XAS::Lib::Service>
+=item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
+
+=item L<XAS::Lib::POE::Service|XAS::Lib::POE::Service>
+
+=item L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>
 
 =item L<XAS::Lib::Services|XAS::Lib::Services>
 
@@ -92,15 +96,15 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Services::Win32|XAS::Lib::Services::Win32>
 
-=item L<XAS::Lib::Session|XAS::Lib::Session>
-
 =item L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>
 
-=item L<XAS::Lib::SSH::Exec|XAS::Lib::SSH::Exec>
+=item L<XAS::Lib::SSH::Client::Exec|XAS::Lib::SSH::Client::Exec>
+
+=item L<XAS::Lib::SSH::Client::Shell|XAS::Lib::SSH::Client::Shell>
+
+=item L<XAS::Lib::SSH::Client::Subsystem|XAS::Lib::SSH::Client::Subsystem>
 
 =item L<XAS::Lib::SSH::Server|XAS::Lib::SSH::Server>
-
-=item L<XAS::Lib::SSH::Shell|XAS::Lib::SSH::Shell>
 
 =item L<XAS::Lib::Stomp::Frame|XAS::Lib::Stomp::Frame>
 
