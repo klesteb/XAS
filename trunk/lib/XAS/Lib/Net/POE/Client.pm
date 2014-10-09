@@ -15,7 +15,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Keepalive',
-  accessors => 'wheel host port listener',
+  accessors => 'wheel host port listener socket',
   utils     => 'dotid',
   vars => {
     PARAMS => {
@@ -245,7 +245,7 @@ sub _server_connection_failed {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _server_connection_failed()");
-    $self->log->error("$alias: operation: $operation; reason: $errnum - $errstr");
+    $self->log->error_msg('server_connection_failed', $alias, $operation, $errnum, $errstr);
 
     delete $self->{socket};
     delete $self->{listner};
@@ -270,8 +270,9 @@ sub _server_error {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _server_error()");
-    $self->log->error("$alias: operation: $operation; reason: $errnum - $errstr");
+    $self->log->error_msg('server_error', $alias, $operation, $errnum, $errstr);
 
+    delete $self->{socket};
     delete $self->{listner};
     delete $self->{wheel};
 
@@ -296,12 +297,12 @@ sub _server_reconnect {
     my $retry;
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: attempts: $self->{attempts}, count: $self->{count}");
+    $self->log->warn_msg('server_reconnect', $alias, $self->{attempts}, $self->{count});
 
     if ($self->{attempts} < $self->{count}) {
 
         my $delay = $RECONNECTIONS[$self->{attempts}];
-        $self->log->warn("$alias: attempting reconnection: $self->{attempts}, waiting: $delay seconds");
+        $self->log->warn_msg('server_attempts', $alias, $self->{attempts}, $delay);
         $self->{attempts} += 1;
         $poe_kernel->delay('server_connect', $delay);
 
@@ -311,13 +312,13 @@ sub _server_reconnect {
 
         if ($retry) {
 
-            $self->log->warn("$alias: cycling reconnection attempts, but not shutting down...");
+            $self->log->warn_msg('server_recycle', $alias);
             $self->{attempts} = 0;
             $poe_kernel->post($alias, 'server_connect');
 
         } else {
 
-            $self->log->warn("$alias: shutting down, to many reconnection attempts");
+            $self->log->warn_msg('server_shutdown', $alias);
             $poe_kernel->post($alias, 'session_shutdown');
 
         }

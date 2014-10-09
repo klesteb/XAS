@@ -158,7 +158,7 @@ sub reaper {
 
     my $alias = $self->alias;
 
-    $self->log->debug_msg('reaper', $alias, $self->host($wheel), $self->peerport($wheel));
+    $self->log->debug_msg('client_reaper', $alias, $self->host($wheel), $self->peerport($wheel));
 
 }
 
@@ -279,7 +279,7 @@ sub _client_connection_failed {
 
     my $alias = $self->alias;
 
-    $self->log->error_msg('connection_failed', $alias, $errnum, $errstr);
+    $self->log->error_msg('client_connection_failed', $alias, $errnum, $errstr);
 
     delete $self->{listener};
 
@@ -310,28 +310,32 @@ sub _client_output {
 
     $self->log->debug("$alias: _client_output()");
 
-    try {
+    if (defined($wheel)) {
 
-        if (defined($wheel)) {
+        # emulate IO::Socket connected() method.
+
+        if (getpeername($self->{clients}->{$wheel}->{socket})) {
 
             push(@buffer, $data);
             $self->{clients}->{$wheel}->{client}->put(@buffer);
 
         } else {
 
-            $self->log->error_msg('nowheel', $alias);
+            $self->log->error_msg(
+                'client_nosocket', 
+                $alias, 
+                $self->peerhist($wheel), 
+                $self->peerport($wheel)
+            );
+            delete $self->{clients}->{$wheel};
 
         }
 
-    } catch {
+    } else {
 
-        my $ex = $_;
+        $self->log->error_msg('client_nowheel', $alias);
 
-        $self->execption_handler($ex);
-
-        delete $self->{clients}->{$wheel};
-
-    };
+    }
 
 }
 
