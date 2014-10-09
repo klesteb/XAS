@@ -11,7 +11,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixin::Handlers',
+  mixin     => 'XAS::Lib::Mixins::Handlers',
   accessors => 'methods',
   codec     => 'JSON',
   constants => 'HASH ARRAY :jsonrpc',
