@@ -118,6 +118,11 @@ sub process_errors {
 
 }
 
+sub handle_connection {
+    my ($self, $wheel) = @_[OBJECT,ARG0];
+    
+}
+
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
@@ -138,6 +143,8 @@ sub _client_connection {
         InputEvent   => 'client_input',
         ErrorEvent   => 'client_error'
     );
+
+    $poe_kernel->post($alias, 'handle_connection', $client->ID);
 
 }
 
@@ -352,6 +359,23 @@ The output to be sent to the socket.
 
 A hash variable to maintain context. This uses the "wheel" field to direct output
 to the correct socket. Others fields may have been added as needed.
+
+=back
+
+=head2 handle_connection(OBJECT, ARG)
+
+This event is called after the client has connected. This is for additional
+post connection processing as needed. It takes the following parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+A handle to the current object.
+
+=item B<ARG0>
+
+The id of the clients wheel.
 
 =back
 

@@ -1,6 +1,6 @@
 package XAS::Lib::Net::Server;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use POE;
 use Try::Tiny;
@@ -42,9 +42,10 @@ sub session_initialize {
 
     $self->log->debug("$alias: entering session_intialize()");
 
-    $poe_kernel->state('process_errors',   $self);
-    $poe_kernel->state('process_request',  $self);
-    $poe_kernel->state('process_response', $self);
+    $poe_kernel->state('process_errors',    $self);
+    $poe_kernel->state('process_request',   $self);
+    $poe_kernel->state('process_response',  $self);
+    $poe_kernel->state('handle_connection', $self);
 
     # private events
 
@@ -125,7 +126,7 @@ sub session_pause {
 
     $self->SUPER::session_pause();
 
-    $self->log->debug("$alias: entering session_pause()");
+    $self->log->debug("$alias: leaving session_pause()");
 
 }
 
@@ -219,6 +220,11 @@ sub process_errors {
 
 }
 
+sub handle_connection {
+    my ($self, $wheel) = @_[OBJECT, ARG0];
+    
+}
+
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
@@ -272,6 +278,8 @@ sub _client_connected {
 
     $self->log->info_msg('client_connect', $alias, $host, $peerport);
 
+    $poe_kernel->post($alias, 'handle_connection', $wheel);
+    
 }
 
 sub _client_connection_failed {
@@ -312,7 +320,9 @@ sub _client_output {
 
     if (defined($wheel)) {
 
-        # emulate IO::Socket connected() method.
+        # emulate IO::Socket connected() method. this method
+        # calls getpeername(). getpeername() returns undef when
+        # the network stack can't validate the socket. 
 
         if (getpeername($self->{clients}->{$wheel}->{socket})) {
 
@@ -573,6 +583,23 @@ The output to be sent to the socket.
 
 A hash variable to maintain context. This uses the "wheel" field to direct output
 to the correct socket. Others fields may have been added as needed.
+
+=back
+
+=head2 handle_connection(OBJECT ARG0)
+
+This event is called after the client connects. This is for additional
+post connection processing as needed. It takes the following parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+A handle to the current object.
+
+=item B<ARG0>
+
+The id of the clients wheel.
 
 =back
 
