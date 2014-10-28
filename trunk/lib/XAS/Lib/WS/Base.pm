@@ -49,8 +49,7 @@ sub request {
         { isa => 'HTTP::Request' }
     );
 
-    my $header_ref;
-    my $content_ref;
+    my @data;
     my $response = undef;
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
@@ -62,10 +61,9 @@ sub request {
 
     # I/O for the request
 
-    $self->curl->setopt(CURLOPT_WRITEDATA,     \$content_ref);
-    $self->curl->setopt(CURLOPT_HEADERDATA,    \$header_ref);
+    $self->curl->setopt(CURLOPT_WRITEDATA,     \@data);
     $self->curl->setopt(CURLOPT_READFUNCTION,  \&_read_callback);
-    $self->curl->setopt(CURLOPT_WRITEFUNCTION, \&_chunk_callback);
+    $self->curl->setopt(CURLOPT_WRITEFUNCTION, \&_write_callback);
 
     # other options depending on request type
 
@@ -105,16 +103,34 @@ sub request {
 
     # perform the request and create the response
 
-   if (($self->{retcode} = $self->curl->perform) == 0) {
+    if (($self->{retcode} = $self->curl->perform) == 0) {
 
+        my @temp;
         my $message;
-        my @headers = split("\r\n\r\n", $header_ref);
+        my $content;
 
-        $response = HTTP::Response->parse($headers[-1]);
-        $response->content($content_ref);
+        # there may have been multiple responses collected, we only
+        # want the last one. so search backwards until a HTTP header
+        # is found.
+
+        while (my $line = pop(@data)) {
+
+            push(@temp, $line);
+            last if ($line =~ /(^HTTP\/|^HTTPS\/)/);
+
+        }
+
+        $content = join('', reverse(@temp));
+
+        # now let HTTP::Response figure it all out...
+
+        $response = HTTP::Response->parse($content);
+
+        # do some fixups
 
         $message = $response->message;
         $response->message($message) if ($message =~ s/\r//g);
+        $response->request($request);
 
     } else {
 
@@ -135,23 +151,23 @@ sub request {
 # ----------------------------------------------------------------------
 
 sub _read_callback {
-    my ( $maxlength, $pointer ) = @_;
+    my ($maxlength, $pointer) = @_;
 
-    my $data = substr( $$pointer, 0, $maxlength );
+    my $data = substr($$pointer, 0, $maxlength);
 
     $$pointer =
       length($$pointer) > $maxlength
-      ? scalar substr( $$pointer, $maxlength )
+      ? scalar substr($$pointer, $maxlength)
       : '';
 
     return $data;
 
 }
 
-sub _chunk_callback {
-    my ( $data, $pointer ) = @_;
+sub _write_callback {
+    my ($data, $pointer) = @_;
 
-    ${$pointer} .= $data;
+    push(@{$pointer}, $data);
 
     return length($data);
 
