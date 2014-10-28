@@ -66,6 +66,7 @@ lib/XAS/Lib/Stomp/Parser.pm
 lib/XAS/Lib/Stomp/POE/Client.pm
 lib/XAS/Lib/Stomp/POE/Filter.pm
 lib/XAS/Lib/Stomp/Utils.pm
+lib/XAS/Lib/WS/Base.pm
 lib/XAS/Msgs/Base.msg
 lib/XAS/Singleton.pm
 lib/XAS/Utils.pm
