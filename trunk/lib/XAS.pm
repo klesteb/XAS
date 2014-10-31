@@ -118,6 +118,8 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Stomp::Utils|XAS::Lib::Stomp::Utils>
 
+=item L<XAS::Lib::XML|XAS::Lib::XML>
+
 =back
 
 =head1 SUPPORT

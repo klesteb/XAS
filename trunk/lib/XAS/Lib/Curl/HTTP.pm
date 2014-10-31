@@ -6,6 +6,7 @@ use HTTP::Response;
 use WWW::Curl::Easy;
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'curl',
@@ -14,7 +15,6 @@ use XAS::Class
   vars => {
     PARAMS => {
       -headers         => { optional => 1, default => 0 },
-      -keep_alive      => { optional => 1, default => 0 },
       -followlocation  => { optional => 1, default => 1 },
       -max_redirects   => { optional => 1, default => 3 },
       -ssl_verify_peer => { optional => 1, default => 1 },
@@ -51,8 +51,6 @@ sub request {
     my $response = undef;
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
-
-    push(@headers, "Connection: close") unless $self->keep_alive;
 
     $self->curl->setopt(CURLOPT_URL,        $request->uri);
     $self->curl->setopt(CURLOPT_HTTPHEADER, \@headers) if (scalar(@headers));
@@ -298,11 +296,6 @@ This method initializes the module and takes the following parameters:
 
 A toggle to tell curl to display headers, defaults to false.
 
-=item B<-keep_alive> 
-
-A toggle to place a "Connection: close" header into the request,
-defaults to yes.
-
 =item B<-followlocation>
 
 A toggle to follow redirects, defaults to true.
@@ -318,6 +311,21 @@ The timeout for the connection, defaults to 60 seconds.
 =item B<-connect_timeout>
 
 The timeout for the initial connection, defaults to 300 seconds.
+
+=item B<-auth_method>
+
+The authentication method to use, defaults to 'noauth'. Possible
+values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a username
+and password are supplied, curl defaults to 'basic'.
+
+=item B<-password>
+
+An optional password to use, implies a username. Wither the password is
+actually used, depends on -auth_method.
+
+=item B<-username>
+
+An optional username to use, implies a password.
 
 =item B<-ssl_cacert>
 
@@ -342,21 +350,6 @@ Wither to verify the host certifcate, defaults to true.
 =item B<-ssl_verify_peer>
 
 Wither to verify the peer certificate, defaults to true.
-
-=item B<-auth_method>
-
-The authentication method to use, defaults to 'noauth'. Possible
-values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a username
-and password are supplied, curl defaults to 'basic'.
-
-=item B<-password>
-
-An optional password to use, implies a username. Wither the password is
-actually used, depends on -auth_method.
-
-=item B<-username>
-
-An optional username to use, implies a password.
 
 =item B<-proxy_url>
 

@@ -68,3 +68,6 @@ json_rpc_format   = this json-rpc format is not supported
 json_rpc_batch    = the usage of json-rpc batch mode is not supported
 json_rpc_notify   = the usage of json-rpc notifications is not supported
 curl              = curl error: %s, reason: %s
+xml_error         => %s
+xml_parser        => unable to parse the document
+xml_validate      => unable to validate the document
