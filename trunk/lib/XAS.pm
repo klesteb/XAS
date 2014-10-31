@@ -48,6 +48,8 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::App::Services::Win32|XAS::Lib::App::Services::Win32>
 
+=item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
+
 =item L<XAS::Lib::Curses::Root|XAS::Lib::Curses::Root>
 
 =item L<XAS::Lib::Curses::Unix|XAS::Lib::Curses::Unix>

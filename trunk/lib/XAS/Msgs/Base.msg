@@ -67,3 +67,4 @@ json_rpc_version  = this server supports only json-rpc version 2.0
 json_rpc_format   = this json-rpc format is not supported
 json_rpc_batch    = the usage of json-rpc batch mode is not supported
 json_rpc_notify   = the usage of json-rpc notifications is not supported
+curl              = curl error: %s, reason: %s

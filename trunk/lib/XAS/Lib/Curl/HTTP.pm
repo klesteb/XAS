@@ -1,4 +1,4 @@
-package XAS::Lib::WS::Base;
+package XAS::Lib::Curl::HTTP;
 
 our $VERSION = '0.01';
 
@@ -19,7 +19,7 @@ use XAS::Class
       -max_redirects   => { optional => 1, default => 3 },
       -ssl_verify_peer => { optional => 1, default => 1 },
       -ssl_verify_host => { optional => 1, default => 1 },
-      -timeout         => { optional => 1, default => 30 },
+      -timeout         => { optional => 1, default => 60 },
       -connect_timeout => { optional => 1, default => 300 },
       -ssl_cacert      => { optional => 1, default => undef },
       -ssl_keypasswd   => { optional => 1, default => undef },
@@ -34,9 +34,6 @@ use XAS::Class
       -proxy_auth      => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
     }
   },
-  messages => {
-    curl => 'curl error: %s, reason: %s',
-  }
 ;
 
 # ----------------------------------------------------------------------
@@ -45,11 +42,12 @@ use XAS::Class
 
 sub request {
     my $self = shift;
-    my ($request) = validate_pos(@_,
+    my ($request) = $self->validate_params(\@_, [
         { isa => 'HTTP::Request' }
-    );
+    ]);
 
-    my @data;
+    my @body
+    my @head
     my $response = undef;
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
@@ -61,9 +59,11 @@ sub request {
 
     # I/O for the request
 
-    $self->curl->setopt(CURLOPT_WRITEDATA,     \@data);
-    $self->curl->setopt(CURLOPT_READFUNCTION,  \&_read_callback);
-    $self->curl->setopt(CURLOPT_WRITEFUNCTION, \&_write_callback);
+    $self->curl->setopt(CURLOPT_WRITEDATA,      \@body);
+    $self->curl->setopy(CURLOPT_HEADERDATA,     \@head);
+    $self->curl->setopt(CURLOPT_READFUNCTION,   \&_read_callback);
+    $self->curl->setopt(CURLOPT_WRITEFUNCTION,  \&_write_callback);
+    $self->curl->setopt(CURLOPT_HEADERFUNCTION, \&_write_callback);
 
     # other options depending on request type
 
@@ -109,18 +109,18 @@ sub request {
         my $message;
         my $content;
 
-        # there may have been multiple responses collected, we only
+        # there may be multiple responses within head, we only
         # want the last one. so search backwards until a HTTP header
         # is found.
 
-        while (my $line = pop(@data)) {
+        while (my $line = pop(@head)) {
 
             push(@temp, $line);
-            last if ($line =~ /(^HTTP\/|^HTTPS\/)/);
+            last if ($line =~ /^HTTP\//);
 
         }
 
-        $content = join('', reverse(@temp));
+        $content = join('', reverse(@temp), @body);
 
         # now let HTTP::Response figure it all out...
 
@@ -267,19 +267,142 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::WS::Base - A class for the XAS environment
+XAS::Lib::Curl::HTTP - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::Lib::WS::Base;
+ use HTTP::Request;
+ use XAS::Lib::Curl::HTTP;
+
+ my $response;
+ my $request = HTTP::Request->new(GET => 'http://scm.kesteb.us/trac');
+ my $ua = XAS::Lib::Curl::HTTP->new();
+
+ $response = $ua->request($request);
+ print $response->content;
 
 =head1 DESCRIPTION
 
+This module uses L<http://curl.haxx.se/libcurl/|libcurl> as the HTTP engine 
+to make requests from a web server. 
+
 =head1 METHODS
 
-=head2 method1
+=head2 new
+
+This method initializes the module and takes the following parameters:
+
+=over 4
+
+=item B<-headers>         
+
+A toggle to tell curl to display headers, defaults to false.
+
+=item B<-keep_alive> 
+
+A toggle to place a "Connection: close" header into the request,
+defaults to yes.
+
+=item B<-followlocation>
+
+A toggle to follow redirects, defaults to true.
+
+=item B<-max_redirects>
+
+The number of redirects to follow, defaults to 3.
+
+=item B<-timeout>
+
+The timeout for the connection, defaults to 60 seconds.
+
+=item B<-connect_timeout>
+
+The timeout for the initial connection, defaults to 300 seconds.
+
+=item B<-ssl_cacert>
+
+An optional CA cerificate to use.
+
+=item B<-ssl_keypasswd>
+
+An optional password for a signed cerificate.
+
+=item B<-ssl_cert>
+
+An optional certificate to use.
+
+=item B<-ssl_key>
+
+An optional key for a certificate to use.
+
+=item B<-ssl_verify_host>
+
+Wither to verify the host certifcate, defaults to true.
+
+=item B<-ssl_verify_peer>
+
+Wither to verify the peer certificate, defaults to true.
+
+=item B<-auth_method>
+
+The authentication method to use, defaults to 'noauth'. Possible
+values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a username
+and password are supplied, curl defaults to 'basic'.
+
+=item B<-password>
+
+An optional password to use, implies a username. Wither the password is
+actually used, depends on -auth_method.
+
+=item B<-username>
+
+An optional username to use, implies a password.
+
+=item B<-proxy_url>
+
+The url of a proxy that needs to be transversed.
+
+=item B<-proxy_auth>
+
+The authentication method to use, defaults to 'noauth'. Possible
+values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a proxy
+username and a proxy password are supplied, curl defaults to 'basic'.
+
+=item B<-proxy_password>
+
+An optional password to use, implies a username. Wither the password is
+actually used, depends on -proxy_auth.
+
+=item B<-proxy_username>
+
+An optional username to use, implies a password.
+
+=back
+
+=head2 request($request)
+
+This method sends the requset to the web server. The request will return
+a L<HTTP::Response|HTTP::Response> object. It takes the following parameters:
+
+=over 4
+
+=item B<$request>
+
+A L<HTTP::Request|HTTP::Request> object.
+
+=back
 
 =head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=item L<WWW::Curl|WWW::Curl>
+
+=item L<http://curl.haxx.se/libcurl/|libcurl>
+
+=back
 
 =head1 AUTHOR
 

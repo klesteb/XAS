@@ -29,6 +29,7 @@ lib/XAS/Lib/App/Daemon.pm
 lib/XAS/Lib/App/Services.pm
 lib/XAS/Lib/App/Services/Unix.pm
 lib/XAS/Lib/App/Services/Win32.pm
+lib/XAS/Lib/Curl/HTTP.pm
 lib/XAS/Lib/Curses/Root.pm
 lib/XAS/Lib/Curses/Toolkit.pm
 lib/XAS/Lib/Curses/Unix.pm
@@ -66,7 +67,6 @@ lib/XAS/Lib/Stomp/Parser.pm
 lib/XAS/Lib/Stomp/POE/Client.pm
 lib/XAS/Lib/Stomp/POE/Filter.pm
 lib/XAS/Lib/Stomp/Utils.pm
-lib/XAS/Lib/WS/Base.pm
 lib/XAS/Msgs/Base.msg
 lib/XAS/Singleton.pm
 lib/XAS/Utils.pm
