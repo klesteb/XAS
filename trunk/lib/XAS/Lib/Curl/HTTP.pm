@@ -14,7 +14,7 @@ use XAS::Class
   utils     => 'dotid',
   vars => {
     PARAMS => {
-      -headers         => { optional => 1, default => 0 },
+      -keep_alive      => { optional => 1, default => 1 },
       -followlocation  => { optional => 1, default => 1 },
       -max_redirects   => { optional => 1, default => 3 },
       -ssl_verify_peer => { optional => 1, default => 1 },
@@ -185,13 +185,13 @@ sub init {
 
     # basic options
 
-    $self->curl->setopt(CURLOPT_HEADER,            $self->headers);
+    $self->curl->setopt(CURLOPT_HEADER,            0);
     $self->curl->setopt(CURLOPT_VERBOSE,           $self->xdebug);
     $self->curl->setopt(CURLOPT_MAXREDIRS,         $self->max_redirects);
     $self->curl->setopt(CURLOPT_PROTOCOLS,         $protocols);
     $self->curl->setopt(CURLOPT_NOPROGRESS,        1);
     $self->curl->setopt(CURLOPT_TIMEOUT_MS,        $timeout);
-    $self->curl->setopt(CURLOPT_FORBID_REUSE,      !$self->keep_alive);
+    $self->curl->setopt(CURLOPT_FORBID_REUSE,      $self->keep_alive);
     $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->followlocation);
     $self->curl->setopt(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout);
 
@@ -286,19 +286,21 @@ to make requests from a web server.
 
 =head1 METHODS
 
+All true/false values use 0/1 as the indicator.
+
 =head2 new
 
 This method initializes the module and takes the following parameters:
 
 =over 4
 
-=item B<-headers>         
+=item B<-keep_alive>
 
-A toggle to tell curl to display headers, defaults to false.
+A toggle to tell curl to forbid the reuse of sockets, defaults to true.
 
 =item B<-followlocation>
 
-A toggle to follow redirects, defaults to true.
+A toggle to tell curl to follow redirects, defaults to true.
 
 =item B<-max_redirects>
 
