@@ -11,6 +11,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::Net::POE::Client',
+  mixins    => 'XAS::Lib::Mixins::Keepalive',
   accessors => 'stomp',
   vars => {
     PARAMS => {
@@ -96,7 +97,7 @@ sub handle_connected {
 
     if ($self->tcp_keepalive) {
 
-        $self->log->debug("$alias: tcp_keepalive enabled");
+        $self->log->info("$alias: tcp_keepalive enabled");
 
         $self->init_keepalive();
         $self->enable_keepalice($self->socket);

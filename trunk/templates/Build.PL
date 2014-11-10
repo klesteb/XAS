@@ -77,8 +77,9 @@ my $class = Module::Build->subclass(code => <<'EOC');
         while (my ($from, $to) = each %$files) {
 
             $to = catfile('blib', $to);
-            $self->make_executable($from);
-            $result = $self->copy_if_modified(from => $from, to => $to);
+            $result = $self->copy_if_modified(from => $from, to => $to) or next;
+            $self->fix_shebang_line($result) unless $self->is_vmsish;
+            $self->make_executable($result);
 
         }
 
@@ -119,7 +120,6 @@ my $class = Module::Build->subclass(code => <<'EOC');
         while (my ($from, $to) = each %$files) {
 
             $to = catfile('blib', $to);
-            $self->make_executable($from);
             $result = $self->copy_if_modified(from => $from, to => $to);
 
         }
@@ -180,15 +180,31 @@ my $class = Module::Build->subclass(code => <<'EOC');
         my ($self, $dir) = @_;
 
         my $sub = sub {
-            return 1 if (($File::Find::dir !~ /SVN/i or
-                          $File::Find::dir !~ /GIT/i ) and 
-                          -f $File::Find::name);
+            return ((($File::Find::name !~ /SVN/i)  and
+                     ($File::Find::name !~ /GIT/i)) and
+                    ( -f $File::Find::name));
         };
 
         return { map {$_, $_} @{ $self->rscan_dir($dir, $sub) } };
 
     }
 
+    sub _files_in {
+        my ($self, $dir) = @_;
+        return unless -d $dir;
+
+        local *DH;
+        opendir DH, $dir or die "Can't read directory $dir: $!";
+
+        my @files;
+        while (defined (my $file = readdir DH)) {
+           my $full_path = File::Spec->catfile($dir, $file);
+           next if -d $full_path;
+           next if (($file =~ /SVN/i) or ($file =~ /GIT/i));
+           push @files, $full_path;
+       }
+       return @files;
+    }
 EOC
 
 my $builder = $class->new(
