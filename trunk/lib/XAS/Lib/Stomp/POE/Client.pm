@@ -100,7 +100,7 @@ sub handle_connected {
         $self->log->info("$alias: tcp_keepalive enabled");
 
         $self->init_keepalive();
-        $self->enable_keepalice($self->socket);
+        $self->enable_keepalive($self->socket);
 
     }
 
