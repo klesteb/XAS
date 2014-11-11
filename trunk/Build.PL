@@ -371,5 +371,7 @@ my $builder = $class->new(
 
 $builder->add_build_element('profiled');
 $builder->add_build_element('msg');
+$builder->add_build_element('etc');
+
 $builder->create_build_script();
 
