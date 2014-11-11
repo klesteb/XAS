@@ -8,34 +8,26 @@ URL:            http://search.cpan.org/dist/XAS/
 Source0:        http://www.cpan.org/modules/by-module/XAS/XAS-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
-BuildRequires:  perl(Badger) >= 0.09
-BuildRequires:  perl(Config::IniFiles) >= 2.72
-BuildRequires:  perl(DateTime) >= 0.53
-BuildRequires:  perl(DateTime::Format::Pg)
-BuildRequires:  perl(DateTime::Format::Strptime) >= 1.1
-BuildRequires:  perl(File::Pid)
-BuildRequires:  perl(Hash::Merge) >= 0.12
-BuildRequires:  perl(JSON::XS) >= 2.27
-BuildRequires:  perl(LockFile::Simple) >= 0.207
-BuildRequires:  perl(MIME::Lite) >= 3.027
-BuildRequires:  perl(Module::Build)
-BuildRequires:  perl(Params::Validate) >= 0.92
-BuildRequires:  perl(POE) >= 1.35
 BuildRequires:  perl(Test::More)
-BuildRequires:  perl(Try::Tiny::Retry) >= 0.0
-Requires:       perl(Badger) >= 0.09
-Requires:       perl(Config::IniFiles) >= 2.72
-Requires:       perl(DateTime) >= 0.53
-Requires:       perl(DateTime::Format::Pg)
-Requires:       perl(DateTime::Format::Strptime) >= 1.1
-Requires:       perl(File::Pid)
-Requires:       perl(Hash::Merge) >= 0.12
-Requires:       perl(JSON::XS) >= 2.27
-Requires:       perl(LockFile::Simple) >= 0.207
-Requires:       perl(MIME::Lite) >= 3.027
-Requires:       perl(Params::Validate) >= 0.92
 Requires:       perl(POE) >= 1.35
+Requires:       perl(Badger) >= 0.09
+Requires:       perl(Curses) >= 1.28
+Requires:       perl(DateTime) >= 0.53
+Requires:       perl(JSON::XS) >= 2.27
+Requires:       perl(File::Pid) >= 0.0
+Requires:       perl(Net::SSH2) >= 0.44
+Requires:       perl(Try::Tiny) >= 0.0
+Requires:       perl(WWW::Curl) >= 4.15
+Requires:       perl(MIME::Lite) >= 3.027
+Requires:       perl(Pod::Usage) >= 1.35
+Requires:       perl(Set::Light) >= 0.04
+Requires:       perl(Hash::Merge) >= 0.12
 Requires:       perl(Try::Tiny::Retry) >= 0.0
+Requires:       perl(Config::IniFiles) >= 2.72
+Requires:       perl(Params::Validate) >= 0.92
+Requires:       perl(LockFile::Simple) >= 0.207
+Requires:       perl(DateTime::Format::Pg) >= 0.0
+Requires:       perl(DateTime::Format::Strptime) >= 1.1
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 # filter out Win32 stuff.
@@ -73,6 +65,7 @@ install -m 755 -d %{buildroot}/var/spool/xas/alerts
 install -m 755 -d %{buildroot}/var/spool/xas/logstash
 
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
+./Build redhat destdir=$RPM_BUILD_ROOT
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
 %{_fixperms} $RPM_BUILD_ROOT/*
@@ -93,7 +86,6 @@ chmod g+s /var/log/xas
 chmod g+s /var/spool/xas
 chmod g+s /var/spool/xas/alerts
 chmod g+s /var/spool/xas/logstash
-rm -F /etc/profile.d/xas.bat
 
 %postun
 if [ "$1" = 0 ]; then
@@ -111,8 +103,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc Changes perl-XAS.spec README
 %{perl_sitelib}/*
+%config(noreplace) /etc/profile.d/xas.sh
 /usr/local/share/man/man3/*
-/etc/profile.d/*
 
 %changelog
 * Tue Sep 24 2013 kesteb 0.07-1

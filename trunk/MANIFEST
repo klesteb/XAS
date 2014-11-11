@@ -1,4 +1,4 @@
-bin/rotate
+bin/xas-rotate
 Build.PL
 Changes
 debian/changelog
@@ -11,7 +11,7 @@ debian/postrm
 debian/preinst
 debian/rules
 debian/watch
-etc/rotate.ini
+etc/xas-rotate.ini
 ignore.txt
 lib/XAS.pm
 lib/XAS/Apps/Logger.pm
@@ -34,10 +34,13 @@ lib/XAS/Lib/Curses/Root.pm
 lib/XAS/Lib/Curses/Toolkit.pm
 lib/XAS/Lib/Curses/Unix.pm
 lib/XAS/Lib/Curses/Win32.pm
+lib/XAS/Lib/Mixins/Bufops.pm
 lib/XAS/Lib/Mixins/Configs.pm
 lib/XAS/Lib/Mixins/Handlers.pm
 lib/XAS/Lib/Mixins/Iterator.pm
 lib/XAS/Lib/Mixins/Keepalive.pm
+lib/XAS/Lib/Mixins/JSON/Client.pm
+lib/XAS/Lib/Mixins/JSON/Server.pm
 lib/XAS/Lib/Modules/Alerts.pm
 lib/XAS/Lib/Modules/Email.pm
 lib/XAS/Lib/Modules/Environment.pm

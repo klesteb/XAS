@@ -37,6 +37,7 @@ my $requires = {
     'Set::Light'                  => 0.04,
     'Net::SSH2'                   => 0.44,
     'Curses'                      => 1.28,
+    'WWW::Curl'                   => 0.0,
 };
 
 # Needed for Win32 installations
@@ -66,6 +67,8 @@ my $class = Module::Build->subclass(code => <<'EOC');
     use File::Find;
     use File::Basename;
     use File::Spec::Functions qw( catfile catdir rel2abs );
+
+    # set up directory structure and user/group accounts
 
     sub ACTION_post_install {
         my $self = shift;
@@ -140,6 +143,46 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
     }
 
+    # remove redhat stuff when installing to debian
+
+    sub ACTION_debian {
+        my $self = shift;
+
+        # cleanup the profile.d directory
+
+        my $destdir = $self->destdir;
+        my @files = ('xas.bat'); 
+        my @names = map { catfile($destdir, 'etc', 'profile.d', $_) } @files;
+
+        foreach my $file (@names) {
+
+            unlink $file if (-e $file);
+
+        }
+
+    }
+
+    # remove debian stuff when installing to redhat
+
+    sub ACTION_redhat {
+        my $self = shift;
+
+        # cleanup the profile.d directory
+
+        my $destdir = $self->destdir;
+        my @files = ('xas.bat'); 
+        my @names = map { catfile($destdir, 'etc', 'profile.d', $_) } @files;
+
+        foreach my $file (@names) {
+
+            unlink $file if (-e $file);
+
+        }
+
+    }
+
+    # correctly process additional directories
+
     sub process_etc_files {
         my $self = shift;
 
@@ -160,6 +203,8 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
     }
 
+    # correctly process additional directories
+
     sub process_sbin_files {
         my $self = shift;
 
@@ -172,10 +217,13 @@ my $class = Module::Build->subclass(code => <<'EOC');
         while (my ($from, $to) = each %$files) {
 
             $to = catfile('blib', $to);
-            $self->make_executable($from);
-            $result = $self->copy_if_modified(from => $from, to => $to);
+            $result = $self->copy_if_modified(from => $from, to => $to) or next;
+            $self->fix_shebang_line($result) unless $self->is_vmsish;
+            $self->make_executable($result);
 
         }
+
+        $self->manify_sbin_pods();
 
         return $self;
 
@@ -214,7 +262,6 @@ my $class = Module::Build->subclass(code => <<'EOC');
         while (my ($from, $to) = each %$files) {
 
             $to = catfile('blib', $to);
-            $self->make_executable($from);
             $result = $self->copy_if_modified(from => $from, to => $to);
 
         }
@@ -282,6 +329,25 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
         return { map {$_, $_} @{ $self->rscan_dir($dir, $sub) } };
 
+    }
+
+    # fix for when scm files are in the script directory
+
+    sub _files_in {
+        my ($self, $dir) = @_;
+        return unless -d $dir;
+
+        local *DH;
+        opendir DH, $dir or die "Can't read directory $dir: $!";
+
+        my @files;
+        while (defined (my $file = readdir DH)) {
+           my $full_path = File::Spec->catfile($dir, $file);
+           next if -d $full_path;
+           next if (($file =~ /SVN/i) or ($file =~ /GIT/i));
+           push @files, $full_path;
+       }
+       return @files;
     }
 EOC
 

@@ -144,7 +144,7 @@ sub _client_connection {
         ErrorEvent   => 'client_error'
     );
 
-    $poe_kernel->post($alias, 'handle_connection', $client->ID);
+    $poe_kernel->post($alias, 'handle_connection', $self->client->ID);
 
 }
 
