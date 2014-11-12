@@ -66,11 +66,13 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{daemon} = FALSE;
+    $self->{daemon}  = FALSE;
+    $self->{cfgfile} = $self->env->cfgfile;
+    $self->{pidfile} = $self->env->pidfile;
 
     $options->{'daemon'} = \$self->{daemon};
 
-    $options->{'install'}   = sub { 
+    $options->{'install'} = sub { 
         $self->install_service(); 
         exit 0; 
     };
@@ -81,12 +83,12 @@ sub _default_options {
     };
 
     $options->{'pidfile=s'} = sub { 
-        my $pidfile = File($_[1]); 
+        my $pidfile = File($_[1]);
         $self->env->pidfile($pidfile);
     };
 
     $options->{'cfgfile=s'} = sub { 
-        my $cfgfile = File($_[1]); 
+        my $cfgfile = File($_[1]);
         $self->env->cfgfile($cfgfile);
     };
 

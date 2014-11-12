@@ -19,18 +19,18 @@ use XAS::Class
 sub load_config {
     my $self = shift;
     my ($filename, $handle) = $self->validate_params(\@_, [
-        { isa => 'Badger::Filesystem::File' },
+        { optional => 1, isa => 'Badger::Filesystem::File', default => $self->env->cfgfile },
         { optional => 1, default => 'cfg' },
     ]);
-    
+
     $self->{$handle} = Config::IniFiles->new(
-        -file => $self->filename->path,
+        -file => $filename->path,
     ) or do {
         $self->log->warn(compress(join('', @Config::IniFiles::errors)));
         $self->throw_msg(
             dotid($self->class) . '.load_config.badini',
             'badini',
-            $self->filename->path
+            $filename->path
         );
     };
 

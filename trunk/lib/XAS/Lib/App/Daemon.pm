@@ -129,17 +129,17 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{daemon} = FALSE;
+    $self->{daemon}  = FALSE;
 
     $options->{'daemon'} = \$self->{daemon};
-  
+
     $options->{'cfgfile=s'} = sub { 
         my $cfgfile = File($_[1]);
         $self->env->cfgfile($cfgfile);
     };
 
     $options->{'pidfile=s'} = sub { 
-        my $pidfile = File($_[1]); 
+        my $pidfile = File($_[1]);
         $self->env->pidfile($pidfile);
     };
 
