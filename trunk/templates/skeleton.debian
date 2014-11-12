@@ -19,6 +19,7 @@
 
 DESC="Description of the service"
 NAME=skeleton
+PROGRAM=/usr/sbin/$NAME
 PIDFILE=/var/run/xas/$NAME.pid
 LOGFILE=/var/log/xas/$NAME.log
 CFGFILE=/etc/xas/$NAME.ini
