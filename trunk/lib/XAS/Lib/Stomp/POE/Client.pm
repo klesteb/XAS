@@ -35,7 +35,7 @@ use XAS::Class
 # Public Methods
 # ---------------------------------------------------------------------
 
-sub session_initalize {
+sub session_initialize {
     my $self = shift;
 
     my $alias = $self->alias;
@@ -68,8 +68,15 @@ sub session_shutdown {
         -receipt => 'disconnecting'
     );
 
+    $self->log->debug("$alias: entering session_shutdown()");
+
     $poe_kernel->call($alias, 'write_data', $frame);
+
+    # walk the chain
+
     $self->SUPER::session_shutdown();
+
+    $self->log->debug("$alias: leaving session_shutdown()");
 
 }
 
@@ -81,19 +88,25 @@ sub handle_connection {
     my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
-    my $frame = $self->frame->connect(
+    my $frame = $self->stomp->connect(
         -login    => $self->login,
         -passcode => $self->passcode
     );
 
+    $self->log->debug("$alias: entering handle_connection()");
+
     $poe_kernel->post($alias, 'write_data', $frame);
-    
+
+    $self->log->debug("$alias: leaving handle_connection()");
+
 }
 
 sub handle_connected {
     my ($self, $frame) = @_[OBJECT, ARG0];
 
     my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering handle_connected()");
 
     if ($self->tcp_keepalive) {
 
@@ -107,6 +120,8 @@ sub handle_connected {
     $self->log->info_msg('connected', $alias, $self->host, $self->port);
 
     $poe_kernel->post($alias, 'connection_up');
+
+    $self->log->debug("$alias: leaving handle_connected()");
 
 }
 
@@ -137,6 +152,10 @@ sub handle_error {
 sub handle_noop {
     my ($self, $frame) = @_[OBJECT, ARG0];
 
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: handle_noop()");
+
 }
 
 # ---------------------------------------------------------------------
@@ -148,7 +167,7 @@ sub _server_message {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _server_message()");
+    $self->log->debug("$alias: entering _server_message()");
 
     if ($frame->command eq 'CONNECTED') {
 
@@ -180,6 +199,8 @@ sub _server_message {
         $self->log->warn("$alias: unknown message type: $frame->command");
 
     }
+
+    $self->log->debug("$alias: leaving _server_message()");
 
 }
 

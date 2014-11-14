@@ -43,7 +43,7 @@ our @RECONNECTIONS = (60, 120, 240, 480, 960, 1920, 3840);
 # Public Methods
 # ---------------------------------------------------------------------
 
-sub session_intialize {
+sub session_initialize {
     my $self = shift;
 
     my $alias = $self->alias;
@@ -86,15 +86,25 @@ sub session_startup {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: session_startup");
+    $self->log->debug("$alias: entering session_startup");
 
     $poe_kernel->post($alias, 'server_connect');
+
+    # walk the chain
+
+    $self->SUPER::session_startup();
+
+    $self->log->debug("$alias: leaving session_startup");
 
 }
 
 sub session_shutdown {
     my $self = shift;
     
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering session_shutdown");
+
     $self->{socket}   = undef;
     $self->{wheel}    = undef;
     $self->{listener} = undef;
@@ -103,6 +113,8 @@ sub session_shutdown {
 
     $self->SUPER::session_shutdown();
 
+    $self->log->debug("$alias: leaving session_shutdown");
+    
 }
 
 sub session_pause {
@@ -110,9 +122,15 @@ sub session_pause {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: session_pause");
+    $self->log->debug("$alias: entering session_pause");
 
     $poe_kernel->call($alias, 'connection_down');
+
+    # walk the chain
+
+    $self->SUPER::session_pause();
+
+    $self->log->debug("$alias: leaving session_pause");
 
 }
 
@@ -121,9 +139,15 @@ sub session_resume {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: session_resume");
+    $self->log->debug("$alias: entering session_resume");
 
     $poe_kernel->call($alias, 'connection_up');
+
+    # walk the chain
+
+    $self->SUPER::session_resume();
+
+    $self->log->debug("$alias: leaving session_resume");
 
 }
 

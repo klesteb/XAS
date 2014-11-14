@@ -26,6 +26,10 @@ use XAS::Class
 sub session_initialize {
     my $self = shift;
 
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: session_initialize()");
+
     $poe_kernel->state('session_idle',   $self, '_session_idle');
     $poe_kernel->state('session_pause',  $self, '_session_pause');
     $poe_kernel->state('session_resume', $self, '_session_resume');
