@@ -26,7 +26,7 @@ our $BEOH   = qr((\015\012\000?|\012\015\000?|\015\000|\012\000));
 our $EOH    = qr((\015\012\015\012?|\012\015\012\015?|\015\015|\012\012));
 
 #use Data::Dumper;
-use Data::Hexdumper;
+#use Data::Hexdumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -45,7 +45,7 @@ sub parse {
     $self->{buffer} .= $buffer;
 
     $self->log->debug('stomp parse');
-    $self->log->debug(hexdump($self->{buffer}));
+#    $self->log->debug(hexdump($self->{buffer}));
 
     # A valid frame is usually this:
     #
@@ -83,7 +83,7 @@ sub parse {
             if ($line = $self->buf_get_line(\$self->{buffer}, $EOL)) {
 
                 $self->log->debug('command');
-                $self->log->debug(hexdump($line));
+#                $self->log->debug(hexdump($line));
 
                 $line = trim($line);
 
@@ -119,7 +119,7 @@ sub parse {
             if (($clength != -1) && ($clength <= $length)) {
 
                 $line = $self->buf_slurp(\$self->{buffer}, $clength);
-                $self->log->debug(hexdump($line));
+#                $self->log->debug(hexdump($line));
 
                 while ($line =~ s/^$HEADER//) {
 

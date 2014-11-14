@@ -20,7 +20,7 @@ use XAS::Class
   }
 ;
 
-use Data::Hexdumper;
+#use Data::Hexdumper;
 
 # ---------------------------------------------------------------------
 # Public methods
@@ -70,9 +70,9 @@ sub put {
 
     foreach my $frame (@$frames) {
 
-        my $buffer = $frame->as_string . $self->eol();
+        my $buffer = $frame->as_string;
 
-        $self->log->debug(hexdump($buffer));
+#        $self->log->debug(hexdump($buffer));
         push(@ret, $buffer);
 
     }
