@@ -5,16 +5,22 @@ our $VERSION = '0.01';
 use XAS::Lib::Stomp::Parser;
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  accessors => 'filter',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  accessors => 'filter eol',
+  constants => 'CRLF',
+  constant => {
+    LF  => "\n",
+  },
   vars => {
     PARAMS => {
       -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
     }
   }
 ;
+
+use Data::Hexdumper;
 
 # ---------------------------------------------------------------------
 # Public methods
@@ -64,8 +70,9 @@ sub put {
 
     foreach my $frame (@$frames) {
 
-        my $buffer = $frame->as_string;
+        my $buffer = $frame->as_string . $self->eol();
 
+        $self->log->debug(hexdump($buffer));
         push(@ret, $buffer);
 
     }
@@ -83,9 +90,9 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
+    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
     $self->{filter} = XAS::Lib::Stomp::Parser->new(
         -target => $self->target,
-        -xdebug => $self->xdebug,
     );
 
     return $self;

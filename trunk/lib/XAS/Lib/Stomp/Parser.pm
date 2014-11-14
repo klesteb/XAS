@@ -8,6 +8,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Bufops',
   utils     => 'trim',
   accessors => 'target',
   vars => {
@@ -25,7 +26,7 @@ our $BEOH   = qr((\015\012\000?|\012\015\000?|\015\000|\012\000));
 our $EOH    = qr((\015\012\015\012?|\012\015\012\015?|\015\015|\012\012));
 
 #use Data::Dumper;
-#use Data::Hexdumper;
+use Data::Hexdumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -43,8 +44,8 @@ sub parse {
 
     $self->{buffer} .= $buffer;
 
-    $self->log->debug('buffer');
-#    $self->log->debug(hexdump($self->{buffer}));
+    $self->log->debug('stomp parse');
+    $self->log->debug(hexdump($self->{buffer}));
 
     # A valid frame is usually this:
     #
@@ -79,10 +80,10 @@ sub parse {
             # start of the frame 
             # check for a valid buffer, must have a EOL someplace.
 
-            if ($line = $self->_read_line($EOL)) {
+            if ($line = $self->buf_get_line(\$self->{buffer}, $EOL)) {
 
                 $self->log->debug('command');
-#                $self->log->debug(hexdump($line));
+                $self->log->debug(hexdump($line));
 
                 $line = trim($line);
 
@@ -117,8 +118,8 @@ sub parse {
 
             if (($clength != -1) && ($clength <= $length)) {
 
-                $line = $self->_slurp($clength);
-#                $self->log->debug(hexdump($line));
+                $line = $self->buf_slurp(\$self->{buffer}, $clength);
+                $self->log->debug(hexdump($line));
 
                 while ($line =~ s/^$HEADER//) {
 
@@ -169,7 +170,7 @@ sub parse {
 
                 if ($clength <= $length) {
 
-                    $self->{body} = $self->_slurp($clength);
+                    $self->{body} = $self->buf_slurp(\$self->{buffer}, $clength);
                     $self->{state} = 'frame';
 
                 } else { last; }
@@ -182,7 +183,7 @@ sub parse {
 
                 if (($clength != -1) && ($clength <= $length)) {
 
-                    $self->{body} = $self->_read_line($EOF);
+                    $self->{body} = $self->buf_get_line(\$self->{buffer}, $EOF);
                     chop $self->{body};
                     $self->{state} = 'frame';
 
@@ -242,40 +243,6 @@ sub init {
     $self->{state} = 'command';
 
     return $self;
-
-}
-
-sub _read_line {
-    my $self = shift;
-    my $eol  = shift;
-
-    my $pos;
-    my $buffer;
-
-    if ($self->{buffer} =~ m/$eol/g) {
-
-        $pos = pos($self->{buffer});
-        $buffer = $self->_slurp($pos);
-
-    }
-
-    return $buffer;
-
-}
-
-sub _slurp {
-    my $self = shift;
-    my $pos  = shift;
-
-    my $buffer;
-
-    if ($buffer = substr($self->{buffer}, 0, $pos)) {
-
-        substr($self->{buffer}, 0, $pos) = "";
-
-    }
-
-    return $buffer;
 
 }
 

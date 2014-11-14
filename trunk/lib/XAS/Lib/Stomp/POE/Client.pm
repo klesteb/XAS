@@ -213,15 +213,10 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{stomp} = XAS::Lib::Stomp::Utils->new();
-
-    unless (defined($self->{filter})) {
-
-        $self->{filter} = XAS::Lib::Stomp::POE::Filter->new(
-            -target => $self->target
-        );
-
-    }
+    $self->{stomp}  = XAS::Lib::Stomp::Utils->new();
+    $self->{filter} = XAS::Lib::Stomp::POE::Filter->new(
+        -target => $self->target
+    );
 
     return $self;
 

@@ -37,7 +37,7 @@ sub buf_get_line {
     my $self = shift;
     my ($buffer, $eol) = $self->validate_params(\@_, [
         { type => SCALARREF },
-        { type => SCALAR },
+        { type => SCALAR | SCALARREF },
     ]);
 
     my $pos;

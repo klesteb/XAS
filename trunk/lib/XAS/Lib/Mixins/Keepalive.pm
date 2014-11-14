@@ -13,8 +13,8 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  accessors => 'tpc_keepalive tcp_keepcnt tcp_keepintvl',
-  mixins    => 'init_keepalive enable_keepalive tpc_keepalive tcp_keepcnt tcp_keepintvl',
+  accessors => 'tcp_keepidle tcp_keepcnt tcp_keepintvl',
+  mixins    => 'init_keepalive enable_keepalive tcp_keepidle tcp_keepcnt tcp_keepintvl',
 ;
 
 # ----------------------------------------------------------------------
@@ -54,7 +54,7 @@ sub init_keepalive {
     });
     
     $self->{tcp_keepcnt}   = $p->{tcp_keepcnt};
-    $self->{tcp_keepidle}  = $p->{tcp_keepalive};
+    $self->{tcp_keepidle}  = $p->{tcp_keepidle};
     $self->{tcp_keepintvl} = $p->{tcp_keepintvl};
                                             
     # implement socket level keepalive, what a mess...
