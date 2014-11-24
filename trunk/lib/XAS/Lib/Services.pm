@@ -115,6 +115,8 @@ sub _session_init {
 sub init {
     my $class = shift;
 
+    $poe_kernel->run(); # this only initializes POE
+
     my $self = $class->SUPER::init(@_);
 
     $self->{sessions} = [];

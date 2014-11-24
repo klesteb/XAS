@@ -318,34 +318,46 @@ sub _client_output {
 
     $self->log->debug("$alias: _client_output()");
 
-    if (defined($wheel)) {
+    try {
 
-        # emulate IO::Socket connected() method. this method
-        # calls getpeername(). getpeername() returns undef when
-        # the network stack can't validate the socket. 
+        if (defined($wheel)) {
 
-        if (getpeername($self->{clients}->{$wheel}->{socket})) {
+            # emulate IO::Socket connected() method. this method
+            # calls getpeername(). getpeername() returns undef when
+            # the network stack can't validate the socket. 
 
-            push(@buffer, $data);
-            $self->{clients}->{$wheel}->{client}->put(@buffer);
+            if (getpeername($self->{clients}->{$wheel}->{socket})) {
+
+                push(@buffer, $data);
+                $self->{clients}->{$wheel}->{client}->put(@buffer);
+
+            } else {
+
+                $self->log->error_msg(
+                    'client_nosocket', 
+                    $alias, 
+                    $self->peerhist($wheel), 
+                    $self->peerport($wheel)
+                );
+                delete $self->{clients}->{$wheel};
+
+            }
 
         } else {
 
-            $self->log->error_msg(
-                'client_nosocket', 
-                $alias, 
-                $self->peerhist($wheel), 
-                $self->peerport($wheel)
-            );
-            delete $self->{clients}->{$wheel};
+            $self->log->error_msg('client_nowheel', $alias);
 
         }
 
-    } else {
+    } catch {
 
-        $self->log->error_msg('client_nowheel', $alias);
+        my $ex = $_;
 
-    }
+        $self->exception_handler($ex);
+
+        delete $self->{clients}->{$wheel};
+
+    };
 
 }
 

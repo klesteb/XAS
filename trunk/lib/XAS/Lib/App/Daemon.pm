@@ -114,7 +114,7 @@ sub run {
 
     my $rc = $self->SUPER::run();
 
-    $self->pid->remove();
+    $self->pid->remove() if ($self->env->pidfile->exists);
 
     return $rc;
 
