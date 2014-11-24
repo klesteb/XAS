@@ -68,6 +68,65 @@ my $class = Module::Build->subclass(code => <<'EOC');
     use File::Basename;
     use File::Spec::Functions qw( catfile catdir rel2abs );
 
+    # override and add a few things
+
+    sub new {
+        my $class = shift;
+
+        my $self = $class->SUPER::new(@_);
+
+        my $blib = $self->{properties}{blib};
+        my $sbin = catfile($blib, 'sbin');
+        $self->{properties}{sbindoc_dirs} = [ $sbin ];
+
+        return $self;
+
+    }
+
+    # create man pages for files within sbin
+
+    sub manify_sbin_pods {
+        my $self    = shift;
+
+        my $files  = $self->_find_pods( 
+            $self->{properties}{sbindoc_dirs},
+            exclude => [ $self->file_qr('\.bat$') ] 
+        );
+
+        return unless keys %$files;
+
+        my $mandir = File::Spec->catdir( $self->blib, 'bindoc' );
+        File::Path::mkpath( $mandir, 0, oct(777) );
+
+        require Pod::Man;
+
+        foreach my $file (keys %$files) {
+
+            # Pod::Simple based parsers only support one document per instance.
+            # This is expected to change in a future version 
+            # (Pod::Simple > 3.03).
+
+            # binaries go in section 1p
+
+            my $parser  = Pod::Man->new( section => '1p' ); 
+            my $manpage = $self->man1page_name( $file ) . '.' .
+                $self->config( 'man1ext' );
+
+            my $outfile = File::Spec->catfile($mandir, $manpage);
+
+            next if $self->up_to_date( $file, $outfile );
+
+            $self->log_verbose("Manifying $file -> $outfile\n");
+
+            eval { $parser->parse_from_file( $file, $outfile ); 1 }
+                 or $self->log_warn("Error creating '$outfile': $@\n");
+          
+            $files->{$file} = $outfile;
+
+        }
+
+    }
+
     # set up directory structure and user/group accounts
 
     sub ACTION_post_install {

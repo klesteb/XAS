@@ -16,7 +16,7 @@ use XAS::Class
   codec     => 'JSON',
   constants => 'HASH ARRAY :jsonrpc',
   mixins    => 'process_request process_response process_errors 
-                _rpc_request _rpc_result _rpc_error methods init_json_server',
+                methods init_json_server',
 ;
 
 my $errors = {
@@ -65,13 +65,13 @@ sub process_request {
 
             foreach my $r (@$request) {
 
-                $self->_rpc_request($r, $ctx);
+                _rpc_request($self, $r, $ctx);
 
             }
 
         } else {
 
-            $self->_rpc_request($request, $ctx);
+            _rpc_request($self, $request, $ctx);
 
         }
 
@@ -94,7 +94,7 @@ sub process_response {
 
     $self->log->debug("$alias: entering process_response");
 
-    $json = $self->_rpc_result($ctx->{id}, $output);
+    $json = _rpc_result($self, $ctx->{id}, $output);
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
@@ -108,7 +108,7 @@ sub process_errors {
 
     $self->log->debug("$alias: entering process_errors");
 
-    $json = $self->_rpc_error($ctx->{id}, $output->{code}, $output->{message});
+    $json = _rpc_error($self, $ctx->{id}, $output->{code}, $output->{message});
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
@@ -133,35 +133,35 @@ sub _exception_handler {
 
             if ($type eq ('xas.lib.mixins.json.server.rpc_method')) {
 
-                $packet = $self->_rpc_error($id, RPC_ERR_METHOD, $info);
+                $packet = _rpc_error($self, $id, RPC_ERR_METHOD, $info);
 
             } elsif ($type eq ('xas.lib.mixins.json.server.rpc_version')) {
 
-                $packet = $self->_rpc_error($id, RPC_ERR_REQ, $info);
+                $packet = _rpc_error($self, $id, RPC_ERR_REQ, $info);
 
             } elsif ($type eq ('xas.lib.mixins.json.server.rpc_format')) {
 
-                $packet = $self->_rpc_error($id, RPC_ERR_PARSE, $info);
+                $packet = _rpc_error($self, $id, RPC_ERR_PARSE, $info);
 
             } elsif ($type eq ('xas.lib.mixins.json.server.rpc_notify')) {
 
-                $packet = $self->_rpc_error($id, RPC_ERR_INTERNAL, $info);
+                $packet = _rpc_error($self, $id, RPC_ERR_INTERNAL, $info);
 
             } else {
 
                 my $msg = $type . ' - ' . $info;
-                $packet = $self->_rpc_error($id, RPC_ERR_APP, $msg);
+                $packet = _rpc_error($self, $id, RPC_ERR_APP, $msg);
 
             }
 
-            $self->log->error($self->message('exception', $type, $info));
+            $self->log->error_msg('exception', $type, $info);
 
         } else {
 
             my $msg = sprintf("%s", $ex);
 
-            $packet = $self->_rpc_error($id, RPC_ERR_SERVER, $msg);
-            $self->log->error($self->message('unexpected', $msg));
+            $packet = _rpc_error($self, $id, RPC_ERR_SERVER, $msg);
+            $self->log->error_msg('unexpected', $msg);
 
         }
 
@@ -169,8 +169,8 @@ sub _exception_handler {
 
         my $msg = sprintf("%s", $ex);
 
-        $packet = $self->_rpc_error($id, RPC_ERR_APP, $msg);
-        $self->log->error($self->message('unexpected', $msg));
+        $packet = _rpc_error($self, $id, RPC_ERR_APP, $msg);
+        $self->log->error_msg('unexpected', $msg);
 
     }
 
@@ -234,7 +234,7 @@ sub _rpc_request {
 
         my $ex = $_;
 
-        my $output = $self->_exception_handler($ex, $request->{id});
+        my $output = _exception_handler($self, $ex, $request->{id});
         $poe_kernel->post($alias, 'client_output', encode($output), $ctx);
 
     };
@@ -298,7 +298,13 @@ XAS::Lib::Mixins::JSON::Server - A mixin for a simple JSON RPC server
 
      if (my $socket = $self->{clients}->{$wheel}->{socket}) {
 
-         $self->enable_keepalive($socket) if ($self->tcp_keepalive);
+         if ($self->tcp_keepalive) {
+
+             $self->log->info("keepalive enabled");
+             $self->init_keepalive();
+             $self->enable_keepalive($socket);
+
+         }
 
      }
 
@@ -318,11 +324,9 @@ XAS::Lib::Mixins::JSON::Server - A mixin for a simple JSON RPC server
      my $class = shift;
 
      my $self = $class->SUPER::init(@_);
-     my @methods = ('echo');
+     my @methods = ['echo'];
 
      $self->init_json_server(\@methods);
-
-     $self->init_keepalive() if ($self->tcp_keepalive);
 
      return $self;
 

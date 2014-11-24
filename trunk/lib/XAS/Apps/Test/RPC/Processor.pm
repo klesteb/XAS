@@ -35,6 +35,7 @@ sub handle_connection {
         if ($self->tcp_keepalive) {
 
             $self->log->debug("$alias: keepalive enabled");
+            $self->init_keepalive();
             $self->enable_keepalive($socket);
 
         }
@@ -64,7 +65,6 @@ sub init {
     my $methods = ['echo'];
 
     $self->init_json_server($methods);
-    $self->init_keepalive() if ($self->tcp_keepalive);
 
     return $self;
 

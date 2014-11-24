@@ -11,7 +11,7 @@
 #
 #export XAS_MXPORT="25"
 #export XAS_MXSERVER="localhost"
-#export XAS_MXMAILER='smtp'
+#export XAS_MXMAILER='sendmail'
 #
 #export XAS_MQPORT="61613"
 #export XAS_MQSERVER="localhost"
@@ -20,11 +20,12 @@
 #export XAS_MSGS=".*\.msg$"
 #export XAS_LOGTYPE="console"
 #
-#export XAS_ROOT="/usr"
+#export XAS_ROOT="/"
 #export XAS_SBIN="/usr/sbin"
 #export XAS_BIN="/usr/bin"
 #export XAS_ETC="/etc/xas"
 #export XAS_VAR="/var'
+#export XAS_LIB="/var/lib/xas"
 #export XAS_LOG="/var/log/xas"
 #export XAS_RUN="/var/run/xas"
 #export XAS_SPOOL="/var/spool/xas"

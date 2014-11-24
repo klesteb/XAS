@@ -1,34 +1,17 @@
-package XAS::Lib::RPC::JSON::Client;
+package XAS::Lib::Mixins::JSON::Client;
 
 our $VERSION = '0.02';
 
-use Params::Validate ':all';
+use Params::Validate 'HASHREF';
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Net::Client',
+  base      => 'XAS::Base',
   codec     => 'JSON',
   constants => ':jsonrpc',
-  messages => {
-    jsonerr  => "error code: %s, reason: %s, extended: %s",
-    invid    => "the returned id doesn't match the supplied id",
-    errorapp => '%s',
-  },
-  vars => {
-    PARAMS => {
-      -port => { optional => 1, default => RPC_DEFAULT_PORT },
-      -host => { optional => 1, default => RPC_DEFAULT_ADDRESS },
-    }
-  }
+  mixins    => 'call',
 ;
-
-Params::Validate::validation_options(
-    on_fail => sub {
-        my $params = shift;
-        my $class  = __PACKAGE__;
-        XAS::Base::validation_exception($params, $class);
-    }
-);
 
 #use Data::Dumper;
 
@@ -38,8 +21,7 @@ Params::Validate::validation_options(
 
 sub call {
     my $self = shift;
-
-    my %p = validate(@_, {
+    my $p = $self->validate_params(\@_, {
         -method => 1,
         -id     => 1,
         -params => { type => HASHREF }
@@ -48,7 +30,7 @@ sub call {
     my $params;
     my $response;
 
-    while (my ($key, $value) = each(%{$p{'-params'}})) {
+    while (my ($key, $value) = each(%{$p->{'params'}})) {
 
         $key =~ s/^-//;
         $params->{$key} = $value;
@@ -57,17 +39,17 @@ sub call {
 
     my $packet = {
         jsonrpc => RPC_JSON,
-        id      => $p{'-id'},
-        method  => $p{'-method'},
+        id      => $p->{'id'},
+        method  => $p->{'method'},
         params  => $params
     };
 
-    $self->put(encode($packet));
-    $response = $self->get();
+    $self->puts(encode($packet));
+    $response = $self->gets();
 
     $response = decode($response);
 
-    if ($response->{id} eq $p{'-id'}) {
+    if ($response->{id} eq $p->{'id'}) {
 
         if ($response->{error}) {
 
@@ -77,15 +59,15 @@ sub call {
 
                 $self->throw_msg(
                     $type,
-                    'errorapp',
+                    'rpc_errorapp',
                     $info
                 );
 
             } else {
 
                 $self->throw_msg(
-                    'xas.lib.mixins.json.client',
-                    'jsonerr',
+                    'xas.lib.mixin.json.client',
+                    'rpc_jsonerr',
                     $response->{error}->{code},
                     $response->{error}->{message},
                     $response->{error}->{data}
@@ -98,8 +80,8 @@ sub call {
     } else {
 
         $self->throw_msg(
-            'xas.lib.mixins.json.client',
-            'invid',
+            'xas.lib.mixin.json.client',
+            'rpc_invid',
         );
 
     }
@@ -118,11 +100,22 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::RPC::JSON::Client - A JSON RPC interface for the XAS environment
+XAS::Lib::Mixins::JSON::Client - A mixin for a JSON RPC interface
 
 =head1 SYNOPSIS
  
- my $client = XAS::Lib::RPC::JSON::Client->new(
+ package Client
+
+ use XAS::Class
+     debug   => 0,
+     version => '0.01',
+     base    => 'XAS::Lib::Net::Client',
+     mixin   => 'XAS::Lib::Mixins::JSON::Client',
+ ;
+
+ package main
+
+  my $client = Client->new(
      -port => 9505,
      -host => 'localhost',
  );
@@ -139,39 +132,10 @@ XAS::Lib::RPC::JSON::Client - A JSON RPC interface for the XAS environment
  
 =head1 DESCRIPTION
 
-This modules implements a simple JSON RPC v2.0 client. It needs be extended
-to be usefull. It doesn't support "Notification" calls.
+This modules implements a simple JSON RPC v2.0 client as a mixin. It 
+doesn't support "Notification" calls.
 
 =head1 METHODS
-
-=head2 new
-
-This initializes the module. There are three parameters that can be passed. 
-They are the following:
-
-=over 4
-
-=item B<-port>
-
-The IP port to connect to (default 9505).
-
-=item B<-host>
-
-The host to connect to (default 127.0.0.1).
-
-=item B<-timeout>
-
-An optional timeout, this defaults to 60 seconds.
-
-=back
-
-=head2 connect
-
-Connect to the defined server.
-
-=head2 disconnect
-
-Disconnect from the defined server.
 
 =head2 call
 

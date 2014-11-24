@@ -50,7 +50,7 @@ exit 0
 %setup -q -n XAS-%{version}
 
 %build
-%{__perl} Build.PL installdirs=site
+%{__perl} Build.PL installdirs=vendor
 ./Build
 
 %install
@@ -66,8 +66,8 @@ install -m 755 -d %{buildroot}/var/spool/xas/logstash
 
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
 ./Build redhat destdir=$RPM_BUILD_ROOT
-find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 
+find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 %{_fixperms} $RPM_BUILD_ROOT/*
 
 %check
@@ -102,7 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc Changes perl-XAS.spec README
-%{perl_sitelib}/*
+%{perl_vendorlib}/*
 %config(noreplace) /etc/profile.d/xas.sh
 /usr/local/share/man/man3/*
 
