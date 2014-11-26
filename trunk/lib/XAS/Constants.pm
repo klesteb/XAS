@@ -52,7 +52,7 @@ use Badger::Class
       # logging
 
       LOG_LEVELS   => qr/info|warn|error|fatal|debug|trace/,
-      LOG_TYPES    => qr/console|file|logstash|syslog/,
+      LOG_TYPES    => qr/console|file|json|syslog/,
       LOG_FACILITY => qr/auth|authpriv|cron|daemon|ftp|local[0-7]|lpr|mail|news|user|uucp/,
 
       # alerts

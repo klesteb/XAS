@@ -37,7 +37,7 @@ case "$1" in
         install -m 775 -d /var/log/xas
         install -m 755 -d /var/spool/xas
         install -m 755 -d /var/spool/xas/alerts
-        install -m 755 -d /var/spool/xas/logstash
+        install -m 755 -d /var/spool/xas/logs
         #
         chown -R root:xas /etc/xas
         chown -R xas:xas /var/lib/xas
@@ -50,7 +50,7 @@ case "$1" in
         chmod g+s /var/log/xas
         chmod g+s /var/spool/xas
         chmod g+s /var/spool/xas/alerts
-        chmod g+s /var/spool/xas/logstash
+        chmod g+s /var/spool/xas/logs
         #
         rm -f /etc/profile.d/xas.bat
     ;;

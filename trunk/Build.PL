@@ -153,8 +153,8 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
             # create some spool directories
 
-            system("mkdir /var/spool/xas/alerts")   unless ( -e '/var/spool/xas/alerts');
-            system("mkdir /var/spool/xas/logstash") unless ( -e '/var/spool/xas/logstash');
+            system("mkdir /var/spool/xas/alerts") unless ( -e '/var/spool/xas/alerts');
+            system("mkdir /var/spool/xas/logs")   unless ( -e '/var/spool/xas/logs');
 
             # set ownership/permissions on the files/directories
 
@@ -165,7 +165,7 @@ my $class = Module::Build->subclass(code => <<'EOC');
             system("chown -R xas:xas  /var/spool/xas");
 
             system("chmod 0664 /var/spool/xas/alerts");
-            system("chmod 0664 /var/spool/xas/logstash");
+            system("chmod 0664 /var/spool/xas/logs");
 
         } else {
 
@@ -193,7 +193,7 @@ my $class = Module::Build->subclass(code => <<'EOC');
             $dir = catdir($base, 'var', 'spool', 'alerts');
             system("mkdir $dir") unless ( -e $dir);
 
-            $dir = catdir($base, 'var', 'spool', 'logstash');
+            $dir = catdir($base, 'var', 'spool', 'logs');
             system("mkdir $dir") unless ( -e $dir);
 
         }

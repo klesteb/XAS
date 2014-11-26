@@ -33,10 +33,10 @@ use XAS::Class
 #use Data::Dumper;
 
 my $mixins = {
-    console  => 'XAS::Lib::Modules::Log::Console',
-    file     => 'XAS::Lib::Modules::Log::File',
-    logstash => 'XAS::Lib::Modules::Log::Logstash',
-    syslog   => 'XAS::Lib::Modules::Log::Syslog',
+    console => 'XAS::Lib::Modules::Log::Console',
+    file    => 'XAS::Lib::Modules::Log::File',
+    json    => 'XAS::Lib::Modules::Log::JSON',
+    syslog  => 'XAS::Lib::Modules::Log::Syslog',
 };
 
 # ------------------------------------------------------------------------
@@ -193,7 +193,7 @@ This will initialize the base object. It takes the following parameters:
 
 =item B<-type>
 
-The type of the log. This can be "console", "file", "logstash" or "syslog".
+The type of the log. This can be "console", "file", "json" or "syslog".
 Defaults to "console". Which means all logging goes to the current terminal.
 
 =item B<-filename>
