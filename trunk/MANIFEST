@@ -48,7 +48,7 @@ lib/XAS/Lib/Modules/Locking.pm
 lib/XAS/Lib/Modules/Log.pm
 lib/XAS/Lib/Modules/Log/Console.pm
 lib/XAS/Lib/Modules/Log/File.pm
-lib/XAS/Lib/Modules/Log/Logstash.pm
+lib/XAS/Lib/Modules/Log/JSON.pm
 lib/XAS/Lib/Modules/Log/Syslog.pm
 lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Client.pm

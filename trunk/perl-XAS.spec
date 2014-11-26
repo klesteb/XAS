@@ -62,7 +62,7 @@ install -m 775 -d %{buildroot}/var/run/xas
 install -m 775 -d %{buildroot}/var/log/xas
 install -m 755 -d %{buildroot}/var/spool/xas
 install -m 755 -d %{buildroot}/var/spool/xas/alerts
-install -m 755 -d %{buildroot}/var/spool/xas/logstash
+install -m 755 -d %{buildroot}/var/spool/xas/logs
 
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
 ./Build redhat destdir=$RPM_BUILD_ROOT
@@ -85,7 +85,7 @@ chmod g+s /var/run/xas
 chmod g+s /var/log/xas
 chmod g+s /var/spool/xas
 chmod g+s /var/spool/xas/alerts
-chmod g+s /var/spool/xas/logstash
+chmod g+s /var/spool/xas/logs
 
 %postun
 if [ "$1" = 0 ]; then
