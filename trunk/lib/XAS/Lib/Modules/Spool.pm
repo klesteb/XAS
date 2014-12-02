@@ -6,12 +6,13 @@ use Try::Tiny;
 use XAS::Factory;
 
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixins::Handlers',
-  accessors => 'lockmgr',
-  utils     => 'dotid',
+  debug      => 0,
+  version    => $VERSION,
+  base       => 'XAS::Base',
+  mixin      => 'XAS::Lib::Mixins::Handlers',
+  filesystem => 'File',
+  accessors  => 'lockmgr',
+  utils      => 'dotid',
   vars => {
     PARAMS => {
       -directory => { isa => 'Badger::Filesystem::Directory' }, 

@@ -28,7 +28,6 @@ use XAS::Class
 
 sub lock_directory {
     my $self = shift;
-
     my ($path) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::Directory' },
     ]);
@@ -41,8 +40,7 @@ sub lock_directory {
 
 sub unlock_directory {
     my $self = shift;
-
-    my ($path) = $self->validate_parms(\@_, [
+    my ($path) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::Directory' },
     ]);
 
@@ -54,7 +52,6 @@ sub unlock_directory {
 
 sub lock_directories {
     my $self = shift;
-
     my ($sdir, $ddir) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::Directory' },
         { isa => 'Badger::Filesystem::Directory' },
@@ -82,7 +79,6 @@ sub lock_directories {
 
 sub unlock_directories {
     my $self = shift;
-
     my ($sdir, $ddir) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::Directory' },
         { isa => 'Badger::Filesystem::Directory' },
@@ -95,7 +91,6 @@ sub unlock_directories {
 
 sub lock_file_name {
     my $self = shift;
-
     my ($directory) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::Directory' },
     ]);
