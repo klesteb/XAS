@@ -18,6 +18,7 @@ use XAS::Class
   auto_can   => '_auto_load',
   filesystem => 'Dir',
   vars => {
+    COMMANDLINE => '',
     PARAMS => {
       -xdebug => { optional => 1, default => 0 }
     },
@@ -50,9 +51,9 @@ sub load_msgs {
 
                     my $cfg = Config::IniFiles->new(-file => $file->path);
                     if (my @names = $cfg->Parameters('messages')) {
-                        
+
                         foreach my $name (@names) {
-                            
+
                             $messages->{$name} = $cfg->val('messages', $name);
 
                         }

@@ -25,7 +25,6 @@ my $requires = {
     'DateTime::Format::Pg'        => 0.0,     #0.16008,
     'DateTime::Format::Strptime'  => 1.10,
     'Config::IniFiles'            => 2.72,
-    'File::Pid'                   => 0.0,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
     'LockFile::Simple'            => 0.207,

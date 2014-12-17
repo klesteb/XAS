@@ -17,6 +17,7 @@ use Badger::Factory::Class
     lockmgr     => 'XAS::Lib::Modules::Locking',
     spool       => 'XAS::Lib::Modules::Spool',
     spooler     => 'XAS::Lib::Modules::Spool',
+    pidfile     => 'XAS::Lib::Modules::PidFile',
   }
 ;
 
@@ -75,6 +76,10 @@ This will load L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
 =item B<locking lockmgr>
 
 This will load L<XAS::Lib::Modules::Locking|XAS::Lib::Modules::Locking>.
+
+=item B<pidfile>
+
+This will load L<XAS::Lib::Modules::PidFile|XAS::Lib::Modules::PidFile>.
 
 =item B<spool spooler>
 

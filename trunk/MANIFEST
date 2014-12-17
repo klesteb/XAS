@@ -49,7 +49,9 @@ lib/XAS/Lib/Modules/Log.pm
 lib/XAS/Lib/Modules/Log/Console.pm
 lib/XAS/Lib/Modules/Log/File.pm
 lib/XAS/Lib/Modules/Log/JSON.pm
-lib/XAS/Lib/Modules/Log/Syslog.pm
+lib/XAS/Lib/Modules/PidFile.pm
+lib/XAS/Lib/Modules/PidFile/Unix.pm
+lib/XAS/Lib/Modules/PidFile/Win32.pm
 lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Client.pm
 lib/XAS/Lib/Net/POE/Client.pm
@@ -105,3 +107,4 @@ test/test-msgs.pl
 test/test-params.pl
 test/test-pubsub.pl
 test/test-service.pl
+test/test-pidfile.pl

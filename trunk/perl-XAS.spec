@@ -14,7 +14,6 @@ Requires:       perl(Badger) >= 0.09
 Requires:       perl(Curses) >= 1.28
 Requires:       perl(DateTime) >= 0.53
 Requires:       perl(JSON::XS) >= 2.27
-Requires:       perl(File::Pid) >= 0.0
 Requires:       perl(Net::SSH2) >= 0.44
 Requires:       perl(Try::Tiny) >= 0.0
 Requires:       perl(WWW::Curl) >= 4.15

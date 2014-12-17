@@ -106,7 +106,17 @@ sub options {
 sub init {
     my $class = shift;
 
+    my $commandline = $0;
+    
+    foreach (@ARGV) {
+        $commandline .= /\s/
+          ?   " \'" . $_ . "\'"
+          :           " "   . $_;
+    }
+    
     my $self = $class->SUPER::init(@_);
+
+    $XAS::Base::COMMANDLINE = $commandline;
 
     $self->class->throws($self->throws);
 
