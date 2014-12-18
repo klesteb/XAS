@@ -32,7 +32,7 @@ set -e
 case "$1" in
     configure)
         install -m 755 -d /etc/xas
-        install -m 755 -d /var/lib/xas
+        install -m 775 -d /var/lib/xas
         install -m 775 -d /var/run/xas
         install -m 775 -d /var/log/xas
         install -m 775 -d /var/spool/xas

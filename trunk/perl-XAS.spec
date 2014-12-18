@@ -9,6 +9,7 @@ Source0:        http://www.cpan.org/modules/by-module/XAS/XAS-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  perl(Test::More)
+BuildRequires:  perl(Module::Build)
 Requires:       perl(POE) >= 1.35
 Requires:       perl(Badger) >= 0.09
 Requires:       perl(Curses) >= 1.28
@@ -56,12 +57,12 @@ exit 0
 rm -rf $RPM_BUILD_ROOT
 
 install -m 755 -d %{buildroot}/etc/xas
-install -m 755 -d %{buildroot}/var/lib/xas
+install -m 775 -d %{buildroot}/var/lib/xas
 install -m 775 -d %{buildroot}/var/run/xas
 install -m 775 -d %{buildroot}/var/log/xas
-install -m 755 -d %{buildroot}/var/spool/xas
-install -m 755 -d %{buildroot}/var/spool/xas/alerts
-install -m 755 -d %{buildroot}/var/spool/xas/logs
+install -m 775 -d %{buildroot}/var/spool/xas
+install -m 775 -d %{buildroot}/var/spool/xas/alerts
+install -m 775 -d %{buildroot}/var/spool/xas/logs
 
 ./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
 ./Build redhat destdir=$RPM_BUILD_ROOT

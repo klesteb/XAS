@@ -161,14 +161,24 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
             # set ownership/permissions on the files/directories
 
-            system("chown -R root:xas /etc/xas");
             system("chown -R xas:xas  /var/log/xas");
             system("chown -R xas:xas  /var/lib/xas");
             system("chown -R xas:xas  /var/run/xas");
             system("chown -R xas:xas  /var/spool/xas");
 
-            system("chmod 0664 /var/spool/xas/alerts");
-            system("chmod 0664 /var/spool/xas/logs");
+            system("chmod 0775 /var/log/xas");
+            system("chmod 0775 /var/lib/xas");
+            system("chmod 0775 /var/run/xas");
+            system("chmod 0775 /var/spool/xas");
+            system("chmod 0775 /var/spool/xas/alerts");
+            system("chmod 0775 /var/spool/xas/logs");
+
+            system("chmod g+s /var/log/xas");
+            system("chmod g+s /var/lib/xas");
+            system("chmod g+s /var/run/xas");
+            system("chmod g+s /var/spool/xas");
+            system("chmod g+s /var/spool/xas/alerts");
+            system("chmod g+s /var/spool/xas/logs");
 
         } else {
 
