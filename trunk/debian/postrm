@@ -13,7 +13,6 @@ set -e
 
 case "$1" in
     remove)
-        rm -Rf /etc/xas
         rm -Rf /var/lib/xas
         rm -Rf /var/run/xas
         rm -Rf /var/log/xas

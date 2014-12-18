@@ -39,7 +39,6 @@ case "$1" in
         install -m 775 -d /var/spool/xas/alerts
         install -m 775 -d /var/spool/xas/logs
         #
-        chown -R root:xas /etc/xas
         chown -R xas:xas /var/lib/xas
         chown -R xas:xas /var/log/xas
         chown -R xas:xas /var/run/xas
