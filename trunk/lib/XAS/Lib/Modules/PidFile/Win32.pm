@@ -25,7 +25,8 @@ use XAS::Class
 sub scan_name {
     my $self = shift;
 
-    my $c = sprintf('perl  %s', $self->class->any_var('COMMANDLINE'));
+
+    my $c = sprintf('perl  %s', $self->class->any_var('SCRIPT'));
 
     return compress($c);
 

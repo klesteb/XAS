@@ -17,9 +17,9 @@ use XAS::Class
 sub scan_name {
     my $self = shift;
 
-    my $c = sprintf('perl %s', $self->class->any_var('COMMANDLINE')); 
-    
-    return compress($c) 
+    # just return the name of the script
+
+    return $self->class->any_var('SCRIPT');
 
 }
 
@@ -31,9 +31,9 @@ sub is_running {
 
     if (defined($pid)) {
 
-        # use ps to scan for an existing process with this pid 
+        # use ps to scan for an existing process with this pid
 
-        my $command = "ps -p $pid -o command=";
+        my $command = "ps -p $pid -o comm=";
         my ($output, $rc) = run_cmd($command);
 
         if ($rc == 0) {
