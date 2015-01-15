@@ -9,7 +9,7 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'daemonize dotid',
-  mixins  => 'define_daemon define_pidfile get_service_config 
+  mixins  => 'define_daemon get_service_config 
               install_service remove_service',
 ;
 
@@ -33,52 +33,6 @@ sub define_daemon {
     }
 
     $self->log->debug("pid = $$");
-
-}
-
-sub define_pidfile {
-    my $self = shift;
-
-    my $script  = $self->class->any_var('SCRIPT');
-
-    # create a pid file, use it as a semaphore lock file
-
-    $self->log->debug("entering define_pidfile()");
-    $self->log->debug("pid file = " . $self->env->pidfile);
-
-    $self->{pid} = File::Pid->new({file => $self->env->pidfile->path});
-
-    if ((my $num = $self->pid->running()) || 
-        ($self->env->pidfile->exists)) {
-
-        if ($num) {
-
-            $self->throw_msg(
-                dotid($self->class) . '.define_pidfile.runerr',
-                'runerr',
-                $script, $num
-            );
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.define_pidfile.piderr',
-                'piderr',
-                $script
-            );
-
-        }
-        
-    }
-    
-    $self->pid->write() or 
-      $self->throw_msg(
-          dotid($self->class) . '.define_pidfile.wrterr',
-          'wrterr',
-          $self->pid->file
-      );
-
-    $self->log->debug("leaving define_pidfile()");
 
 }
 

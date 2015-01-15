@@ -8,6 +8,7 @@ use Pod::Usage;
 use Hash::Merge;
 use Getopt::Long;
 use POSIX 'setsid';
+use XAS::Lib::PidFile;
 
 use XAS::Class
   debug     => 0,
@@ -16,7 +17,7 @@ use XAS::Class
   base      => 'XAS::Lib::App',
   utils     => ':process',
   constants => 'TRUE FALSE',
-  accessors => 'daemon',
+  accessors => 'daemon pid',
 ;
 
 # ----------------------------------------------------------------------
@@ -36,58 +37,28 @@ sub define_signals {
 sub define_pidfile {
     my $self = shift;
 
-    my $script  = $self->class->any_var('SCRIPT');
+    my $script = $self->class->any_var('SCRIPT');
 
-    # create a pid file, use it as a semaphore lock file
+    $self->log->debug('entering define_pidfile()');
 
-    $self->log->debug("entering define_pidfile()");
-    $self->log->debug("pid file = " . $self->env->pidfile);
+    if (my $num = $self->pid->is_running()) {
 
-    try {
+        $self->throw_msg(
+            dotid($self->class). '.define_pidfile.runerr',
+            'runerr',
+            $script, $num
+        );
 
-        $self->{pid} = File::Pid->new({file => $self->env->pidfile->path});
+    }
 
-        if ((my $num = $self->pid->running()) || 
-            ($self->env->pidfile->exists)) {
+    $self->pid->write() or 
+        $self->throw_msg(
+            dotid($self->class) . '.define_pidfile.wrterr',
+            'wrterr',
+            $self->pid->file
+        );
 
-            if ($num) {
-
-                $self->throw_msg(
-                    'xas.lib.app.daemon.pidfile.runerr',
-                    'runerr',
-                    $script, $num
-                );
-
-            } else {
-
-                $self->throw_msg(
-                    'xas.lib.app.daemon.pidfile.piderr',
-                    'piderr',
-                    $script
-                );
-
-            }
-
-        }
-
-        $self->pid->write() or 
-          $self->throw_msg(
-              'xas.lib.app.daemon.pidfile.writerr',
-              'wrterr',
-              $self->pid->file
-          );
-
-    } catch {
-
-        my $ex = $_;
-
-        print STDERR "$ex\n";
-
-        exit 2;
-
-    };
-
-    $self->log->debug("leaving define_pidfile()");
+    $self->log->debug('leaving define_pidfile()');
 
 }
 
@@ -114,7 +85,7 @@ sub run {
 
     my $rc = $self->SUPER::run();
 
-    $self->pid->remove() if ($self->env->pidfile->exists);
+    $self->pid->remove();
 
     return $rc;
 
@@ -123,6 +94,17 @@ sub run {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    $self->{pid} = XAS::Lib::PidFile->new();
+
+    return $self;
+
+}
 
 sub _default_options {
     my $self = shift;
@@ -171,7 +153,7 @@ doesn't have a concept for this behavior. For running background jobs
 on Windows please see L<XAS::Lib::App::Services|XAS::Lib::App::Services>. 
 
 This module is also single threaded, it doesn't use POE to provide an 
-async environment. If you need that, the see the above module. This inherits 
+async environment. If you need that, then see the above module. This inherits 
 from L<XAS::Lib::App|XAS::Lib::App>. Please see that module for additional 
 documentation.
 

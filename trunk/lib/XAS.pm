@@ -86,11 +86,21 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>
 
-=item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
+=item L<XAS::Lib::PidFile|XAS::Lib::PidFile>
+
+=item L<XAS::Lib::PidFile::Unix|XAS::Lib::PidFile::Unix>
+
+=item L<XAS::Lib::PidFile::Win32|XAS::Lib::PidFile::Win32>
 
 =item L<XAS::Lib::POE::Service|XAS::Lib::POE::Service>
 
 =item L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>
+
+=item L<XAS::Lib::Process|XAS::Lib::Process>
+
+=item L<XAS::Lib::Process::Unix|XAS::Lib::Process::Unix>
+
+=item L<XAS::Lib::Process::Win32|XAS::Lib::Process::Win32>
 
 =item L<XAS::Lib::Services|XAS::Lib::Services>
 

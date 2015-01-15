@@ -3,6 +3,7 @@ package XAS::Lib::App::Services;
 our $VERSION = '0.01';
 
 my $mixin;
+
 BEGIN {
     $mixin = ($^O eq 'MSWin32')
       ? 'XAS::Lib::App::Services::Win32'
@@ -12,6 +13,7 @@ BEGIN {
 use Try::Tiny;
 use File::Pid;
 use Pod::Usage;
+use XAS::Lib::PidFile;
 use XAS::Lib::Services;
 
 use XAS::Class
@@ -33,12 +35,40 @@ sub define_signals {
 
 }
 
+sub define_pidfile {
+    my $self = shift;
+
+    my $script = $self->class->any_var('SCRIPT');
+
+    $self->log->debug('entering define_pidfile()');
+
+    if (my $num = $self->pid->is_running()) {
+
+        $self->throw_msg(
+            dotid($self->class). '.define_pidfile.runerr',
+            'runerr',
+            $script, $num
+        );
+
+    }
+
+    $self->pid->write() or 
+        $self->throw_msg(
+            dotid($self->class) . '.define_pidfile.wrterr',
+            'wrterr',
+            $self->pid->file
+        );
+
+    $self->log->debug('leaving define_pidfile()');
+
+}
+
 sub run {
     my $self = shift;
 
     my $rc = $self->SUPER::run();
 
-    $self->pid->remove() if ($self->env->pidfile->exists);
+    $self->pid->remove();
 
     return $rc;
 
@@ -56,6 +86,8 @@ sub init {
     $self->{service} = XAS::Lib::Services->new(
         -alias => 'services'
     );
+
+    $self->{pid} = XAS::Lib::PidFile->new();
 
     return $self;
 

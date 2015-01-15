@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 48;
+use Test::More tests => 50;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -37,9 +37,11 @@ BEGIN {
     use_ok( 'XAS::Lib::Net::Client' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::POE::Client' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::Server' )            || print "Bail out!\n";
+    use_ok( 'XAS::Lib::PidFile' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::PubSub' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Process' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client::Exec' )      || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client::Shell' )     || print "Bail out!\n";
