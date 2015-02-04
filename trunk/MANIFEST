@@ -30,10 +30,6 @@ lib/XAS/Lib/App/Services.pm
 lib/XAS/Lib/App/Services/Unix.pm
 lib/XAS/Lib/App/Services/Win32.pm
 lib/XAS/Lib/Curl/HTTP.pm
-lib/XAS/Lib/Curses/Root.pm
-lib/XAS/Lib/Curses/Toolkit.pm
-lib/XAS/Lib/Curses/Unix.pm
-lib/XAS/Lib/Curses/Win32.pm
 lib/XAS/Lib/Mixins/Bufops.pm
 lib/XAS/Lib/Mixins/Configs.pm
 lib/XAS/Lib/Mixins/Handlers.pm

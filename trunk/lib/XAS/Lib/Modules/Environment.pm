@@ -1,6 +1,6 @@
 package XAS::Lib::Modules::Environment;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use File::Basename;
 use Net::Domain qw(hostdomain);
@@ -11,7 +11,7 @@ use XAS::Class
   base       => 'XAS::Singleton',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
-  accessors  => 'path host domain username',
+  accessors  => 'path host domain username script commandline',
   mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs',
 ;
 
@@ -59,6 +59,28 @@ sub logtype {
 # Private Methods
 # ------------------------------------------------------------------------
 
+sub _create_methods {
+    my $self = shift;
+    my $p    = shift;
+
+    no strict 'refs';
+    no warnings;
+
+    while (my ($key, $value) = each(%$p)) {
+
+        $self->{$key} = $value;
+
+        *$key = sub {
+            my $self = shift;
+            my $parm = shift;
+            $self->{$key} = $parm if (defined($parm));
+            return $self->{$key};
+        };
+
+    }
+
+}
+
 sub init {
     my $self = shift;
 
@@ -66,6 +88,16 @@ sub init {
     my $name;
     my $path;
     my $suffix;
+    my $commandline = $0;
+    my ($script) = ( $commandline =~ m#([^\\/]+)$# );
+
+    foreach (@ARGV) {
+        $commandline .= /\s/
+          ?   " \'" . $_ . "\'"
+                      :           " "   . $_;
+        }
+
+    $self->{commandline} = $commandline;
 
     # Initialize variables - these are defaults
 

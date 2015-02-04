@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 50;
+use Test::More tests => 48;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -17,8 +17,6 @@ BEGIN {
     use_ok( 'XAS::Apps::Rotate' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Daemon' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Services' )          || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Curses::Root' )           || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Curses::Toolkit' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Configs' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Handlers' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Iterator' )       || print "Bail out!\n";

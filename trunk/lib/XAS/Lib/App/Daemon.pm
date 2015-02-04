@@ -37,7 +37,7 @@ sub define_signals {
 sub define_pidfile {
     my $self = shift;
 
-    my $script = $self->class->any_var('SCRIPT');
+    my $script = $self->env->script;
 
     $self->log->debug('entering define_pidfile()');
 

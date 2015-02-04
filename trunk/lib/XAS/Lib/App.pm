@@ -106,17 +106,7 @@ sub options {
 sub init {
     my $class = shift;
 
-    my $commandline = $0;
-    
-    foreach (@ARGV) {
-        $commandline .= /\s/
-          ?   " \'" . $_ . "\'"
-          :           " "   . $_;
-    }
-    
     my $self = $class->SUPER::init(@_);
-
-    $XAS::Base::COMMANDLINE = $commandline;
 
     $self->class->throws($self->throws);
 
@@ -133,12 +123,12 @@ sub _default_options {
     my $self = shift;
 
     my $version = $self->CLASS->VERSION;
-    my $script  = $self->class->any_var('SCRIPT');
+    my $script  = $self->env->script;
 
     return {
         'logtype=s' => sub { $self->env->logtype($_[1]) },
-        'alerts!'   => sub { $self->alerts->on($_[1]); },
-        'debug'     => sub { $XAS::Base::DEBUG = 1; },
+        'alerts!'   => sub { $self->env->alerts($_[1]); },
+        'debug'     => sub { $self->env->xdebug(1); },
         'help|h|?'  => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
         'manual'    => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
         'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; },

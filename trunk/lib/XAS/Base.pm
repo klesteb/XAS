@@ -1,13 +1,10 @@
 package XAS::Base;
 
-our $MESSAGES;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 our $EXCEPTION = 'XAS::Exception';
-our ($SCRIPT)  = ( $0 =~ m#([^\\/]+)$# );
 
 use XAS::Factory;
 use XAS::Exception;
-use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
@@ -17,10 +14,32 @@ use XAS::Class
   utils      => 'dotid dir_walk',
   auto_can   => '_auto_load',
   filesystem => 'Dir',
+  messages => {
+    exception    => '%s: %s',
+    invparams    => 'invalid parameters passed, reason: %s',
+    invperms     => 'unable to change file permissions on %s',
+    invmethod    => 'invalid method: unable to auto load "%s" in package: %s, line: %s',
+    badini       => 'unable to load config file: %s, reason: %s',
+    unknownos    => 'unknown OS: %s',
+    unexpected   => 'unexpected error: %s',
+    unknownerror => 'unknown error: %s',
+    noserver     => 'unable to connect to %s; reason: %s',
+    nodelivery   => 'unable to send message to %s; reason: %s',
+    noconfigs    => 'no config file defined',
+    nospooldir   => 'no spool directory defined',
+    sequence     => 'unable to retrive sequence number from %s',
+    write_packet => 'unable to write a packet to %s',
+    read_packet  => 'unable to read a packet from %s',
+    lock_error   => 'unable to aquire a lock on %s',
+    interrupt    => 'process interrupted by signal %s',
+    runerr       => '%s is already running: %d',
+    piderr       => '%s has left a pid file behind, exiting',
+    wrterr       => 'unable to create pid file %s',
+  },
   vars => {
-    COMMANDLINE => '',
     PARAMS => {
-      -xdebug => { optional => 1, default => 0 }
+      -alerts => { optional => 1, default => 0 },
+      -xdebug => { optional => 1, default => 0 },
     },
   }
 ;
@@ -30,46 +49,6 @@ use XAS::Class
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
-
-sub load_msgs {
-    my $self = shift;
-
-    my $messages = $self->class->any_var('MESSAGES');
-    return if (defined($messages->{messages_loaded}));
-
-    foreach my $path (@INC) {
-
-        my $dir = Dir($path, 'XAS');
-
-        if ($dir->exists) {
-
-            dir_walk(
-                -directory => $dir, 
-                -filter    => $self->env->msgs, 
-                -callback  => sub {
-                    my $file = shift;
-
-                    my $cfg = Config::IniFiles->new(-file => $file->path);
-                    if (my @names = $cfg->Parameters('messages')) {
-
-                        foreach my $name (@names) {
-
-                            $messages->{$name} = $cfg->val('messages', $name);
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-    $MESSAGES = $messages;
-
-}
 
 sub validation_exception {
     my $param = shift;
@@ -117,6 +96,46 @@ sub validate_params {
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub _load_msgs {
+    my $self = shift;
+
+    my $messages = $self->class->any_var('MESSAGES');
+    return if (defined($messages->{messages_loaded}));
+
+    foreach my $path (@INC) {
+
+        my $dir = Dir($path, 'XAS');
+
+        if ($dir->exists) {
+
+            dir_walk(
+                -directory => $dir, 
+                -filter    => $self->env->msgs, 
+                -callback  => sub {
+                    my $file = shift;
+
+                    my $cfg = Config::IniFiles->new(-file => $file->path);
+                    if (my @names = $cfg->Parameters('messages')) {
+
+                        foreach my $name (@names) {
+
+                            $messages->{$name} = $cfg->val('messages', $name);
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    $XAS::Base::MESSAGES = $messages;
+
+}
+
 sub _auto_load {
     my $self = shift;
     my $name = shift;
@@ -127,15 +146,16 @@ sub _auto_load {
 
     }
 
-    if ($name eq 'alerts') {
-
-        return sub { XAS::Alerts->new(); } 
-
-    }
-
     if ($name eq 'env') {
 
-        return sub { XAS::Factory->module('environment'); } 
+        return sub { 
+
+            XAS::Factory->module('environment', {
+                -alerts => $self->alerts,
+                -xdebug => $self->xdebug,
+            }); 
+
+        }
 
     }
 
@@ -152,8 +172,9 @@ sub _auto_load {
             XAS::Factory->module('logger', {
                 -type     => $self->env->logtype,
                 -filename => $self->env->logfile,
+                -process  => $self->env->process,
                 -levels => {
-                    debug => $DEBUG,
+                    debug => $self->env->xdebug,
                 }
             }); 
 
@@ -161,10 +182,11 @@ sub _auto_load {
 
     }
 
+    my ($package, $filename, $line) = caller(2);
     $self->throw_msg(
         dotid($self->class) . '.auto_load.invmethod',
         'invmethod',
-        $name
+        $name, $package, $line
     );
 
 }
@@ -194,7 +216,7 @@ sub init {
 
     # load the messages
 
-    $self->load_msgs();
+    $self->_load_msgs();
 
     # process PARAMS
 
@@ -206,44 +228,6 @@ sub init {
 
     $self->{config} = $p;
     $self->_create_methods($p);
-
-    return $self;
-
-}
-
-package # hide from PAUSE
-  XAS::Alerts;
-
-use XAS::Class
-  version => '0.01',
-  base    => 'XAS::Singleton',
-;
-
-sub check {
-    my $self = shift;
-
-    return $self->{enabled};
-
-}
-
-sub on {
-    my $self = shift;
-    my ($enable) = $self->validate_params(\@_, [ 
-        { optional => 1, default => undef, regex => qr/0|1/ } 
-    ]);
-
-    $self->{enabled} = $enable if (defined($enable));
-
-    return $self->{enabled};
-
-}
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->{enabled} = 0;
 
     return $self;
 
