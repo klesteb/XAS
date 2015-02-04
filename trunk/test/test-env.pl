@@ -35,4 +35,11 @@ printf("+------------------------------+\n");
 printf("logfile = %s\n", $env->logfile);
 printf("pidfile = %s\n", $env->pidfile);
 printf("cfgfile = %s\n", $env->cfgfile);
+printf("+------------------------------+\n");
+printf("| Other                        |\n");
+printf("+------------------------------+\n");
+printf("alerts      = %s\n", $env->alerts);
+printf("xdebug      = %s\n", $env->xdebug);
+printf("script      = %s\n", $env->script);
+printf("commandline = %s\n", $env->commandling);
 

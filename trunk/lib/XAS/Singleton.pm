@@ -49,10 +49,10 @@ sub _new_instance {
         Badger::Utils::odd_params(@_);
     } if DEBUG;
 
-    my $args  = @_ && ref $_[0] eq HASH ? shift : { @_ };
-    my $self  = bless { }, ref $class || $class;
+    my $args = @_ && ref $_[0] eq HASH ? shift : { @_ };
+    my $self = bless { }, ref $class || $class;
 
-    $self  = $self->init($args);
+    $self = $self->init($args);
 
     # be careful to account for object that overload the boolean comparison
     # operator and may return false to a simple truth test.

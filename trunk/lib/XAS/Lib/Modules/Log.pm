@@ -1,6 +1,6 @@
 package XAS::Lib::Modules::Log;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use DateTime;
 use Config::IniFiles;
@@ -11,6 +11,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Singleton',
   filesystem => 'File',
+  utils      => ':boolean',
   vars => {
     LEVELS => {
       trace => 0,
@@ -35,7 +36,7 @@ use XAS::Class
 my $mixins = {
     console => 'XAS::Lib::Modules::Log::Console',
     file    => 'XAS::Lib::Modules::Log::File',
-    json    => 'XAS::Lib::Modules::Log::JSON',
+    json    => 'XAS::Lib::Modules::Log::Json',
     syslog  => 'XAS::Lib::Modules::Log::Syslog',
 };
 
@@ -45,10 +46,18 @@ my $mixins = {
 
 sub level {
     my $self  = shift;
-
     my ($level, $action) = $self->validate_params(\@_, [
         { regex => LOG_LEVELS },
-        { optional => 1, default => undef , regex => qr/0|1/ },
+        { optional => 1, default => undef , 
+          callbacks => {
+              'must be a boolean value or undef' => sub {
+                  my $param = shift;
+                  return 1 unless (defined($param));
+                  return 1 if (is_truthy($param));
+                  return 1 if (is_falsey($param));
+              }
+          }
+        },
     ]);
 
     $self->{$level} = $action if (defined($action));
@@ -59,7 +68,6 @@ sub level {
 
 sub build {
     my $self = shift;
-
     my ($level, $message) = $self->validate_params(\@_, [
         { regex => LOG_LEVELS },
         1
@@ -151,7 +159,7 @@ sub init {
 sub DESTROY {
     my $self = shift;
 
-    $self->destroy();
+    $self->destroy() if ($self->can('destroy'));
 
 }
 

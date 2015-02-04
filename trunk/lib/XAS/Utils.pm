@@ -1,6 +1,6 @@
 package XAS::Utils;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use DateTime;
 use Try::Tiny;
@@ -25,18 +25,19 @@ use XAS::Class
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr',
+            left right mid instr is_truthy is_falsey',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr',
+            left right mid instr is_truthy is_falsey',
     tags => {
       dates   => 'db2dt dt2db',
       env     => 'env_store env_restore env_create env_parse env_dump',
       modules => 'init_module load_module',
       strings => 'trim ltrim rtrim compress left right mid instr',
       process => 'daemonize spawn kill_proc exitcode _do_fork',
+      boolean => 'is_truthy is_falsey',
     }
   }
 ;
@@ -228,10 +229,36 @@ sub instr {
 
 }
 
+sub is_truthy {
+    my $parm = shift;
+
+    #
+    # Checks to see if the parameter is the string 't', 'true' or the number 1.
+    #
+
+    my @truth = qw(yes true t 1 0e0);
+
+    return scalar(grep {lc($parm) eq $_} @truth);
+
+}
+
+sub is_falsey {
+    my $parm = shift;
+
+    #
+    # Checks to see if the parameter is the string 'f' or 'false' or the number 0.
+    #
+
+    my @truth = qw(no false f 0);
+
+    return scalar(grep {lc($parm) eq $_} @truth);
+
+}
+
 sub bool {
     my $item = shift;
 
-    my @truth = qw(yes true 1 0e0);
+    my @truth = qw(yes true 1 0e0 no false f 0);
     return grep {lc($item) eq $_} @truth;
 
 }

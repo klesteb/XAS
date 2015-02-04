@@ -10,7 +10,8 @@
 messages_loaded   = don't remove this...
 exception         = %s: %s
 invparams         = invalid parameters passed, reason: %s
-invmethod         = invalid method "%s", unable to auto load
+invmethod         = invalid method: unable to auto load "%s" in package: %s, line: %s
+badini            = unable to load config file: %s, reason: %s
 nospooldir        = no spool directory defined
 unknownos         = unknown OS: %s
 unexpected        = unexpected error: %s
@@ -23,7 +24,6 @@ write_packet      = unable to write a packet to %s
 read_packet       = unable to read a packet from %s
 lock_error        = unable to acquire a lock on %s
 invperms          = unable to change file permissions on %s
-badini            = unable to load config file: %s
 signaled          = %s: recieved signal %s
 noservice         = unable to start service; reason: %s
 paused            = the service is already paused

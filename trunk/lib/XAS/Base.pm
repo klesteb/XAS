@@ -5,6 +5,7 @@ our $EXCEPTION = 'XAS::Exception';
 
 use XAS::Factory;
 use XAS::Exception;
+use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
@@ -13,29 +14,8 @@ use XAS::Class
   base       => 'Badger::Base',
   utils      => 'dotid dir_walk',
   auto_can   => '_auto_load',
+  accessors  => 'env',
   filesystem => 'Dir',
-  messages => {
-    exception    => '%s: %s',
-    invparams    => 'invalid parameters passed, reason: %s',
-    invperms     => 'unable to change file permissions on %s',
-    invmethod    => 'invalid method: unable to auto load "%s" in package: %s, line: %s',
-    badini       => 'unable to load config file: %s, reason: %s',
-    unknownos    => 'unknown OS: %s',
-    unexpected   => 'unexpected error: %s',
-    unknownerror => 'unknown error: %s',
-    noserver     => 'unable to connect to %s; reason: %s',
-    nodelivery   => 'unable to send message to %s; reason: %s',
-    noconfigs    => 'no config file defined',
-    nospooldir   => 'no spool directory defined',
-    sequence     => 'unable to retrive sequence number from %s',
-    write_packet => 'unable to write a packet to %s',
-    read_packet  => 'unable to read a packet from %s',
-    lock_error   => 'unable to aquire a lock on %s',
-    interrupt    => 'process interrupted by signal %s',
-    runerr       => '%s is already running: %d',
-    piderr       => '%s has left a pid file behind, exiting',
-    wrterr       => 'unable to create pid file %s',
-  },
   vars => {
     PARAMS => {
       -alerts => { optional => 1, default => 0 },
@@ -99,8 +79,8 @@ sub validate_params {
 sub _load_msgs {
     my $self = shift;
 
-    my $messages = $self->class->any_var('MESSAGES');
-    return if (defined($messages->{messages_loaded}));
+    my $messages = $self->class->hash_vars('MESSAGES');
+    return if (defined($messages->{'messages_loaded'}));
 
     foreach my $path (@INC) {
 
@@ -146,19 +126,6 @@ sub _auto_load {
 
     }
 
-    if ($name eq 'env') {
-
-        return sub { 
-
-            XAS::Factory->module('environment', {
-                -alerts => $self->alerts,
-                -xdebug => $self->xdebug,
-            }); 
-
-        }
-
-    }
-
     if ($name eq 'email') {
 
         return sub { XAS::Factory->module('email'); } 
@@ -172,7 +139,7 @@ sub _auto_load {
             XAS::Factory->module('logger', {
                 -type     => $self->env->logtype,
                 -filename => $self->env->logfile,
-                -process  => $self->env->process,
+                -process  => $self->env->script,
                 -levels => {
                     debug => $self->env->xdebug,
                 }
@@ -186,7 +153,7 @@ sub _auto_load {
     $self->throw_msg(
         dotid($self->class) . '.auto_load.invmethod',
         'invmethod',
-        $name, $package, $line
+        $name, $filename, $line
     );
 
 }
@@ -214,10 +181,6 @@ sub _create_methods {
 sub init {
     my $self = shift;
 
-    # load the messages
-
-    $self->_load_msgs();
-
     # process PARAMS
 
     my $class = $self->class;
@@ -228,6 +191,16 @@ sub init {
 
     $self->{config} = $p;
     $self->_create_methods($p);
+
+    # load the environment
+
+    $self->{env} = XAS::Factory->module('environment');
+    $self->env->alerts($self->alerts);
+    $self->env->xdebug($self->xdebug);
+
+    # load the messages
+
+    $self->_load_msgs();
 
     return $self;
 

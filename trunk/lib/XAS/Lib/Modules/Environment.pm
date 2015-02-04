@@ -12,7 +12,7 @@ use XAS::Class
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username script commandline',
-  mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs',
+  mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs alerts xdebug',
 ;
 
 # ------------------------------------------------------------------------
@@ -58,28 +58,6 @@ sub logtype {
 # ------------------------------------------------------------------------
 # Private Methods
 # ------------------------------------------------------------------------
-
-sub _create_methods {
-    my $self = shift;
-    my $p    = shift;
-
-    no strict 'refs';
-    no warnings;
-
-    while (my ($key, $value) = each(%$p)) {
-
-        $self->{$key} = $value;
-
-        *$key = sub {
-            my $self = shift;
-            my $parm = shift;
-            $self->{$key} = $parm if (defined($parm));
-            return $self->{$key};
-        };
-
-    }
-
-}
 
 sub init {
     my $self = shift;
