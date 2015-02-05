@@ -3,7 +3,7 @@ use lib '../lib';
 
 package testing;
 
-use XAS::Lib::Modules::PidFile;
+use XAS::Lib::PidFile;
 use XAS::Class
   debug     => 0,
   version   => '0.01',
@@ -15,13 +15,13 @@ use XAS::Class
 sub define_pidfile {
     my $self = shift;
 
-    my $script = $self->class->any_var('SCRIPT');
+    my $script = $self->env->script;
     
     # create a pid file, use it as a semaphore lock file
 
     $self->log('debug', "entering define_pidfile()");
 
-    $self->{pid} = XAS::Lib::Modules::PidFile->new();
+    $self->{pid} = XAS::Lib::PidFile->new();
     if (my $num = $self->pid->is_running()) {
 
         $self->throw_msg(

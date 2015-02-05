@@ -25,19 +25,19 @@ use XAS::Class
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr is_truthy is_falsey',
+            left right mid instr is_truthy is_falsey run_cmd',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr is_truthy is_falsey',
+            left right mid instr is_truthy is_falsey run_cmd',
     tags => {
       dates   => 'db2dt dt2db',
       env     => 'env_store env_restore env_create env_parse env_dump',
       modules => 'init_module load_module',
       strings => 'trim ltrim rtrim compress left right mid instr',
       process => 'daemonize spawn kill_proc exitcode _do_fork',
-      boolean => 'is_truthy is_falsey',
+      boolean => 'is_truthy is_falsey bool',
     }
   }
 ;
@@ -229,12 +229,11 @@ sub instr {
 
 }
 
+# Checks to see if the parameter is the string 't', 'true', 'yes', '0E0' 
+# or the number 1.
+#
 sub is_truthy {
     my $parm = shift;
-
-    #
-    # Checks to see if the parameter is the string 't', 'true' or the number 1.
-    #
 
     my @truth = qw(yes true t 1 0e0);
 
@@ -242,12 +241,11 @@ sub is_truthy {
 
 }
 
+# Checks to see if the parameter is the string 'f', 'false', 'no' or 
+# the number 0.
+#
 sub is_falsey {
     my $parm = shift;
-
-    #
-    # Checks to see if the parameter is the string 'f' or 'false' or the number 0.
-    #
 
     my @truth = qw(no false f 0);
 
@@ -504,6 +502,16 @@ sub dt2db {
     }
 
     return $ft;
+
+}
+
+sub run_cmd {
+    my $command = shift;
+
+    my @output = `$command 2>&1`;
+    my ($rc, $sig) = exitcode();
+
+    return wantarray ? @output : \@output, $rc;
 
 }
 
@@ -792,6 +800,15 @@ Decodes Perls version of the exit code from a cli process. Returns two items.
 
      my @output = spawn(-command => "ls -l");
      my ($rc, $sig) = exitcode();
+
+=head2 run_cmd($command)
+
+Run a command and capture the output and exit code, stderr is merged
+with stdout.
+
+ Example:
+ 
+     my (@output, $rc) = run_cmd("ls -l");
 
 =head2 daemonize
 
