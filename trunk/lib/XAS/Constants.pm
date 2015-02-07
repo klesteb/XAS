@@ -112,7 +112,7 @@ XAS::Constants - A Perl extension for the XAS environment
 =head1 DESCRIPTION
 
 This module provides various constants for the XAS enviromnet. It inherits from
-L<Badger::Constants|http://badgerpower.com/docs/Badger/Constants.html> and also provides these additional
+L<Badger::Constants|https://metacpan.org/pod/Badger::Constants> and also provides these additional
 constants.
 
 =head2 EXPORT

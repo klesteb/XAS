@@ -137,7 +137,7 @@ The optional channel to unsubscribe from. Defaults to 'default'.
 =head2 publish
 
 This method allows you to publish an event to a specified channel. Additional
-aruguments can be supplied. It takes the following parameters:
+arguuments can be supplied. It takes the following parameters:
 
 =over 4
 
@@ -151,7 +151,7 @@ Optional channel. Defaults to 'default'.
 
 =item B<-args>
 
-Optional additional arugments to send with the event. The context of the 
+Optional additional arguments to send with the event. The context of the 
 arguments is determined by the method that is handling the event. For example:
 
  -args => ['this', 'is', 'neat']

@@ -428,7 +428,7 @@ This method initializes the module so that it can function properly.
 
 =head2 start_process
 
-This method does the neccessary things to spawn a new process. 
+This method does the necessary things to spawn a new process. 
 
 =head2 stat_process
 
@@ -486,6 +486,10 @@ This method calls stop_process().
 =head1 SEE ALSO
 
 =over 4
+
+=item L<Win32::Process|https://metacpan.org/pod/Win32::Process>
+
+=item L<XAS::Lib::Process|XAS::Lib::Process>
 
 =item L<XAS|XAS>
 

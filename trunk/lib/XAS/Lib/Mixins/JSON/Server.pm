@@ -340,7 +340,7 @@ XAS::Lib::Mixins::JSON::Server - A mixin for a simple JSON RPC server
 
 =head1 DESCRIPTION
 
-This modules implements a simple JSON RPC v2.0 server as a mixin. It 
+This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> server as a mixin. It 
 doesn't support "Notification" calls. 
 
 =head1 METHODS
@@ -359,7 +359,7 @@ An arrayref of methods that this server can process.
 
 =head2 methods
 
-A handle to a L<Set::Light> object that contains the methods 
+A handle to a L<Set::Light|https://metacpan.org/pod/Set::Light> object that contains the methods 
 that can be evoked.
 
 =head1 EVENTS

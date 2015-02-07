@@ -105,6 +105,8 @@ Closes the connection to syslog.
 
 =over 4
 
+=item <XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+
 =item L<XAS|XAS>
 
 =back

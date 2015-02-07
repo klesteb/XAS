@@ -117,6 +117,8 @@ This methods deinitializes the module.
 
 =over 4
 
+=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+
 =item L<XAS|XAS>
 
 =back

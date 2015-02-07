@@ -41,7 +41,7 @@ You can use this module in the following manner.
 
  my $env = XAS:Factory->module('Environment');
 
-Either of the above statements will load the XAS::Lib::Modules::Environment module.
+Either of the above statements will load the L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment> module.
 
 =head1 DESCRIPTION
 

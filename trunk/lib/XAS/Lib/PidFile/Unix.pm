@@ -70,7 +70,7 @@ XAS::Lib::PidFile::Unix - A mixin class to scan for processes on Unix
 =head1 DESCRIPTION
 
 This is a mixin class to provide process scanning on a Unix platform. It
-ps to do the process scan.
+uses "ps" to do the process scan.
 
 =head1 METHODS
 

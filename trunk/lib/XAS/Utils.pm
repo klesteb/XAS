@@ -960,7 +960,7 @@ Take the items from the current $ENV variable and create a formated string.
 
 =item L<XAS|XAS>
 
-=item L<Badger::Utils|http://badgerpower.com/docs/Badger/Utils.html>
+=item L<Badger::Utils|https://metacpan.org/pod/Badger::Utils>
 
 =back
 

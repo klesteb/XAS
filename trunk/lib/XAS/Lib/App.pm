@@ -325,7 +325,7 @@ This prints out the version of the module.
 =head2 --logtype
 
 What type of log to use. By default the log is displayed on the console. Log
-types can be one of the following "console", "file", "logstash" or "syslog".
+types can be one of the following "console", "file", "json" or "syslog".
 
 =head2 --logfile
 

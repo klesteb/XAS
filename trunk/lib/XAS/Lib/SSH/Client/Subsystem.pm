@@ -95,7 +95,7 @@ XAS::Lib::SSH::Client::Subsystem - A class to interact with the SSH Subsystem fa
 
 The module uses a SSH subsystem to make RPC calls. Which means it 
 sends formated packets to the remote host and parses the resulting output. 
-This module inherits from XAS::Lib::SSH::Client.
+This module inherits from L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>.
 
 =head1 METHODS
 

@@ -211,13 +211,13 @@ The name of the log file. This only is relevant if the log type is "file".
 =item B<-facility>
 
 The facility of the log message. Primarily has meaning when using a log type of
-"logstash" or "syslog". The following have been defined and follows the syslog
+"json" or "syslog". The following have been defined and follows the syslog
 standard.
  
     auth, authpriv, cron, daemon, ftp,
     local[0-7], lpr, mail, news, user, uucp
 
-Defaults to "local7".
+Defaults to "local6".
 
 =item B<-process>
 

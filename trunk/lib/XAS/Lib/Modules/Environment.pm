@@ -401,11 +401,27 @@ The regex to use when searching for message files. Defaults to /.*\.msg/i.
 
 =back
 
+=head2 alerts
+
+This method sets or returns wither to send alerts.
+
+=head2 xdebug
+
+This method sets or returns the status of debug.
+
+=head2 script
+
+This method returns the name of the script.
+
+=head2 commandline
+
+This method returns the complete commandline.
+
 =head2 logtype
 
 This method will return the currently defined log type. By default this is
 "console". i.e. all logging will go to the terminal screen. Valid options
-are "file", "logstash" and "syslog'. 
+are "file", "json" and "syslog'. 
 
 =head2 logfile
 

@@ -132,7 +132,7 @@ XAS::Lib::Mixins::JSON::Client - A mixin for a JSON RPC interface
  
 =head1 DESCRIPTION
 
-This modules implements a simple JSON RPC v2.0 client as a mixin. It 
+This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> client as a mixin. It 
 doesn't support "Notification" calls.
 
 =head1 METHODS

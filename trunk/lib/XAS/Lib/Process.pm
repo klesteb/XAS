@@ -567,8 +567,8 @@ XAS::Lib::Process - A class for managing processes within the XAS environment
 
 This class manages a sub process in a platform independent way. Mixins
 are loaded to handle the differences between Unix/Linux and Windows.
-This module inherits from L<XAS::Lib::Service|XAS::Lib::Service>. Please
-refer to that module for additional help. 
+This module inherits from L<XAS::Lib::POE::Service|XAS::Lib::POE::Service>. 
+Please refer to that module for additional help. 
 
 =head1 METHODS
 

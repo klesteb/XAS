@@ -156,7 +156,7 @@ XAS::Lib::SSH::Client::Shell - A class to interact with the SSH Shell facility
 
 This module uses the SSH Shell subsystem to execute commands. Which means it 
 executes a procedure on a remote host and parses the resulting output. This 
-module inherits from XAS::Lib::SSH::Client.
+module inherits from L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>.
 
 =head1 METHODS
 

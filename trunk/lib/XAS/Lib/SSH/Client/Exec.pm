@@ -101,7 +101,7 @@ XAS::Lib::SSH::Client::Exec - A class to interact with the SSH Exec facility
 
 The module uses the SSH Exec subsystem to execute commands. Which means it 
 executes a procedure on a remote host and parses the resulting output. This 
-module inherits from XAS::Lib::SSH::Client.
+module inherits from L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>.
 
 =head1 METHODS
 

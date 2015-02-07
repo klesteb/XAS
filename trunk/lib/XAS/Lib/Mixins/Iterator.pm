@@ -152,7 +152,8 @@ XAS::Lib::Mixins::Iterator - A mixin for the XAS environment
 This is a general purpose iterator mixin. It is for handling an array of
 objects. It inserts the following items into the current object.
 
-  __position __table
+  __position 
+  __table
 
 Which are used for bookkeeping.
 

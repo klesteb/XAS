@@ -441,7 +441,7 @@ XAS::Lib::Net::Server - A basic network server for the XAS Environment
 This module implements a simple text orientated network protocol. Data is
 sent out as "packets". Which means everything is delimited with a consistent
 EOL. These packets may be formatted strings, such as JSON. This module inherits
-from L<XAS::Lib::Session>.
+from L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>.
 
 =head1 METHODS
 
@@ -619,7 +619,7 @@ The id of the clients wheel.
 
 =over 4
 
-=item POE::Filter::Line
+=item L<POE::Filter::Line|https://metacpan.org/pod/POE::Filter::Line>
 
 =item L<XAS|XAS>
 

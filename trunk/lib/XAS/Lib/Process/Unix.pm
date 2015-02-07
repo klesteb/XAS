@@ -454,6 +454,8 @@ This method will send a 'KILL' signal to the process.
 
 =over 4
 
+=item L<XAS::Lib::Process|XAS::Lib::Process>
+
 =item L<XAS|XAS>
 
 =back

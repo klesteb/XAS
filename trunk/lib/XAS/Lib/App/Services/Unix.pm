@@ -94,6 +94,8 @@ This method does nothing on Unix.
 
 =over 4
 
+=item L<XAS::Lib::App::Services|XAS::Lib::App::Services>
+
 =item L<XAS|XAS>
 
 =back

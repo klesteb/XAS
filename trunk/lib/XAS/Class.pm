@@ -27,8 +27,8 @@ XAS::Class - A Perl extension for the XAS environment
 
 This module ties the XAS environment to the base Badger object framework. It
 exposes the defined constants and utilities that reside in L<XAS::Constants|XAS::Constants> and
-L<XAS::Utils|XAS::Utils>. Which inherits from L<Badger::Constants|http://badgerpower.com/docs/Badger/Class.html> and 
-L<Badger::Utils|http://badgerpower.com/docs/Badger/Utils.html>.
+L<XAS::Utils|XAS::Utils>. Which inherits from L<Badger::Constants|https://metacpan.org/pod/Badger::Constants> and 
+L<Badger::Utils|http://metacpan.org/pod/Badger::Utils>.
 
 =head1 SEE ALSO
 

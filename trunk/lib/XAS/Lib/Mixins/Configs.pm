@@ -77,7 +77,7 @@ The file name for the configuration file.
 =item B<$handle>
 
 An optional name to the accessor that will access the 
-L<https://metacpan.org/pod/Config::IniFiles|Config::IniFiles> 
+L<Config::IniFiles|https://metacpan.org/pod/Config::IniFiles> 
 object in the current self. This name defaults to 'cfg'.
 
 =back
