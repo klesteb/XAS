@@ -71,10 +71,15 @@ sub init {
 
     foreach (@ARGV) {
         $commandline .= /\s/
-          ?   " \'" . $_ . "\'"
-                      :           " "   . $_;
-        }
+          ? " \'" . $_ . "\'"
+          : " "   . $_;
+    }
 
+    # set some defaults
+
+    $self->{alerts} = 1;
+    $self->{xdebug} = 0;
+    $self->{script} = $script;
     $self->{commandline} = $commandline;
 
     # Initialize variables - these are defaults

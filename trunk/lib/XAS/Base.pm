@@ -72,6 +72,22 @@ sub validate_params {
 
 }
 
+sub message {
+    my $self = shift;
+
+    # override and lazy load the message files
+
+   unless($self->{messages_loaded}) {
+
+        $self->_load_msgs();
+        $self->{messages_loaded} = 1;
+
+    }
+
+    $self->SUPER::message(@_);
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -80,7 +96,6 @@ sub _load_msgs {
     my $self = shift;
 
     my $messages = $self->class->hash_vars('MESSAGES');
-    return if (defined($messages->{'messages_loaded'}));
 
     foreach my $path (@INC) {
 
@@ -200,7 +215,7 @@ sub init {
 
     # load the messages
 
-    $self->_load_msgs();
+#    $self->_load_msgs();
 
     return $self;
 

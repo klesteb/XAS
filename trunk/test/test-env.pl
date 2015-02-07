@@ -41,5 +41,5 @@ printf("+------------------------------+\n");
 printf("alerts      = %s\n", $env->alerts);
 printf("xdebug      = %s\n", $env->xdebug);
 printf("script      = %s\n", $env->script);
-printf("commandline = %s\n", $env->commandling);
+printf("commandline = %s\n", $env->commandline);
 
