@@ -46,7 +46,7 @@ sub exit_handler {
 
     $self->log->fatal($errors);
 
-    if ($self->alerts->check) {
+    if ($self->alerts) {
 
         $self->alert->send(
             -process  => $script,

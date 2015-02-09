@@ -1,18 +1,18 @@
 package XAS::Base;
 
+our $MESSAGES;
 our $VERSION = '0.04';
 our $EXCEPTION = 'XAS::Exception';
 
 use XAS::Factory;
 use XAS::Exception;
-use Config::IniFiles;
 use Params::Validate ':all';
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'Badger::Base',
-  utils      => 'dotid dir_walk',
+  utils      => 'dotid',
   auto_can   => '_auto_load',
   accessors  => 'env',
   filesystem => 'Dir',
@@ -24,7 +24,7 @@ use XAS::Class
   }
 ;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -72,64 +72,9 @@ sub validate_params {
 
 }
 
-sub message {
-    my $self = shift;
-
-    # override and lazy load the message files
-
-   unless($self->{messages_loaded}) {
-
-        $self->_load_msgs();
-        $self->{messages_loaded} = 1;
-
-    }
-
-    $self->SUPER::message(@_);
-
-}
-
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub _load_msgs {
-    my $self = shift;
-
-    my $messages = $self->class->hash_vars('MESSAGES');
-
-    foreach my $path (@INC) {
-
-        my $dir = Dir($path, 'XAS');
-
-        if ($dir->exists) {
-
-            dir_walk(
-                -directory => $dir, 
-                -filter    => $self->env->msgs, 
-                -callback  => sub {
-                    my $file = shift;
-
-                    my $cfg = Config::IniFiles->new(-file => $file->path);
-                    if (my @names = $cfg->Parameters('messages')) {
-
-                        foreach my $name (@names) {
-
-                            $messages->{$name} = $cfg->val('messages', $name);
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-    $XAS::Base::MESSAGES = $messages;
-
-}
 
 sub _auto_load {
     my $self = shift;
@@ -196,6 +141,11 @@ sub _create_methods {
 sub init {
     my $self = shift;
 
+    # load the environment
+
+    $self->{env} = XAS::Factory->module('environment');
+    $XAS::Base::MESSAGES = $self->env->get_msgs();
+
     # process PARAMS
 
     my $class = $self->class;
@@ -207,15 +157,10 @@ sub init {
     $self->{config} = $p;
     $self->_create_methods($p);
 
-    # load the environment
+    # set defaults
 
-    $self->{env} = XAS::Factory->module('environment');
     $self->env->alerts($self->alerts);
     $self->env->xdebug($self->xdebug);
-
-    # load the messages
-
-#    $self->_load_msgs();
 
     return $self;
 

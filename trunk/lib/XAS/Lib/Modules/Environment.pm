@@ -3,12 +3,14 @@ package XAS::Lib::Modules::Environment;
 our $VERSION = '0.02';
 
 use File::Basename;
+use Config::IniFiles;
 use Net::Domain qw(hostdomain);
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Singleton',
+  utils      => 'dir_walk',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username script commandline',
@@ -55,9 +57,55 @@ sub logtype {
 
 }
 
+sub get_msgs {
+    my $self = shift;
+
+    return $self->class->any_var('MESSAGES');
+
+}
+
 # ------------------------------------------------------------------------
 # Private Methods
 # ------------------------------------------------------------------------
+
+sub _load_msgs {
+    my $self = shift;
+
+    my $messages = $self->class->hash_vars('MESSAGES');
+
+    foreach my $path (@INC) {
+
+        my $dir = Dir($path, 'XAS');
+
+        if ($dir->exists) {
+
+            dir_walk(
+                -directory => $dir, 
+                -filter    => $self->msgs, 
+                -callback  => sub {
+                    my $file = shift;
+
+                    my $cfg = Config::IniFiles->new(-file => $file->path);
+                    if (my @names = $cfg->Parameters('messages')) {
+
+                        foreach my $name (@names) {
+
+                            $messages->{$name} = $cfg->val('messages', $name);
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+    $self->class->var('MESSAGES', $messages);
+
+}
 
 sub init {
     my $self = shift;
@@ -284,6 +332,8 @@ sub init {
 
     }
     
+    $self->_load_msgs();
+      
     return $self;
 
 }
