@@ -58,7 +58,7 @@ sub request {
     # I/O for the request
 
     $self->curl->setopt(CURLOPT_WRITEDATA,      \@body);
-    $self->curl->setopy(CURLOPT_HEADERDATA,     \@head);
+    $self->curl->setopt(CURLOPT_HEADERDATA,     \@head);
     $self->curl->setopt(CURLOPT_READFUNCTION,   \&_read_callback);
     $self->curl->setopt(CURLOPT_WRITEFUNCTION,  \&_write_callback);
     $self->curl->setopt(CURLOPT_HEADERFUNCTION, \&_write_callback);
