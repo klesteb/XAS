@@ -46,8 +46,8 @@ sub request {
         { isa => 'HTTP::Request' }
     ]);
 
-    my @body
-    my @head
+    my @body;
+    my @head;
     my $response = undef;
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
