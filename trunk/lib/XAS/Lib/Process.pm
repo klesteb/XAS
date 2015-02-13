@@ -16,7 +16,7 @@ use POE qw(Wheel Driver::SysRW Filter::Line);
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::Service',
+  base      => 'XAS::Lib::POE::Service',
   mixin     => $mixin,
   utils     => 'dotid',
   mutators  => 'is_active input_handle output_handle status retries',
