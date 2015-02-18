@@ -1,8 +1,8 @@
 
 use lib '../lib';
-use XAS::Factory;
+use XAS::Lib::Modules::Environment;
 
-my $env = XAS::Factory->module('environment');
+my $env = XAS::Lib::Modules::Environment->new();
 
 printf("+------------------------------+\n");
 printf("| System                       |\n");
@@ -42,4 +42,5 @@ printf("alerts      = %s\n", $env->alerts);
 printf("xdebug      = %s\n", $env->xdebug);
 printf("script      = %s\n", $env->script);
 printf("commandline = %s\n", $env->commandline);
+printf("path        = %s\n", $env->path);
 

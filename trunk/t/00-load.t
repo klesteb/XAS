@@ -29,7 +29,7 @@ BEGIN {
     use_ok( 'XAS::Lib::Modules::Locking' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log::File' )     || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log::JSON' )     || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Modules::Log::Json' )     || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log::Syslog' )   || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Spool' )         || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::Client' )            || print "Bail out!\n";

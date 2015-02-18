@@ -127,9 +127,11 @@ sub init {
 
     $self->{alerts} = 1;
     $self->{xdebug} = 0;
+    $self->{mxtimeout} = 60;
     $self->{script} = $script;
+    $self->{path} = $ENV{'PATH'};
     $self->{commandline} = $commandline;
-
+      
     # Initialize variables - these are defaults
 
     $self->{mqserver} = defined($ENV{'XAS_MQSERVER'}) 
@@ -280,9 +282,6 @@ sub init {
     $self->{logtype} = defined($ENV{'XAS_LOGTYPE'})
         ? $ENV{'XAS_LOGTYPE'}
         : 'console';
-
-    $self->{path}      = $ENV{'PATH'};
-    $self->{mxtimeout} = 60;
 
     # create some common file names
 
