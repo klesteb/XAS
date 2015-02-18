@@ -26,7 +26,7 @@ sub scan_name {
     my $self = shift;
 
 
-    my $c = sprintf('perl  %s', $self->class->any_var('SCRIPT'));
+    my $c = sprintf('perl  %s', $self->env->script);
 
     return compress($c);
 

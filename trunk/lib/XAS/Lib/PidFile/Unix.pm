@@ -1,6 +1,6 @@
 package XAS::Lib::PidFile::Unix;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Class
   debug   => 0,
@@ -19,7 +19,7 @@ sub scan_name {
 
     # just return the name of the script
 
-    return $self->class->any_var('SCRIPT');
+    return $self->env->script;
 
 }
 
