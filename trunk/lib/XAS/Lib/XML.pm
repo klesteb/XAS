@@ -123,7 +123,7 @@ sub load {
 }
 
 sub xmlerr {
-    my ($class, $value) = $self->validate_params(\@_, [ 
+    my ($class, $value) = $class->validate_params(\@_, [ 
         1,
         { optional => 1, default => undef }
     ]);
