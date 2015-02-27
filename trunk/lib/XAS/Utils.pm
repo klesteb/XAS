@@ -1,6 +1,6 @@
 package XAS::Utils;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use DateTime;
 use Try::Tiny;
@@ -42,14 +42,6 @@ use XAS::Class
   }
 ;
 
-Params::Validate::validation_options(
-    on_fail => sub {
-        my $params = shift;
-        my $class  = __PACKAGE__;
-        XAS::Base::validation_exception($params, $class);
-    }
-);
-
 #use Data::Dumper;
 
 # ----------------------------------------------------------------------
@@ -58,16 +50,15 @@ Params::Validate::validation_options(
 
 # recursively walk a HOH
 sub hash_walk {
-
-    my %p = validate(@_, {
+    my $p = XAS::Base->validate_params(\@_, {
         -hash     => { type => HASHREF }, 
         -keys     => { type => ARRAYREF }, 
         -callback => { type => CODEREF },
     });
 
-    my $hash     = $p{'-hash'};
-    my $key_list = $p{'-keys'};
-    my $callback = $p{'-callback'};
+    my $hash     = $p->{'hash'};
+    my $key_list = $p->{'keys'};
+    my $callback = $p->{'callback'};
 
     while (my ($k, $v) = each %$hash) {
 
@@ -99,27 +90,19 @@ sub hash_walk {
 
 # recursively walk a directory structure
 sub dir_walk {
-    my %p = validate_with(
-        params => \@_,
-        spec => {
-            -directory => { isa  => 'Badger::Filesystem::Directory' },
-            -callback  => { type => CODEREF },
-            -filter    => { optional => 1, default => qr/.*/, callbacks => {
-                'must be a compiled regex' => sub {
-                    return (ref shift() eq 'Regexp') ? 1 : 0;
-                }
-            }},
-        },
-        on_fail => sub {
-            my $param = shift;
-            my $class = (caller(1))[3];
-            XAS::Base::validation_exception($param, $class);
-        }
-    );
+    my $p = XAS::Base->validate_params(\@_, {
+        -directory => { isa  => 'Badger::Filesystem::Directory' },
+        -callback  => { type => CODEREF },
+        -filter    => { optional => 1, default => qr/.*/, callbacks => {
+            'must be a compiled regex' => sub {
+                return (ref shift() eq 'Regexp') ? 1 : 0;
+            }
+        }},
+    });
 
-    my $folder   = $p{'-directory'};
-    my $filter   = $p{'-filter'};
-    my $callback = $p{'-callback'};
+    my $folder   = $p->{'directory'};
+    my $filter   = $p->{'filter'};
+    my $callback = $p->{'callback'};
 
     my @files = grep ( $_->path =~ /$filter/, $folder->files() );
     my @folders = $folder->dirs;
@@ -140,7 +123,7 @@ sub dir_walk {
 
 # Perl trim function to remove whitespace from the start and end of the string
 sub trim {
-    my $string = shift;
+    my ($string) = XAS::Base->validate_params(\@_, [1]);
 
     $string =~ s/^\s+//;
     $string =~ s/\s+$//;
@@ -151,7 +134,7 @@ sub trim {
 
 # Left trim function to remove leading whitespace
 sub ltrim {
-    my $string = shift;
+    my ($string) = XAS::Base->validate_params(\@_, [1]);
 
     $string =~ s/^\s+//;
 
@@ -161,7 +144,7 @@ sub ltrim {
 
 # Right trim function to remove trailing whitespace
 sub rtrim {
-    my $string = shift;
+    my ($string) = XAS::Base->validate_params(\@_, [1]);
 
     $string =~ s/\s+$//;
 
@@ -171,7 +154,7 @@ sub rtrim {
 
 # replace multiple whitspace with a single space
 sub compress {
-    my $string = shift;
+    my ($string) = XAS::Base->validate_params(\@_, [1]);
 
     $string =~ s/\s+/ /gms;
 
@@ -181,8 +164,7 @@ sub compress {
 
 # emulate Basics string function left()
 sub left {
-    my $string = shift;
-    my $offset = shift;
+    my ($string, $offset) = XAS::Base->validate_params(\@_, [1,1]);
 
     return substr($string, 0, $offset);
 
@@ -190,8 +172,7 @@ sub left {
 
 # emulate Basics string function right()
 sub right {
-    my $string = shift;
-    my $offset = shift;
+    my ($string, $offset) = XAS::Base->validate_params(\@_, [1,1]);
 
     return substr($string, -($offset));
 
@@ -199,9 +180,7 @@ sub right {
 
 # emulate Basics string function mid()
 sub mid {
-    my $string = shift;
-    my $start  = shift;
-    my $length = shift;
+    my ($string, $start, $length) = XAS::Base->validate_params(\@_, [1,1,1]);
 
     return substr($string, $start - 1, $length);
 
@@ -209,9 +188,7 @@ sub mid {
 
 # emulate Basics string function instr()
 sub instr {
-    my $start   = shift;
-    my $string  = shift;
-    my $compare = shift;
+    my ($start, $string, $compare) = XAS::Base->validate_params(\@_, [1,1,1]);
 
     if ($start =~ /^[0-9\-]+/) {
 
@@ -233,7 +210,7 @@ sub instr {
 # or the number 1.
 #
 sub is_truthy {
-    my $parm = shift;
+    my ($parm) = XAS::Base->validate_params(\@_, [1]);
 
     my @truth = qw(yes true t 1 0e0);
 
@@ -245,7 +222,7 @@ sub is_truthy {
 # the number 0.
 #
 sub is_falsey {
-    my $parm = shift;
+    my ($parm) = XAS::Base->validate_params(\@_, [1]);
 
     my @truth = qw(no false f 0);
 
@@ -254,7 +231,7 @@ sub is_falsey {
 }
 
 sub bool {
-    my $item = shift;
+    my ($item) = XAS::Base->validate_params(\@_, [1]);
 
     my @truth = qw(yes true 1 0e0 no false f 0);
     return grep {lc($item) eq $_} @truth;
@@ -262,8 +239,7 @@ sub bool {
 }
 
 sub spawn {
-
-    my %p = validate(@_, {
+    my $p = XAS::Base->validate_params(\@_, {
         -command => 1,
         -timeout => { optional => 1, default => 0 },
     });
@@ -293,7 +269,7 @@ sub spawn {
 
         try {
 
-            alarm( $p{'-timeout'} );
+            alarm( $p->{'timeout'} );
 
             while (<$kid>) {
 
@@ -343,7 +319,7 @@ sub spawn {
         # kill -9 will kill it and all its descendents
 
         setpgrp(0, 0);
-        exec $p{'-command'};
+        exec $p->{'command'};
         exit;
 
     }
@@ -353,16 +329,15 @@ sub spawn {
 }
 
 sub kill_proc {
-
-    my %p = validate(@_, {
+    my $p = XAS::Base->validate_params(\@_, {
         -signal => 1,
         -pid    => 1,
     });
 
     my $time = 10;
     my $status = 0;
-    my $pid = $p{'-pid'};
-    my $signal = $p{'-signal'};
+    my $pid = $p->{'pid'};
+    my $signal = $p->{'signal'};
 
     kill($signal, $pid);
 
@@ -426,87 +401,38 @@ sub daemonize {
 }
 
 sub db2dt {
-    my ($p) = shift;
+    my ($p) = XAS::Base->validate_params(\@_, [
+        { regex => qr/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ }
+    ]);
 
-    my $dt;
-    my $parser;
+    my $parser = DateTime::Format::Strptime->new(
+        pattern => '%Y-%m-%d %H:%M:%S',
+        time_zone => 'local',
+        on_error => sub {
+            my ($obj, $err) = @_;
+            my $ex = XAS::Exception->new(
+                type => 'xas.utils.db2dt',
+                info => $err
+            );
+            $ex->throw;
+        }
+    );
 
-    if ($p =~ m/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) {
-
-        $parser = DateTime::Format::Strptime->new(
-            pattern => '%Y-%m-%d %H:%M:%S',
-            time_zone => 'local',
-            on_error => sub {
-                my ($obj, $err) = @_;
-	            my $ex = XAS::Exception->new(
-                    type => 'xas.utils.db2dt',
-                    info => $err
-                );
-                $ex->throw;
-            }
-        );
-
-        $dt = $parser->parse_datetime($p);
-
-    } else {
-
-        my ($package, $file, $line) = caller;
-        my $ex = XAS::Exception->new(
-            type => 'xas.utils.db2dt',
-            info => sprintf(ERRMSG, $package, $line)
-        );
-
-        $ex->throw;
-
-    }
-
-    return $dt;
+    return $parser->parse_datetime($p);
 
 }
 
 sub dt2db {
-    my ($p) = shift;
+    my ($dt) = XAS::Base->validate_params(\@_, [
+        { isa => 'DateTime' }
+    ]);
 
-    my $ft;
-    my $parser;
-
-    my $ref = ref($p);
-
-    if ($ref && $p->isa('DateTime')) {
-
-        $parser = DateTime::Format::Strptime->new(
-            pattern => '%Y-%m-%d %H:%M:%S',
-            time_zone => 'local',
-            on_error => sub {
-                my ($obj, $err) = @_;
-	            my $ex = XAS::Exception->new(
-                    type => 'xas.utils.dt2db',
-                    info => $err
-                );
-                $ex->throw;
-            }
-        );
-
-        $ft = $parser->format_datetime($p);
-
-    } else {
-
-        my ($package, $file, $line) = caller;
-        my $ex = XAS::Exception->new(
-            type => 'xas.utils.dt2db',
-            info => sprintf(ERRMSG, $package, $line)
-        );
-
-        $ex->throw;
-
-    }
-
-    return $ft;
+    return $dt->strftime('%Y-%m-%d %H:%M:%S');
 
 }
 
 sub run_cmd {
-    my $command = shift;
+    my ($command) = XAS::Base->validate_params(\@_, [1]);
 
     my @output = `$command 2>&1`;
     my ($rc, $sig) = exitcode();
@@ -516,98 +442,70 @@ sub run_cmd {
 }
 
 sub init_module {
-    my ($module, $params) = validate_pos(@_, 
+    my ($module, $params) = XAS::Base->validate_params(@_, [ 
         1, 
-        {optional => 1, type => HASHREF}
-    );
+        { optional => 1, type => HASHREF, default => {} }
+    ]);
 
     my $obj;
     my @parts;
     my $filename;
 
-    $params = {} unless (defined($params));
+    @parts = split("::", $module);
+    $filename = File(@parts);
 
-    if ($module) {
+    try {
 
-        @parts = split("::", $module);
-        $filename = File(@parts);
+        require $filename . '.pm';
+        $module->import();
+        $obj = $module->new($params);
 
-        try {
+    } catch {
 
-            require $filename . '.pm';
-            $module->import();
-            $obj = $module->new($params);
-
-        } catch {
-
-            my $x = $_;
-            my $ex = Badger::Exception->new(
-                type => 'xas.utils.init_module',
-                info => $x
-            );
-
-            $ex->throw;
-
-        };
-
-    } else {
-
-        my $ex = Badger::Exception->new(
+        my $x = $_;
+        my $ex = XAS::Exception->new(
             type => 'xas.utils.init_module',
-            info => 'no module was defined'
+            info => $x
         );
 
         $ex->throw;
 
-    }
+    };
 
     return $obj;
 
 }
 
 sub load_module {
-    my $module = shift;
+    my ($module) = XAS::Base->validate_params(\@_, [1]);
 
     my @parts;
     my $filename;
 
-    if ($module) {
+    @parts = split("::", $module);
+    $filename = File(@parts);
 
-        @parts = split("::", $module);
-        $filename = File(@parts);
+    try {
 
-        try {
+        require $filename . '.pm';
+        $module->import();
 
-            require $filename . '.pm';
-            $module->import();
+    } catch {
 
-        } catch {
-
-            my $x = $_;
-            my $ex = XAS::Exception->new(
-                type => 'xas.utils.load_module',
-                info => $x
-            );
-
-            $ex->throw;
-
-        };
-
-    } else {
-
+        my $x = $_;
         my $ex = XAS::Exception->new(
             type => 'xas.utils.load_module',
-            info => 'no module was defined'
+            info => $x
         );
 
         $ex->throw;
 
-    }
+    };
 
 }
 
 sub glob2regex {
-    my $globstr = shift;
+    my ($globstr) = XAS::Base->validate_params(\@_, [1]);
 
     my %patmap = (
         '*' => '.*',
@@ -638,7 +536,7 @@ sub env_store {
 }
 
 sub env_restore {
-    my $env = shift;
+    my ($env) = XAS::Base->validate_params(\@_, [1]);
 
     while ((my $key, my $value) = each(%ENV)) {
 
@@ -655,7 +553,7 @@ sub env_restore {
 }
 
 sub env_create {
-    my $env = shift;
+    my ($env) = XAS::Base->validate_params(\@_, [1]);
 
     while ((my $key, my $value) = each(%{$env})) {
 
@@ -666,7 +564,7 @@ sub env_create {
 }
 
 sub env_parse {
-    my $env = shift;
+    my ($env) = XAS::Base->validate_params(\@_, [1]);
 
     my ($key, $value, %env);
     my @envs = split(';;', $env);
