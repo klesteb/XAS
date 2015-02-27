@@ -17,9 +17,6 @@ use XAS::Class
   base       => 'Badger::Utils XAS::Base',
   constants  => 'HASH ARRAY',
   filesystem => 'Dir File',
-  constant => {
-    ERRMSG => 'invalid parameters passed from %s at line %s', 
-  },
   exports => {
     all => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
@@ -274,7 +271,7 @@ sub spawn {
             while (<$kid>) {
 
                 chomp;
-                push @output, $_;
+                push(@output, $_);
 
             }
 
@@ -292,7 +289,7 @@ sub spawn {
 
                     unless (kill_proc(-signal => 'KILL', -pid => $pid)) {
 
-                        my $ex = Badger::Exception->new(
+                        my $ex = XAS::Exception->new(
                             type => 'xas.utils.spawn',
                             info => 'unable to kill ' . $pid
                         );

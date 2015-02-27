@@ -1,20 +1,23 @@
-XAS - Middleware for Perl
-==========================
+XAS - Middleware for Operations
+===============================
 
-I have over 30 years in systems administration. During those years, I
-have written or help maintain 4 operations environments. Most where on
-proprietary platforms that can't be reproduced nor released. This one is 
-a generic version of the 6th iteration of the 4th environment. The
-first iteration was developed 12 years ago.
+XAS is a set of modules, procedures and practices to help write
+consistent Perl5 code for an operations environment. For the most part,
+this follows the Unix tradition of small discrete components that
+communicate in well defined ways.
 
-The philosophy behind these modules is small discrete components that
-communication with well defined interfaces. These are the base modules that 
-make up the system. They represent a "best practice" on how to write 
-distributed systems in Perl. 
+This system is cross platform capable. It will run under Windows as well
+as Unix like environments without a code rewrite. This allows you to
+write your code once and run it where ever.
+
+This code is based on a production system that has been running for over
+10 years. It incorporates the accumulated knowledge of running a
+distributed system, written in Perl5.
+
+Installation of this system is fairly straight forward. You can install
+it in the usual Perl fashion or there are build scripts for creating
+Debian and RedHat install packages. Please see the included README for
+details.
 
 Extended documentation is available at: http://scm.kesteb.us/trac
-
-Enjoy...
-
-Kevin
 
