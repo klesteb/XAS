@@ -10,8 +10,6 @@ use XAS::Class
     SERVICE_NAME         => 'XAS_Test',
     SERVICE_DISPLAY_NAME => 'XAS Text',
     SERVICE_DESCRIPTION  => 'This is a test Perl service',
-    PARAMS => {
-    },
   }
 ;
 

@@ -1,4 +1,4 @@
-package XAS::Apps:: ;
+package XAS:: ;
 
 our $VERSION = '0.01';
 
@@ -6,30 +6,12 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
+  mixins  => '',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
-
-sub setup {
-    my $self = shift;
-
-}
-
-sub main {
-    my $self = shift;
-
-    $self->setup();
-    
-}
-
-sub options {
-    my $self = shift;
-
-    return {};
-
-}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -41,23 +23,25 @@ __END__
 
 =head1 NAME
 
-XAS::Apps - A class for the XAS environment
+XAS::xxx - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::Apps;
+ use XAS::XXX;
 
 =head1 DESCRIPTION
 
 =head1 METHODS
 
-=head2 setup
-
-=head2 main
-
-=head2 options
+=head2 method1
 
 =head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=back
 
 =head1 AUTHOR
 

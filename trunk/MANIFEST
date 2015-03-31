@@ -85,6 +85,7 @@ t/boilerplate.t
 t/manifest.t
 t/pod.t
 templates/Build.PL
+templates/mixin.pm
 templates/module.pm
 templates/procedure.sh
 templates/program.pm
