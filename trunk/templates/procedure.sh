@@ -13,6 +13,7 @@
 #
 # PARAMETERS:
 #              --logtype toggles the log type
+#              --logfile name of the log file
 #              --help    prints out a helpful help message
 #              --manual  prints out the procedures manual
 #              --version prints out the procedures version
@@ -61,6 +62,7 @@ changeme [--help] [--debug] [--manual] [--version]
    --version  outputs the apps version
    --debug    toogles debugging output
    --logtype  toggles the log type
+   --logfile  name of the log file 
    --alerts   toogles alert notifications
 
 =head1 DESCRIPTION
@@ -86,7 +88,11 @@ Togggles alert notification.
 =item B<--logtype>
 
 Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
-'logstash' or 'syslog'.
+'json' or 'syslog'.
+
+=item B<--logfile>
+
+Optional logfile. When specified the logtype is set to 'file'.
 
 =item B<--manual>
 
@@ -107,7 +113,7 @@ Prints out the apps version
 
 =over 4
 
-=item L<XAS>
+=item L<XAS|XAS>
 
 =back
 
