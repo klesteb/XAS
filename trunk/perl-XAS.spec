@@ -30,11 +30,21 @@ Requires:       perl(DateTime::Format::Pg) >= 0.0
 Requires:       perl(DateTime::Format::Strptime) >= 1.1
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
-# filter out Win32 stuff.
+%define _initrddir  %{_sysconfdir}/init.d
+%define _sysconfigs %{_sysconfdir}/sysconfig
+%define _logrotated %{_sysconfdir}/logrotate.d
+%define _profiled   %{_sysconfdir}/profile.d
 
+%if 0%{?rhel} == 6
+%define _mandir /usr/local/share/man
 %{?filter_setup: %{?perl_default_filter} }
 %filter_from_requires /Win32/d
+%filter_from_provides /Win32/d
 %filter_setup
+Requires:       perl(Pod::Usage) >= 1.51
+Requires:       perl(Sys::Syslog) >= 0.27
+Requires:       perl(JSON::XS) >= 2.27
+%endif
 
 %description
 This is middleware for Perl. It is cross platform capable.
@@ -48,6 +58,24 @@ exit 0
 
 %prep
 %setup -q -n XAS-%{version}
+
+%if 0%{?rhel} == 5
+
+cat << \EOF > %{name}-prov
+#!/bin/sh
+%{__perl_provides} $* | sed -e '/Win32/d'
+EOF
+%global __perl_provides %{_builddir}/XAS-%{version}/%{name}-prov
+chmod +x %{__perl_provides}
+
+cat << \EOF > %{name}-req
+#!/bin/sh
+%{__perl_requires} $* | sed -e '/Win32/d'
+EOF
+%global __perl_requires %{_builddir}/XAS-%{version}/%{name}-req
+chmod +x %{__perl_requires}
+
+%endif
 
 %build
 %{__perl} Build.PL installdirs=vendor
@@ -80,12 +108,12 @@ chown -R xas.xas  /var/log/xas
 chown -R xas.xas  /var/run/xas
 chown -R xas.xas  /var/spool/xas
 
-chmod g+s /var/lib/xas
-chmod g+s /var/run/xas
-chmod g+s /var/log/xas
-chmod g+s /var/spool/xas
-chmod g+s /var/spool/xas/alerts
-chmod g+s /var/spool/xas/logs
+chmod g+ws /var/lib/xas
+chmod g+ws /var/run/xas
+chmod g+ws /var/log/xas
+chmod g+ws /var/spool/xas
+chmod g+ws /var/spool/xas/alerts
+chmod g+ws /var/spool/xas/logs
 
 %postun
 if [ "$1" = 0 ]; then
@@ -103,8 +131,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc Changes perl-XAS.spec README
 %{perl_vendorlib}/*
-%config(noreplace) /etc/profile.d/xas.sh
-/usr/local/share/man/man3/*
+%config(noreplace) %{_profiled}/xas.sh
+%{_manddir}/*
+%{_sysconfdir}/*
 
 %changelog
 * Tue Sep 24 2013 kesteb 0.07-1
