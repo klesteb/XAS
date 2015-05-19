@@ -22,7 +22,7 @@ project. Interesting if true.
 Code should be easy to read and have a nice flow. Any programmer should be
 able to sit down and figure out what it does in a realitivly short time. This
 means all the nice Perl tricks should be kept to a minimun. Remember you
-may not be the only person the needs to read and understand your code.
+may not be the only person that needs to read and understand your code.
 
 The style that I perfer has been developed over the past 25 years. It has been 
 succefully used with different languages and environments. I first started 
@@ -53,9 +53,13 @@ A more condensed version would be like this.
        call do_this             \
        end if
  
- or the more condensed version of that BASICPLUS 2
+ or the more condensed version
 
     10 if something = this then:call do_this:end if
+
+ or the really condensed version
+
+    10 call do_this if something = this
 
 Perfectly valid code for the compiler, but extremely hard for the programmer to
 read. I find this much easier to read.
