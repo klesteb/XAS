@@ -20,19 +20,19 @@ this style can even be used to determine who contributed what, for any given
 project. Interesting if true. 
 
 Code should be easy to read and have a nice flow. Any programmer should be
-able to sit down and figure out what it does in a realitivly short time. This
-means all the nice Perl tricks should be kept to a minimun. Remember you
+able to sit down and figure out what it does in a relatively short time. This
+means all the nice Perl tricks should be kept to a minimum. Remember you
 may not be the only person that needs to read and understand your code.
 
-The style that I perfer has been developed over the past 25 years. It has been 
-succefully used with different languages and environments. I first started 
+The style that I prefer has been developed over the past 25 years. It has been 
+successfully used with different languages and environments. I first started 
 using it with BASICPLUS 2 on the PDP 11/70 running RSTS/E. Yeah, I have been 
 around that long.
 
 =head1 WHITESPACE
 
 Whitespace is your friend. It is there to help you read the code. Compilers and
-interperters don't care about whitespace, you should. I find the following
+interpreters don't care about whitespace, you should. I find the following
 code hard to read.
 
     if($something==$this){
@@ -43,21 +43,21 @@ A more condensed version would be like this.
 
     if($something==$this){do_this();}
 
- or
+or
 
     do_this()if($something==$this);
 
- or that BASICPLUS 2
+or that BASICPLUS 2
 
     10 if something = this then \
        call do_this             \
        end if
  
- or the more condensed version
+or the more condensed version
 
     10 if something = this then:call do_this:end if
 
- or the really condensed version
+or the really condensed version
 
     10 call do_this if something = this
 
@@ -75,7 +75,7 @@ Which leads into the next topic.
 =head1 BRACING
 
 There are many ways to do bracing. Most of it originated in the C world and
-migrated to other environments. I perfer the bracing on the same line as the 
+migrated to other environments. I prefer the bracing on the same line as the 
 statement with the trailing brace in the starting column of that block. Here 
 are some examples.
 
@@ -83,19 +83,19 @@ are some examples.
         
     }
 
- or
+or
 
     do {
        
     } while ($this == $running);
 
- or
+or
 
     foreach my $a (@array) {
       
     }
 
- or
+or
 
     if ($something == $that) {
         
@@ -105,10 +105,10 @@ are some examples.
         
     }
 
- or even this
+or even this
 
     {
-        # some additonal code here
+        # some additional code here
     }
 
 Notice how I like to but parens around the conditional for the if 
@@ -121,8 +121,8 @@ Python guys. Indentions should be 4 spaces. I know that some people think
 this should be handled as tabs. With the terminals tab spacing set to whatever
 so the code lines up nicely. That may have been true when the Teletype 33 was 
 dying and the vt100 was king. But with modern terminal emulators and fancy 
-IDE editors, the tab spacing just never matchs up. Especially when two people
-are using both syles in the same file. 
+IDE editors, the tab spacing just never matches up. Especially when two people
+are using both styles in the same file. 
 
 =head1 FORMATTING
 
@@ -205,7 +205,7 @@ For example:
 
     }
 
- or with named parameters
+or with named parameters
 
     sub routine {
         my $self = shift;
@@ -219,7 +219,7 @@ For example:
         
     }
 
- or as plain package routine
+or as plain package routine
 
     sub routine {
         my $p = XAS::Base->validate_params(\@_, {

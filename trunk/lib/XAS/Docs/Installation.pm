@@ -61,7 +61,7 @@ also be set at the system level. It is recommended that you use
 L<Strawberry Perl|http://strawberryperl.com/>, L<ActiveState Perl|http://www.activestate.com/activeperl>
 doesn't have all of the necessary modules available.
 
-WARNING
+B<WARNING>
 
     Not all of the Perl modules have been included to make the software 
     run. You may need to load additional CPAN modules. How you do this,

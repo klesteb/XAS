@@ -20,8 +20,8 @@ the below guide lines.
 =head1 CODE
 
 All contributed code must be licensed under the Perl license, v5.8.8 or 
-later, at your leisure. Even thou the current trend is to have a seperate 
-license for contributions, I feel that this is suffecient protection for all 
+later, at your leisure. Even thou the current trend is to have a separate 
+license for contributions, I feel that this is sufficient protection for all 
 involved.
 
 Your code must have an author and copyright/license attributions, like the 
