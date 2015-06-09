@@ -5,17 +5,11 @@ our $VERSION = '0.01';
 use XAS::Lib::Stomp::Frame;
 
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixins::Bufops',
-  utils     => 'trim',
-  accessors => 'target',
-  vars => {
-    PARAMS => {
-      -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
-    }
-  }
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Base',
+  mixin   => 'XAS::Lib::Mixins::Bufops',
+  utils   => 'trim',
 ;
 
 our $EOF    = "\000";
@@ -133,7 +127,7 @@ sub parse {
                     # the last defined header is honored. The duplictes
                     # are discarded.
 
-                    if ($self->target < 1.2) {
+                    if ($self->env->mqlevel < 1.2) {
 
                         $self->{headers}->{$key} = $value;
 
@@ -200,7 +194,6 @@ sub parse {
             $self->{buffer} =~ s/^$CNTRL//;
 
             $frame = XAS::Lib::Stomp::Frame->new(
-                -target  => $self->target,
                 -command => $self->{command},
                 -headers => $self->{headers},
                 -body    => $self->{body}
@@ -258,9 +251,7 @@ XAS::Lib::Stomp::Parse - Create a STOMP Frame From a Buffer
 
   use XAS::Lib::Stomp::Parser;
 
-  my $parser = XAS::Lib::Stomp::Parser->new(
-    -target  => '1.0',
-  );
+  my $parser = XAS::Lib::Stomp::Parser->new();
 
   while (my $buffer = read()) {
 
@@ -287,16 +278,7 @@ A STOMP frame consists of a command, a series of headers and a body.
 
 =head2 new
 
-Creates a new parser. It can take the following parameters:
-
-=over 4
-
-=item B<-target>
-
-Specify a STOMP protocol version number. It currently supports 1.0,
-1.1 and 1.2, defaulting to 1.0.
-
-=back
+Creates a new parser.
 
 =head2 get_pending
 

@@ -51,6 +51,7 @@ client_disconnect = %s: client disconnected from %s on port %s
 client_nowheel    = %s: no wheel defined for output
 client_reaper     = %s: reaper invoked for %s on port %s
 client_nosocket   = %s: no socket for %s on %s
+client_noport     = 'no port has been assigned'
 server_connection_failed = %s: operation: %s; reason: %s - %s
 server_error      = %s: operation: %s; reason: %s - %s
 server_reconnect  = %s: reconnection attempts: %s, count: %s

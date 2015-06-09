@@ -49,9 +49,9 @@ lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Client.pm
 lib/XAS/Lib/Net/POE/Client.pm
 lib/XAS/Lib/Net/Server.pm
-lib/XAS/Lib/PidFile.pm
-lib/XAS/Lib/PidFile/Unix.pm
-lib/XAS/Lib/PidFile/Win32.pm
+lib/XAS/Lib/Pidfile.pm
+lib/XAS/Lib/Pidfile/Unix.pm
+lib/XAS/Lib/Pidfile/Win32.pm
 lib/XAS/Lib/POE/PubSub.pm
 lib/XAS/Lib/POE/Service.pm
 lib/XAS/Lib/POE/Session.pm

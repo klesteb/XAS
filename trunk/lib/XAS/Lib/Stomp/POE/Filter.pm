@@ -13,11 +13,6 @@ use XAS::Class
   constant => {
     LF  => "\n",
   },
-  vars => {
-    PARAMS => {
-      -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
-    }
-  }
 ;
 
 #use Data::Hexdumper;
@@ -90,10 +85,8 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
-    $self->{filter} = XAS::Lib::Stomp::Parser->new(
-        -target => $self->target,
-    );
+    $self->{eol} = ($self->env->mqlevel > 1.1) ? CRLF : LF;
+    $self->{filter} = XAS::Lib::Stomp::Parser->new();
 
     return $self;
 
@@ -115,7 +108,7 @@ XAS::Lib::Stomp::POE::Filter - An I/O filter for the POE Environment
 
   POE::Component::Server::TCP->new(
       ...
-      Filter => XAS::Lib::Stomp::POE::Filter->new(-target => '1.0'),
+      Filter => XAS::Lib::Stomp::POE::Filter->new(),
       ...
   );
 
@@ -123,7 +116,7 @@ XAS::Lib::Stomp::POE::Filter - An I/O filter for the POE Environment
 
   POE::Component::Client::TCP->new(
       ...
-      Filter => XAS::Lib::Stomp::POE::Filter->new(-target => '1.0'),
+      Filter => XAS::Lib::Stomp::POE::Filter->new(),
       ...
   );
 
@@ -138,15 +131,6 @@ from said object.
 =head2 new
 
 This method initializes the module. It takes these parameters:
-
-=over 4
-
-=item B<-target>
-
-Specify a STOMP protocol version number. It currently supports 1.0,
-1.1 and 1.2, defaulting to 1.0.
-
-=back
 
 =head1 SEE ALSO
 

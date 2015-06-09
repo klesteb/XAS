@@ -1,6 +1,6 @@
 package XAS::Lib::Stomp::POE::Client;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use POE;
 use Try::Tiny;
@@ -15,12 +15,11 @@ use XAS::Class
   accessors => 'stomp',
   vars => {
     PARAMS => {
+      -host     => { optional => 1, default => undef },
+      -port     => { optional => 1, default => undef },
       -alias    => { optional => 1, default => 'stomp-client' },
-      -host     => { optional => 1, default => 'localhost' },
-      -port     => { optional => 1, default => 61613 },
       -login    => { optional => 1, default => 'guest' },
       -passcode => { optional => 1, default => 'guest' },
-      -target   => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
     }
   }
 ;
@@ -98,30 +97,6 @@ sub handle_connection {
     $poe_kernel->post($alias, 'write_data', $frame);
 
     $self->log->debug("$alias: leaving handle_connection()");
-
-}
-
-sub handle_connected {
-    my ($self, $frame) = @_[OBJECT, ARG0];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering handle_connected()");
-
-    if ($self->tcp_keepalive) {
-
-        $self->log->info("$alias: tcp_keepalive enabled");
-
-        $self->init_keepalive();
-        $self->enable_keepalive($self->socket);
-
-    }
-
-    $self->log->info_msg('connected', $alias, $self->host, $self->port);
-
-    $poe_kernel->post($alias, 'connection_up');
-
-    $self->log->debug("$alias: leaving handle_connected()");
 
 }
 
@@ -213,10 +188,20 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
+    unless (defined($self->{host})) {
+
+        $self->{host} = $self->env->mqserver;
+
+    }
+
+    unless (defined($self->{port})) {
+
+        $self->{port} = $self->env->mqport;
+
+    }
+
     $self->{stomp}  = XAS::Lib::Stomp::Utils->new();
-    $self->{filter} = XAS::Lib::Stomp::POE::Filter->new(
-        -target => $self->target
-    );
+    $self->{filter} = XAS::Lib::Stomp::POE::Filter->new();
 
     return $self;
 
@@ -244,41 +229,6 @@ look as follows:
    base    => 'XAS::Lib::Stomp::POE::Client',
  ;
 
- sub handle_connection {
-    my ($self) = @_[OBJECT];
- 
-    my $nframe = $self->stomp->connect(
-        -login    => 'testing',
-        -passcode => 'testing'
-    ); 
-
-    $poe_kernel->yield('send_data', $nframe);
-
- }
-
- sub handle_connected {
-    my ($self, $frame) = @_[OBJECT, ARG0];
-
-    my $nframe = $self->stomp->subscribe(
-        -queue => $self->queue,
-        -ack   => 'client'
-    );
-
-    $poe_kernel->yield('send_data', $nframe);
-
- }
- 
- sub handle_message {
-    my ($self, $frame) = @_[OBJECT, ARG0];
-
-    my $nframe = $self->stomp->ack(
-       -message_id => $frame->header->message_id
-    );
-
-    $poe_kernel->yield('send_data', $nframe);
-
- }
-
  package main;
 
  use POE;
@@ -293,115 +243,96 @@ look as follows:
 
  exit 0;
 
-
 =head1 DESCRIPTION
 
 This module handles the nitty-gritty details of setting up the communications 
 channel to a message queue server. You will need to sub-class this module
 with your own for it to be useful.
 
-An attempt to maintain that channel will be made when/if that server should 
-happen to disappear off the network. There is nothing more unpleasant then 
-having to go around to dozens of servers and restarting processes.
-
 When messages are received, specific events are generated. Those events are 
 based on the message type. If you are interested in those events you should 
 override the default behavior for those events. The default behavior is to 
-do nothing.
+do nothing. This module inherits from L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>.
 
 =head1 METHODS
 
 =head2 new
 
 This method initializes the class and starts a session to handle the 
-communications channel. It takes the following parameters:
+communications channel. It takes the following additional parameters:
 
 =over 4
 
 =item B<-alias>
 
-The session alias, defaults to 'stomp-client'.
+Sets the alias for this client, defaults to 'stomp-client'.
 
-=item B<-server>
+=item B<-host>
 
-The servers host name, defaults to 'localhost'.
+Sets the host to attach too. defaults to 'localhost'.
 
 =item B<-port>
 
-The servers port number, defaults to '61613'.
+Sets the port to use, defaults to 61613.
 
-=item B<-target>
+=item B<-login>
 
-The STOMP protocol version that is targeted. Defaults to '1.0'.
+Sets the login name for this server, defaults to 'guest'.
 
-=item B<-retry_count>
+=item B<-passcode>
 
-Wither to attempt reconnections after they run out. Defaults to true.
-
-=item B<-enable_keepalive>
-
-For those pesky firewalls, defaults to false
+Sets the passcode for this server, defaults to 'guest'.
 
 =back
 
-=head2 send_data
+=head2 handle_connection(OBJECT)
 
-You use this event to send Stomp frames to the server. 
+This event is signaled and the corresponding method is called upon initial 
+connection to the message server. I accepts these parameters:
 
 =over 4
 
-=item Example
+=item B<OBJECT>
 
- $kernel->yield('send_data', $frame);
+The current class object.
 
 =back
 
-=head2 handle_connection
-
-This event is signaled and the corresponding method is called upon initial 
-connection to the message server. For the most part you should send a 
-"CONNECT" frame to the server.
-
- Example
-
-    sub handle_connection {
-        my ($self) = @_[$OBJECT];
- 
-       my $nframe = $self->stomp->connect(
-           -login => 'testing',
-           -passcode => 'testing'
-       );
-
-       $poe_kernel->yield('send_data', $nframe);
-
-    }
-
-=head2 handled_connected
+=head2 handle_connected(OBJECT, ARG0)
 
 This event and corresponding method is called when a "CONNECT" frame is 
-received from the server. This means the server will allow you to start
-generating/processing frames.
+received from the server. It posts the frame to the 'connection_up' event.
+It accepts these parameters:
 
- Example
+=over 4
 
-    sub handle_connected {
-        my ($self, $frame) = @_[OBJECT,ARG0];
+=item B<OBJECT>
 
-        my $nframe = $self->stomp->subscribe(
-            -queue => $self->queue,
-            -ack => 'client'
-        );
+The current class object.
 
-        $poe_kernel->yield('send_data', $nframe);
+=item B<ARG0>
 
-    }
+The current STOMP frame.
 
-This example shows you how to subscribe to a particular queue. The queue name
-was passed as a parameter to new().
+=back
 
-=head2 handle_message
+=head2 handle_message(OBJECT, ARG0)
 
 This event and corresponding method is used to process "MESSAGE" frames. 
+
+It accepts these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=item B<ARG0>
+
+The current STOMP frame.
+
+=back
 
  Example
 
@@ -412,16 +343,29 @@ This event and corresponding method is used to process "MESSAGE" frames.
             -message_id => $frame->header->message_id
         );
 
-        $poe_kernel->yield('send_data', $nframe);
+        $poe_kernel->yield('write_data', $nframe);
 
     }
 
 This example really doesn't do much other then "ack" the messages that are
 received. 
 
-=head2 handle_receipt
+=head2 handle_receipt(OBJECT, ARG0)
 
 This event and corresponding method is used to process "RECEIPT" frames. 
+It accepts these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=item B<ARG0>
+
+The current STOMP frame.
+
+=back
 
  Example
 
@@ -436,116 +380,45 @@ This example really doesn't do much, and you really don't need to worry about
 receipts unless you ask for one when you send a frame to the server. So this 
 method could be safely left with the default.
 
-=head2 handle_error
+=head2 handle_error(OBJECT, ARG0)
 
 This event and corresponding method is used to process "ERROR" frames. 
+It accepts these parameters:
 
- Example
+=over 4
 
-    sub handle_error {
-        my ($self, $frame) = @_[OBJECT,ARG0];
- 
-    }
+=item B<OBJECT>
 
-This example really doesn't do much. Error handling is pretty much what the
-process needs to do when something unexpected happens.
+The current class object.
 
-=head2 handle_noop
+=item B<ARG0>
+
+The current STOMP frame.
+
+=back
+
+=head2 handle_noop(OBJECT, ARG0)
 
 This event and corresponding method is used to process "NOOP" frames. 
+It accepts these parameters:
 
- Example
+=over 4
 
-    sub handle_noop {
-        my ($self, $frame) = @_[OBJECT,ARG0];
- 
-    }
+=item B<OBJECT>
 
-This example really doesn't do much. 
+The current class object.
 
-=head2 gather_data
+=item B<ARG0>
 
-This event and corresponding method is used to "gather data". How that is done
-is up to your program. But usually a "send_data" event is generated.
+The current STOMP frame.
 
- Example
-
-    sub gather_data {
-        my ($self) = @_[OBJECT];
- 
-        # doing something here
-
-        $poe_kernel->yield('send_data', $frame);
-
-    }
-
-=head2 connection_down
-
-This event and corresponding method is a hook to allow you to be notified if 
-the connection to the server is currently down. By default it does nothing. 
-But it would be useful to notify "gather_data" to temporarily stop doing 
-whatever it is currently doing.
-
- Example
-
-    sub connection_down {
-        my ($self) = @_[OBJECT];
-
-        # do something here
-
-    }
-
-=head2 connection_up
-
-This event and corresponding method is a hook to allow you to be notified 
-when the connection to the server up. By default it does nothing. 
-But it would be useful to notify "gather_data" to start doing 
-whatever it supposed to do.
-
- Example
-
-    sub connection_up {
-       my ($self) = @_[OBJECT];
-
-       # do something here
-
-    }
-
-=head2 session_cleanup
-
-This method is a hook and should be overridden to do "shutdown" stuff. By
-default it sends a "DISCONNECT" message to the message queue server.
-
- Example
-
-    sub session_cleanup {
-        my $self = shift;
-
-        # do something here
-
-        $self->SUPER::session_cleanup();
-
-    }
-
-=head2 session_reload
-
-This method is a hook and should be overridden to do "reload" stuff. By
-default it executes POE's sig_handled() method.
-
- Example
-
-    sub session_reload {
-        my $self = shift;
-
-        $poe_kernel->sig_handled();
-
-    }
+=back
 
 =head1 ACCESSORS
 
 =head2 stomp
 
-This returns an object to the internal XAS::Lib::Stomp::Utils 
+This returns an object to the internal L<XAS::Lib::Stomp::Utils|XAS::Lib::Stomp::Utils>
 object. This is very useful for creating STOMP frames.
 
  Example
@@ -555,7 +428,7 @@ object. This is very useful for creating STOMP frames.
          -passcode => 'testing'
     );
 
-    $poe_kernel->yield('send_data', $frame);
+    $poe_kernel->yield('write_data', $frame);
 
 =head1 SEE ALSO
 
@@ -565,7 +438,7 @@ object. This is very useful for creating STOMP frames.
 
 =back
 
- For details on the protocol see L<http://stomp.github.io/>.
+For details on the protocol see L<http://stomp.github.io/>.
 
 =head1 AUTHOR
 

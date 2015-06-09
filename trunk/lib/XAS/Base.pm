@@ -1,7 +1,7 @@
 package XAS::Base;
 
 our $MESSAGES;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 our $EXCEPTION = 'XAS::Exception';
 
 use XAS::Factory;

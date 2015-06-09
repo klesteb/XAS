@@ -1,4 +1,4 @@
-package XAS::Lib::PidFile::Unix;
+package XAS::Lib::Pidfile::Unix;
 
 our $VERSION = '0.02';
 
@@ -19,7 +19,9 @@ sub scan_name {
 
     # just return the name of the script
 
-    return $self->env->script;
+    my $c = sprintf('%s', $self->env->script); 
+
+    return compress($c);
 
 }
 

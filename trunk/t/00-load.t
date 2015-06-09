@@ -35,7 +35,7 @@ BEGIN {
     use_ok( 'XAS::Lib::Net::Client' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::POE::Client' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::Server' )            || print "Bail out!\n";
-    use_ok( 'XAS::Lib::PidFile' )                || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Pidfile' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::PubSub' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";

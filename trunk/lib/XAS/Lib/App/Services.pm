@@ -11,9 +11,8 @@ BEGIN {
 }
 
 use Try::Tiny;
-use File::Pid;
 use Pod::Usage;
-use XAS::Lib::PidFile;
+use XAS::Lib::Pidfile;
 use XAS::Lib::Services;
 
 use XAS::Class
@@ -41,6 +40,8 @@ sub define_pidfile {
     my $script = $self->env->script;
 
     $self->log->debug('entering define_pidfile()');
+
+    $self->{pid} = XAS::Lib::PidFile->new(-pid => $$);
 
     if (my $num = $self->pid->is_running()) {
 
@@ -86,8 +87,6 @@ sub init {
     $self->{service} = XAS::Lib::Services->new(
         -alias => 'services'
     );
-
-    $self->{pid} = XAS::Lib::PidFile->new();
 
     return $self;
 

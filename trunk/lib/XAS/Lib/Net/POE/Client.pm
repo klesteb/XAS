@@ -19,13 +19,13 @@ use XAS::Class
   utils     => 'dotid',
   vars => {
     PARAMS => {
-      -host            => 1,
       -port            => 1,
       -retry_reconnect => { optional => 1, default => 1 },
       -tcp_keepalive   => { optional => 1, default => 0 },
       -filter          => { optional => 1, default => undef },
       -alias           => { optional => 1, default => 'client' },
       -eol             => { optional => 1, default => "\012\015" },
+      -host            => { optional => 1, default => 'localhost'},
     }
   }
 ;
@@ -167,6 +167,30 @@ sub connection_down {
 
 sub connection_up {
     my ($self) = $_[OBJECT];
+
+}
+
+sub handle_connected {
+    my ($self, $frame) = @_[OBJECT, ARG0];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering handle_connected()");
+
+    if ($self->tcp_keepalive) {
+
+        $self->log->info("$alias: tcp_keepalive enabled");
+
+        $self->init_keepalive();
+        $self->enable_keepalive($self->socket);
+
+    }
+
+    $self->log->info_msg('connected', $alias, $self->host, $self->port);
+
+    $poe_kernel->post($alias, 'connection_up');
+
+    $self->log->debug("$alias: leaving handle_connected()");
 
 }
 
@@ -415,6 +439,9 @@ An attempt to maintain that channel will be made when/if that server should
 happen to disappear off the network. There is nothing more unpleasant then
 having to go around to dozens of servers and restarting processes.
 
+The following methods are responding to POE events and use the POE argument
+passing conventions.
+
 =head1 METHODS
 
 =head2 new
@@ -428,9 +455,9 @@ communications channel. It takes the following parameters:
 
 The session alias, defaults to 'client'.
 
-=item B<-server>
+=item B<-host>
 
-The servers host name.
+The servers host name, defaults to 'localhost'.
 
 =item B<-port>
 
@@ -442,31 +469,100 @@ Wither to attempt reconnections after they run out. Defaults to true.
 
 =item B<-tcp_keepalive>
 
-For those pesky firewalls, defaults to false
+For those pesky firewalls, defaults to false.
 
 =back
 
-=head2 read_data
+=head2 read_data(OBJECT, ARG0)
 
-This event is triggered when data is received for the server.
+This event is triggered when data is received for the server. It accepts
+these parameters:
 
-=head2 write_data
+=over 4
 
-You use this event to send data to the server.
+=item B<OBJECT>
 
-=head2 handle_connection
+The current class object.
 
-This event is triggered upon initial connection to the server.
+=item B<ARG0>
 
-=head2 connection_down
+The data that has been read.
 
-This event is triggered to allow you to be notified if
-the connection to the server is currently down.
+=back
 
-=head2 connection_up
+=head2 write_data(OBJECT, ARG0)
+
+You use this event to send data to the server. It accepts
+these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=item B<ARGO>
+
+The data to write out.
+
+=back
+
+=head2 handle_connection(OBJECT)
+
+This event is triggered upon initial connection to the server. It accepts
+these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=back
+
+=head2 connection_down(OBJECT)
+
+This event is triggered to allow you to be notified if the connection to 
+the server is currently down. It accepts
+these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=back
+
+=head2 connection_up(OBJECT)
 
 This event is triggered to allow you to be notified when the connection
-to the server is restored.
+to the server is restored. It accepts
+these parameters:
+
+=over 4
+
+=item B<OBJECT>
+
+The current class object.
+
+=back
+
+=head1 VARIABLES
+
+The following class variables are available if you want to adjust them.
+
+=over 4
+
+=item B<ERRORS>
+
+An array of POSIX error codes. 
+
+=item B<RECONNECTIONS>
+
+An array of seconds to wait for the next reconnect attempt.
+
+=back
 
 =head1 SEE ALSO
 

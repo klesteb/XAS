@@ -1,13 +1,13 @@
 package XAS::Lib::Stomp::Frame;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'eol header',
-  mutators  => 'target command body',
+  mutators  => 'command body',
   constants => 'CRLF',
   codec     => 'unicode',
   constant => {
@@ -19,7 +19,6 @@ use XAS::Class
       -body    => { optional => 1, default => undef },
       -command => { optional => 1, default => undef },
       -headers => { optional => 1, default => undef },
-      -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
     }
   }
 ;
@@ -61,7 +60,7 @@ sub as_string {
 
     }
 
-    if ($self->target > 1.1) {
+    if ($self->env->mqlevel > 1.1) {
 
         $frame = encode('utf8', $command) . $self->eol;
 
@@ -83,7 +82,7 @@ sub as_string {
 
     if (keys %{$headers}) {
 
-        $self->_encode_headers(\$headers) if ($self->target > 1.1);
+        $self->_encode_headers(\$headers) if ($self->env->mqlevel > 1.1);
 
         while (my ($key, $value) = each(%{$headers})) {
 
@@ -120,9 +119,9 @@ sub init {
     
     my $headers = $self->headers || {};
 
-    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
+    $self->{eol} = ($self->env->mqlevel > 1.1) ? CRLF : LF;
 
-    $self->_decode_headers(\$headers) if ($self->target > 1.1);
+    $self->_decode_headers(\$headers) if ($self->env->mqlevel > 1.1);
     $self->{header} = XAS::Lib::Stomp::Frame::Headers->new($headers);
 
     return $self;
@@ -307,7 +306,6 @@ XAS::Lib::Stomp::Frame - A STOMP Frame
   use XAS::Lib::Stomp::Frame;
 
   my $frame = XAS::Lib::Stomp::Frame->new(
-    -target  => '1.0',
     -command => $command,
     -headers => $headers,
     -body    => $body,
@@ -317,7 +315,6 @@ XAS::Lib::Stomp::Frame - A STOMP Frame
 
   my $frame = XAS:::Lib::Stomp::Frame->new();
 
-  $frame->target('1.0');
   $frame->command('MESSAGE');
   $frame->header->add('destination', '/queue/foo');
   $frame->body('this is the body');
@@ -351,11 +348,6 @@ Create a new XAS::Lib::Stomp::Frame object:
 It can take the following parameters:
 
 =over 4
-
-=item B<-target>
-
-Specify a STOMP protocol version number. It currently supports 1.0,
-1.1 and 1.2, defaulting to 1.0.
 
 =item B<-command>
 

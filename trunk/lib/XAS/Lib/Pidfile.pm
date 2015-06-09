@@ -1,12 +1,12 @@
-package XAS::Lib::PidFile;
+package XAS::Lib::Pidfile;
 
 our $VERSION = '0.01';
 
 my $mixin;
 
 BEGIN {
-    $mixin = 'XAS::Lib::PidFile::Unix';
-    $mixin = 'XAS::Lib::PidFile::Win32' if ($^O eq 'MSWin32');
+    $mixin = 'XAS::Lib::Pidfile::Unix';
+    $mixin = 'XAS::Lib::Pidfile::Win32' if ($^O eq 'MSWin32');
 }
 
 use XAS::Lib::Modules::Locking;
@@ -17,10 +17,10 @@ use XAS::Class
   base      => 'XAS::Base',
   mixin     => $mixin,
   utils     => 'trim dotid',
-  accessors => 'env lockmgr',
+  accessors => 'lockmgr',
   vars => {
     PARAMS => {
-      pid  => { optional => 1, default => $$ },
+      pid  => 1,
       file => { optional => 1, default => undef, isa => 'Badger::Filesystem::File' },
     }
   }
@@ -141,6 +141,7 @@ XAS::Lib::PidFile - A class to manage pid files within XAS
   use XAS::Lib::PidFile;
 
   my $pid = XAS::Lib::PidFile->new(
+      -pid  => $$,
       -file => File('/', 'var', 'run', 'xas', 'process.pid')
   );
 
@@ -178,7 +179,7 @@ L<XAS::Lib::Modules::Environment> for the current procedure.
 
 =item B<-pid>
 
-Define a pid number. Defaults to the pid of the current process.
+Define a pid number. This must be supplied
 
 =back
 

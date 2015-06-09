@@ -3,12 +3,11 @@ package XAS::Lib::App::Daemon;
 our $VERSION = '0.02';
 
 use Try::Tiny;
-use File::Pid;
 use Pod::Usage;
 use Hash::Merge;
 use Getopt::Long;
 use POSIX 'setsid';
-use XAS::Lib::PidFile;
+use XAS::Lib::Pidfile;
 
 use XAS::Class
   debug     => 0,
@@ -40,6 +39,8 @@ sub define_pidfile {
     my $script = $self->env->script;
 
     $self->log->debug('entering define_pidfile()');
+
+    $self->{pid} = XAS::Lib::Pidfile->new(-pid => $$);
 
     if (my $num = $self->pid->is_running()) {
 
@@ -94,17 +95,6 @@ sub run {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->{pid} = XAS::Lib::PidFile->new();
-
-    return $self;
-
-}
 
 sub _default_options {
     my $self = shift;

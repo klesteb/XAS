@@ -1,4 +1,4 @@
-package XAS::Lib::PidFile::Win32;
+package XAS::Lib::Pidfile::Win32;
 
 our $VERSION = '0.01';
 

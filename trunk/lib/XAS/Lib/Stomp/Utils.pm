@@ -1,6 +1,6 @@
 package XAS::Lib::Stomp::Utils;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Lib::Stomp::Frame;
 
@@ -8,11 +8,6 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  vars => {
-    PARAMS => {
-      -target  => { optional => 1, default => '1.0', regex => qr/(1\.0|1\.1|1\.2)/ },
-    }
-  }
 ;
 
 #use Data::Dumper;
@@ -23,7 +18,6 @@ use XAS::Class
 
 sub connect {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -login      => { optional => 1, default => undef },
         -passcode   => { optional => 1, default => undef },
@@ -42,7 +36,7 @@ sub connect {
     $header->{'login'}    = $p->{'login'}    if (defined($p->{'login'}));
     $header->{'passcode'} = $p->{'passcode'} if (defined($p->{'passcode'}));
 
-    if ($self->target > 1.0) {
+    if ($self->env->mqlevel > 1.0) {
 
         $header->{'host'}           = $p->{'host'};
         $header->{'heart-beat'}     = $p->{'heart_beat'};
@@ -51,7 +45,6 @@ sub connect {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'CONNECT',
         -headers => $header,
         -body    => ''
@@ -63,10 +56,10 @@ sub connect {
 
 sub stomp {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -login      => { optional => 1, default => undef },
         -passcode   => { optional => 1, default => undef },
+        -prefetch   => { optional => 1, default => undef },
         -host       => { optional => 1, default => 'localhost' },
         -heart_beat => { optional => 1, default => '0,0', regex => qr/\d+,\d+/ },
         -acceptable => {
@@ -81,21 +74,22 @@ sub stomp {
     my $frame;
     my $header = {};
 
-    if ($self->target == 1.0) {
+    if ($self->env->mqlevel == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.stomp',
             'nosup',
-            $self->target,
+            $self->env->mqlevel,
             'stomp'
         );
 
     }
 
-    $header->{'login'}    = $p->{'login'}    if (defined($p->{'login'}));
-    $header->{'passcode'} = $p->{'passcode'} if (defined($p->{'passcode'}));
+    $header->{'login'}         = $p->{'login'}    if (defined($p->{'login'}));
+    $header->{'passcode'}      = $p->{'passcode'} if (defined($p->{'passcode'}));
+    $header->{'prefetch-size'} = $p->{'prefetch'} if (defined($p->{'prefetch'}));
 
-    if ($self->target > 1.0) {
+    if ($self->env->mqlevel > 1.0) {
 
         $header->{'host'}           = $p->{'host'};
         $header->{'heart-beat'}     = $p->{'heart_beat'};
@@ -104,7 +98,6 @@ sub stomp {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'STOMP',
         -headers => $header,
         -body    => ''
@@ -116,20 +109,21 @@ sub stomp {
 
 sub subscribe {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -destination  => 1,
         -id           => { optional => 1, default => undef },
         -receipt      => { optional => 1, default => undef },
+        -prefetch     => { optional => 1, default => undef },
         -ack          => { optional => 1, default => 'auto', regex => qr/auto|client|client\-individual/ }, 
     });
 
     my $frame;
     my $header = {};
 
-    $header->{'ack'}         = $p->{'ack'};
-    $header->{'destination'} = $p->{'destination'};
-    $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
+    $header->{'ack'}           = $p->{'ack'};
+    $header->{'destination'}   = $p->{'destination'};
+    $header->{'receipt'}       = $p->{'receipt'} if (defined($p->{'receipt'}));
+    $header->{'prefetch-size'} = $p->{'prefetch'} if (defined($p->{'prefetch'}));
 
     if (defined($p->{'-id'})) {
 
@@ -139,12 +133,12 @@ sub subscribe {
 
         # v1.1 and greater must have an id header
 
-        if ($self->target > 1.0) {
+        if ($self->env->mqlevel > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.subscribe',
                 'noid',
-                $self->target
+                $self->env->mqlevel
                 
             );
 
@@ -153,7 +147,6 @@ sub subscribe {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'SUBSCRIBE',
         -headers => $header,
         -body    => ''
@@ -165,7 +158,6 @@ sub subscribe {
 
 sub unsubscribe {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -id           => { optional => 1, default => undef },
         -destination  => { optional => 1, default => undef },
@@ -198,12 +190,12 @@ sub unsubscribe {
         $self->throw_msg(
             'xas.lib.stomp.utils.unsubscribe',
             'nopar',
-            $self->target
+            $self->env->mqlevel
         );
 
     }
 
-    if ($self->target > 1.0) {
+    if ($self->env->mqlevel > 1.0) {
 
         # v1.1 and greater must have an id header
 
@@ -212,7 +204,7 @@ sub unsubscribe {
             $self->throw_msg(
                 'xas.lib.stomp.utils.unsubscribe',
                 'noid',
-                $self->target
+                $self->env->mqlevel
             );
 
         }
@@ -220,7 +212,6 @@ sub unsubscribe {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'UNSUBSCRIBE',
         -headers => $header,
         -body    => ''
@@ -232,7 +223,6 @@ sub unsubscribe {
 
 sub begin {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
@@ -245,7 +235,6 @@ sub begin {
     $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'BEGIN',
         -headers => $header,
         -body    => ''
@@ -257,7 +246,6 @@ sub begin {
 
 sub commit {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
@@ -270,7 +258,6 @@ sub commit {
     $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'COMMIT',
         -headers => $header,
         -body    => ''
@@ -282,7 +269,6 @@ sub commit {
 
 sub abort {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
@@ -295,7 +281,6 @@ sub abort {
     $header->{'receipt'}     = $p->{'receipt'} if (defined($p->{'receipt'}));
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'ABORT',
         -headers => $header,
         -body    => ''
@@ -307,7 +292,6 @@ sub abort {
 
 sub ack {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -message_id   => 1,
         -subscription => { optional => 1, default => undef },
@@ -321,7 +305,7 @@ sub ack {
     $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
 
-    if ($self->target < 1.2) {
+    if ($self->env->mqlevel < 1.2) {
 
         $header->{'message-id'} = $p->{'message_id'};
 
@@ -337,12 +321,12 @@ sub ack {
 
     } else {
 
-        if ($self->target > 1.0) {
+        if ($self->env->mqlevel > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.act',
                 'nosub',
-                $self->target
+                $self->env->mqlevel
             );
 
         }
@@ -350,7 +334,6 @@ sub ack {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'ACK',
         -headers => $header,
         -body    => ''
@@ -362,7 +345,6 @@ sub ack {
 
 sub nack {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -message_id   => 1,
         -receipt      => { optional => 1, default => undef },
@@ -376,18 +358,18 @@ sub nack {
     $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
 
-    if ($self->target == 1.0) {
+    if ($self->env->mqlevel == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.nack',
             'nosup',
-            $self->target,
+            $self->env->mqlevel,
             'nack'
         );
 
     }
 
-    if ($self->target < 1.2) {
+    if ($self->env->mqlevel < 1.2) {
 
         $header->{'message-id'} = $p->{'message_id'};
 
@@ -403,12 +385,12 @@ sub nack {
 
     } else {
 
-        if ($self->target > 1.0) {
+        if ($self->env->mqlevel > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.nact',
                 'nosub',
-                $self->target
+                $self->env->mqlevel
             );
 
         }
@@ -416,7 +398,6 @@ sub nack {
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'NACK',
         -headers => $header,
         -body    => ''
@@ -428,7 +409,6 @@ sub nack {
 
 sub disconnect {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -receipt => { optional => 1, default => undef }
     });
@@ -439,7 +419,6 @@ sub disconnect {
     $header->{'receipt'} = $p->{'receipt'} if (defined($p->{'receipt'}));
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'DISCONNECT',
         -headers => $header,
         -body    => ''
@@ -451,7 +430,6 @@ sub disconnect {
 
 sub send {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -destination => 1,
         -message     => 1,
@@ -472,14 +450,13 @@ sub send {
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
     $header->{'content-length'} = defined($p->{'length'}) ? $p->{'length'} : length($body);
 
-    if ($self->target > 1.0) {
+    if ($self->env->mqlevel > 1.0) {
 
         $header->{'content-type'} = $p->{'type'};
 
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'SEND',
         -headers => $header,
         -body    => $body
@@ -494,19 +471,18 @@ sub noop {
 
     my $frame;
 
-    if ($self->target == 1.0) {
+    if ($self->env->mqlevel == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.noop',
             'nosup',
-            $self->target,
+            $self->env->mqlevel,
             'noop'
         );
 
     }
 
     $frame = XAS::Lib::Stomp::Frame->new(
-        -target  => $self->target,
         -command => 'NOOP',
         -headers => {},
         -body    => ''
@@ -566,15 +542,6 @@ the various differences between the protocol versions.
 
 This method initializes the base object. It takes the following parameters:
 
-=over 4 
-
-=item B<-target>
-
-This is the targeted version of the STOMP protocol that the frame 
-will represent. Defaults to '1.0'.
-
-=back 
-
 =head2 connect
 
 This method creates a "CONNECT" frame. This frame is used to initiate a
@@ -612,6 +579,11 @@ is to turn them off.
 
 An optional list of protocol versions that are acceptable to this client for
 STOMP v1.1 and later clients. The default is '1.0,1.1,1.2'.
+
+=item B<-prefetch>
+
+This sets the optional header 'prefetch-size' for RabbitMQ or other servers
+that support this extension.
 
 =back
 
