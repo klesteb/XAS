@@ -26,7 +26,7 @@ use XAS::Class
       -process  => { optional => 1, default => 'XAS' },
       -levels   => { optional => 1, default => {}, type => HASHREF },
       -type     => { optional => 1, default => 'console', regex => LOG_TYPES },
-      -facility => { optional => 1, default => 'local7', regex => LOG_FACILITY },
+      -facility => { optional => 1, default => 'local6', regex => LOG_FACILITY },
     }
   },
 ;

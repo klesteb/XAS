@@ -17,9 +17,6 @@ use XAS::Class
 
 sub output {
     my $self  = shift;
-
-    $self = $self->prototype() unless ref $self;
-
     my ($args) = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);

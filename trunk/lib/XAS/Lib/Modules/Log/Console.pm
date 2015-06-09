@@ -15,7 +15,6 @@ use XAS::Class
 
 sub output {
     my $self  = shift;
-
     my ($args) = $self->validate_params(\@_, [
         { type => HASHREF }
     ]);
