@@ -598,14 +598,14 @@ directory of the parent process.
 
 =item B<-environment>
 
-Optional, addtional environmnet variables to provide to the process.
+Optional, addtitional environment variables to provide to the process.
 The default is none.
 
 =item B<-exit_codes>
 
 Optional exit codes to check for the process. They default to '0,1'.
 If the exit code matches, then the process is auto restarted. This should
-be a comma delimted list of values.
+be a comma delimited list of values.
 
 =item B<-exit_retries>
 
@@ -665,7 +665,7 @@ The optional output filter to use. Defaults to POE::Filter::Line.
 The following public events have been defined. The following arguments
 are provided by POE as offsets into the argument array.
 
-=head2 put_input(OBJECT,ARG0)
+=head2 put_input(OBJECT, ARG0)
 
 This event will write a buffer to stdin.
 
@@ -675,7 +675,7 @@ This event will write a buffer to stdin.
 
 =back
 
-=head2 get_output(OBJECT,ARG0,ARG1)
+=head2 get_output(OBJECT, ARG0, ARG1)
 
 This event will read a buffer for stdout/stderr.
 
@@ -687,7 +687,7 @@ This event will read a buffer for stdout/stderr.
 
 =back
 
-=head2 flush_event(OBJECT,ARG0)
+=head2 flush_event(OBJECT, ARG0)
 
 This event is fired when a flush event happens on stdin.
 
@@ -697,15 +697,15 @@ This event is fired when a flush event happens on stdin.
 
 =back
 
-=head2 error_event(OBJECT,ARG0..ARG4)
+=head2 error_event(OBJECT, ARG0..ARG4)
 
-This event is fired when ever an error occurs.  
+This event is fired whenever an error occurs.  
 
 =over 4
 
 =item B<ARG0> - the operation that was being performed i.e. read/write
 
-=item B<ARG1> - the errno that occured
+=item B<ARG1> - the errno that occurred
 
 =item B<ARG2> - the errstr for that errno
 

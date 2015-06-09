@@ -79,7 +79,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::POE::PubSub - A class for the XAS environment
+XAS::Lib::POE::PubSub - A publish/subscribe class for POE sessions
 
 =head1 SYNOPSIS
 

@@ -15,7 +15,7 @@ use XAS::Class
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
-      -eol    => { optional => 1, default => "\012\015" },
+      -eol    => { optional => 1, default => "\015\012" },
     }
   }
 ;
@@ -244,7 +244,7 @@ XAS::Lib::SSH::Server - A SSH Subsystem based server
 
  my $server = XAS::Lib::SSH::Server->new(
      -filter => POE::Filter::Line->new(),
-     -eol    => "\012\015",
+     -eol    => "\015\012",
  );
 
  $server->run();
@@ -253,7 +253,8 @@ XAS::Lib::SSH::Server - A SSH Subsystem based server
 
 The module provides a POE based framework for a SSH subsystem. A SSH subsystem
 reads from stdin, writes to stdout or stderr. This modules emulates 
-L<XAS::Lib::Net::Server> to provide a consistent interface.
+L<XAS::Lib::Net::Server|XAS::Lib::Net::Server> to provide a consistent 
+interface.
 
 =head1 METHODS
 
@@ -274,7 +275,7 @@ An optional filter to use, defaults to POE::Filter::Line
 
 =item B<-eol>
 
-An optional EOL, defaults to "\012\015";
+An optional EOL, defaults to "\015\012";
 
 =back
 
@@ -287,12 +288,6 @@ This returns the peers port number.
 =head2 peerhost
 
 This returns the peers host name.
-
-=head1 MUTATORS
-
-=head2 eol
-
-This method sets the EOL for reads. It defaults to CRLF - "\015\012".
 
 =head1 PUBLIC EVENTS
 

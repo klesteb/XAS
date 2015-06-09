@@ -210,8 +210,6 @@ XAS::Lib::Services - A class to interact with Services
 
 =head1 SYNOPSIS
 
- use POE;
- use XAS::Lib::Service;
  use XAS::Lib::Services;
 
  my $service = XAS::Lib::Services->new(
@@ -220,60 +218,24 @@ XAS::Lib::Services - A class to interact with Services
     -shutdown_interval => 25
  );
 
- my $task = XAS::Lib::Service->new(
-     -alias => 'task'
- );
-
- $service->register('task');
- $poe_kernel->run();
+ $service->run();
 
 =head1 DESCRIPTION
 
 This module provides a generic interface to "Services". A Service is
 a managed background process. It responds to external events. On Windows
-this would be responding to commands from the Service Control Manager. 
-On Unix this would be responding to a special set of signals. This module 
-provides an event loop that can interact those external events. 
-
-When an external event happens this module will trap it and generate a POE 
-event. This event is then sent to all interested modules. The following POE 
-events have been defined:
-
-=over 4
-
-=item B<session_startup> 
-
-This is fired when your process starts up and is used to initialize what ever
-processing you are going to do. On a network server, this may be opening a
-port to listen on.
-
-=item B<session_shutdown>
-
-This is fired when your process is shutting down. 
-
-=item B<session_pause>
-
-This is fired when your process needs to "pause".
-
-=item B<session_resume>
-
-This is fired when your process needs to "resume".
-
-=item B<session_idle>
-
-This is fired at every poll_interval.
-
-=back
-
-These events follow closely the model defined by the Windows Service 
-Control Manager interface. To use these events it is best to inherit from
-L<XAS::Lib::Service>. 
+this would be responding to commands from the SCM. On Unix this would 
+be responding to a special set of signals. This module provides an 
+event loop that can interact those external events. The module 
+L<XAS::Lib::POE::Service|XAS::Lib::POE::Service> can interact with 
+this event loop.
 
 =head1 METHODS
 
 =head2 new()
 
-This method is used to initialize the service. It takes the following
+This method is used to initialize the service. This module inherits from
+L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>. It takes the following
 parameters:
 
 =over 4
@@ -294,8 +256,6 @@ can cleanup after itself. The default is 25 seconds.
 
 =back
 
-It also use parameters from L<XAS::Lib::Session>.
-
 =head2 register($session)
 
 This allows your process to register whatever modules you want events sent too.
@@ -305,9 +265,38 @@ This allows your process to register whatever modules you want events sent too.
 =item B<$session>
 
 This can be an array reference or a text string. The text string may be 
-delimited with commas.
+delimited with commas. This will be the POE alias for each session.
 
 =back
+
+=head1 EVENTS
+
+When an external event happens this module will trap it and generate a POE 
+event. These events follow closely the model defined by the Windows Service 
+Control Manager interface. The event is then sent to all interested modules. 
+The following POE events have been defined:
+
+=head2 session_startup
+
+This is fired when your process starts up and is used to initialize what ever
+processing you are going to do. On a network server, this may be opening a
+port to listen on.
+
+=head2 session_shutdown
+
+This is fired when your process is shutting down. 
+
+=head2 session_pause
+
+This is fired when your process needs to "pause".
+
+=head2 session_resume
+
+This is fired when your process needs to "resume".
+
+=head2 session_idle
+
+This is fired at every poll_interval.
 
 =head1 SEE ALSO
 

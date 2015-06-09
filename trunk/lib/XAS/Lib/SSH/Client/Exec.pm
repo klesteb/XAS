@@ -83,7 +83,7 @@ XAS::Lib::SSH::Client::Exec - A class to interact with the SSH Exec facility
  use XAS::Lib::SSH::Client::Exec;
 
  my $client = XAS::Lib::SSH::Client::Exec->new(
-    -server   => 'test-xen-01',
+    -host     => 'test-xen-01',
     -username => 'root',
     -password => 'secret',
  );
@@ -116,7 +116,7 @@ This method does nothing.
 
 =head2 call($command, $parser)
 
-This method execute the command on the remote host and parses the output.
+This method executes the command on the remote host and parses the output.
 
 =over 4
 
@@ -137,11 +137,11 @@ returned to the caller.
 
 =head2 exit_code
 
-Return the exit code from the remote process.
+Returns the exit code from the remote process.
 
 =head2 exit_signal
 
-Return the exit signal from the remote process.
+Returns the exit signal from the remote process.
 
 =head1 SEE ALSO
 

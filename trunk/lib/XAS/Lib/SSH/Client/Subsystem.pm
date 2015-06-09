@@ -76,7 +76,7 @@ XAS::Lib::SSH::Client::Subsystem - A class to interact with the SSH Subsystem fa
  use XAS::Lib::SSH::Client::Subsystem;
 
  my $client = XAS::Lib::SSH::Client::Subsystem->new(
-    -server    => 'auburn-xen-01',
+    -host      => 'auburn-xen-01',
     -username  => 'root',
     -password  => 'secret',
  );

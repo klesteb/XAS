@@ -223,69 +223,75 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Session - The base class for all POE Sessions.
+XAS::Lib::POE::Session - The base class for all POE Sessions.
 
 =head1 SYNOPSIS
 
- my $session = XAS::Lib::Session->new(
+ my $session = XAS::Lib::POE::Session->new(
      -alias => 'name',
  );
 
 =head1 DESCRIPTION
 
 This module provides an object based POE session. This object will perform
-the necessary actions for the lifetime of the session. This includes handling
-signals. The following signals INT, TERM, QUIT will trigger the 'shutdown'
-event which invokes the session_cleanup() method. The HUP signal will invoke 
-the session_reload() method. This module inherits from XAS::Base.
+the necessary actions for the lifetime of the session. This includes signal 
+handling. Due to the nature of POE events, they can not be inherited from, 
+but the event handlers can call methods which can. To effectively inherit from
+this class, you need to walk the SUPER chain to process overridden methods.
 
 =head1 METHODS
 
+=head2 new
+
+This method initializes the modules. It inherits from L<XAS::Base|XAS::Base>
+and takes these paramters:
+
+=over 4
+
+=item B<-alias>
+
+The name of the POE session, defaults to 'session'.
+
+=back
+
 =head2 session_initialize
 
-This is where the session should do whatever initialization it needs. This
-initialization may include defining additional events.
+This method is called after session startup and is used for initialization.
+This initialization may include defining additonal event. By default it sets
+up signal handling for these signals:
 
-=head2 session_cleanup
+    HUP 
+    INT 
+    TERM
+    QUIT
 
-This method should perform cleanup actions for the session. This is triggered
-by a "shutdown" event.
+=head2 session_startup
+
+This method is where actual processing starts to happen.
+
+=head2 session_shutdown
+
+This method is called when your session is shutting down.
 
 =head2 session_reload
 
 This method should perform reload actions for the session. By default it
-calls $kernel->sig_handled() which terminates further handling of the HUP
-signal.
+calls POE's sig_handled() method which terminates further handling of the 
+HUP signal.
+
+=head2 session_interrupt
+
+This is called when the process recieves a signal. By default, when a 
+HUP signal is received it will call session_reload() otherwise it 
+calls session_shutdown().
 
 =head2 session_stop
 
-This method should perform stop actions for the session. This is triggered
-by a "_stop" event.
+This method is called when POE starts doing "_stop" activities.
 
-=head1 PUBLIC EVENTS
+=head2 run
 
-The following public events are defined for the session.
-
-=head2 session_startup
-
-This event should start whatever processing the session will do. It is passed
-two parameters:
-
-=head2 session_shutdown
-
-When you send this event to the session, it will invoke the session_shutdown() 
-method.
-
-=head1 PRIVATE EVENTS
-
-The following events are used internally:
-
- session_init
- session_interrupt
- session_reload
- session_shutdown
-
-They should only be used with caution.
+A short cut to POE's run() method.
 
 =head1 SEE ALSO
 

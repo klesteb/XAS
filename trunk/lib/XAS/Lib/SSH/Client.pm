@@ -20,7 +20,7 @@ use XAS::Class
       -port      => { optional => 1, default => 22 },
       -timeout   => { optional => 1, default => 0.2 },
       -username  => { optional => 1, default => undef},
-      -server    => { optional => 1, default => 'localhost' },
+      -host      => { optional => 1, default => 'localhost' },
       -eol       => { optional => 1, default => "\015\012" },
       -password  => { optional => 1, default => undef, depends => [ 'username' ] },
       -priv_key  => { optional => 1, default => undef, depends => [ 'pub_key', 'username' ] },
@@ -31,7 +31,7 @@ use XAS::Class
   }
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -45,7 +45,7 @@ sub connect {
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
 
-    if ($self->ssh->connect($self->server, $self->port)) {
+    if ($self->ssh->connect($self->host, $self->port)) {
 
         if ($self->pub_key) {
 
@@ -409,7 +409,7 @@ XAS::Lib::SSH::Client - A SSH based client
  use XAS::Lib::SSH::Client;
 
  my $client = XAS::Lib::SSH::Client->new(
-    -server   => 'auburn-xen-01',
+    -host    => 'auburn-xen-01',
     -username => 'root',
     -password => 'secret',
  );
@@ -451,7 +451,7 @@ An optional public ssh key file to use.
 
 An optional private ssh key to use.
 
-=item B<-server>
+=item B<-host>
 
 The server to connect too. Defaults to 'localhost'.
 
@@ -463,6 +463,10 @@ The port to use on the server. It defaults to 22.
 
 The number of seconds to timeout writes. It must be compatible with IO::Select.
 Defaults to 0.2.
+
+=item B<-eol>
+
+The EOL to use, defaults to "\015\012".
 
 =back
 
@@ -561,3 +565,4 @@ at your option, any later version of Perl 5 you may have available.
 See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
+

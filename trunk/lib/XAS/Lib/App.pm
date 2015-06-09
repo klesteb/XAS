@@ -216,7 +216,7 @@ Example
 If an exception is caught, the global exception handler will send an alert, 
 write the exception to the log and returns an exit code of 1. 
 
-=item Normal Completiion
+=item Normal Completion
 
 When the procedure completes successfully, it will return an exit code of 0. 
 
@@ -231,8 +231,8 @@ This is where your main line logic starts.
 =head2 options
 
 This method sets up additional cli options. Option handling is provided
-by Getopt::Long. To access these options you need to define accessors for
-them.
+by L<Getopt::Long|https://metacpan.org/pod/Getopt::Long>. To access these 
+options you need to define accessors for them.
 
   Example
 

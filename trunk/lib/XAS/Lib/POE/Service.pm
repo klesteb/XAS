@@ -153,7 +153,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::POE::Service - The base class for all POE Sessions.
+XAS::Lib::POE::Service - The base class for service sessions.
 
 =head1 SYNOPSIS
 
@@ -163,65 +163,45 @@ XAS::Lib::POE::Service - The base class for all POE Sessions.
 
 =head1 DESCRIPTION
 
-This module provides an object based POE session. This object will perform
-the necessary actions for the lifetime of the session. This includes handling
-signals. The following signals INT, TERM, QUIT will trigger the 'shutdown'
-event which invokes the session_cleanup() method. The HUP signal will invoke 
-the session_reload() method. This module inherits from XAS::Base.
+This module inherits and extends L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>.
+It adds several more event types that can be signaled from registered 
+sessions with L<XAS::Lib::Services|XAS::Lib::Services>.
+
+The method session_initialize() is used to define this event types:
+
+    session_idle
+    session_pause
+    session_resume
+    session_status
+
+While signal processing for HUP is not changed.
 
 =head1 METHODS
 
-=head2 session_initialize
+=head2 session_idle
 
-This is where the session should do whatever initialization it needs. This
-initialization may include defining additional events.
+This mehod is called during the sessions idle time. The idle time is defined
+in L<XAS::Lib::Services|XAS::Lib::Services>.
 
-=head2 session_shutdown
+=head2 session_pause
 
-This method should perform cleanup actions for the session. This is triggered
-by a "shutdown" event.
+This method is called when the service has been requested to pause processing.
 
-=head2 session_reload
+=head2 session_resume
 
-This method should perform reload actions for the session. By default it
-calls $kernel->sig_handled() which terminates further handling of the HUP
-signal.
+This method is called when the service has been requested to resume processing.
 
-=head2 session_stop
+=head2 session_status
 
-This method should perform stop actions for the session. This is triggered
-by a "_stop" event.
-
-=head1 PUBLIC EVENTS
-
-The following public events are defined for the session.
-
-=head2 session_startup
-
-This event should start whatever processing the session will do. It is passed
-two parameters:
-
-=head2 session_shutdown
-
-When you send this event to the session, it will invoke the session_cleanup() 
-method.
-
-=head1 PRIVATE EVENTS
-
-The following events are used internally:
-
- session_init
- session_interrupt
- session_reload
- shutdown
-
-They should only be used with caution.
+This method returns the status of the session.
 
 =head1 SEE ALSO
 
 =over 4
 
 =item L<XAS|XAS>
+
+=item L<XAS::Lib::Services|XAS::Lib::Services>
 
 =back
 

@@ -24,7 +24,7 @@ use XAS::Class
       -inactivity_timer => { optional => 1, default => 600 },
       -filter           => { optional => 1, default => undef },
       -address          => { optional => 1, default => 'localhost' },
-      -eol              => { optional => 1, default => "\012\015" },
+      -eol              => { optional => 1, default => "\015\012" },
     }
   }
 ;
@@ -429,11 +429,11 @@ XAS::Lib::Net::Server - A basic network server for the XAS Environment
 
  my $server = XAS::Lib::Net::Server->new(
      -port             => 9505,
-     -address          => 'localhost',
+     -host             => 'localhost',
      -filter           => POE::Filter::Line->new(),
      -alias            => 'server',
      -inactivity_timer => 600,
-     -eol              => "\012\015"
+     -eol              => "\015\012"
  }
 
 =head1 DESCRIPTION
@@ -476,7 +476,7 @@ An optional filter to use, defaults to POE::Filter::Line
 
 =item B<-eol>
 
-An optional EOL, defaults to "\012\015";
+An optional EOL, defaults to "\015\012";
 
 =back
 

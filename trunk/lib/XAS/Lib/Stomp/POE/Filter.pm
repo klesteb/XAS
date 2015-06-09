@@ -123,14 +123,49 @@ XAS::Lib::Stomp::POE::Filter - An I/O filter for the POE Environment
 =head1 DESCRIPTION
 
 This module is a filter for the POE environment. It will translate the input
-buffer into XAS::Lib::Stomp::Frame objects and serialize the output buffer 
-from said object. 
+buffer into L<XAS::Lib::Stomp::Frame|XAS::Lib::Stomp::Frame> objects and 
+serialize the output buffer from said object. 
 
 =head1 METHODS
 
 =head2 new
 
-This method initializes the module. It takes these parameters:
+This method initializes the module.
+
+=head2 get_one_start($buffers)
+
+This method parses one frame for a buffer and stores it in an internal frames 
+buffer.
+
+=over 4
+
+=item B<$buffers>
+
+A reference to a buffer.
+
+=back
+
+=head2 get_one
+
+This method returns one frame from the internal buffer.
+
+=head2 get_pending
+
+This method returns the number of pending frames.
+
+=head2 put($buffers)
+
+This method pulls frames out of the buffer, stringifies them and places them
+into a internal array. When done it returns that array.
+
+=over 4
+
+=item B<$buffers>
+
+A reference to a buffer of L<XAS::Lib::Stomp::Frame|XAS::Lib::Stomp::Frame> 
+frames.
+
+=back
 
 =head1 SEE ALSO
 
@@ -140,7 +175,7 @@ This method initializes the module. It takes these parameters:
 
 =back
 
-See the documentation for POE::Filter for usage.
+See the documentation for L<POE::Filter|https://metacpan.org/pod/POE::Filter> for usage.
 
 For more information on the STOMP protocol, please refer to: L<http://stomp.github.io/> .
 

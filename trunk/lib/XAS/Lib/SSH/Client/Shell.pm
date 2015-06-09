@@ -137,7 +137,7 @@ XAS::Lib::SSH::Client::Shell - A class to interact with the SSH Shell facility
  use XAS::Lib::SSH::Client::Shell;
 
  my $client = XAS::Lib::SSH::Client::Shell->new(
-    -server   => 'test-xen-01',
+    -host     => 'test-xen-01',
     -username => 'root',
     -password => 'secret',
     -eol      => "\012",

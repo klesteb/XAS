@@ -20,7 +20,7 @@ use XAS::Class
       -port    => 1,
       -host    => 1,
       -timeout => { optional => 1, default => 60 },
-      -eol     => { optional => 1, default => "\012\015" },
+      -eol     => { optional => 1, default => "\015\012" },
     },
     ERRNO  => 0,
     ERRSTR => '',
@@ -341,7 +341,7 @@ XAS::Lib::Net::Client - The network client interface for the XAS environment
 =head1 DESCRIPTION
 
 This module implements a simple text orientated network protocol. All "packets"
-will have an explicit "\012\015" appended. This delineates the "packets" and is
+will have an explicit "\015\012" appended. This delineates the "packets" and is
 network neutral. No attempt is made to decipher these "packets".
 
 =head1 METHODS
@@ -368,7 +368,7 @@ An optional timeout, it defaults to 60 seconds.
 
 =item B<-eol>
 
-An optional eol. The default is "\012\015". Which is network netural.
+An optional eol. The default is "\015\012". Which is network netural.
 
 =back
 

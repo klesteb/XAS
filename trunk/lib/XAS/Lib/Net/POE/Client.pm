@@ -170,30 +170,6 @@ sub connection_up {
 
 }
 
-sub handle_connected {
-    my ($self, $frame) = @_[OBJECT, ARG0];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: entering handle_connected()");
-
-    if ($self->tcp_keepalive) {
-
-        $self->log->info("$alias: tcp_keepalive enabled");
-
-        $self->init_keepalive();
-        $self->enable_keepalive($self->socket);
-
-    }
-
-    $self->log->info_msg('connected', $alias, $self->host, $self->port);
-
-    $poe_kernel->post($alias, 'connection_up');
-
-    $self->log->debug("$alias: leaving handle_connected()");
-
-}
-
 sub read_data {
     my ($self, $data) = @_[OBJECT, ARG0];
 

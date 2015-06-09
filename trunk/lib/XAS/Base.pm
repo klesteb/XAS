@@ -187,9 +187,9 @@ XAS::Base - The base class for the XAS environment
 =head1 DESCRIPTION
 
 This module defines a base class for the XAS Environment and inherits from
-L<Badger::Base|http://http://badgerpower.com/docs/Badger/Base.html>. The package variable $PARAMS is used to hold 
+L<Badger::Base|https://metacpan.org/pod/Badger::Base>. The package variable $PARAMS is used to hold 
 the parameters that this class uses for initialization. Due to the pseudo 
-inheritance of package variables provided by L<Badger::Class|http://badgerpower.com/docs/Badger/Class.html>, these 
+inheritance of package variables provided by L<Badger::Class|https://metacpan.org/pod/Badger::Class>, these 
 parameters can be changed or extended by inheriting classes. The parameters 
 are validated using L<Params::Validate|https://metacpan.org/pod/Params::Validate>. Any parameters defined in $PARAMS 
 auto-magically become accessors toward their values.
@@ -203,18 +203,6 @@ the validate_params() method.
 
 By default the parameter -xdebug is set to 0. This parameter is used to
 turn on debugging output.
-
-=head2 load_msgs
-
-This method loads the message files. It searches @INC for the XAS 
-installation. When found, it loads any message files found into the package 
-variable MESSAGES. A message file has the following format:
-
- [messages]
- exception = %s: %s
-
-Where "exception" is the name of the message and rest is the text that will
-be used for the message. 
 
 =head2 validate_params($params, $spec, $class)
 
@@ -238,7 +226,7 @@ An array ref to a set of parameters.
 
 =item B<$spec>
 
-A validation spec as defined by L<Params::Validate>.
+A validation spec as defined by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
 
 =item B<$class>
 
@@ -256,7 +244,7 @@ error message. It takes these parameters:
 
 =item B<$param>
 
-The error message returned by L<Params::Validate>.
+The error message returned by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
 
 =item B<$class>
 
