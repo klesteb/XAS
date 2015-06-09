@@ -8,13 +8,13 @@ __END__
 
 =head1 NAME
 
-XAS - Middleware for Perl
+XAS - Middleware for Operations
 
 =head1 DESCRIPTION
 
-These are the base modules for writting applications within the XAS 
-Middleware Framework. These modules provide a consistent and uniform
-method for writting distributed applications.
+These are the base modules for writing applications within the XAS 
+Middleware for Operations framework. These modules provide a consistent 
+and uniform method for writing distributed applications.
 
 =head1 SEE ALSO
 
@@ -29,8 +29,6 @@ method for writting distributed applications.
 =item L<XAS::Exception|XAS::Exception>
 
 =item L<XAS::Factory|XAS::Factory>
-
-=item L<XAS::Singleton|XAS::Singleton>
 
 =item L<XAS::Utils|XAS::Utils>
 
@@ -50,13 +48,17 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
-=item L<XAS::Lib::Curses::Root|XAS::Lib::Curses::Root>
+=item L<XAS::Lib::Mixins::Bufops|XAS::Lib::Mixins::Bufops>
 
-=item L<XAS::Lib::Curses::Unix|XAS::Lib::Curses::Unix>
-
-=item L<XAS::Lib::Curses::Win32|XAS::Lib::Curses::Win32>
+=item L<XAS::Lib::Mixins::Configs|XAS::Lib::Mixins::Configs>
 
 =item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
+
+=item L<XAS::Lib::Mixins::Iterator|XAS::Lib::Mixins::Iterator>
+
+=item L<XAS::Lib::Mixins::JSON::Client|XAS::Lib::Mixins::JSON::Client>
+
+=item L<XAS::Lib::Mixins::JSON::Server|XAS::Lib::Mixins::JSON::Server>
 
 =item L<XAS::Lib::Mixins::Keepalive|XAS::Lib::Mixins::Keepalive>
 
@@ -74,7 +76,7 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Modules::Log::Files|XAS::Lib::Modules::Log::Files>
 
-=item L<XAS::Lib::Modules::Log::Logstash|XAS::Lib::Modules::Log:::Logstash>
+=item L<XAS::Lib::Modules::Log::Json|XAS::Lib::Modules::Log::Json>
 
 =item L<XAS::Lib::Modules::Log::Syslog|XAS::Lib::Modules::Log::Syslog>
 
@@ -86,15 +88,17 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>
 
-=item L<XAS::Lib::PidFile|XAS::Lib::PidFile>
+=item L<XAS::Lib::Pidfile|XAS::Lib::Pidfile>
 
-=item L<XAS::Lib::PidFile::Unix|XAS::Lib::PidFile::Unix>
+=item L<XAS::Lib::Pidfile::Unix|XAS::Lib::Pidfile::Unix>
 
-=item L<XAS::Lib::PidFile::Win32|XAS::Lib::PidFile::Win32>
+=item L<XAS::Lib::Pidfile::Win32|XAS::Lib::Pidfile::Win32>
 
-=item L<XAS::Lib::POE::Service|XAS::Lib::POE::Service>
+=item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
 
 =item L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>
+
+=item L<XAS::Lib::POE::Service|XAS::Lib::POE::Service>
 
 =item L<XAS::Lib::Process|XAS::Lib::Process>
 
@@ -128,19 +132,13 @@ method for writting distributed applications.
 
 =item L<XAS::Lib::Stomp::Utils|XAS::Lib::Stomp::Utils>
 
-=item L<XAS::Lib::XML|XAS::Lib::XML>
-
 =back
 
 =head1 SUPPORT
 
 Additional support is available at:
 
-=over 4
-
-=item  L<http://scm.kesteb.us/trac>
-
-=back
+  http://www.kesteb.us/trac
 
 =head1 AUTHOR
 
@@ -148,11 +146,11 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright 2014 Kevin L. Esteb
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
-at your option, any later version of Perl 5 you may have available.
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
 
 See L<http://dev.perl.org/licenses/> for more information.
 

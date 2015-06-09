@@ -281,7 +281,7 @@ XAS::Lib::Curl::HTTP - A class for the XAS environment
 
 =head1 DESCRIPTION
 
-This module uses L<http://curl.haxx.se/libcurl/|libcurl> as the HTTP engine 
+This module uses L<libcurl|http://curl.haxx.se/libcurl/> as the HTTP engine 
 to make requests from a web server. 
 
 =head1 METHODS
@@ -377,13 +377,13 @@ An optional username to use, implies a password.
 =head2 request($request)
 
 This method sends the requset to the web server. The request will return
-a L<HTTP::Response|HTTP::Response> object. It takes the following parameters:
+a L<HTTP::Response|https://metacpan.org/pod/HTTP::Response> object. It takes the following parameters:
 
 =over 4
 
 =item B<$request>
 
-A L<HTTP::Request|HTTP::Request> object.
+A L<HTTP::Request|https://metacpan.org/pod/HTTP::Request> object.
 
 =back
 
@@ -393,9 +393,9 @@ A L<HTTP::Request|HTTP::Request> object.
 
 =item L<XAS|XAS>
 
-=item L<WWW::Curl|WWW::Curl>
+=item L<WWW::Curl|https://metacpan.org/pod/WWW::Curl>
 
-=item L<http://curl.haxx.se/libcurl/|libcurl>
+=item L<libcurl|http://curl.haxx.se/libcurl/>
 
 =back
 
