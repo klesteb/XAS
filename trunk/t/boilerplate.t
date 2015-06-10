@@ -5,6 +5,9 @@ use strict;
 use warnings;
 use Test::More tests => 3;
 
+unless ( $ENV{RELEASE_TESTING} ) {
+    plan( skip_all => "Author tests not required for installation" );
+}
 
 sub not_in_file_ok {
     my ($filename, %regex) = @_;
@@ -39,9 +42,6 @@ sub module_boilerplate_ok {
 }
 
 TODO: {
-  unless ( $ENV{RELEASE_TESTING} ) {
-      plan( skip_all => "Author tests not required for installation" );
-  }
 
   local $TODO = "Need to replace the boilerplate text";
 
