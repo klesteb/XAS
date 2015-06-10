@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 48;
+use Test::More tests => 51;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -16,7 +16,8 @@ BEGIN {
     use_ok( 'XAS::Apps::Logger' )                || print "Bail out!\n";
     use_ok( 'XAS::Apps::Rotate' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Daemon' )            || print "Bail out!\n";
-    use_ok( 'XAS::Lib::App::Services' )          || print "Bail out!\n";
+    use_ok( 'XAS::Lib::App::Service' )           || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Curl::HTTP' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Configs' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Handlers' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Iterator' )       || print "Bail out!\n";
@@ -28,6 +29,7 @@ BEGIN {
     use_ok( 'XAS::Lib::Modules::Environment' )   || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Locking' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log' )           || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Modules::Log::Console' )  || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log::File' )     || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log::Json' )     || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Log::Syslog' )   || print "Bail out!\n";
@@ -40,6 +42,7 @@ BEGIN {
     use_ok( 'XAS::Lib::POE::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Process' )                || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Service' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client::Exec' )      || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client::Shell' )     || print "Bail out!\n";

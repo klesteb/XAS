@@ -40,11 +40,11 @@ and uniform method for writing distributed applications.
 
 =item L<XAS::Lib::App::Daemon|XAS::Lib::App::Daemon>
 
-=item L<XAS::Lib::App::Services|XAS::Lib::App::Services>
+=item L<XAS::Lib::App::Service|XAS::Lib::App::Service>
 
-=item L<XAS::Lib::App::Services::Unix|XAS::Lib::App::Services::Unix>
+=item L<XAS::Lib::App::Service::Unix|XAS::Lib::App::Service::Unix>
 
-=item L<XAS::Lib::App::Services::Win32|XAS::Lib::App::Services::Win32>
+=item L<XAS::Lib::App::Service::Win32|XAS::Lib::App::Service::Win32>
 
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
@@ -106,11 +106,11 @@ and uniform method for writing distributed applications.
 
 =item L<XAS::Lib::Process::Win32|XAS::Lib::Process::Win32>
 
-=item L<XAS::Lib::Services|XAS::Lib::Services>
+=item L<XAS::Lib::Service|XAS::Lib::Service>
 
-=item L<XAS::Lib::Services::Unix|XAS::Lib::Services::Unix>
+=item L<XAS::Lib::Service::Unix|XAS::Lib::Service::Unix>
 
-=item L<XAS::Lib::Services::Win32|XAS::Lib::Services::Win32>
+=item L<XAS::Lib::Service::Win32|XAS::Lib::Service::Win32>
 
 =item L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>
 

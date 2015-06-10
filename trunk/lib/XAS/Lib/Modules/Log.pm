@@ -3,7 +3,6 @@ package XAS::Lib::Modules::Log;
 our $VERSION = '0.02';
 
 use DateTime;
-use Config::IniFiles;
 use XAS::Constants ':logging';
 use Params::Validate 'HASHREF';
 
@@ -150,6 +149,8 @@ sub init {
     # load and initialize our output mixin
 
     $self->class->mixin($mixins->{$type});
+    $self->class->var('MESSAGES', $self->env->get_msgs);
+
     $self->init_log();
 
     return $self;

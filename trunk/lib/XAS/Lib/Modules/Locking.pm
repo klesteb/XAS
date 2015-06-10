@@ -2,7 +2,6 @@ package XAS::Lib::Modules::Locking;
 
 our $VERSION = '0.02';
 
-use XAS::Factory;
 use LockFile::Simple;
 
 use XAS::Class
@@ -14,10 +13,10 @@ use XAS::Class
   filesystem => 'File',
   vars => {
     PARAMS => {
-      -lockfile => { optional => 1, default => 'locked' },
-      -max      => { optional => 1, default => 20 },
       -delay    => { optional => 1, default => 1 },
+      -max      => { optional => 1, default => 20 },
       -hold     => { optional => 1, default => 900 },
+      -lockfile => { optional => 1, default => 'locked' },
     }
   }
 ;

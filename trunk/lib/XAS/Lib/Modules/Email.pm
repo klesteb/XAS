@@ -19,7 +19,6 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-
     my $p = $self->validate_params(\@_, {
         -to         => 1, 
         -from       => 1, 

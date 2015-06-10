@@ -82,7 +82,7 @@ sub session_initialize {
 }
 
 sub session_startup {
-    my ($self) = $_[OBJECT];
+    my $self = shift;
 
     my $alias = $self->alias;
 

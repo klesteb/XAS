@@ -36,6 +36,8 @@ sub run {
     $self->chan->pty('vt100');   # set up a default pty
     $self->chan->subsystem($subsystem);
 
+    # flush the buffers
+
     $self->put($self->eol);
     $self->get();
 

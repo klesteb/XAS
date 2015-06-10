@@ -30,7 +30,6 @@ use XAS::Class
 
 sub read {
     my $self = shift;
-
     my ($filename) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' },
     ]);
@@ -70,7 +69,6 @@ sub read {
 
 sub write {
     my $self = shift;
-
     my ($packet) = $self->validate_params(\@_, [ 1 ]);
 
     my $seqnum;
@@ -296,7 +294,6 @@ sub sequence {
 
 sub write_packet {
     my $self = shift;
-
     my ($packet, $seqnum) = $self->validate_params(\@_, [1,1]);
 
     my $fh;
@@ -332,7 +329,6 @@ sub write_packet {
 
 sub read_packet {
     my $self = shift;
-
     my ($file) = $self->validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' }
     ]);

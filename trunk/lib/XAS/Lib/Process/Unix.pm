@@ -40,7 +40,7 @@ sub start_process {
     my $gid       = getgrnam($self->group);
     my $directory = $self->directory->path;
 
-	$self->log->debug("$alias: command @args");
+    $self->log->debug("$alias: command @args");
 
     my $spawn = sub {
 
