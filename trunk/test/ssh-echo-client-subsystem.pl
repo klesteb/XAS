@@ -4,7 +4,7 @@ use Data::Dumper;
 use XAS::Lib::SSH::Client::Subsystem;
 
 my $shell = XAS::Lib::SSH::Client::Subsystem->new(
-    -server   => 'localhost',
+    -host     => 'localhost',
     -username => 'kevin',
     -priv_key => '/home/kevin/.ssh/id_rsa',
     -pub_key  => '/home/kevin/.ssh/id_rsa.pub',

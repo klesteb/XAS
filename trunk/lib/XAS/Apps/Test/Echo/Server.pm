@@ -6,8 +6,13 @@ use XAS::Lib::Net::Server;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Lib::App::Services',
+  base      => 'XAS::Lib::App::Service',
   accessors => 'port address',
+  vars => {
+    SERVICE_NAME         => 'XAS_Echo_Server',
+    SERVICE_DISPLAY_NAME => 'XAS Echo Server',
+    SERVICE_DESCRIPTION  => 'This is a test Perl service',
+  }
 ;
 
 # ----------------------------------------------------------------------

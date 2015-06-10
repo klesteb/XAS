@@ -4,7 +4,7 @@ use XAS::Lib::POE::Service;
 
 use XAS::Class
   version => '0.01',
-  base    => 'XAS::Lib::App::Services',
+  base    => 'XAS::Lib::App::Service',
   vars => {
     SERVICE_NAME         => 'XAS_POE_TEST',
     SERVICE_DISPLAY_NAME => 'XAS POE Test',

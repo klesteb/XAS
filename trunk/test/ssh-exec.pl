@@ -3,7 +3,7 @@ use lib '../lib';
 use XAS::Lib::SSH::Client::Exec;
 
 my $shell = XAS::Lib::SSH::Client::Exec->new(
-    -server   => 'localhost',
+    -host     => 'localhost',
     -username => 'kevin',
     -priv_key => '/home/kevin/.ssh/id_rsa',
     -pub_key  => '/home/kevin/.ssh/id_rsa.pub',

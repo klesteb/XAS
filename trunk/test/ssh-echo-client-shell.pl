@@ -5,7 +5,7 @@ use XAS::Lib::SSH::Client::Shell;
 
 my $command = 'dev/XAS/trunk/test/ssh-echo-server.sh';
 my $shell = XAS::Lib::SSH::Client::Shell->new(
-    -server   => 'localhost',
+    -host   => 'localhost',
     -username => 'kevin',
     -priv_key => '/home/kevin/.ssh/id_rsa',
     -pub_key  => '/home/kevin/.ssh/id_rsa.pub',

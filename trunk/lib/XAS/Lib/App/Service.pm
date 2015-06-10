@@ -5,9 +5,8 @@ our $VERSION = '0.01';
 my $mixin;
 
 BEGIN {
-    $mixin = ($^O eq 'MSWin32')
-      ? 'XAS::Lib::App::Service::Win32'
-      : 'XAS::Lib::App::Service::Unix';
+    $mixin = 'XAS::Lib::App::Service::Unix';
+    $mixin = 'XAS::Lib::App::Service::Win32' if ($^O eq 'MSWin32');
 }
 
 use Try::Tiny;
@@ -22,6 +21,7 @@ use XAS::Class
   mixin      => $mixin,
   constants  => 'TRUE FALSE',
   filesystem => 'File',
+  utils      => 'dotid',
   accessors  => 'daemon service pid',
 ;
 
