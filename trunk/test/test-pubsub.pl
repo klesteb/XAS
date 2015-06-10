@@ -231,7 +231,7 @@ sub init {
 
 package App;
 
-use XAS::Lib::Services;
+use XAS::Lib::Service;
 use XAS::Class
   debug   => 0,
   version => '0.01',
@@ -243,7 +243,7 @@ sub main {
 
     $self->log->info('start run');
 
-    my $service = XAS::Lib::Services->new();
+    my $service = XAS::Lib::Service->new();
     my $test1 = Test1->new(-alias => 'test1');
     my $test2 = Test2->new(-alias => 'test2');
     my $test3 = Test3->new(-alias => 'test3');

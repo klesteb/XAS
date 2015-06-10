@@ -90,3 +90,14 @@ nosub             = v%s requires a subscription
 noque             = v%s requires a destination
 nosup             = v%s doesn't support this frame type: %s
 nopar             = you have invalid paramters for v%s
+# process messages
+process_started  = %s: started process %s
+process_paused   = %s: paused process %s
+process_stopped  = %s: stopped process %s
+process_killed   = %s: killed process %s
+process_exited   = %s: process %s exited with a %s
+location         = %s: can not find absolution location of %s
+no_autorestart   = %s: auto restart disabled
+nomore_retries   = %s: no more retries
+unknown_exitcode = %s: unknown exit code
+

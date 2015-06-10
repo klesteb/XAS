@@ -21,17 +21,6 @@ use XAS::Class
   utils     => 'dotid',
   mutators  => 'is_active input_handle output_handle status retries',
   accessors => 'pid exit_code exit_signal process ID',
-  messages => {
-    started_process  => '%s: started process %s',
-    paused_process   => '%s: paused process %s',
-    stopped_process  => '%s: stopped process %s',
-    killed_process   => '%s: killed process %s',
-    process_exited   => '%s: process %s exited with a %s',
-    location         => '%s: can not find absolution location of %s',
-    no_autorestart   => '%s: auto restart disabled',
-    nomore_retries   => '%s: no more retries',
-    unknown_exitcode => '%s: unknown exit code',
-  },
   vars => {
     PARAMS => {
       -command       => 1,

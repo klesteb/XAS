@@ -3,7 +3,7 @@ use lib '../lib';
 
 package testing;
 
-use XAS::Lib::PidFile;
+use XAS::Lib::Pidfile;
 use XAS::Class
   debug     => 0,
   version   => '0.01',
@@ -21,7 +21,7 @@ sub define_pidfile {
 
     $self->log('debug', "entering define_pidfile()");
 
-    $self->{pid} = XAS::Lib::PidFile->new();
+    $self->{pid} = XAS::Lib::Pidfile->new();
     if (my $num = $self->pid->is_running()) {
 
         $self->throw_msg(

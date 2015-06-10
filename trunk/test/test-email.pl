@@ -14,8 +14,8 @@ my $test = Test->new();
 
 $test->env->mxmailer('smtp');
 $test->email->send(
-    -to => 'kevin',
-    -from => 'testing',
+    -to      => sprintf("kevin\@%s", $test->env->domain),
+    -from    => sprintf("debbie\@%s", $test->env->domain),
     -subject => 'this is a test'
 );
 

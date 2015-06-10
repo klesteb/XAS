@@ -434,7 +434,7 @@ sub run_cmd {
     my @output = `$command 2>&1`;
     my ($rc, $sig) = exitcode();
 
-    return wantarray ? @output : \@output, $rc;
+    return \@output, $rc, $sig;
 
 }
 

@@ -169,7 +169,7 @@ sub start_process {
     $poe_kernel->sig_child($pid, 'poll_child');
     $self->{pid} = $pid;
 
-    $self->log->info_msg('started_process', $alias, $self->pid);
+    $self->log->info_msg('process_started', $alias, $self->pid);
 
     # recover the old environment
 
@@ -234,7 +234,7 @@ sub pause_process {
             if (kill('TSTP', $pid)) {
 
                 $self->status(PAUSED);
-                $self->log->warn_msg('paused_process', $alias, $self->pid);
+                $self->log->warn_msg('process_paused', $alias, $self->pid);
 
             }
 
@@ -259,7 +259,7 @@ sub resume_process {
             if (kill('CONT', $pid)) {
 
                 $self->status(RUNNING);
-                $self->log->warn_msg('start_process', $alias, $self->pid);
+                $self->log->warn_msg('process_started', $alias, $self->pid);
 
             }
 
@@ -282,7 +282,7 @@ sub stop_process {
 
             $self->status(STOPPED);
             $self->retries(0);    
-            $self->log->warn_msg('stopped_process', $alias, $self->pid);
+            $self->log->warn_msg('process_stopped', $alias, $self->pid);
 
         }
 
@@ -303,7 +303,7 @@ sub kill_process {
 
             $self->status(STOPPED);
             $self->retries(0);
-            $self->log->warn_msg('killed_process', $alias, $self->pid);
+            $self->log->warn_msg('process_killed', $alias, $self->pid);
 
         }
 

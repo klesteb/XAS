@@ -13,6 +13,8 @@ use XAS::Class
   utils   => 'dotid compress',
 ;
 
+#use Data::Dumper;
+
 # ------------------------------------------------------------------------
 # Public Methods
 # ------------------------------------------------------------------------
@@ -23,12 +25,12 @@ sub send {
         -to         => 1, 
         -from       => 1, 
         -subject    => 1,
-        -message    => {default => ' '}, 
-        -attachment => 0
+        -message    => { optional => 1, default => ' '}, 
+        -attachment => { optional => 1, default => undef }
     });
 
     my $msg;
-
+    
     try {
 
         if ($self->env->mxmailer eq 'smtp') {

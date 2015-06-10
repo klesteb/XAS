@@ -156,7 +156,7 @@ sub start_process {
     $self->{pid} = $process->GetProcessID();
     $self->{process} = $process;
 
-    $self->log->info_msg('started_process', $alias, $self->pid);
+    $self->log->info_msg('process_started', $alias, $self->pid);
 
     # start the background child poller
 
@@ -231,7 +231,7 @@ sub pause_process {
 
             $self->status(PAUSED);
             $self->process->Suspend();
-            $self->log->warn_msg('paused_process', $alias, $self->pid);
+            $self->log->warn_msg('process_paused', $alias, $self->pid);
 
         }
 
@@ -256,7 +256,7 @@ sub resume_process {
 
             $self->status(RUNNING);
             $self->process->Resume();
-            $self->log->warn_msg('start_process', $alias, $self->pid);
+            $self->log->warn_msg('process_started', $alias, $self->pid);
 
         }
    
@@ -280,7 +280,7 @@ sub stop_process {
         $self->retries(0);
 
         Win32::Process::KillProcess($pid, $exitcode);
-        $self->log->warn_msg('stopped_process', $alias, $self->pid);
+        $self->log->warn_msg('process_stopped', $alias, $self->pid);
 
     }
 
@@ -293,7 +293,7 @@ sub kill_process {
 
     my $alias = $self->alias;
 
-    $self->log->warn_msg('killed_process', $alias, $self->pid);
+    $self->log->warn_msg('process_killed', $alias, $self->pid);
     $self->stop_process();
 
 }
