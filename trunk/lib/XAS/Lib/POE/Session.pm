@@ -244,7 +244,7 @@ this class, you need to walk the SUPER chain to process overridden methods.
 =head2 new
 
 This method initializes the modules. It inherits from L<XAS::Base|XAS::Base>
-and takes these paramters:
+and takes these parameters:
 
 =over 4
 
@@ -281,7 +281,7 @@ HUP signal.
 
 =head2 session_interrupt
 
-This is called when the process recieves a signal. By default, when a 
+This is called when the process receives a signal. By default, when a 
 HUP signal is received it will call session_reload() otherwise it 
 calls session_shutdown().
 

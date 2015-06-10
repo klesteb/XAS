@@ -210,11 +210,23 @@ This module is a mixin that provides an interface between Services and
 the Win32 SCM. It allows POE to manage the scheduling of sessions while
 referencing the Win32 SCM event stream.
 
+=head1 METHODS
+
+=head2 init_service
+
+Perform initialize for this mixin.
+
+=head2 poll
+
+Handle the services polling loop.
+
 =head1 SEE ALSO
 
 =over 4
 
 =item L<XAS|XAS>
+
+=item L<XAS::Lib::Service|XAS::Lib::Service>
 
 =back
 

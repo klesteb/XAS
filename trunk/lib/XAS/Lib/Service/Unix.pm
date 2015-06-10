@@ -245,11 +245,27 @@ and a Service. It responds to these additional signals.
 It allows POE to manage the scheduling of sessions while handling the 
 additional signals to emulate the Windows SCM.
 
+=head1 METHODS
+
+=head2 init_service
+
+Perform initialize for this mixin.
+
+=head2 session_interrupt
+
+Handle Unix signals and translate them into service events.
+
+=head2 poll
+
+Handle the services polling loop.
+
 =head1 SEE ALSO
 
 =over 4
 
 =item L<XAS|XAS>
+
+=item L<XAS::Lib::Service|XAS::Lib::Service>
 
 =back
 

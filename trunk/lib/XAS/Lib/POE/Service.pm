@@ -92,17 +92,6 @@ sub session_status {
 # Private Events
 # ----------------------------------------------------------------------
 
-sub _session_init {
-    my ($self) = $_[OBJECT];
-
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: _session_init()");
-
-    $self->session_initialize();
-
-}
-
 sub _session_idle {
     my ($self) = $_[OBJECT];
 
@@ -157,7 +146,7 @@ XAS::Lib::POE::Service - The base class for service sessions.
 
 =head1 SYNOPSIS
 
- my $session = XAS::Lib::POE::Session->new(
+ my $session = XAS::Lib::POE::Service->new(
      -alias => 'name',
  );
 
@@ -165,7 +154,7 @@ XAS::Lib::POE::Service - The base class for service sessions.
 
 This module inherits and extends L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>.
 It adds several more event types that can be signaled from registered 
-sessions with L<XAS::Lib::Services|XAS::Lib::Services>.
+sessions with L<XAS::Lib::Service|XAS::Lib::Service>.
 
 The method session_initialize() is used to define this event types:
 
@@ -181,7 +170,7 @@ While signal processing for HUP is not changed.
 =head2 session_idle
 
 This mehod is called during the sessions idle time. The idle time is defined
-in L<XAS::Lib::Services|XAS::Lib::Services>.
+in L<XAS::Lib::Service|XAS::Lib::Service>.
 
 =head2 session_pause
 
@@ -201,7 +190,7 @@ This method returns the status of the session.
 
 =item L<XAS|XAS>
 
-=item L<XAS::Lib::Services|XAS::Lib::Services>
+=item L<XAS::Lib::Service|XAS::Lib::Service>
 
 =back
 
