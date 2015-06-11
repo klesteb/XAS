@@ -19,20 +19,21 @@ All programmers develop a style for their code. It has been suggested that
 this style can even be used to determine who contributed what, for any given
 project. Interesting if true. 
 
-Code should be easy to read and have a nice flow. Any programmer should be
-able to sit down and figure out what it does in a relatively short time. This
-means all the nice Perl tricks should be kept to a minimum. Remember you
-may not be the only person that needs to read and understand your code.
+Code should be easy to read and have a nice flow, some would say it should be
+elegant. Any programmer should be able to sit down and figure out what it 
+does in a relatively short time. This means all those nice Perl tricks should 
+be kept to a minimum. Remember you may not be the only person that needs to 
+read and understand your code.
 
 The style that I prefer has been developed over the past 25 years. It has been 
 successfully used with different languages and environments. I first started 
 using it with BASICPLUS 2 on the PDP 11/70 running RSTS/E. Yeah, I have been 
 around that long.
 
-=head1 WHITESPACE
+=head1 WHITE SPACE
 
-Whitespace is your friend. It is there to help you read the code. Compilers and
-interpreters don't care about whitespace, you should. I find the following
+White space is your friend. It is there to help you read the code. Compilers 
+and interpreters don't care about white space, you should. I find the following
 code hard to read.
 
     if($something==$this){
@@ -50,7 +51,7 @@ or
 or that BASICPLUS 2
 
     10 if something = this then \
-       call do_this             \
+           call do_this         \
        end if
  
 or the more condensed version
@@ -117,16 +118,16 @@ statements. To me, it is easier to read.
 =head1 INDENTION
 
 Indenting code makes for readable code. This is a good thing. Just ask the
-Python guys. Indentions should be 4 spaces. I know that some people think 
-this should be handled as tabs. With the terminals tab spacing set to whatever
+Python guys. Indents should be 4 spaces. I know that some people think 
+this should be handled as tabs. With the terminals tab spacing set to whatever,
 so the code lines up nicely. That may have been true when the Teletype 33 was 
-dying and the vt100 was king. But with modern terminal emulators and fancy 
-IDE editors, the tab spacing just never matches up. Especially when two people
-are using both styles in the same file. 
+dying and the vt100 was king. But with modern terminal emulators, fancy 
+IDE editors, and web based pretty printers, the tab spacing just never matches
+up. Especially when two people are using both styles in the same file. 
 
 =head1 FORMATTING
 
-With the usage of whitespace and indention, you can have fairly readable code.
+With the usage of white space and indention, you can have fairly readable code.
 For example a subroutine would be written like this.
 
     sub routine {
@@ -143,7 +144,7 @@ For example a subroutine would be written like this.
 
 Which is straight forward and easy on the eyes. 
 
-=head1 LINEWRAPPING
+=head1 LINE WRAPPING
 
 As everyone knows, god created the 80 by 24 character terminal and you
 shall use it. I don't care if you have a 32" monitor and want to run your IDE 
@@ -154,9 +155,10 @@ makes sense going farther.
 
 Variable names should make sense. A one character variable name makes sense
 when used as an incremental. They should be lowercase and use "_" to denote
-meaning. No CamelCase or Hungarian Notation here. Variables should be 
-declared at the beginning of the routine unless there scope needs to be 
-limited. For example.
+meaning. No L<CamelCase|http://en.wikipedia.org/wiki/CamelCase> or 
+L<Hungarian Notation|http://en.wikipedia.org/wiki/Hungarian_notation> here. 
+Variables should be declared at the beginning of the routine unless there 
+scope needs to be limited. For example.
 
     sub routine {
         my $p1 = shift;
@@ -177,10 +179,10 @@ for the loop.
 Remember that 80 by 24 terminal. Size matters. Your subroutine should fit 
 within a terminal screen. If bigger, consider breaking it up.  
 
-=head1 SUBROUTINE NAMES
+=head2 SUBROUTINE NAMES
 
 Function, method, subroutine or whatever you call them, should be lowercase 
-and use "_" to denote meaning. Once again, no CamelCase here. 
+and use "_" to denote meaning. Once again, no L<CamelCase|http://en.wikipedia.org/wiki/CamelCase> here. 
 
 A leading "_" indicates a private method. Due to the nature of Perl. It is 
 not easy to truly have private methods. If somebody abuses your code and 
@@ -188,16 +190,16 @@ uses your private methods, including me. It is their problem, should they
 get bitten by code changes. 
 
 If you really thing you need them, may I suggest C#. It is a nice little 
-bondage language, that will let you do all the Computer Science stuff, that 
-your professors thought were important. Hey, it would even run on Linux...
+bondage language, that will let you do all that Computer Science stuff, that 
+your professors thought were important. Hey, it would might even run on Linux...
 
-=head1 PARAMETERS
+=head2 PARAMETERS
 
 If you pass parameters to your subroutines, they should be validated if they
 are a public interface. A validation method is supplied and uses 
-Params::Validate as the validation engine. If more the two parameters are 
-passed they need to be named and the parameter name must start with a "-".
-For example:
+L<Params::Validate|https://metacpan.org/pod/Params::Validate> as the validation
+ engine. If more the two parameters are passed they need to be named and the 
+parameter name must start with a "-". For example:
 
     sub routine {
         my $self = shift;
@@ -232,17 +234,74 @@ or as plain package routine
         
     }
   
+=head2 ERROR HANDLING
+
+For the most part error handling is done thru exceptions and those exceptions
+have names and those names have meaning. Those names should be lower case and
+have dot (.) separators. The utility function dotid() is very handy when 
+creating those names. Example:
+
+    package Package;
+
+    our $VERSION = '0.01';
+
+    use Try::Tiny;
+    use XAS::Class
+      debug   => 0,
+      version => $VERSION,
+      base    => 'XAS::Base',
+      utils   => 'dotid',
+   ;
+
+   sub routine {
+       my $self = shift;
+       my ($p1, $p2) = $self->validate_params(\@_, [1,1]);
+
+      try {
+
+          If ($p1 == $p2) {
+
+              do_something();
+
+          } else {
+
+              $self->throw_msg(
+                  dotid($self->class) . '.routine.notequal',
+                  'notequal',
+                  $p1, $p2
+              );
+
+          }
+
+      } catch {
+
+          my $ex = $_;
+
+          $self->exception_handler($ex);
+
+      };
+
+   }
+
+   1;
+
+The name of this exception would be 'package.routine.notequal' were 'notequal'
+would be the exception type. The message for this exception is 'notequal' and
+would have the format of "%s is not equal to %s". This is a quick and easy way
+to find problems in your code.
+
 =head1 COMMENTS
 
 I don't believe in excessive comments. They clutter the code and are 
 usually wrong. Comments should only be used when something out of the ordinary
 is about to happen. Otherwise the actual code should be sufficient. It's all
-that whitespace and indenting, it really works.
+that white space and indenting, it really works.
 
 =head1 DOCUMENTATION
 
 Documentation is good. It should be at the end of the file after the code. I 
-find pod intertwined with the code to be hard to read. 
+find POD intertwined with the code to be hard to read. And please run the
+documentation thru a spell checker. 
 
 =head1 TEMPLATES
 
@@ -257,9 +316,10 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 Copyright (c) 2015 Kevin L. Esteb
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
 
-See http://dev.perl.org/licenses/ for more information.
+See L<http://dev.perl.org/licenses/> for more information.
 
+=cut

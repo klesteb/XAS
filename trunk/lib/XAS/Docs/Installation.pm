@@ -58,6 +58,7 @@ rpm build environment, then you can do the following:
     # ./Build test
     # ./Build dist
     # rpmbuild -ta XAS-0.08.tar.gz
+    # cd ~/rpmbuild/RPMS/noarch
     # yum --nogpgcheck localinstall perl-XAS-0.08-1.noarch.rpm
 
 Each of these installation methods will overlay the local file system and
@@ -167,9 +168,11 @@ The latest and greatest is always available at:
 
 Copyright (C) 2015 Kevin L. Esteb
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
 
-See http://dev.perl.org/licenses/ for more information.
+See L<http://dev.perl.org/licenses/> for more information.
+
+=cut
 

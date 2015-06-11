@@ -1,4 +1,4 @@
-package XAS:: ;
+package XAS::Lib::Mixins:: ;
 
 our $VERSION = '0.01';
 
@@ -23,11 +23,16 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Mixins::xxxx - A mixin for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Class
+   debug   => 0,
+   version => '0.01',
+   base    => 'XAS::Base',
+   mixin   => 'XAS::Lib::Mixins::xxxx'
+;
 
 =head1 DESCRIPTION
 

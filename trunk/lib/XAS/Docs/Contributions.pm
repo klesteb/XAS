@@ -13,31 +13,27 @@ __END__
 
 XAS::Docs::Contributions - How to contribute to XAS
 
-So you have used the code base and like what you saw and want to contribute 
+So you have used the framework and liked what you saw and want to contribute 
 back. For that, thanks. Contributions are gladly accepted when they follow
 the below guide lines.
 
-=head1 CODE
+=head1 CONTRIBUTIONS
 
-All contributed code must be licensed under the Perl license, v5.8.8 or 
-later, at your leisure. Even thou the current trend is to have a separate 
-license for contributions, I feel that this is sufficient protection for all 
-involved.
+All contributed code, documentation and patches will be licensed under the 
+Perl v5.8.8 or later license, just like the rest of the code base. This is
+known as the L<"inbound=outbound"|http://ebb.org/bkuhn/blog/2014/06/09/do-not-need-cla.html>
+principle. 
 
-Your code must have an author and copyright/license attributions, like the 
-ones on the bottom of this document. That way we know who contributed the 
-code.
+Additionally, any contributed modules, code or documentation, must have an author
+and copyright/license attributions, like the ones at the bottom of this 
+document. That way, I know who contributed what.
 
-=head1 DOCUMENTATION
+=head1 DONATIONS
 
-I will gladly accept documentation. You can never have enough, but all 
-contributed documentation must be licensed under the same terms as code 
-contributions. 
-
-=head1 MONEY
-
-I will gladly accept money contributions. You can donate thru Paypal. My email
-is below.
+I will gladly accept money donations. You can donate thru L<PayPal|https://www.paypal.com/home>. My email
+is in the code. The donation doesn't obligate me in any way or fashion to
+provide a service. Please use the "Friends and Family" option when sending the
+donation.
 
 =head1 AUTHOR
 
@@ -47,9 +43,10 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 Copyright (c) 2015 Kevin L. Esteb
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
 
-See http://dev.perl.org/licenses/ for more information.
+See L<http://dev.perl.org/licenses/> for more information.
 
+=cut
