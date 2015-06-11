@@ -78,7 +78,7 @@ chmod +x %{__perl_requires}
 %endif
 
 %build
-%{__perl} Build.PL installdirs=vendor
+%{__perl} Build.PL --installdirs vendor
 ./Build
 
 %install
@@ -92,8 +92,8 @@ install -m 775 -d %{buildroot}/var/spool/xas
 install -m 775 -d %{buildroot}/var/spool/xas/alerts
 install -m 775 -d %{buildroot}/var/spool/xas/logs
 
-./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
-./Build redhat destdir=$RPM_BUILD_ROOT
+./Build install --destdir $RPM_BUILD_ROOT create_packlist=0
+./Build redhat --destdir $RPM_BUILD_ROOT
 
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 %{_fixperms} $RPM_BUILD_ROOT/*

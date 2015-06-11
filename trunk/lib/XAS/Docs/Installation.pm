@@ -14,9 +14,28 @@ XAS is operations middleware for Perl. It provides standardized methods,
 modules and philosophy for constructing large distributed applications. This 
 system is based on production level code.
 
+=head1 GETTING THE CODE
+
+Since the code repository is git based, you can use the following commands:
+
+    # mkdir XAS
+    # cd XAS
+    # git init
+    # git pull http://scm.kesteb.us/git/XAS master
+
+Or you can download the code from CPAN in the following manner:
+
+    # cpan -g XAS
+    # tar -xvf XAS-0.08.tar.gz
+    # cd XAS-0.08
+
+It is suggested that you do not do a cpan based install, as it will not set
+up the environment correctly. In either case the following commands are run 
+from that directory.
+
 =head1 INSTALLATION
 
-On Unix like systems, run the following commands:
+On Unix like systems, using pure Perl, run the following commands:
 
     # perl Build.PL installdirs=site
     # ./Build
@@ -27,11 +46,8 @@ On Unix like systems, run the following commands:
 If you are DEB based, Debian build files has been provided. If you have a 
 Debian build environment, then you can do the following:
 
-    # perl Build.PL
-    # ./Build
-    # ./Build test
-    # ./Build dist
-    # debuild -uc -us
+    # debian/rules build
+    # debian/rules clean
     # dpkg -i ../libxas-perl_0.08-1_all.deb
 
 If you are RPM based, a spec file has been included. If you have a
@@ -41,7 +57,7 @@ rpm build environment, then you can do the following:
     # ./Build
     # ./Build test
     # ./Build dist
-    # rpmbuild -ta xas-0.08.tar.gz
+    # rpmbuild -ta XAS-0.08.tar.gz
     # yum --nogpgcheck localinstall perl-XAS-0.08-1.noarch.rpm
 
 Each of these installation methods will overlay the local file system and
