@@ -1,4 +1,4 @@
-XAS v0.08
+XAS is Copyright (c) 2012-2015 Kevin L. Esteb 
 
 XAS is a set of modules, procedures and practices to help write
 consistent Perl5 code for an operations environment. For the most part,
@@ -18,4 +18,12 @@ Installation instructions can be found here:
     http://scm.kesteb.us/trac/wiki/XasDocsInstallation
 
 Extended documentation is available at: http://scm.kesteb.us/trac
+
+LICENSE INFORMATION
+
+This package is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
