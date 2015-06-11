@@ -29,21 +29,21 @@ Or you can download the code from CPAN in the following manner:
     # tar -xvf XAS-0.08.tar.gz
     # cd XAS-0.08
 
-It is suggested that you do not do a cpan based install, as it will not set
-up the environment correctly. In either case the following commands are run 
-from that directory.
+It is suggested that you do not do an automated cpan based install, as it 
+will not set up the environment correctly. In either case the following 
+commands are run from that directory.
 
 =head1 INSTALLATION
 
 On Unix like systems, using pure Perl, run the following commands:
 
-    # perl Build.PL installdirs=site
+    # perl Build.PL --installdirs site
     # ./Build
     # ./Build test
     # ./Build install
     # ./Build post_install
 
-If you are DEB based, Debian build files has been provided. If you have a 
+If you are DEB based, Debian build files have been provided. If you have a 
 Debian build environment, then you can do the following:
 
     # debian/rules build
@@ -162,10 +162,6 @@ Extended documentation is available here:
 The latest and greatest is always available at:
 
     http://scm.kesteb.us/git/XAS
-
-    or
-
-    https://github.com/klesteb
 
 =head1 LICENSE AND COPYRIGHT
 
