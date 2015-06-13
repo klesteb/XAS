@@ -37,3 +37,7 @@ Revision history for XAS
         Now using git as the source repository. It seems to be what the
           "cool kids" are using.
 
+0.08    13-Jun-2015 Kevin L. Esteb
+        Changed the license to Artictic License 2.0
+        Corrected problems.
+        

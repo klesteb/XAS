@@ -209,7 +209,7 @@ EOC
 
 my $builder = $class->new(
     module_name         => 'XXX',
-    license             => 'perl',
+    license             => 'artistic2',
     dist_author         => q{Kevin L. Esteb <kevin@kesteb.us>},
     dist_version_from   => 'lib/XXX.pm',
     release_status      => 'stable',

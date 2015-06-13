@@ -148,10 +148,8 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 Copyright 2014 Kevin L. Esteb
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See L<http://dev.perl.org/licenses/> for more information.
+This is free software; you can redistribute it and/or modify it under
+the terms of the Artistic License 2.0. For details, see the full text
+of the license at http://www.perlfoundation.org/artistic_license_2_0.
 
 =cut
