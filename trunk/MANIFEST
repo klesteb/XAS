@@ -109,3 +109,5 @@ test/test-params.pl
 test/test-pubsub.pl
 test/test-service.pl
 test/test-pidfile.pl
+Makefile.PL
+META.yml
