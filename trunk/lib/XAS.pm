@@ -8,13 +8,14 @@ __END__
 
 =head1 NAME
 
-XAS - Middleware for Operations
+XAS - Middleware for Datacenter Operations
 
 =head1 DESCRIPTION
 
 These are the base modules for writing applications within the XAS 
-Middleware for Operations framework. These modules provide a consistent 
-and uniform method for writing distributed applications.
+Middleware for Datacenter Operations framework. These modules provide a 
+consistent and uniform method for writing applications typically used
+within a Operations Center.
 
 =head1 SEE ALSO
 

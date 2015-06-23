@@ -20,12 +20,12 @@ the below guide lines.
 =head1 CONTRIBUTIONS
 
 All contributed code, documentation and patches will be licensed under the 
-Perl v5.8.8 or later license, just like the rest of the code base. This is
+Artistic License v2.0, just like the rest of the code base. This is
 known as the L<"inbound=outbound"|http://ebb.org/bkuhn/blog/2014/06/09/do-not-need-cla.html>
 principle. 
 
-Additionally, any contributed modules, code or documentation, must have an author
-and copyright/license attributions, like the ones at the bottom of this 
+Additionally, any contributed modules, code or documentation, must have an 
+author and copyright/license attributions, like the ones at the bottom of this 
 document. That way, I know who contributed what.
 
 =head1 DONATIONS

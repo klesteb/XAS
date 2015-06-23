@@ -1,8 +1,8 @@
 XAS is Copyright (c) 2012-2015 Kevin L. Esteb 
 
 XAS is a set of modules, procedures and practices to help write
-consistent Perl5 code for an operations environment. For the most part,
-this follows the Unix tradition of small discrete components that
+consistent Perl5 code for a datacenter operations environment. For the most 
+part, this follows the Unix tradition of small discrete components that
 communicate in well defined ways.
 
 This system is cross platform capable. It will run under Windows as well

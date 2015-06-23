@@ -9,7 +9,8 @@ Homepage: http://scm.kesteb.us/trac
 Package: libxas-perl
 Architecture: all
 Depends: ${misc:Depends}, ${perl:Depends}
-Description: Middelware for Perl
+Description: Middelware for Datacenter Operations
  .
- XAS is middleware for Perl. It provides standardized methods, modules
- and philosophy for constructing large distributed applications.
+ XAS is middleware for datacenter operations. It provides standardized 
+ methods, modules and philosophy for constructing large distributed 
+ applications.

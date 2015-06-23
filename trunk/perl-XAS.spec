@@ -1,7 +1,7 @@
 Name:           perl-XAS
 Version:        0.08
 Release:        1%{?dist}
-Summary:        XAS Perl module
+Summary:        XAS - Middleware for Datacener Operations
 License:        GPL+ or Artistic
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/XAS/
@@ -47,7 +47,7 @@ Requires:       perl(JSON::XS) >= 2.27
 %endif
 
 %description
-This is middleware for Perl. It is cross platform capable.
+This is middleware for datacenter operations. It is cross platform capable.
 
 %pre
 getent group xas >/dev/null || groupadd -f -r xas

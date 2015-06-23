@@ -1,5 +1,5 @@
-XAS - Middleware for Operations
-===============================
+XAS - Middleware for Datacenter Operations
+==========================================
 
 XAS is a set of modules, procedures and practices to help write
 consistent Perl5 code for an operations environment. For the most part,
