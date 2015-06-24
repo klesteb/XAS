@@ -45,7 +45,7 @@ sub session_initialize {
     $poe_kernel->state('process_errors',    $self, '_process_errors');
     $poe_kernel->state('process_request',   $self, '_process_request');
     $poe_kernel->state('process_response',  $self, '_process_response');
-    $pos_kernel->state('handle_connection', $self, '_handle_connection');
+    $poe_kernel->state('handle_connection', $self, '_handle_connection');
 
     # Find the remote host and port.
 
