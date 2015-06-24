@@ -19,7 +19,8 @@ rem set XAS_MQSERVER="localhost"
 rem set XAS_MQLEVEL="1.0"
 
 rem set XAS_MSGS=".*\.msg$"
-rem set XAS_LOGTYPE="console"
+rem set XAS_LOG_TYPE="console"
+rem set XAS_LOG_FACILITY="local6"
 
 rem set XAS_ROOT="D:\XAS"
 rem set XAS_SBIN="D:\XAS\sbin"

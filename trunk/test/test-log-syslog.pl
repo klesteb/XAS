@@ -3,7 +3,7 @@ use XAS::Factory;
 
 my $log = XAS::Factory->module('log', { 
    -type     => 'syslog',
-   -facility => 'local7',
+#   -facility => 'local7',
    -process  => $0,
    -levels => {
        debug => 1,

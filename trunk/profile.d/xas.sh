@@ -18,7 +18,8 @@
 #export XAS_MQLEVEL="1.0"
 #
 #export XAS_MSGS=".*\.msg$"
-#export XAS_LOGTYPE="console"
+#export XAS_LOG_TYPE="console"
+#export XAS_LOG_FACILITY="local6"
 #
 #export XAS_ROOT="/"
 #export XAS_SBIN="/usr/sbin"
