@@ -93,6 +93,7 @@ templates/program.pm
 templates/service.pm
 templates/skeleton.debian
 templates/skeleton.rhel
+templates/perl-XXXX.spec
 test/echo-client.pl
 test/echo-server.pl
 test/test-alerts.pl
@@ -109,6 +110,3 @@ test/test-params.pl
 test/test-pubsub.pl
 test/test-service.pl
 test/test-pidfile.pl
-Makefile.PL
-META.yml
-META.json
