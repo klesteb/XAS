@@ -35,16 +35,17 @@ sub session_initialize {
 
     # public events
 
-    $poe_kernel->state('process_errors',   $self);
-    $poe_kernel->state('process_request',  $self);
-    $poe_kernel->state('process_response', $self);
-
     # private events
 
     $poe_kernel->state('client_error',      $self, '_client_error');
     $poe_kernel->state('client_input',      $self, '_client_input');
     $poe_kernel->state('client_output',     $self, '_client_output');
     $poe_kernel->state('client_connection', $self, '_client_connection');
+
+    $poe_kernel->state('process_errors',    $self, '_process_errors');
+    $poe_kernel->state('process_request',   $self, '_process_request');
+    $poe_kernel->state('process_response',  $self, '_process_response');
+    $pos_kernel->state('handle_connection', $self, '_handle_connection');
 
     # Find the remote host and port.
 
@@ -80,52 +81,86 @@ sub session_startup {
 
 }
 
-# ----------------------------------------------------------------------
-# Public Events
-# ----------------------------------------------------------------------
-
 sub process_request {
-    my ($self, $input, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($input, $ctx) = $self->validate_params(\@_, [1,1]);
 
-    my $output = $input;
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: process_request()");
-
-    $poe_kernel->post($alias, 'process_response', $output, $ctx);
+    return $input;
 
 }
 
 sub process_response {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
 
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: process_response()");
-
-    $poe_kernel->post($alias, 'client_output', $output, $ctx);
+    return $output;
 
 }
 
 sub process_errors {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
 
-    my $alias = $self->alias;
-
-    $self->log->debug("$alias: process_errors()");
-
-    $poe_kernel->post($alias, 'client_output', $output, $ctx);
+    return $output;
 
 }
 
 sub handle_connection {
-    my ($self, $wheel) = @_[OBJECT,ARG0];
-    
+    my $self = shift;
+    my ($wheel) = $self->validate_params(\@_, [1]);
+
 }
+
+# ----------------------------------------------------------------------
+# Public Events
+# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _process_request {
+    my ($self, $input, $ctx) = @_[OBJECT,ARG0,ARG1];
+
+    my $alias = $self->alias;
+    my $data  = $self->process_request($input, $ctx);
+
+    $self->log->debug("$alias: process_request()");
+    $poe_kernel->post($alias, 'process_response', $data, $ctx);
+
+}
+
+sub _process_response {
+    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+
+    my $alias = $self->alias;
+    my $data  = $self->process_response($output, $ctx);
+
+    $self->log->debug("$alias: process_response()");
+    $poe_kernel->post($alias, 'client_output', $data, $ctx);
+
+}
+
+sub _process_errors {
+    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+
+    my $alias = $self->alias;
+    my $data  = $self->process_errors($output, $ctx);
+
+    $self->log->debug("$alias: process_errors()");
+    $poe_kernel->post($alias, 'client_output', $data, $ctx);
+
+}
+
+sub _handle_connection {
+    my ($self, $wheel) = @_[OBJECT,ARG0];
+    
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: process_errors()");
+    $self->handle_connection($wheel);
+
+}
 
 sub _client_connection {
     my ($self) = $_[OBJECT];
@@ -279,6 +314,73 @@ An optional EOL, defaults to "\015\012";
 
 =back
 
+=head2 process_request($input, $ctx)
+
+This method will process the input from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<$input>
+
+The input received from the socket.
+
+=item B<$ctx>
+
+A hash variable to maintain context. This will be initialized with a "wheel"
+field. Others fields may be added as needed.
+
+=back
+
+=head2 process_response($output, $ctx)
+
+This method will process the output from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<$output>
+
+The output to be sent to the socket.
+
+=item B<$ctx>
+
+A hash variable to maintain context. This uses the "wheel" field to direct output
+to the correct socket. Others fields may have been added as needed.
+
+=back
+
+=head2 process_errors($error, $ctx)
+
+This method will process the error output from the client. It takes the
+following parameters:
+
+=over 4
+
+=item B<$error>
+
+The output to be sent to the socket.
+
+=item B<$ctx>
+
+A hash variable to maintain context. This uses the "wheel" field to direct output
+to the correct socket. Others fields may have been added as needed.
+
+=back
+
+=head2 handle_connection($wheel)
+
+This method is called after the client has connected. This is for additional
+post connection processing as needed. It takes the following parameters:
+
+=over 4
+
+=item B<$wheel>
+
+The id of the clients wheel.
+
+=back
+
 =head1 ACCESSORS
 
 =head2 peerport
@@ -288,91 +390,6 @@ This returns the peers port number.
 =head2 peerhost
 
 This returns the peers host name.
-
-=head1 PUBLIC EVENTS
-
-=head2 process_request(OBJECT, ARG0, ARG1)
-
-This event will process the input from the client. It takes the
-following parameters:
-
-=over 4
-
-=item B<OBJECT>
-
-A handle to the current object.
-
-=item B<ARG0>
-
-The input received from the socket.
-
-=item B<ARG1>
-
-A hash variable to maintain context. This will be initialized with a "wheel"
-field. Others fields may be added as needed.
-
-=back
-
-=head2 process_response(OBJECT, ARG0, ARG1)
-
-This event will process the output from the client. It takes the
-following parameters:
-
-=over 4
-
-=item B<OBJECT>
-
-A handle to the current object.
-
-=item B<ARG0>
-
-The output to be sent to the socket.
-
-=item B<ARG1>
-
-A hash variable to maintain context. This uses the "wheel" field to direct output
-to the correct socket. Others fields may have been added as needed.
-
-=back
-
-=head2 process_errors(OBJECT, ARG0, ARG1)
-
-This event will process the error output from the client. It takes the
-following parameters:
-
-=over 4
-
-=item B<OBJECT>
-
-A handle to the current object.
-
-=item B<ARG0>
-
-The output to be sent to the socket.
-
-=item B<ARG1>
-
-A hash variable to maintain context. This uses the "wheel" field to direct output
-to the correct socket. Others fields may have been added as needed.
-
-=back
-
-=head2 handle_connection(OBJECT, ARG)
-
-This event is called after the client has connected. This is for additional
-post connection processing as needed. It takes the following parameters:
-
-=over 4
-
-=item B<OBJECT>
-
-A handle to the current object.
-
-=item B<ARG0>
-
-The id of the clients wheel.
-
-=back
 
 =head1 SEE ALSO
 

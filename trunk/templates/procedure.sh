@@ -12,13 +12,14 @@
 # ENVIRONMENT: The XAS Middleware Environment
 #
 # PARAMETERS:
-#              --logtype toggles the log type
-#              --logfile name of the log file
-#              --help    prints out a helpful help message
-#              --manual  prints out the procedures manual
-#              --version prints out the procedures version
-#              --debug   toggles debug output
-#              --alerts  toggles alert notification
+#              --log-type     toggles the log type
+#              --log-facility changes the log facility to use
+#              --logfile      name of the log file
+#              --help         prints out a helpful help message
+#              --manual       prints out the procedures manual
+#              --version      prints out the procedures version
+#              --debug        toggles debug output
+#              --alerts       toggles alert notification
 #
 # RETURNS:
 #              0 - success
@@ -57,13 +58,14 @@ changeme - the great new changeme procedure
 changeme [--help] [--debug] [--manual] [--version]
 
  options:
-   --help     outputs simple help text
-   --manual   outputs the procedures manual
-   --version  outputs the apps version
-   --debug    toogles debugging output
-   --logtype  toggles the log type
-   --logfile  name of the log file 
-   --alerts   toogles alert notifications
+   --help        outputs simple help text
+   --manual      outputs the procedures manual
+   --version     outputs the apps version
+   --debug       toogles debugging output
+   --logfile     name of the log file 
+   --log-type    toggles the log type
+   --log-facilty changes the log facility
+   --alerts      toogles alert notifications
 
 =head1 DESCRIPTION
 
@@ -85,10 +87,15 @@ Turns on debbuging.
 
 Togggles alert notification.
 
-=item B<--logtype>
+=item B<--log-type>
 
 Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
 'json' or 'syslog'.
+
+=item B<--log-facility>
+
+Toggles the log facilty. Defaults to 'local6'. This follows syslog
+convention.
 
 =item B<--logfile>
 

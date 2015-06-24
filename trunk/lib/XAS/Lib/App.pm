@@ -126,12 +126,13 @@ sub _default_options {
     my $script  = $self->env->script;
 
     return {
-        'logtype=s' => sub { $self->env->logtype($_[1]) },
-        'alerts!'   => sub { $self->env->alerts($_[1]); },
-        'help|h|?'  => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
-        'manual'    => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
-        'version'   => sub { printf("%s - v%s\n", $script, $version); exit 0; },
-        'debug'     => sub { 
+        'log-type=s'     => sub { $self->env->log_type($_[1]); },
+        'log-facility=s' => sub { $self->env->log_facility($_[1]); },
+        'alerts!'        => sub { $self->env->alerts($_[1]); },
+        'help|h|?'       => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
+        'manual'         => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
+        'version'        => sub { printf("%s - v%s\n", $script, $version); exit 0; },
+        'debug'          => sub { 
             $self->env->xdebug(1); 
             $self->log->level('debug', 1);
         },
@@ -325,10 +326,15 @@ This displaces the procedures manual in the defined pager.
 
 This prints out the version of the module.
 
-=head2 --logtype
+=head2 --log-type
 
 What type of log to use. By default the log is displayed on the console. Log
 types can be one of the following "console", "file", "json" or "syslog".
+
+=head2 --log-facility
+
+What log facility class to use. This follows syslog convention. By default 
+the facility is "local6".
 
 =head2 --logfile
 

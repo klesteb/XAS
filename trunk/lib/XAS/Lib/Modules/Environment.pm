@@ -45,18 +45,30 @@ sub mqlevel {
 
 }
 
-sub logtype {
+sub log_type {
     my $self = shift;
     my ($type) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
 
-    $self->{logtype} = $type if (defined($type));
+    $self->{log_type} = $type if (defined($type));
 
-    return $self->{logtype};
+    return $self->{log_type};
 
 }
 
+sub log_facility {
+    my $self = shift;
+    my ($type) = $self->validate_params(\@_, [
+        { optional => 1, default => undef, regex => LOG_FACILITY }
+    ]);
+
+    $self->{log_facility} = $type if (defined($type));
+
+    return $self->{log_facility};
+
+}
+    
 sub get_msgs {
     my $self = shift;
 
@@ -279,9 +291,13 @@ sub init {
         ? $ENV{'XAS_BIN'}   
         : [$self->{root}, 'bin']);
 
-    $self->{logtype} = defined($ENV{'XAS_LOGTYPE'})
-        ? $ENV{'XAS_LOGTYPE'}
+    $self->{log_type} = defined($ENV{'XAS_LOG_TYPE'})
+        ? $ENV{'XAS_LOG_TYPE'}
         : 'console';
+
+    $self->{log_facility} = defined($ENV{'XAS_LOG_FACILITY'})
+        ? $ENV{'XAS_LOG_FACILITY'}
+        : 'local6';
 
     # create some common file names
 
@@ -453,6 +469,10 @@ on Windows this will be "smtp".
 
 The regex to use when searching for message files. Defaults to /.*\.msg/i.
 
+=item B<XAS_LOG_FACILITY>
+
+The syslog facility class to use. Defaults to 'local6'.
+
 =back
 
 =head2 alerts
@@ -471,11 +491,21 @@ This method returns the name of the script.
 
 This method returns the complete commandline.
 
-=head2 logtype
+=head2 log_type
 
 This method will return the currently defined log type. By default this is
 "console". i.e. all logging will go to the terminal screen. Valid options
-are "file", "json" and "syslog'. 
+are "console", "file", "json" and "syslog'. 
+
+=head2 log_facility
+
+This method will return the log facility class to use when writting to
+syslog or json.
+
+Example
+
+    $facility = $xas->log_facility;
+    $xas->log_facility('local6');
 
 =head2 logfile
 

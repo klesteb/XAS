@@ -24,8 +24,8 @@ use XAS::Class
       -filename => { optional => 1 },
       -process  => { optional => 1, default => 'XAS' },
       -levels   => { optional => 1, default => {}, type => HASHREF },
+      -facility => { optional => 1, default => undef, regex => LOG_FACILITY },
       -type     => { optional => 1, default => 'console', regex => LOG_TYPES },
-      -facility => { optional => 1, default => 'local6', regex => LOG_FACILITY },
     }
   },
 ;
@@ -98,6 +98,12 @@ sub init {
     if (defined($self->{filename})) {
 
         $self->{filename} = File($self->{filename});
+
+    }
+
+    unless (defined($self->{facility})) {
+
+        $self->{facility} = $self->env->log_facility;
 
     }
 
