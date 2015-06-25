@@ -471,7 +471,15 @@ The regex to use when searching for message files. Defaults to /.*\.msg/i.
 
 =item B<XAS_LOG_FACILITY>
 
-The syslog facility class to use. Defaults to 'local6'.
+The syslog facility class to use. Defaults to 'local6'. It uses the syslog 
+conventions.
+
+=back
+
+=item B<XAS_LOG_TYPE>
+
+The log type. This can be "console", "file", "json" or "syslog". Defaults
+to "console">
 
 =back
 

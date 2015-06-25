@@ -97,7 +97,7 @@ sub _auto_load {
         return sub { 
 
             XAS::Factory->module('logger', {
-                -type     => $self->env->logtype,
+                -type     => $self->env->log_type,
                 -filename => $self->env->logfile,
                 -process  => $self->env->script,
                 -levels => {
