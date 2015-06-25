@@ -138,7 +138,7 @@ sub _default_options {
         },
         'logfile=s' => sub {
             my $logfile = File($_[1]);
-            $self->env->logtype('file');
+            $self->env->log_type('file');
             $self->env->logfile($logfile);
         }
     };

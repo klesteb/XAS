@@ -1,4 +1,4 @@
-Name:           perl-XXXX
+Name:           perl-XAS-XXXX
 Version:        0.01
 Release:        1%{?dist}
 Summary:        A set of processes to manage spool files
@@ -38,13 +38,13 @@ cat << \EOF > %{name}-prov
 #!/bin/sh
 %{__perl_provides} $* | sed -e '/Win32/d'
 EOF
-%global __perl_provides %{_builddir}/WPM-%{version}/%{name}-prov
+%global __perl_provides %{_builddir}/XAS-%{version}/%{name}-prov
 chmod +x %{__perl_provides}
 cat << \EOF > %{name}-req
 #!/bin/sh
 %{__perl_requires} $* | sed -e '/Win32/d'
 EOF
-%global __perl_requires %{_builddir}/WPM-%{version}/%{name}-req
+%global __perl_requires %{_builddir}/XAS-%{version}/%{name}-req
 chmod +x %{__perl_requires}
 %endif
 
