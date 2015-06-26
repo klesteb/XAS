@@ -18,6 +18,11 @@ __PACKAGE__->add_columns(
         is_nullable       => 0
     },
 
+
+    revision => {
+        data_type   => 'integer',
+        is_nullable => 1
+    }
 );
 
 __PACKAGE__->set_primary_key( 'id' );
@@ -37,7 +42,6 @@ sub table_name {
 
 __END__
  
-
 =head1 NAME
 
 XAS::Model::Database::XXXX::Result::XXXX - Table for XAS Log entries
@@ -52,12 +56,43 @@ The definition for the log table.
 
 An automatic incremental index.
 
+=over 4
+
+=item B<data type> - bigint
+
+=item B<sequence name> - 'XXXX_id_seq'
+
+=item B<is nullable> - no
+
+=back
+
 =head2 revision
 
 Used by L<DBIx::Class::OptimisticLocking|https://metacpan.org/pod/DBIx::Class::Optimisticlocking>
 to manage changes for this record.
 
+=over 4
+
+=item B<data type> - integer
+ 
+=item B<is nullable> - yes
+
+=back
+
 =head1 METHODS
+
+=head2 sqlt_deploy_hook($sqlt_table)
+
+This method is used when a database schema is being generated. It can be used
+to add additional features.
+
+=over 4
+
+=item B<$sqlt_table>
+
+The DBIx::Class class for this table.
+
+=back
 
 =head2 table_name
 
