@@ -93,7 +93,8 @@ templates/program.pm
 templates/service.pm
 templates/skeleton.debian
 templates/skeleton.rhel
-templates/perl-XXXX.spec
+templates/table.pm
+templates/perl-XAS-XXXX.spec
 test/echo-client.pl
 test/echo-server.pl
 test/test-alerts.pl

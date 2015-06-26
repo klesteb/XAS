@@ -38,13 +38,13 @@ cat << \EOF > %{name}-prov
 #!/bin/sh
 %{__perl_provides} $* | sed -e '/Win32/d'
 EOF
-%global __perl_provides %{_builddir}/XAS-%{version}/%{name}-prov
+%global __perl_provides %{_builddir}/XAS-XXXX-%{version}/%{name}-prov
 chmod +x %{__perl_provides}
 cat << \EOF > %{name}-req
 #!/bin/sh
 %{__perl_requires} $* | sed -e '/Win32/d'
 EOF
-%global __perl_requires %{_builddir}/XAS-%{version}/%{name}-req
+%global __perl_requires %{_builddir}/XAS-XXXX-%{version}/%{name}-req
 chmod +x %{__perl_requires}
 %endif
 
@@ -55,8 +55,8 @@ chmod +x %{__perl_requires}
 %install
 rm -rf $RPM_BUILD_ROOT
 
-./Build install destdir=$RPM_BUILD_ROOT create_packlist=0
-./Build redhat destdir=$RPM_BUILD_ROOT
+./Build install --destdir $RPM_BUILD_ROOT create_packlist=0
+./Build redhat --destdir $RPM_BUILD_ROOT
 
 find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
 %{_fixperms} $RPM_BUILD_ROOT/*
