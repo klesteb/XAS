@@ -46,20 +46,25 @@ autherr           = unable to authenticate: %s, reason - %s
 protoerr          = unexpected protocol error: %s, reason - %s
 badval            = invalid header value
 badkey            = invalid header key
+
 client_connection_failed = %s: the client connection failed with: %s, reason: %s
-client_error      = %s: the client experienced error: %s, reason: %s
-client_connect    = %s: a connection from %s on port %s
-client_disconnect = %s: client disconnected from %s on port %s
-client_nowheel    = %s: no wheel defined for output
-client_reaper     = %s: reaper invoked for %s on port %s
-client_nosocket   = %s: no socket for %s on %s
-client_noport     = 'no port has been assigned'
+client_error             = %s: the client experienced error: %s, reason: %s
+client_connect           = %s: a connection from %s on port %s
+client_disconnect        = %s: client disconnected from %s on port %s
+client_nowheel           = %s: no wheel defined for output
+client_reaper            = %s: reaper invoked for %s on port %s
+client_nosocket          = %s: no socket for %s on %s
+client_noport            = no port has been assigned
+
+tcp_keepalive_enabled    = %s: tcp_keepalive enabled
+
 server_connection_failed = %s: operation: %s; reason: %s - %s
 server_error      = %s: operation: %s; reason: %s - %s
 server_reconnect  = %s: reconnection attempts: %s, count: %s
 server_attempts   = %s: attempting reconnection: %s, waiting: %s seconds
 server_recycle    = %s: cycling reconnection attempts, but not shutting down...
 server_shutdown   = %s: shutting down, to many reconnection attempts
+
 json_rpc_method   = the rpc method "%s" is unknown
 json_rpc_version  = this server supports only json-rpc version 2.0
 json_rpc_format   = this json-rpc format is not supported
@@ -79,12 +84,8 @@ db_nullcolumn     = %s: null value in column for: %s
 db_toolong        = %s: value to long for type: %s
 db_open           = %s: unable to access database: %s; reason: %s
 initialize        = %s: unable to initialize: %s; reason %s
-connected         = %s: connected to %s on %s
-subscribed        = %s: subscribed to %s
 receipts          = %s: received a receipt %s
-unsubscribed      = %s: unsubscribed from %s
 errors            = %s: received an error %s, message: %s, reason: %s
-unknowntype       = %s: unknown packet type: %s
 unknown           = %s: %s
 received          = %s: recieved message %s, type: "%s" from %s
 noid              = v%s requires an id
