@@ -8,6 +8,8 @@
 
 [messages]
 messages_loaded   = don't remove this...
+startup           = starting up
+shutdown          = shutting down
 exception         = %s: %s
 invparams         = invalid parameters passed, reason: %s
 invmethod         = invalid method: unable to auto load "%s" in package: %s, line: %s
