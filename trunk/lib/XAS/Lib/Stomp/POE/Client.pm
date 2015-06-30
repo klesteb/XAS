@@ -195,7 +195,7 @@ sub _server_message {
 
     } else {
 
-        $self->log->warn_msg('stomp_unknown_type' $alias, $frame->command);
+        $self->log->warn_msg('stomp_unknown_type', $alias, $frame->command);
 
     }
 
