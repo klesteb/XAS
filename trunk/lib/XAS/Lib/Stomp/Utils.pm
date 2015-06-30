@@ -476,7 +476,7 @@ sub noop {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.noop.nosup',
-            'stomp_no_support,
+            'stomp_no_support',
             $self->env->mqlevel,
             'noop'
         );
