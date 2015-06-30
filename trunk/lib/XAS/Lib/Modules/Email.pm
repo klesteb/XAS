@@ -78,7 +78,7 @@ sub send {
 
         $self->throw_msg(
             dotid($self->class) . '.send.undeliverable',
-            'undeliverable', 
+            'enail_undeliverable', 
             $p->{'to'}, 
             compress($ex)
         ); 

@@ -74,6 +74,7 @@ lib/XAS/Lib/Stomp/POE/Filter.pm
 lib/XAS/Lib/Stomp/Utils.pm
 lib/XAS/Lib/XML.pm
 lib/XAS/Msgs/Base.msg
+lib/XAS/Msgs/Rotate.msg
 lib/XAS/Singleton.pm
 lib/XAS/Utils.pm
 MANIFEST			This list of files

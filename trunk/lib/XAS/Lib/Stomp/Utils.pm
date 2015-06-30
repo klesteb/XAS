@@ -77,8 +77,8 @@ sub stomp {
     if ($self->env->mqlevel == 1.0) {
 
         $self->throw_msg(
-            'xas.lib.stomp.utils.stomp',
-            'nosup',
+            'xas.lib.stomp.utils.stomp.nosup',
+            'stomp_no_support',
             $self->env->mqlevel,
             'stomp'
         );
@@ -137,7 +137,7 @@ sub subscribe {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.subscribe',
-                'noid',
+                'stomp_no_id',
                 $self->env->mqlevel
                 
             );
@@ -188,8 +188,8 @@ sub unsubscribe {
     } else {
 
         $self->throw_msg(
-            'xas.lib.stomp.utils.unsubscribe',
-            'nopar',
+            'xas.lib.stomp.utils.unsubscribe.invparams',
+            'stomp_invalid_params',
             $self->env->mqlevel
         );
 
@@ -202,8 +202,8 @@ sub unsubscribe {
         unless (defined($header->{'id'})) {
 
             $self->throw_msg(
-                'xas.lib.stomp.utils.unsubscribe',
-                'noid',
+                'xas.lib.stomp.utils.unsubscribe.noid',
+                'stomp_no_id',
                 $self->env->mqlevel
             );
 
@@ -324,8 +324,8 @@ sub ack {
         if ($self->env->mqlevel > 1.0) {
 
             $self->throw_msg(
-                'xas.lib.stomp.utils.act',
-                'nosub',
+                'xas.lib.stomp.utils.ack.nosup',
+                'stomp_no_subscription',
                 $self->env->mqlevel
             );
 
@@ -362,7 +362,7 @@ sub nack {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.nack',
-            'nosup',
+            'stomp_no_support',
             $self->env->mqlevel,
             'nack'
         );
@@ -389,8 +389,9 @@ sub nack {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.nact',
-                'nosub',
-                $self->env->mqlevel
+                'stomp_no_support',
+                $self->env->mqlevel,
+                'nack'
             );
 
         }
@@ -474,8 +475,8 @@ sub noop {
     if ($self->env->mqlevel == 1.0) {
 
         $self->throw_msg(
-            'xas.lib.stomp.utils.noop',
-            'nosup',
+            'xas.lib.stomp.utils.noop.nosup',
+            'stomp_no_support,
             $self->env->mqlevel,
             'noop'
         );

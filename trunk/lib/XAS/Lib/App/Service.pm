@@ -47,7 +47,7 @@ sub define_pidfile {
 
         $self->throw_msg(
             dotid($self->class). '.define_pidfile.runerr',
-            'runerr',
+            'pid_run_error',
             $script, $num
         );
 
@@ -56,7 +56,7 @@ sub define_pidfile {
     $self->pid->write() or 
         $self->throw_msg(
             dotid($self->class) . '.define_pidfile.wrterr',
-            'wrterr',
+            'pid_write_error',
             $self->pid->file
         );
 

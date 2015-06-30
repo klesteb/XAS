@@ -46,11 +46,11 @@ sub install_service {
 
     if (Win32::Daemon::CreateService($config)) {
 
-        printf("%s\n", $self->message('installed'));
+        printf("%s\n", $self->message('service_installed'));
 
     } else {
 
-        printf("%s\n", $self->message('failed', 'install', _get_error()));
+        printf("%s\n", $self->message('service_failed', 'install', _get_error()));
 
     }
 
@@ -63,11 +63,11 @@ sub remove_service {
 
     if (Win32::Daemon::DeleteService($config->{name})) {
 
-        printf("%s\n", $self->message('removed'));
+        printf("%s\n", $self->message('service_removed'));
 
     } else {
 
-        printf("%s\n", $self->message('failed', 'remove', _get_error()));
+        printf("%s\n", $self->message('service_failed', 'remove', _get_error()));
 
     }
 

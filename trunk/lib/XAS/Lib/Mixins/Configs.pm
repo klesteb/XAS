@@ -29,7 +29,7 @@ sub load_config {
         $self->log->warn(compress(join('', @Config::IniFiles::errors)));
         $self->throw_msg(
             dotid($self->class) . '.load_config.badini',
-            'badini',
+            'config_badini',
             $filename->path
         );
     };

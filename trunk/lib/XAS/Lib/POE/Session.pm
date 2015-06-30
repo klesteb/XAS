@@ -59,7 +59,7 @@ sub session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: session_interrupt()");
-    $self->log->warn_msg('signaled', $alias, $signal);
+    $self->log->warn_msg('session_signaled', $alias, $signal);
 
     if ($signal eq 'HUP') {
 
@@ -137,7 +137,7 @@ sub _session_start {
 
         $self->throw_msg(
             'xas.session._session_start.noalias',
-            'noalias',
+            'session_noalias',
             $alias
         );
 

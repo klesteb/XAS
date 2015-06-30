@@ -59,7 +59,7 @@ sub connect {
 
                 $self->throw_msg(
                     dotid($self->class) . '.autherr',
-                    'autherr',
+                    'ssh_client_autherr',
                     $name, $errstr
                 );
 
@@ -76,7 +76,7 @@ sub connect {
 
                 $self->throw_msg(
                     dotid($self->class) . '.autherr',
-                    'autherr',
+                    'ssh_client_autherr',
                     $name, $errstr
                 );
 
@@ -99,7 +99,7 @@ sub connect {
 
         $self->throw_msg(
             dotid($self->class) . '.conerr',
-            'conerr',
+            'ssh_client_conerr',
             $name, $errstr
         );
 
@@ -237,7 +237,7 @@ sub put {
 
                 $self->throw_msg(
                     dotid($self->class) . '.protoerr',
-                    'protoerr',
+                    'ssh_client_protoerr',
                     $name, $errstr
                 );
 
@@ -355,7 +355,7 @@ sub _fill_buffer {
 
                 $self->throw_msg(
                     dotid($self->class) . '.protoerr',
-                    'protoerr',
+                    'ssh_client_protoerr',
                     $name, $errstr
                 );
 

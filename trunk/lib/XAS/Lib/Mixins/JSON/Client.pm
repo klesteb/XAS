@@ -59,7 +59,7 @@ sub call {
 
                 $self->throw_msg(
                     $type,
-                    'rpc_errorapp',
+                    'json_rpc_errorapp',
                     $info
                 );
 
@@ -67,7 +67,7 @@ sub call {
 
                 $self->throw_msg(
                     'xas.lib.mixin.json.client',
-                    'rpc_jsonerr',
+                    'json_rpc_error',
                     $response->{error}->{code},
                     $response->{error}->{message},
                     $response->{error}->{data}
@@ -81,7 +81,7 @@ sub call {
 
         $self->throw_msg(
             'xas.lib.mixin.json.client',
-            'rpc_invid',
+            'rpc_invalid_id',
         );
 
     }

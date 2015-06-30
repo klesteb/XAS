@@ -55,7 +55,7 @@ sub connect {
 
         $self->throw_msg(
             dotid($self->class) . '.connect.noconnect',
-            'connection',
+            'net_client_noconnect',
             $self->host,
             $self->port,
             $errstr
@@ -178,7 +178,7 @@ sub put {
 
                         $self->throw_msg(
                             dotid($self->class) . '.put',
-                            'network',
+                            'net_client_network',
                             $errstr
                         );
 
@@ -301,7 +301,7 @@ sub _fill_buffer {
 
                         $self->throw_msg(
                             dotid($self->class) . '.get',
-                            'network',
+                            'net_client_network',
                             $errstr
                         );
 

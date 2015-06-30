@@ -59,7 +59,7 @@ sub init_log {
 
             $self->throw_msg(
                 dotid($self->class) . '.init_log.creatfile',
-                'creatfile', 
+                'log_creatfile', 
                 $self->filename->path
             );
 

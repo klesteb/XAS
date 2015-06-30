@@ -57,7 +57,7 @@ sub read {
 
         $self->throw_msg(
             dotid($self->class) . '.read.lock_error',
-            'lock_error', 
+            'spooler_lock_error', 
             $self->directory->path
         );
 
@@ -121,7 +121,7 @@ sub scan {
 
         $self->throw_msg(
             dotid($self->class) . '.scan.lock_error',
-            'lock_error',
+            'spooler_lock_error',
             $self->directory->path
         );
 
@@ -158,7 +158,7 @@ sub delete {
 
         $self->throw_msg(
             dotid($self->class) . '.delete.lock_error', 
-            'lock_error', 
+            'spooler_lock_error', 
             $self->directory->path
         ); 
 
@@ -184,7 +184,7 @@ sub count {
 
         $self->throw_msg(
             dotid($self->class) . '.count.lock_error',
-            'lock_error',
+            'spooler_lock_error',
             $self->directory->path
         );
 
@@ -212,7 +212,7 @@ sub get {
 
         $self->throw_msg(
             dotid($self->class) . '.get.lock_error',
-            'lock_error',
+            'spooler_lock_error',
             $self->directory->path
         );
 
@@ -282,7 +282,7 @@ sub sequence {
 
         $self->throw_msg(
             dotid($self->class) . '.sequence', 
-            'sequence', 
+            'spooler_sequence', 
             $file
         );
 
@@ -319,7 +319,7 @@ sub write_packet {
 
         $self->throw_msg(
             dotid($self->class) . '.write_packet', 
-            'write_packet', 
+            'spooler_write_packet', 
             $file->path
         );
 
@@ -348,7 +348,7 @@ sub read_packet {
 
         $self->throw_msg(
             dotid($self->class) . '.read_packet', 
-            'read_packet', 
+            'spooler_read_packet', 
             $file->path
         );
 

@@ -109,14 +109,14 @@ sub handle_connected {
 
     if ($self->tcp_keepalive) {
 
-        $self->log->info("$alias: tcp_keepalive enabled");
+        $self->log->info('tcp_keepalive_enabled', $alias);
 
         $self->init_keepalive();
         $self->enable_keepalive($self->socket);
 
     }
 
-    $self->log->info_msg('connected', $alias, $self->host, $self->port);
+    $self->log->info_msg('net_server_connected', $alias, $self->host, $self->port);
 
     $poe_kernel->post($alias, 'connection_up');
 
@@ -139,7 +139,7 @@ sub handle_error {
 
     my $alias = $self->alias;
 
-    $self->log->error_msg('errors',
+    $self->log->error_msg('stomp_errors',
         $alias,
         $frame->header->message_id,
         $frame->header->message,
@@ -195,7 +195,7 @@ sub _server_message {
 
     } else {
 
-        $self->log->warn("$alias: unknown message type: $frame->command");
+        $self->log->warn_msg('stomp_unknown_type' $alias, $frame->command);
 
     }
 

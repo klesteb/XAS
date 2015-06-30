@@ -194,7 +194,7 @@ sub write_data {
 
         $self->throw_msg(
             dotid($self->class) . '.write_data.nowheel',
-            'nowheel',
+            'net_server_nowheel',
             $alias
         );
 
@@ -269,7 +269,7 @@ sub _server_connection_failed {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _server_connection_failed()");
-    $self->log->error_msg('server_connection_failed', $alias, $operation, $errnum, $errstr);
+    $self->log->error_msg('net_server_connection_failed', $alias, $operation, $errnum, $errstr);
 
     delete $self->{socket};
     delete $self->{listner};
@@ -294,7 +294,7 @@ sub _server_error {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _server_error()");
-    $self->log->error_msg('server_error', $alias, $operation, $errnum, $errstr);
+    $self->log->error_msg('net_server_error', $alias, $operation, $errnum, $errstr);
 
     delete $self->{socket};
     delete $self->{listner};
@@ -321,12 +321,12 @@ sub _server_reconnect {
     my $retry;
     my $alias = $self->alias;
 
-    $self->log->warn_msg('server_reconnect', $alias, $self->{attempts}, $self->{count});
+    $self->log->warn_msg('net_server_reconnect', $alias, $self->{attempts}, $self->{count});
 
     if ($self->{attempts} < $self->{count}) {
 
         my $delay = $RECONNECTIONS[$self->{attempts}];
-        $self->log->warn_msg('server_attempts', $alias, $self->{attempts}, $delay);
+        $self->log->warn_msg('net_server_attempts', $alias, $self->{attempts}, $delay);
         $self->{attempts} += 1;
         $poe_kernel->delay('server_connect', $delay);
 
@@ -336,13 +336,13 @@ sub _server_reconnect {
 
         if ($retry) {
 
-            $self->log->warn_msg('server_recycle', $alias);
+            $self->log->warn_msg('net_server_recycle', $alias);
             $self->{attempts} = 0;
             $poe_kernel->post($alias, 'server_connect');
 
         } else {
 
-            $self->log->warn_msg('server_shutdown', $alias);
+            $self->log->warn_msg('net_server_shutdown', $alias);
             $poe_kernel->post($alias, 'session_shutdown');
 
         }

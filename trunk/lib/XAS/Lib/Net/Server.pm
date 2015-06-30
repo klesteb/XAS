@@ -160,7 +160,7 @@ sub reaper {
 
     my $alias = $self->alias;
 
-    $self->log->debug_msg('client_reaper', $alias, $self->host($wheel), $self->peerport($wheel));
+    $self->log->debug_msg('net_client_reaper', $alias, $self->host($wheel), $self->peerport($wheel));
 
 }
 
@@ -320,7 +320,7 @@ sub _client_connected {
     $self->{clients}->{$wheel}->{socket} = $socket;
     $self->{clients}->{$wheel}->{watchdog} = $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
 
-    $self->log->info_msg('client_connect', $alias, $host, $peerport);
+    $self->log->info_msg('net_client_connect', $alias, $host, $peerport);
 
     $poe_kernel->post($alias, 'handle_connection', $wheel);
     
@@ -331,7 +331,7 @@ sub _client_connection_failed {
 
     my $alias = $self->alias;
 
-    $self->log->error_msg('client_connection_failed', $alias, $errnum, $errstr);
+    $self->log->error_msg('net_client_connection_failed', $alias, $errnum, $errstr);
 
     delete $self->{listener};
 
@@ -378,7 +378,7 @@ sub _client_output {
             } else {
 
                 $self->log->error_msg(
-                    'client_nosocket', 
+                    'net_client_nosocket', 
                     $alias, 
                     $self->peerhist($wheel), 
                     $self->peerport($wheel)
@@ -389,7 +389,7 @@ sub _client_output {
 
         } else {
 
-            $self->log->error_msg('client_nowheel', $alias);
+            $self->log->error_msg('net_client_nowheel', $alias);
 
         }
 
@@ -414,11 +414,11 @@ sub _client_error {
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('client_disconnect', $alias, $self->peerhost($wheel), $self->peerport($wheel));
+        $self->log->info_msg('net_client_disconnect', $alias, $self->peerhost($wheel), $self->peerport($wheel));
 
     } else {
 
-        $self->log->error_msg('client_error', $alias, $errnum, $errstr);
+        $self->log->error_msg('net_client_error', $alias, $errnum, $errstr);
 
     }
 

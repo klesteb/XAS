@@ -50,7 +50,7 @@ sub session_interrupt {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: session_interrupt()");
-    $self->log->warn_msg('signaled', $alias, $signal);
+    $self->log->warn_msg('service_signaled', $alias, $signal);
 
     if ($signal eq 'HUP') {
 
@@ -139,7 +139,7 @@ sub poll {
 
         } else {
 
-            $self->log->info_msg('unpaused');
+            $self->log->info_msg('service_unpaused');
 
         }
 
@@ -197,7 +197,7 @@ sub poll {
     unless ($delay == 0) {
 
         $stat = $poe_kernel->delay('poll', $delay);
-        $self->log->error("unable to queue delay - $stat") if ($stat != 0);
+        $self->log->error_msg('service_que_delay', $alias, $stat) if ($stat != 0);
 
     }
 

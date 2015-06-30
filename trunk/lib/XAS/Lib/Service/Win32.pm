@@ -32,7 +32,7 @@ sub init_service {
 
         $self->throw_msg(
             'xas.lib.service.win32.startup.startservice',
-            'noservice',
+            'service_noservice',
             _get_error()
         );
 
@@ -106,7 +106,7 @@ sub poll {
 
         } else {
 
-            $self->log->info_msg('unpaused');
+            $self->log->info_msg('service_unpaused');
 
         }
 
@@ -160,7 +160,7 @@ sub poll {
     unless ($delay == 0) {
 
         $stat = $poe_kernel->delay('poll', $delay);
-        $self->log->error("unable to queue delay - $stat") if ($stat != 0);
+        $self->log->error('service_que_delay', $alias, $stat) if ($stat != 0);
 
     }
 

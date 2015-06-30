@@ -162,8 +162,8 @@ sub _decode_headers {
             unless ($v =~ s/(\\.)/$DECODE_MAP{$1}/eg) {
 
                 $self->throw_msg(
-                    'xas.lib.stomp.frame.decode_header',
-                    'badval',
+                    'xas.lib.stomp.frame.decode_header.badval',
+                    'stomp_badval',
                 );
 
             }
@@ -175,8 +175,8 @@ sub _decode_headers {
             unless ($k =~ s/(\\.)/$DECODE_MAP{$1}/eg) {
 
                 $self->throw_msg(
-                    'xas.lib.stomp.frame.decode_header',
-                    'badkey'
+                    'xas.lib.stomp.frame.decode_header.badkey',
+                    'stomp_badkey'
                 );
 
             }

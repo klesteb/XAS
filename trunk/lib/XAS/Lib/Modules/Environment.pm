@@ -275,7 +275,7 @@ sub init {
 
         $self->throw_msg(
             'xas.system.environment.unknownos',
-            'unknownos', 
+            'environment_unknownos', 
             $^O
         );
 

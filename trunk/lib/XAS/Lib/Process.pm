@@ -187,7 +187,7 @@ sub put_input {
 
         $self->throw_msg(
             dotid($self->class) . '.put_input.writerr',
-            'writerr'.
+            'process_writerr',
             'called put() on a wheel without an open INPUT handle' 
         );
 
@@ -267,19 +267,19 @@ sub _child_exit {
 
                 } else {
 
-                    $self->log->warn_msg('unknown_exitcode', $alias);
+                    $self->log->warn_msg('process_unknown_exitcode', $alias);
 
                 }
 
             } else {
 
-                $self->log->warn_msg('nomore_retries', $alias);
+                $self->log->warn_msg('process_nomore_retries', $alias);
 
             }
 
         } else {
 
-            $self->log->warn_msg('no_autorestart', $alias);
+            $self->log->warn_msg('process_no_autorestart', $alias);
 
         }
 
@@ -446,7 +446,7 @@ sub _resolve_path {
 
             $self->throw_msg(
                 dotid($self->class) . '.resolve_path.path',
-                'location',
+                'process_location',
                 $command
             );
 
@@ -504,7 +504,7 @@ sub _resolve_path {
 
             $self->throw_msg(
                 dotid($self->class) . '.resolve_path.path',
-                'location',
+                'process_location',
                 $command
             );
 

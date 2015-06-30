@@ -212,7 +212,7 @@ sub _client_output {
 
     } else {
 
-        $self->log->error_msg('nowheel', $alias);
+        $self->log->error_msg('net_server_nowheel', $alias);
 
     }
 
@@ -230,14 +230,14 @@ sub _client_error {
 
         # EOF detected.
 
-        $self->log->info_msg('client_disconnect', $alias, $self->peerhost, $self->peerport);
+        $self->log->info_msg('net_server_disconnect', $alias, $self->peerhost, $self->peerport);
 
         delete $self->{client};
         $poe_kernel->post($alias, 'session_shutdown');
 
     } else {
 
-        $self->log->error_msg('client_error', $alias, $errnum, $errstr);
+        $self->log->error_msg('net_server_error', $alias, $errnum, $errstr);
 
     }
 

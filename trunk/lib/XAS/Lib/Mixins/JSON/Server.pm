@@ -208,7 +208,7 @@ sub _rpc_request {
 
             $self->throw_msg(
                 'xas.lib.mixins.json.server.nonotifications', 
-                'json_rpc_nonotify'
+                'json_rpc_notify'
             );
 
         }
