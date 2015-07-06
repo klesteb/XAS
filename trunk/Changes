@@ -41,4 +41,8 @@ Revision history for XAS
         Changed the license to Artictic License 2.0
         Improved the documentation.
         Corrected problems.
+
+0.09    06-Jul-2015 Kevin L. Esteb
+        Fixed problems the CPAN flagged
+
         

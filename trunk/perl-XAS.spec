@@ -1,5 +1,5 @@
 Name:           perl-XAS
-Version:        0.08
+Version:        0.09
 Release:        1%{?dist}
 Summary:        XAS - Middleware for Datacener Operations
 License:        GPL+ or Artistic
@@ -10,24 +10,24 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  perl(Test::More)
 BuildRequires:  perl(Module::Build)
-Requires:       perl(POE) >= 1.35
 Requires:       perl(Badger) >= 0.09
-Requires:       perl(Curses) >= 1.28
+Requires:       perl(POE) >= 1.35
 Requires:       perl(DateTime) >= 0.53
-Requires:       perl(JSON::XS) >= 2.27
-Requires:       perl(Net::SSH2) >= 0.44
-Requires:       perl(Try::Tiny) >= 0.0
-Requires:       perl(WWW::Curl) >= 4.15
-Requires:       perl(MIME::Lite) >= 3.027
-Requires:       perl(Pod::Usage) >= 1.35
-Requires:       perl(Set::Light) >= 0.04
-Requires:       perl(Hash::Merge) >= 0.12
-Requires:       perl(Try::Tiny::Retry) >= 0.0
-Requires:       perl(Config::IniFiles) >= 2.72
-Requires:       perl(Params::Validate) >= 0.92
-Requires:       perl(LockFile::Simple) >= 0.207
-Requires:       perl(DateTime::Format::Pg) >= 0.0
 Requires:       perl(DateTime::Format::Strptime) >= 1.1
+Requires:       perl(DateTime::Format::Pg) >= 0.0
+Requires:       perl(Config::IniFiles) >= 2.72
+Requires:       perl(Hash::Merge) >= 0.12
+Requires:       perl(JSON::XS) >= 2.27
+Requires:       perl(LockFile::Simple) >= 0.207
+Requires:       perl(MIME::Lite) >= 3.027
+Requires:       perl(Params::Validate) >= 0.92
+Requires:       perl(Pod::Usage) >= 1.35
+Requires:       perl(Try::Tiny) >= 0.0
+Requires:       perl(Try::Tiny::Retry) >= 0.0
+Requires:       perl(Set::Light) >= 0.04
+Requires:       perl(Net::SSH2) >= 0.44
+Requires:       perl(WWW::Curl) >= 4.15
+Requires:       perl(HTTP::Response) >= 0.0
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %define _initrddir  %{_sysconfdir}/init.d

@@ -23,6 +23,7 @@ my $requires = {
     'POE'                         => 1.294,
     'DateTime'                    => 0.53,
     'DateTime::Format::Strptime'  => 1.10,
+    'DateTime::Format::Pg'        => 0.0,
     'Config::IniFiles'            => 2.65,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
@@ -34,8 +35,8 @@ my $requires = {
     'Try::Tiny::Retry'            => 0.003,
     'Set::Light'                  => 0.04,
     'Net::SSH2'                   => 0.44,
-    'Curses'                      => 1.28,
     'WWW::Curl'                   => 0.0,
+    'HTTP::Response'              => 0.0,
 };
 
 # Needed for Win32 installations

@@ -1,6 +1,6 @@
 package XAS::Lib::Net::Server;
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 use POE;
 use Try::Tiny;
