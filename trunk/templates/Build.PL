@@ -9,7 +9,8 @@ use warnings FATAL => 'all';
 use Module::Build;
 
 my $requires = {
-    'XAS' => '0.07',
+    'perl' => 5.8.8,
+    'XAS'  => 0.09,
 };
     
 my $sysconfig = ( -e '/etc/default' ) ? '/etc/default' : '/etc/sysconfig';
@@ -225,6 +226,12 @@ my $builder = $class->new(
     requires           => $requires
 );
 
-$builder->add_build_element('msg');
+#$builder->add_build_element('etc');
+#$builder->add_build_element('msg');
+#$builder->add_build_element('sbin');
+#$builder->add_build_element('initd');
+#$builder->add_build_element('sysconf');
+#$builder->add_build_element('logrotated');
+
 $builder->create_build_script();
 
