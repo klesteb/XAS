@@ -179,7 +179,7 @@ sub init {
 
     my $OS = $^O;
 
-    if (($OS eq "aix") or ($OS eq 'linux')) {
+    if (($OS eq "aix") or ($OS eq 'linux') or ($OS =~ /bsd/)) {
 
         $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
             ? $ENV{'XAS_HOSTNAME'} 
@@ -235,7 +235,7 @@ sub init {
 
         $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
-            : ['C:', 'xas']);
+            : ['C:', 'XAS']);
 
         $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
             ? $ENV{'XAS_ETC'}   
@@ -274,7 +274,7 @@ sub init {
     } else {
 
         $self->throw_msg(
-            'xas.system.environment.unknownos',
+            'xas.lib.modules.environment.unknownos',
             'environment_unknownos', 
             $^O
         );
