@@ -61,7 +61,7 @@ within the XAS enviornment.
 
 =head1 SEE ALSO
 
-L< XAS|XAS>
+L<XAS|XAS>
 
 =head1 AUTHOR
 

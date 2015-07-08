@@ -19,6 +19,7 @@ my $install_path = {
 # Required modules
 
 my $requires = {
+    'perl'                        => 5.8.8,
     'Badger'                      => 0.09,
     'POE'                         => 1.294,
     'DateTime'                    => 0.53,
@@ -37,6 +38,7 @@ my $requires = {
     'Net::SSH2'                   => 0.44,
     'WWW::Curl'                   => 0.0,
     'HTTP::Response'              => 0.0,
+    'XML::LibXML'                 => 0.0,
 };
 
 # Needed for Win32 installations
