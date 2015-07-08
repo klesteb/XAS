@@ -19,7 +19,7 @@ my $install_path = {
 # Required modules
 
 my $requires = {
-    'perl'                        => 5.8.8,
+    'perl'                        => 5.008_08,
     'Badger'                      => 0.09,
     'POE'                         => 1.294,
     'DateTime'                    => 0.53,
