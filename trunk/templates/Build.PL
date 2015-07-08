@@ -220,6 +220,12 @@ my $builder = $class->new(
     build_requires => {
         'Test::More' => 0,
     },
+    meta_add => {
+        resources => {
+            homepage   => 'http://scm.kesteb.us/trac',
+            repository => 'http://scm.kesteb.us/git/XAS-XXXX',
+        },
+    },
     add_to_cleanup     => [ 'XXX-*' ],
     create_makefile_pl => 'traditional',
     install_path       => $install_path,
