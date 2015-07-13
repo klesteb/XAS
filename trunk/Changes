@@ -45,4 +45,6 @@ Revision history for XAS
 0.09    06-Jul-2015 Kevin L. Esteb
         Fixed problems the CPAN flagged
 
-        
+0.10    13-Jul-2015 Kevin L. Esteb
+        More fixes for CPAN testers
+
