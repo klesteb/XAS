@@ -36,6 +36,8 @@ sub parse {
     my $count = 0;
     my $frame = undef;
 
+    use bytes;
+
     $self->{buffer} .= $buffer;
 
     $self->log->debug('stomp parse');

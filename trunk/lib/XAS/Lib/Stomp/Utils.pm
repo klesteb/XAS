@@ -449,7 +449,10 @@ sub send {
     $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
     $header->{'persistent'}  = $p->{'persistent'}  if (defined($p->{'presistent'}));
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
-    $header->{'content-length'} = defined($p->{'length'}) ? $p->{'length'} : length($body);
+    {
+        use bytes;
+        $header->{'content-length'} = defined($p->{'length'}) ? $p->{'length'} : length($body);
+    }
 
     if ($self->env->mqlevel > 1.0) {
 
