@@ -111,19 +111,19 @@ sub subscribe {
     my $self = shift;
     my $p = $self->validate_params(\@_, {
         -destination  => 1,
+        -prefetch     => { optional => 1, default => 0 },
         -id           => { optional => 1, default => undef },
         -receipt      => { optional => 1, default => undef },
-        -prefetch     => { optional => 1, default => undef },
         -ack          => { optional => 1, default => 'auto', regex => qr/auto|client|client\-individual/ }, 
     });
 
     my $frame;
     my $header = {};
 
-    $header->{'ack'}           = $p->{'ack'};
-    $header->{'destination'}   = $p->{'destination'};
-    $header->{'receipt'}       = $p->{'receipt'} if (defined($p->{'receipt'}));
-    $header->{'prefetch-size'} = $p->{'prefetch'} if (defined($p->{'prefetch'}));
+    $header->{'ack'}            = $p->{'ack'};
+    $header->{'prefetch-count'} = $p->{'prefetch'};
+    $header->{'destination'}    = $p->{'destination'};
+    $header->{'receipt'}        = $p->{'receipt'} if (defined($p->{'receipt'}));
 
     if (defined($p->{'-id'})) {
 
