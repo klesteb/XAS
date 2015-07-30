@@ -6,7 +6,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'trim',
+  utils   => 'dotid run_cmd trim',
   constant => {
     QSUB   => '/usr/bin/qsub',
     QSTAT  => '/usr/bin/qstat',
@@ -36,31 +36,126 @@ use XAS::Class
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub _parse_ouput {
+sub _create_jobid {
+    my $self = shift;
+    my ($id, $host) = $self->validate_params(\@_, [
+        1,
+        { optional => 1, default => undef }
+    ]);
+
+    my $jobid;
+
+    if (defined($host)) {
+
+        $jobid = sprintf("%s\@%s", $id, $host);
+
+    } else {
+
+        $jobid = $id;
+
+    }
+
+    return $jobid;
+
+}
+
+sub _create_queue {
+    my $self = shift;
+    my ($queue, $host) = $self->validate_params(\@_, [
+        1,
+        { optional => 1, default => undef }
+    ]);
+
+    my $que;
+
+    if (defined($host)) {
+
+        $que = sprintf("%s\@%s", $queue, $host);
+
+    } else {
+
+        $que = $queue;
+
+    }
+
+    return $que;
+
+}
+
+sub _do_cmd {
+    my $self = shift;
+    my ($cmd, $sub) $self->params_validate(\@_, [1,1]);
+
+    $self->log->debug("command = $cmd");
+
+    my ($output, $rc, $sig) = run_cmd($cmd);
+
+    if ($rc != 0) {
+
+        my $msg = $output->[0] || '';
+
+        $self->throw_msg(
+            dotid($self->class) . ".$sub",
+            'pbserr',
+            $rc, trim($msg)
+        );
+
+    }
+
+    return $output;
+
+}
+
+sub _parse_output {
     my $self = shift;
     my $output = shift;
 
+    my $id;
     my $stat;
 
     foreach my $line (@$output) {
 
         next if ($line eq '');
-        next if ($line =~ /variable_list/i);
-        next if (index($line, '=') < 0);
 
         $line = trim($line);
 
-        my ($key, $value) = split('=', $line);
+        if ($line =~ /^Job Id/) {
+
+            ($id) = ($line =~ m/^Job Id\:\s(.*)/);
+            $id = trim($id);
+            next;
+
+        }
+
+        if ($line =~ /^Queue/) {
+
+            ($id) = ($line =~ m/^Queue\:\s(.*)/);
+            $id = trim($id);
+            next;
+
+        }
+
+        if ($line =~ /^Server/) {
+
+            ($id) = ($line =~ m/^Server\:\s(.*)/);
+            $id = trim($id);
+            next;
+
+        }
+
+        next if (index($line, '=') < 0);
+
+        my ($key, $value) = split('=', $line, 2);
 
         $key = trim(lc($key));
         $key =~ s/\./_/;
 
-        $stat->{$key} = trim($value);
+        $stat->{$id}->{$key} = trim($value);
 
     }
 
     return $stat;
-    
+
 }
 
 1;

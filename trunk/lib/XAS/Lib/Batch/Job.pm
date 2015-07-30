@@ -6,7 +6,6 @@ use XAS::Class
   debug    => 0,
   version  => $VERSION,
   base     => 'XAS::Lib::Batch',
-  utils    => 'dotid trim run_cmd',
   constant => ':pbs DELIMITER',
 ;
 
@@ -37,35 +36,19 @@ sub qsub {
         -mail_points => { optional => 1, default => 'bea' },
         -after       => { optional => 1, isa => 'DateTime' },
         -shell_path  => { optional => 1, default => '/bin/sh' },
-        -work_path   => { optional => 1, default => '/wise/logs' },
+        -work_path   => { optional => 1, default => '/tmp' },
         -priority    => { optional => 1, default => 0, callbacks => {
             'out of priority range' =>
             sub { $_[0] > -1024 && $_[0] < 1024; },
         }}
     });
 
-    my $queue = $p->{'-queue'};
-    $queue .= "\@" . $p->{'-host'} if (defined($p->{'-host'}));
+    my $queue = $self->_create_queue($p->{'-queue'}, $p->{'-host'});
+    my $cmd = sprintf('%s -q %s %s', QSUB, $queue, $p->{'-jobfile'});
 
     $self->_create_jobfile($p);
 
-    my $cmd = sprintf('%s -q %s %s', QSUB, $queue, $p->{'-jobfile'});
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qsub',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    my $output = $self->_do_cmd($cmd, 'qsub');
 
     return trim($output->[0]);
 
@@ -78,39 +61,9 @@ sub qstat {
         -host => { optional => 1, default => undef },
     });
 
-    my $cmd;
-    my $stat;
-    my $jobid;
-
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
-
-    $cmd = sprintf('%s -f1 %s', QSTAT, $jobid);
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qstat',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
-
-    shift @$output; # strip the job id line
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
+    my $cmd = sprintf('%s -f1 %s', QSTAT, $jobid);
+    my $output = $self->_do_cmd($cmd, 'qstat');
 
     $stat = $self->_parse_output($output);
 
@@ -128,39 +81,16 @@ sub qdel {
     });
 
     my $cmd;
-    my $stat;
-    my $jobid;
-
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
 
     $cmd  = sprintf('%s', QDEL);
     $cmd .= sprintf(' -p') if (defined($p->{'-force'}));
     $cmd .= sprintf(' -m "%s"', $p->{'-message'}) if (defined($p->{'-message'}));
     $cmd .= sprintf(' %s', $jobid);
 
-    $self->log->debug("command = $cmd");
+    my $output = $self->_do_cmd($cmd, 'qdel');
 
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qdel',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -172,37 +102,11 @@ sub qsig {
         -host   => { optional => 1, default => undef },
     });
 
-    my $cmd;
-    my $stat;
-    my $jobid;
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
+    my $cmd  = sprintf('%s -s %s %s', QSIG, $p->{'-signal'}, $jobid);
+    my $output = $self->_do_cmd($cmd, 'qsig');
 
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
-
-    $cmd  = sprintf('%s -s %s %s', QSIG, $p->{'-signal'}, $jobid);
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qsig',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -215,45 +119,22 @@ sub qhold {
     });
 
     my $cmd;
-    my $stat;
     my $hold;
-    my $jobid;
-
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
 
     foreach my $x (split(DELIMITER, $p->{'-type'})) {
-        
+
         $hold .= 'u' if ($x eq 'user');
         $hold .= 'o' if ($x eq 'other');
         $hold .= 's' if ($x eq 'system');
-        
+
     }
-    
+
     $cmd  = sprintf('%s -h %s %s', QHOLD, $hold, $jobid);
 
-    $self->log->debug("command = $cmd");
+    my $output = $self->_do_cmd($cmd, 'qhold');
 
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qhold',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -266,19 +147,8 @@ sub qrls {
     });
 
     my $cmd;
-    my $stat;
     my $hold;
-    my $jobid;
-
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
 
     foreach my $x (split(DELIMITER, $p->{'-type'})) {
 
@@ -290,21 +160,9 @@ sub qrls {
 
     $cmd  = sprintf('%s -h %s %s', QRLS, $hold, $jobid);
 
-    $self->log->debug("command = $cmd");
+    my $output = $self->_do_cmd($cmd, 'qrls');
 
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qrls',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -317,49 +175,12 @@ sub qmove {
         -dhost => { optional => 1, default => undef },
     });
 
-    my $cmd;
-    my $stat;
-    my $hold;
-    my $jobid;
-    my $queue;
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
+    my $queue = $self->_create_queue($p->{'-queue'}, $p->{'-dhost'});
+    my $cmd = sprintf('%s %s %s', QMOVE, $queue, $jobid);
+    my $output = $self->_do_cmd($cmd, 'qmove');
 
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
-    
-    if (defined($p->{'-dhost'})) {
-        
-        $queue = sprintf("%s\@%s", $p->{'-queue'}, $p->{'-dhost'});
-
-    } else {
-        
-        $queue = $p->{'-queue'};
-        
-    }
-
-    $cmd  = sprintf('%s %s %s', QMOVE, $queue, $jobid);
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qmove',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -372,38 +193,11 @@ sub qmsg {
         -host    => { optional => 1, default => undef },
     });
 
-    my $cmd;
-    my $stat;
-    my $hold;
-    my $jobid;
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
+    my $cmd  = sprintf('%s -%s "%s" %s', QMSG, $p->{'-output'}, $p->{'-message'}, $jobid);
+    my $output = $self->_do_cmd($cmd, 'qmsg');
 
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
-
-    $cmd  = sprintf('%s -%s "%s" %s', QMSG, $p->{'-output'}, $p->{'-message'}, $jobid);
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qmsg',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    return 1;
 
 }
 
@@ -414,37 +208,9 @@ sub qrerun {
         -host => { optional => 1, default => undef },
     });
 
-    my $cmd;
-    my $stat;
-    my $jobid;
-
-    if (defined($p->{'-host'})) {
-
-        $jobid = sprintf("%s\@%s", $p->{'-job'}, $p->{'-host'});
-
-    } else {
-
-        $jobid = $p->{'-job'};
-
-    }
-
-    $cmd  = sprintf('%s %s', QRERUN, $jobid);
-
-    $self->log->debug("command = $cmd");
-
-    my ($output, $rc, $sig) = run_cmd($cmd);
-
-    if ($rc != 0) {
-
-        my $msg = $output->[0] || '';
-
-        $self->throw_msg(
-            dotid($self->class) . '.qrerun',
-            'pbserr',
-            $rc, trim($msg)
-        );
-
-    }
+    my $jobid = $self->_create_jobid($p->{'-job'}, $p->{'-host'});
+    my $cmd  = sprintf('%s %s', QRERUN, $jobid);
+    my $output = $self->_do_cmd($cmd, 'qrerun');
 
 }
 
