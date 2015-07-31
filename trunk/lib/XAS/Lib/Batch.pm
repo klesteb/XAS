@@ -7,22 +7,10 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'dotid run_cmd trim',
-  constant => {
-    QSUB   => '/usr/bin/qsub',
-    QSTAT  => '/usr/bin/qstat',
-    QDEL   => '/usr/bin/qdel',
-    QSIG   => '/usr/bin/qsig',
-    QHOLD  => '/usr/bin/qhold',
-    QRLS   => '/usr/bin/qrls',
-    QMSG   => '/usr/bin/qmsg',
-    QMOVE  => '/usr/bin/qmove',
-    QRERUN => '/usr/bin/qrerun',
-    QALTER => '/usr/bin/qalter',
-    TYPES  => qr/user|other|system|,|\s/,
-  },
-  export => {
-    any => 'QSUB QSTAT QDEL QSIG QHOLD QRLS QMSG QMOVE QRERUN QALTER TYPES',
-    pbs => 'QSUB QSTAT QDEL QSIG QHOLD QRLS QMSG QMOVE QRERUN QALTER TYPES',
+  vars => {
+    PARAMS => {
+      -interface => { optional => 1, default => 'XAS::Lib::Batch::Interface::Torque' },
+    }
   }
 ;
 
@@ -36,55 +24,9 @@ use XAS::Class
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub _create_jobid {
+sub do_cmd {
     my $self = shift;
-    my ($id, $host) = $self->validate_params(\@_, [
-        1,
-        { optional => 1, default => undef }
-    ]);
-
-    my $jobid;
-
-    if (defined($host)) {
-
-        $jobid = sprintf("%s\@%s", $id, $host);
-
-    } else {
-
-        $jobid = $id;
-
-    }
-
-    return $jobid;
-
-}
-
-sub _create_queue {
-    my $self = shift;
-    my ($queue, $host) = $self->validate_params(\@_, [
-        1,
-        { optional => 1, default => undef }
-    ]);
-
-    my $que;
-
-    if (defined($host)) {
-
-        $que = sprintf("%s\@%s", $queue, $host);
-
-    } else {
-
-        $que = $queue;
-
-    }
-
-    return $que;
-
-}
-
-sub _do_cmd {
-    my $self = shift;
-    my ($cmd, $sub) $self->params_validate(\@_, [1,1]);
+    my ($cmd, $sub) = $self->validate_params(\@_, [1,1]);
 
     $self->log->debug("command = $cmd");
 
@@ -106,55 +48,14 @@ sub _do_cmd {
 
 }
 
-sub _parse_output {
-    my $self = shift;
-    my $output = shift;
+sub init {
+    my $class = shift;
 
-    my $id;
-    my $stat;
+    my $self = $class->SUPER::init(@_);
 
-    foreach my $line (@$output) {
+    $self->class->mixin($self->interface);
 
-        next if ($line eq '');
-
-        $line = trim($line);
-
-        if ($line =~ /^Job Id/) {
-
-            ($id) = ($line =~ m/^Job Id\:\s(.*)/);
-            $id = trim($id);
-            next;
-
-        }
-
-        if ($line =~ /^Queue/) {
-
-            ($id) = ($line =~ m/^Queue\:\s(.*)/);
-            $id = trim($id);
-            next;
-
-        }
-
-        if ($line =~ /^Server/) {
-
-            ($id) = ($line =~ m/^Server\:\s(.*)/);
-            $id = trim($id);
-            next;
-
-        }
-
-        next if (index($line, '=') < 0);
-
-        my ($key, $value) = split('=', $line, 2);
-
-        $key = trim(lc($key));
-        $key =~ s/\./_/;
-
-        $stat->{$id}->{$key} = trim($value);
-
-    }
-
-    return $stat;
+    return $self;
 
 }
 

@@ -8,11 +8,11 @@
 
 [messages]
 messages_loaded              = don't remove this...
-
 startup                      = starting up
 shutdown                     = shutting down
 exception                    = %s: %s
 invparams                    = invalid parameters passed, reason: %s
+invmethod                    = invalid method "%s" in %s at line %s
 unexpected                   = unexpected error: %s
 invperms                     = unable to change file permissions on %s
 config_badini                = unable to load config file: %s, reason: %s
