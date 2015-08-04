@@ -12,12 +12,13 @@ BEGIN {
 use XAS::Lib::Modules::Locking;
 
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Base',
-  mixin     => $mixin,
-  utils     => 'trim dotid',
-  accessors => 'lockmgr',
+  debug      => 0,
+  version    => $VERSION,
+  base       => 'XAS::Base',
+  mixin      => $mixin,
+  utils      => 'trim dotid',
+  accessors  => 'lockmgr',
+  filesystem => 'Dir',
   vars => {
     PARAMS => {
       pid  => 1,
@@ -36,7 +37,7 @@ sub write {
     my $self = shift;
 
     my $stat = 0;
-    my $lock = $self->file->directory;
+    my $lock = Dir($self->file->volume, $self->file->directory);
     my $output = sub {
 
         my $fh = $self->file->open('w');
@@ -70,7 +71,7 @@ sub write {
 sub remove {
     my $self = shift;
 
-    my $lock = $self->file->directory;
+    my $lock = Dir($self->file->volume, $self->file->directory);
 
     if ($self->lockmgr->lock_directory($lock)) {
 
@@ -90,7 +91,7 @@ sub _get_pid {
     my $self = shift;
 
     my $pid = undef;
-    my $lock = $self->file->directory;
+    my $lock = Dir($self->file->volume, $self->file->directory);
 
     if ($self->lockmgr->lock_directory($lock)) {
 

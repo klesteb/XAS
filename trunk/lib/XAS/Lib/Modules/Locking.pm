@@ -94,7 +94,7 @@ sub lock_file_name {
         { isa => 'Badger::Filesystem::Directory' },
     ]);
 
-    my $lock = File($directory->canonical, $self->lockfile);
+    my $lock = File($directory->path, $self->lockfile);
 
     return $lock->path;
 
