@@ -9,18 +9,24 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'trim',
-  mixins  => 'do_qsub do_qstat do_qdel do_qsig do_qhold do_qrls do_qmove do_qmsg do_qrerun',
+  mixins  => 'do_qsub do_qstat do_qdel do_qsig do_qhold do_qrls do_qmove 
+              do_qmsg do_qrerun do_queue_stat do_queue_stop do_queue_start
+              do_server_stat do_server_enable do_server_disable',
   constant => {
-    QSUB   => '/usr/bin/qsub',
-    QSTAT  => '/usr/bin/qstat',
-    QDEL   => '/usr/bin/qdel',
-    QSIG   => '/usr/bin/qsig',
-    QHOLD  => '/usr/bin/qhold',
-    QRLS   => '/usr/bin/qrls',
-    QMSG   => '/usr/bin/qmsg',
-    QMOVE  => '/usr/bin/qmove',
-    QRERUN => '/usr/bin/qrerun',
-    QALTER => '/usr/bin/qalter',
+    QSUB     => '/usr/bin/qsub',
+    QSTAT    => '/usr/bin/qstat',
+    QDEL     => '/usr/bin/qdel',
+    QSIG     => '/usr/bin/qsig',
+    QHOLD    => '/usr/bin/qhold',
+    QRLS     => '/usr/bin/qrls',
+    QMSG     => '/usr/bin/qmsg',
+    QMOVE    => '/usr/bin/qmove',
+    QRERUN   => '/usr/bin/qrerun',
+    QALTER   => '/usr/bin/qalter',
+    QSTOP    => '/usr/bin/qstop',
+    QSTART   => '/usr/bin/qstart',
+    QENABLE  => '/usr/bin/qenable',
+    QDISABLE => '/usr/bin/qdisable',
   },
 ;
 
@@ -191,6 +197,95 @@ sub do_qrerun {
 
 }
 
+sub do_queue_stat {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $queue = _create_queue($self, $p->{'queue'}, $p->{'host'});
+    my $cmd = sprintf('%s -Q -f1 %s', QSTAT, $queue);
+    my $output = $self->do_cmd($cmd, 'qstat');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
+sub do_queue_stop {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $queue = _create_queue($self, $p->{'queue'}, $p->{'host'});
+    my $cmd = sprintf('%s -Q -f1 %s', QSTOP, $queue);
+    my $output = $self->do_cmd($cmd, 'qstop');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
+sub do_queue_start {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $queue = _create_queue($self, $p->{'queue'}, $p->{'host'});
+    my $cmd = sprintf('%s -Q -f1 %s', QSTART, $queue);
+    my $output = $self->do_cmd($cmd, 'qstart');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
+sub do_server_stat {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $cmd = sprintf('%s -B -f1 %s', QSTAT, $p->{'host'});
+    my $output = $self->do_cmd($cmd, 'qstat');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
+sub do_server_disable {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $queue = _create_queue($self, $p->{'queue'}, $p->{'host'});
+    my $cmd = sprintf('%s %s', QDISABLE, $queue);
+    my $output = $self->do_cmd($cmd, 'qdisable');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
+sub do_server_enable {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $queue = _create_queue($self, $p->{'queue'}, $p->{'host'});
+    my $cmd = sprintf('%s %s', QENABLE, $queue);
+    my $output = $self->do_cmd($cmd, 'qenable');
+    my $stat = _parse_output($self, $output);
+
+    return $stat;
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -221,19 +316,23 @@ sub _create_jobid {
 sub _create_queue {
     my $self = shift;
     my ($queue, $host) = $self->validate_params(\@_, [
-        1,
-        { optional => 1, default => undef }
+        { optional => 1, default => undef },
+        { optional => 1, default => undef },
     ]);
 
     my $que;
 
-    if (defined($host)) {
+    if (defined($host) && defined($queue)) {
 
         $que = sprintf("%s\@%s", $queue, $host);
 
+    } elsif (defined($host)) {
+
+        $que = sprintf("@%s", $host);
+
     } else {
 
-        $que = $queue;
+        $que = $queue || '';
 
     }
 
