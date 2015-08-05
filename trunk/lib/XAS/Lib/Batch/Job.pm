@@ -8,7 +8,8 @@ use XAS::Class
   base      => 'XAS::Lib::Batch',
   constants => 'DELIMITER',
   constant => {
-    TYPES  => qr/user|other|system|,|\s/,
+    TYPES  => qr/user|other|system|none|,|\s/,
+    JTYPES => qr/oe|eo|n|,|\s/,
   }
 ;
 
@@ -147,6 +148,36 @@ sub qrerun {
 
 }
 
+sub qalter {
+    my $self = shift;
+    my $p = $self->validate_params(\@_, {
+        -job         => 1,
+        -jobname     => { optional => 1, default => undef },
+        -rerunable   => { optional => 1, default => undef },
+        -email       => { optional => 1, default => undef },
+        -account     => { optional => 1, default => undef },
+        -attributes  => { optional => 1, default => undef },
+        -exclusive   => { optional => 1, default => undef },
+        -resources   => { optional => 1, default => undef },
+        -user        => { optional => 1, default => undef },
+        -host        => { optional => 1, default => undef },
+        -mail_points => { optional => 1, default => undef },
+        -shell_path  => { optional => 1, default => undef },
+        -hold        => { optional => 1, default => undef, regex => TYPES }, 
+        -join_path   => { optional => 1, default => undef, regex => JTYPES },
+        -after       => { optional => 1, default => undef, isa => 'DateTime' },
+        -out_path    => { optional => 1, default => undef, isa => 'Badger::Filesystem::File' },
+        -error_path  => { optional => 1, default => undef, isa => 'Badger::Filesystem::File' },
+        -priority    => { optional => 1, default => 0, callbacks => {
+            'out of priority range' =>
+            sub { $_[0] > -1024 && $_[0] < 1024; },
+        }}
+    });
+
+    return $self->do_qalter($p);
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -157,11 +188,29 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Batch::Job - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Lib::Batch::Job;
+
+ my $batch = XAS::Lib::Batch::Job->new();
+
+ my $id = $batch->qsub(...);
+ 
+ printf("job %s has started\n", $id);
+
+ while (my $stat = $batch->qstat(-job => $id)) {
+
+     if ($stat->{job_state} eq 'C') {
+
+         printf("job %s has finished\n", $id);
+
+     }
+
+     sleep 10;
+
+ }
 
 =head1 DESCRIPTION
 
@@ -175,6 +224,8 @@ XAS::xxx - A class for the XAS environment
 
 =item L<XAS|XAS>
 
+=item L<XAS::Lib::Batch|XAS::Lib::Batch>
+
 =back
 
 =head1 AUTHOR
@@ -183,7 +234,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

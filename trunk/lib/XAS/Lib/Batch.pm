@@ -65,17 +65,59 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Batch - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Class
+   version => '0.01',
+   base    => 'XAS::Lib::Batch'
+ ;
 
 =head1 DESCRIPTION
 
+This is a class for accessing a batch system. Batch systems are a controlled
+way to run jobs in the background. Depending on how the batch system is
+setup you may have access to hundreds of systems to run jobs on. These jobs 
+can then controlled by issuing commads against the batch system. This module 
+encapsulates those commands into Perl objects and methods. 
+
+There is apparently a standardized command line interface to these batch
+systems. This module also helps to abstract some of the differences between 
+those standardized commands. Because if you work in this business long enough
+you get to know what "standardized" really means.
+
+Since this is Perl and you are loading a mixin. You could access the mixin
+methods directly. But it is advisable to use the pre-defined classes to help 
+with parameter checking and exception handling.
+
 =head1 METHODS
 
-=head2 method1
+=head2 new
+
+This initializes the class and takes these parameters:
+
+=over 4
+
+=item B<-interface>
+
+This defines the interface to load. It defaults to L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>.
+
+=back
+
+=head2 do_cmd($command)
+
+This method will run a command and capture its output. If an non zero return
+code is detected, it will throw an exception with that return code and the 
+first line returned on STDOUT.
+
+=over 4
+
+=item B<$command>
+
+The command to execute in the background using Perl's backtick function.
+
+=back
 
 =head1 SEE ALSO
 
@@ -91,7 +133,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
