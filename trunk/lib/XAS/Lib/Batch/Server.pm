@@ -55,21 +55,93 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Batch::Server - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Lib::Batch::Server;
+
+ my $server = XAS::Lib::Batch::Server->new();
+
+ my $stat = $server->qstat();
 
 =head1 DESCRIPTION
 
+This module provides an interface for manipulating servers in a Batch System. 
+Each available method is a wrapper around a given command. A command line
+is built, executed, and the return code is checked. If the return code is
+non-zero an exception is thrown. The exception will include the return code
+and the first line from stderr.
+
+Since each method is a wrapper, there is a corresponding man page for the 
+actual command. They should also be checked when problems arise.
+
 =head1 METHODS
 
-=head2 method1
+=head2 new
+
+This method initializes the module and takes these parameters:
+
+=over 4
+
+=item B<-interface>
+
+The command line interface to use. This defaults to 'XAS::Lib::Batch::Interface::Torque'.
+
+=back
+
+=head2 qstat(...)
+
+This method returns that status of a server. This status will be a hash 
+reference of the parsed output on stdout. It takes the following paramters:
+
+=over 4
+
+=item B<-host>
+
+The optional host that the server may be on. Defaults to 'localhost'.
+
+=back
+
+=head2 qdisable(...)
+
+This method will disable a queue or if the queue is not given, batch processing
+at the server. It takes the following paramters:
+
+=over 4
+
+=item B<-queue>
+
+The optional name of the queue.
+
+=item B<-host>
+
+The optional host that the queue may be on. Defaults to 'localhost'.
+
+=back
+
+=head2 qenable(...)
+
+This method will enable a queue or if the queue is not given, batch processing
+at the server. It takes the following paramters:
+
+=over 4
+
+=item B<-queue>
+
+The optional name of the queue.
+
+=item B<-host>
+
+The optional host that the queue may be on. Defaults to 'localhost'.
+
+=back
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::Batch|XAS::Lib::Batch>
 
 =item L<XAS|XAS>
 
@@ -81,7 +153,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

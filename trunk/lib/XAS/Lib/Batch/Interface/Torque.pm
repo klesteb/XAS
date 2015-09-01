@@ -9,9 +9,10 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'trim',
-  mixins  => 'do_qsub do_qstat do_qdel do_qsig do_qhold do_qrls do_qmove 
-              do_qmsg do_qrerun do_queue_stat do_queue_stop do_queue_start
-              do_server_stat do_server_enable do_server_disable',
+  mixins  => 'do_job_sub do_job_stat do_job_del do_job_sig do_job_hold 
+              do_job_rls do_job_move do_job_msg do_job_rerun do_queue_stat 
+              do_queue_stop do_queue_start do_server_stat do_server_enable 
+              do_server_disable',
   constant => {
     QSUB     => '/usr/bin/qsub',
     QSTAT    => '/usr/bin/qstat',
@@ -36,7 +37,7 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub do_qsub {
+sub do_job_sub {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -53,7 +54,7 @@ sub do_qsub {
 
 }
 
-sub do_qstat {
+sub do_job_stat {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -68,7 +69,7 @@ sub do_qstat {
 
 }
 
-sub do_qdel {
+sub do_job_del {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -88,7 +89,7 @@ sub do_qdel {
 
 }
 
-sub do_qsig {
+sub do_job_sig {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -102,7 +103,7 @@ sub do_qsig {
 
 }
 
-sub do_qhold {
+sub do_job_hold {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -128,7 +129,7 @@ sub do_qhold {
 
 }
 
-sub do_qrls {
+sub do_job_rls {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -154,7 +155,7 @@ sub do_qrls {
 
 }
 
-sub do_qmove {
+sub do_job_move {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -169,7 +170,7 @@ sub do_qmove {
 
 }
 
-sub do_qmsg {
+sub do_job_msg {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -183,7 +184,7 @@ sub do_qmsg {
 
 }
 
-sub do_qrerun {
+sub do_job_rerun {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
         { type => HASHREF }
@@ -458,7 +459,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Mixins::xxxx - A mixin for the XAS environment
+XAS::Lib::Batch::Interface::Torque - A mixin for the XAS environment
 
 =head1 SYNOPSIS
 
@@ -466,18 +467,20 @@ XAS::Lib::Mixins::xxxx - A mixin for the XAS environment
    debug   => 0,
    version => '0.01',
    base    => 'XAS::Base',
-   mixin   => 'XAS::Lib::Mixins::xxxx'
+   mixin   => 'XAS::Lib::Batch::Interface::Torque'
 ;
 
 =head1 DESCRIPTION
 
-=head1 METHODS
-
-=head2 method1
+In the Unix world, there is a standardized interface for Batch Systems. In
+honor of this standard, each implementation has a slightly different command
+line syntax. This mixin implements the PBS/Torque command line. 
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::Batch|XAS::Lib::Batch>
 
 =item L<XAS|XAS>
 
@@ -489,7 +492,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

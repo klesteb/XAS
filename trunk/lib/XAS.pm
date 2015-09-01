@@ -47,6 +47,16 @@ within a Operations Center.
 
 =item L<XAS::Lib::App::Service::Win32|XAS::Lib::App::Service::Win32>
 
+=item L<XAS::Lib::Batch|XAS::Lib::Batch>
+
+=item L<XAS::Lib::Batch::Job|XAS::Lib::Batch::Job>
+
+=item L<XAS::Lib::Batch::Queue|XAS::Lib::Batch::Queue>
+
+=item L<XAS::Lib::Batch::Server|XAS::Lib::Batch::Server>
+
+=item L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>
+
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
 =item L<XAS::Lib::Mixins::Bufops|XAS::Lib::Mixins::Bufops>

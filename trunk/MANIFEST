@@ -30,6 +30,11 @@ lib/XAS/Lib/App/Daemon.pm
 lib/XAS/Lib/App/Service.pm
 lib/XAS/Lib/App/Service/Unix.pm
 lib/XAS/Lib/App/Service/Win32.pm
+lib/XAS/Lib/Batch.pm
+lib/XAS/Lib/Batch/Job.pm
+lib/XAS/Lib/Batch/Queue.pm
+lib/XAS/Lib/Batch/Server.pm
+lib/XAS/Lib/Batch/Interface/Torque.pm
 lib/XAS/Lib/Curl/HTTP.pm
 lib/XAS/Lib/Mixins/Bufops.pm
 lib/XAS/Lib/Mixins/Configs.pm
