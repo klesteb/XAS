@@ -36,10 +36,10 @@ lib/XAS/Lib/Batch/Queue.pm
 lib/XAS/Lib/Batch/Server.pm
 lib/XAS/Lib/Batch/Interface/Torque.pm
 lib/XAS/Lib/Curl/HTTP.pm
+lib/XAS/Lib/Iterator.pm
 lib/XAS/Lib/Mixins/Bufops.pm
 lib/XAS/Lib/Mixins/Configs.pm
 lib/XAS/Lib/Mixins/Handlers.pm
-lib/XAS/Lib/Mixins/Iterator.pm
 lib/XAS/Lib/Mixins/Keepalive.pm
 lib/XAS/Lib/Mixins/JSON/Client.pm
 lib/XAS/Lib/Mixins/JSON/Server.pm
@@ -92,6 +92,3 @@ t/00-load.t
 t/boilerplate.t
 t/manifest.t
 t/pod.t
-Makefile.PL
-META.yml
-META.json
