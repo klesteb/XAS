@@ -179,53 +179,7 @@ sub init {
 
     my $OS = $^O;
 
-    if (($OS eq "aix") or ($OS eq 'linux') or ($OS =~ /bsd/)) {
-
-        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
-            ? $ENV{'XAS_HOSTNAME'} 
-            : `hostname -s`;
-
-        chomp($self->{host});
-
-        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
-            ? $ENV{'XAS_ROOT'} 
-            : ['/']);
-
-        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
-            ? $ENV{'XAS_ETC'}   
-            : [$self->{root}, 'etc', 'xas']);
-
-        $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
-            ? $ENV{'XAS_TMP'} 
-            : ['/', 'tmp']);
-
-        $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
-            ? $ENV{'XAS_VAR'}   
-            : [$self->{root}, 'var']);
-
-        $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
-            ? $ENV{'XAS_LIB'}   
-            : [$self->{root}, 'var', 'lib', 'xas']);
-
-        $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
-            ? $ENV{'XAS_LOG'}   
-            : [$self->{root}, 'var', 'log', 'xas']);
-
-        $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
-            ? $ENV{'XAS_RUN'}   
-            : [$self->{root}, 'var', 'run', 'xas']);
-
-        $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
-            ? $ENV{'XAS_SPOOL'} 
-            : [$self->{root}, 'var', 'spool', 'xas']);
-
-        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
-          ? $ENV{'XAS_MXMAILER'} 
-          : 'sendmail';
-
-        $self->{username} = getpwuid($<);
-
-    } elsif ($OS eq "MSWin32") {
+    if ($OS eq "MSWin32") {
 
         require Win32;
 
@@ -273,11 +227,51 @@ sub init {
 
     } else {
 
-        $self->throw_msg(
-            'xas.lib.modules.environment.unknownos',
-            'environment_unknownos', 
-            $^O
-        );
+        # this assumes a unix like working environment
+
+        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+            ? $ENV{'XAS_HOSTNAME'} 
+            : `hostname -s`;
+
+        chomp($self->{host});
+
+        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+            ? $ENV{'XAS_ROOT'} 
+            : ['/']);
+
+        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
+            ? $ENV{'XAS_ETC'}   
+            : [$self->{root}, 'etc', 'xas']);
+
+        $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
+            ? $ENV{'XAS_TMP'} 
+            : ['/', 'tmp']);
+
+        $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
+            ? $ENV{'XAS_VAR'}   
+            : [$self->{root}, 'var']);
+
+        $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
+            ? $ENV{'XAS_LIB'}   
+            : [$self->{root}, 'var', 'lib', 'xas']);
+
+        $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
+            ? $ENV{'XAS_LOG'}   
+            : [$self->{root}, 'var', 'log', 'xas']);
+
+        $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
+            ? $ENV{'XAS_RUN'}   
+            : [$self->{root}, 'var', 'run', 'xas']);
+
+        $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
+            ? $ENV{'XAS_SPOOL'} 
+            : [$self->{root}, 'var', 'spool', 'xas']);
+
+        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+          ? $ENV{'XAS_MXMAILER'} 
+          : 'sendmail';
+
+        $self->{username} = getpwuid($<);
 
     }
 
@@ -313,8 +307,7 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, 
-                [
+            my ($p) = $self->validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
                 ],
                 "xas.lib.modules.environment.$datum"
@@ -332,8 +325,7 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, 
-                [
+            my ($p) = $self->validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
                 ],
                 "xas.lib.modules.environment.$datum"
