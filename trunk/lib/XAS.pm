@@ -12,10 +12,39 @@ XAS - Middleware for Datacenter Operations
 
 =head1 DESCRIPTION
 
-These are the base modules for writing applications within the XAS 
-Middleware for Datacenter Operations framework. These modules provide a 
-consistent and uniform method for writing applications typically used
-within a Operations Center.
+XAS is middleware for datacenter operations. Every datacenter has those little 
+one off scripts that perform some important task. Most of them were written 
+on the fly, to automate some specific task. These scripts have grown 
+organically, they may have actually become an important part of your 
+operations and they are generally a pain to maintain. Most of these scripts 
+are written in a shell language or an interpreted language such as Perl. They 
+have some important characteristics:
+
+=over 4
+
+=item * They have no consistent command structure.
+
+=item * They are not documented.
+
+=item * They represent an investment of time and money.
+
+=item * They are the accumulated knowledge of how your operations really work. 
+
+=back
+
+If you are trying to pull your operations into the 21st century, you need to
+refactor those scripts. You could throw them out and restart, but that would 
+be a waste of time and money. Your operations people have better things to do 
+then rewrite everything from scratch. More importantly, you could choose a 
+framework that helps you migrate those old scripts into something more modern. 
+XAS is that framework, and it will help you to refactor those old Perl scripts 
+into a modern code base.
+
+XAS does this by providing a consistent framework to write your operations 
+procedures. It is layered environment that allows you to follow accepted 
+practices for continuous integration and delivery of software.  
+
+The following section describes how this environment works.
 
 =head1 SEE ALSO
 
@@ -59,13 +88,13 @@ within a Operations Center.
 
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
+=item L<XAS::Lib::Iterator|XAS::Lib::Iterator>
+
 =item L<XAS::Lib::Mixins::Bufops|XAS::Lib::Mixins::Bufops>
 
 =item L<XAS::Lib::Mixins::Configs|XAS::Lib::Mixins::Configs>
 
 =item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
-
-=item L<XAS::Lib::Mixins::Iterator|XAS::Lib::Mixins::Iterator>
 
 =item L<XAS::Lib::Mixins::JSON::Client|XAS::Lib::Mixins::JSON::Client>
 
