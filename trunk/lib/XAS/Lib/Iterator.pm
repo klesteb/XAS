@@ -226,7 +226,9 @@ with the fields "key" and "value". Where "key" is the orignal key and "value"
 is the original value. The items will be sorted by the key.
 
 And lastly, you can use a delimited string. The delimiter can be white space
-or commas. This will be split into an array of items.
+or commas. This will be split into an array of sorted items.
+
+Sorting is done by Perls builtin sort function.
 
 =back
 
