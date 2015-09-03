@@ -537,7 +537,7 @@ The ID of the job, as returned from submit().
 
 The optional host that the job may be running on. Defaults to 'localhost'.
 
-=item <-jobname>
+=item B<-jobname>
 
 This will change the jobs name.
 

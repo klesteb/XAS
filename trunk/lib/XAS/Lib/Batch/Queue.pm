@@ -55,7 +55,7 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::Batch::Queue - A class for the XAS environment
 
 =head1 SYNOPSIS
 

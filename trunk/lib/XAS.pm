@@ -178,7 +178,7 @@ The following section describes how this environment works.
 
 Additional support is available at:
 
-  http://www.kesteb.us/trac
+  http://scm.kesteb.us/trac
 
 =head1 AUTHOR
 
