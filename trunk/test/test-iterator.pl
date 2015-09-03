@@ -50,3 +50,25 @@ for (my $x = 1; $x <= $iterator->count; $x++) {
 
 }
 
+printf("using find for 'test1'\n");
+
+my $pos = $iterator->find(sub {
+    my $item = shift;
+
+    return -1 if ('test1' lt $item);
+    return  1 if ('test1' gt $item);
+    return  0;
+
+});
+
+if ($pos > -1) {
+
+    $iterator->index($pos);
+    printf("pos: %s, index: %s, item: %s\n", $pos, $iterator->index, $iterator->item);
+
+} else {
+
+    printf("not found\n");
+
+}
+

@@ -8,7 +8,7 @@ communicate in well defined ways.
 
 This system is cross platform capable. It will run under Windows as well
 as Unix like environments without a code rewrite. This allows you to
-write your code once and run it where ever.
+write your code once and run it wherever.
 
 This code is based on a production system that has been running for over
 10 years. It incorporates the accumulated knowledge of running a

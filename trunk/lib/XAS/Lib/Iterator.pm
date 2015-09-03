@@ -6,8 +6,8 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  utils     => 'blessed',
-  constants => 'ARRAY HASH DELIMITER',
+  utils     => 'blessed dotid',
+  constants => 'ARRAY HASH DELIMITER CODE',
   constant => {
     SELF  => 0,
     DATA  => 0,
@@ -40,7 +40,7 @@ sub new {
 
     } elsif ($ref ne ARRAY) {
 
-        $data = [split(DELIMITER, $data)];
+        $data = [sort(split(DELIMITER, $data))];
 
     }
 
@@ -68,7 +68,7 @@ sub index {
         return $_[SELF]->[INDEX];
 
     }
-    
+
 }
 
 sub count {
@@ -83,12 +83,6 @@ sub last {
     $_[SELF]->[INDEX] = $_[SELF]->[SIZE] - 1;
 }
 
-sub item {
-    $_[SELF]->[INDEX] >= 0 && $_[SELF]->[INDEX] < $_[SELF]->[SIZE]
-      ? $_[SELF]->[DATA]->[ $_[SELF]->[INDEX] ]
-      : undef;
-}
-
 sub prev {
     $_[SELF]->[INDEX] < 1
       ? undef
@@ -99,6 +93,34 @@ sub next {
     $_[SELF]->[INDEX] >= $_[SELF]->[SIZE]
       ? undef
       : $_[SELF]->[DATA]->[ ++$_[SELF]->[INDEX] ];
+}
+
+sub find {
+
+    my $left = 0;
+    my $right = $_[SELF]->[SIZE] - 1;
+    my $callback = $_[1] || undef;
+
+    if (defined($callback) && (ref($callback) eq CODE)) {
+
+        return _bsearch($_[SELF], $left, $right, $callback);
+
+    } else {
+
+        $_[SELF]->throw_msg(
+            dotid($_[SELF]->class) . '.find',
+            'invparams',
+            'parameter 1 needs to be a code reference',
+        );
+
+    }
+
+}
+
+sub item {
+    $_[SELF]->[INDEX] >= 0 && $_[SELF]->[INDEX] < $_[SELF]->[SIZE]
+      ? $_[SELF]->[DATA]->[ $_[SELF]->[INDEX] ]
+      : undef;
 }
 
 sub items {
@@ -126,6 +148,38 @@ sub items {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub _bsearch {
+    my $self    = shift;
+    my $left    = shift;
+    my $right   = shift;
+    my $compare = shift;
+
+    if ($right < $left) {
+
+        return -1;
+
+    }
+
+    my $mid  = ($left + $right) >> 1;
+    my $item = $self->[DATA]->[$mid];
+    my $x    = $compare->($item);
+
+    if ($x > 0) {
+
+        return _bsearch($self, $mid + 1, $right, $compare);
+
+    } elsif ($x < 0) {
+
+        return _bsearch($self, $left, $mid - 1, $compare);
+
+    } else {
+
+        return $mid + 1;
+
+    }
+
+}
 
 1;
 
@@ -197,6 +251,30 @@ Return or set the current position of the index.
 =item B<$position>
 
 The optional position within the index. This is ones based.
+
+=back
+
+=head2 find($callback)
+
+This method will find an item within the items. It will return the position
+in the index or -1;
+
+=over 4
+
+=item B<$callback>
+
+The comparison routine. It is passed an item for comparision. The routine
+should return the following:
+
+=over 4
+
+=item * 1  if the item is greater then what is wanted.
+
+=item * -1 if the item is lesser then what is wanted.
+
+=item * 0  if they match.
+
+=back
 
 =back
 
