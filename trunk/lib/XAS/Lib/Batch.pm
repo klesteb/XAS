@@ -109,13 +109,14 @@ This defines the interface to load. It defaults to L<XAS::Lib::Batch::Interface:
 
 This method will run a command and capture its output. If an non zero return
 code is detected, it will throw an exception with that return code and the 
-first line returned on STDOUT.
+first output line returned.
 
 =over 4
 
 =item B<$command>
 
-The command to execute in the background using Perl's backtick function.
+The command to execute in the background using Perl's backtick function. STDERR
+is redirected into STDOUT.
 
 =back
 
