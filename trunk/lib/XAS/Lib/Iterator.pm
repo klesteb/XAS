@@ -259,7 +259,7 @@ The optional position within the index. This is ones based.
 =head2 find($callback)
 
 This method will find an item within the items. It will return the position
-in the index or -1;
+in the index or -1.
 
 =over 4
 
@@ -286,7 +286,7 @@ Return the next item and increment the index.
 
 =head2 prev
 
-Return the previous item and decrement the index.
+Return the previous item and decrements the index.
 
 =head2 item
 
