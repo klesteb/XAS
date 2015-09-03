@@ -270,11 +270,11 @@ should return the following:
 
 =over 4
 
-=item * 1  if the item is greater then what is wanted.
+=item *  1 if the item is greater then what is wanted.
 
 =item * -1 if the item is lesser then what is wanted.
 
-=item * 0  if they match.
+=item *  0 if they match.
 
 =back
 
@@ -290,11 +290,11 @@ Return the previous item and decrement the index.
 
 =head2 item
 
-Return the item at the current position.
+Return the item at the current index position.
 
 =head2 items
 
-Return a slice of the items from the current position to the end.
+Return a slice of the items from the current index position to the end.
 
 =head1 SEE ALSO
 
