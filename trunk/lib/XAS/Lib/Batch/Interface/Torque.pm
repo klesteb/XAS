@@ -198,6 +198,42 @@ sub do_job_rerun {
 
 }
 
+sub do_job_alter {
+    my $self = shift;
+    my ($p) = $self->validate_params(\@_, [
+        { type => HASHREF }
+    ]);
+
+    my $cmd;
+    my $after   = _create_after($self, $p->{'after'});
+    my $jobid   = _create_jobid($self, $p->{'job'}, $p->{'host'});
+    my $outpath = _create_path($self, $p->{'out_path'}, $p->{'host'});
+    my $errpath = _create_path($self, $p->{'error_path'}, $p->{'host'});
+
+    $cmd .= sprintf('%s ', QALTER);
+    $cmd .= sprintf('-a %s ', $after)            if (defined($p->{'after'}));
+    $cmd .= sprintf('-A %s ', $p->{'account'})   if (defined($p->{'account'}));
+    $cmd .= sprintf('-e %s ', $errpath)          if (defined($p->{'error_path'}));
+    $cmd .= sprintf('-h %s ', $p->{'hold'})      if (defined($p->{'hold'}));
+    $cmd .= sprintf('-l "%s" ', $p->{'resources'}) if (defined($p->{'resources'}));
+    $cmd .= sprintf('-m %s ', $p->{'mail_points'}) if (defined($p->{'mail_points'}));
+    $cmd .= sprintf('-M "%s" ', $p->{'email'})   if (defined($p->{'email'}));
+    $cmd .= sprintf('-n %s ', $p->{'exclusive'}) if (defined($p->{'exclusive'}));
+    $cmd .= sprintf('-N %s ', $p->{'jobname'})   if (defined($p->{'jobname'}));
+    $cmd .= sprintf('-o %s ', $outpath)          if (defined($p->{'out_path'}));
+    $cmd .= sprintf('-p %s ', $p->{'priority'})  if (defined($p->{'priority'}));
+    $cmd .= sprintf('-r %s ', $p->{'rerunable'}) if (defined($p->{'rerunnable'}));
+    $cmd .= sprintf('-S "%s" ', $p->{'shell_path'}) if (defined($p->{'shell_path'}));
+    $cmd .= sprintf('-u "%s" ', $p->{'user'})    if (defined($p->{'user'}));
+    $cmd .= sprintf('-W "%s" ', $p->{'attributes'}) if (defined($p->{'attributes'}));
+    $cmd .= sprintf('%s', $jobid);
+
+    my $output = $self->do_cmd($cmd, 'qalter');
+
+    return 1;
+
+}
+
 sub do_queue_stat {
     my $self = shift;
     my ($p) = $self->validate_params(\@_, [
@@ -341,6 +377,41 @@ sub _create_queue {
 
 }
 
+sub _create_path {
+    my $self = shift;
+    my $path = shift || undef;
+    my $host = shift || undef;
+
+    my $fqpath;
+
+    if (defined($host)) {
+
+        $fqpath = sprintf("%s:%s", $host, $path);
+
+    } else {
+
+        $fqpath = $path;
+
+    }
+
+    return $fqpath;
+
+}
+
+sub _create_after {
+    my $self = shift;
+    my $after = shift || undef;
+
+    if (defined($after)) {
+
+        $after = $after->strftime('%Y%m%d%H%M');
+
+    }
+
+    return $after;
+
+}
+
 sub _parse_output {
     my $self = shift;
     my ($output) = $self->validate_params(\@_, [
@@ -401,26 +472,10 @@ sub _create_jobfile {
         { type => HASHREF }
     ]);
 
-    my $after;
-    my $logfile;
     my $job = $p->{'jobfile'};
     my $fh  = $job->open('w');
-
-    if (defined($p->{'host'})) {
-
-        $logfile = sprintf("%s:%s", $p->{'host'}, $p->{'logfile'});
-
-    } else {
-
-        $logfile = $p->{'logfile'};
-
-    }
-
-    if (defined($p->{'after'})) {
-
-        $after = $p->{'after'}->strftime('%Y%m%d%H%M');
-
-    }
+    my $after   = _create_after($self, $p->{'after'});
+    my $logfile = _create_path($self, $p->{'logfile'}, $p->{'host'});
 
     $fh->printf("#!/bin/sh\n");
     $fh->printf("#\n");
