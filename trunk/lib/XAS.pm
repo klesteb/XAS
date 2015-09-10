@@ -114,7 +114,7 @@ The following section describes how this environment works.
 
 =item L<XAS::Lib::Modules::Log::Console|XAS::Lib::Modules::Log::Console>
 
-=item L<XAS::Lib::Modules::Log::Files|XAS::Lib::Modules::Log::Files>
+=item L<XAS::Lib::Modules::Log::File|XAS::Lib::Modules::Log::File>
 
 =item L<XAS::Lib::Modules::Log::Json|XAS::Lib::Modules::Log::Json>
 

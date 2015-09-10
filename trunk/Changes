@@ -48,3 +48,8 @@ Revision history for XAS
 0.10    13-Jul-2015 Kevin L. Esteb
         More fixes for CPAN testers
 
+0.11    09-Sep-2015 Kevin L. Esteb
+        Added handling for Batch Systems
+        Added a general purpose iterator
+        Documentation fixes
+        

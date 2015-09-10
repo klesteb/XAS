@@ -384,7 +384,7 @@ using the following variables:
 =item B<XAS_ROOT>
 
 The root of the directory structure. On Unix like boxes this will be 
-/usr/local and Windows this will be C:\xas.
+/ and Windows this will be C:\xas.
 
 =item B<XAS_LOG>
 

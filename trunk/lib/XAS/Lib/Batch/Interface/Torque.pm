@@ -521,7 +521,7 @@ XAS::Lib::Batch::Interface::Torque - A mixin for the XAS environment
  use XAS::Class
    debug   => 0,
    version => '0.01',
-   base    => 'XAS::Base',
+   base    => 'XAS::Lib::Batch',
    mixin   => 'XAS::Lib::Batch::Interface::Torque'
 ;
 

@@ -86,7 +86,8 @@ This method initializes the module and takes these parameters:
 
 =item B<-interface>
 
-The command line interface to use. This defaults to 'XAS::Lib::Batch::Interface::Torque'.
+The command line interface to use. This defaults to 
+L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>.
 
 =back
 
