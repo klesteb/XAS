@@ -1,6 +1,6 @@
 package XAS::Lib::Stomp::POE::Filter;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Lib::Stomp::Parser;
 
@@ -9,10 +9,15 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'filter eol',
-  constants => 'CRLF',
+  constants => 'CRLF :stomp',
   constant => {
-    LF  => "\n",
+    LF => "\n",
   },
+  vars => {
+    PARAMS => {
+      -target => { optional => 1, default => undef, regex => STOMP_LEVELS },
+    }
+  }
 ;
 
 #use Data::Hexdumper;
@@ -85,8 +90,14 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{eol} = ($self->env->mqlevel > 1.1) ? CRLF : LF;
-    $self->{filter} = XAS::Lib::Stomp::Parser->new();
+    unless (defined($self->{target})) {
+
+        $self->{target} = $self->env->mqlevel;
+
+    }
+
+    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
+    $self->{filter} = XAS::Lib::Stomp::Parser->new(-target => $self->target);
 
     return $self;
 

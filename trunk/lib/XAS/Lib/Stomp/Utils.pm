@@ -1,13 +1,19 @@
 package XAS::Lib::Stomp::Utils;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use XAS::Lib::Stomp::Frame;
+use XAS::Constants ':stomp';
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  vars => {
+    PARAMS => {
+      -target  => { optional => 1, default => undef, regex => STOMP_LEVELS },
+    }
+  }
 ;
 
 #use Data::Dumper;
@@ -36,7 +42,7 @@ sub connect {
     $header->{'login'}    = $p->{'login'}    if (defined($p->{'login'}));
     $header->{'passcode'} = $p->{'passcode'} if (defined($p->{'passcode'}));
 
-    if ($self->env->mqlevel > 1.0) {
+    if ($self->target > 1.0) {
 
         $header->{'host'}           = $p->{'host'};
         $header->{'heart-beat'}     = $p->{'heart_beat'};
@@ -74,12 +80,12 @@ sub stomp {
     my $frame;
     my $header = {};
 
-    if ($self->env->mqlevel == 1.0) {
+    if ($self->target == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.stomp.nosup',
             'stomp_no_support',
-            $self->env->mqlevel,
+            $self->target,
             'stomp'
         );
 
@@ -89,7 +95,7 @@ sub stomp {
     $header->{'passcode'}      = $p->{'passcode'} if (defined($p->{'passcode'}));
     $header->{'prefetch-size'} = $p->{'prefetch'} if (defined($p->{'prefetch'}));
 
-    if ($self->env->mqlevel > 1.0) {
+    if ($self->target > 1.0) {
 
         $header->{'host'}           = $p->{'host'};
         $header->{'heart-beat'}     = $p->{'heart_beat'};
@@ -125,7 +131,7 @@ sub subscribe {
     $header->{'destination'}    = $p->{'destination'};
     $header->{'receipt'}        = $p->{'receipt'} if (defined($p->{'receipt'}));
 
-    if (defined($p->{'-id'})) {
+    if (defined($p->{'id'})) {
 
         $header->{'id'} = $p->{'id'};
 
@@ -133,12 +139,12 @@ sub subscribe {
 
         # v1.1 and greater must have an id header
 
-        if ($self->env->mqlevel > 1.0) {
+        if ($self->target > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.subscribe',
                 'stomp_no_id',
-                $self->env->mqlevel
+                $self->target
                 
             );
 
@@ -190,12 +196,12 @@ sub unsubscribe {
         $self->throw_msg(
             'xas.lib.stomp.utils.unsubscribe.invparams',
             'stomp_invalid_params',
-            $self->env->mqlevel
+            $self->target
         );
 
     }
 
-    if ($self->env->mqlevel > 1.0) {
+    if ($self->target > 1.0) {
 
         # v1.1 and greater must have an id header
 
@@ -204,7 +210,7 @@ sub unsubscribe {
             $self->throw_msg(
                 'xas.lib.stomp.utils.unsubscribe.noid',
                 'stomp_no_id',
-                $self->env->mqlevel
+                $self->target
             );
 
         }
@@ -305,7 +311,7 @@ sub ack {
     $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
 
-    if ($self->env->mqlevel < 1.2) {
+    if ($self->target < 1.2) {
 
         $header->{'message-id'} = $p->{'message_id'};
 
@@ -321,12 +327,12 @@ sub ack {
 
     } else {
 
-        if ($self->env->mqlevel > 1.0) {
+        if ($self->target > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.ack.nosup',
                 'stomp_no_subscription',
-                $self->env->mqlevel
+                $self->target
             );
 
         }
@@ -358,18 +364,18 @@ sub nack {
     $header->{'receipt'}     = $p->{'receipt'}     if (defined($p->{'receipt'}));
     $header->{'transaction'} = $p->{'transaction'} if (defined($p->{'transaction'}));
 
-    if ($self->env->mqlevel == 1.0) {
+    if ($self->target == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.nack',
             'stomp_no_support',
-            $self->env->mqlevel,
+            $self->target,
             'nack'
         );
 
     }
 
-    if ($self->env->mqlevel < 1.2) {
+    if ($self->target < 1.2) {
 
         $header->{'message-id'} = $p->{'message_id'};
 
@@ -385,12 +391,12 @@ sub nack {
 
     } else {
 
-        if ($self->env->mqlevel > 1.0) {
+        if ($self->target > 1.0) {
 
             $self->throw_msg(
                 'xas.lib.stomp.utils.nact',
                 'stomp_no_support',
-                $self->env->mqlevel,
+                $self->target,
                 'nack'
             );
 
@@ -454,7 +460,7 @@ sub send {
         $header->{'content-length'} = defined($p->{'length'}) ? $p->{'length'} : length($body);
     }
 
-    if ($self->env->mqlevel > 1.0) {
+    if ($self->target > 1.0) {
 
         $header->{'content-type'} = $p->{'type'};
 
@@ -475,12 +481,12 @@ sub noop {
 
     my $frame;
 
-    if ($self->env->mqlevel == 1.0) {
+    if ($self->target == 1.0) {
 
         $self->throw_msg(
             'xas.lib.stomp.utils.noop.nosup',
             'stomp_no_support',
-            $self->env->mqlevel,
+            $self->target,
             'noop'
         );
 
@@ -499,6 +505,21 @@ sub noop {
 # -----------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    unless (defined($self->{target})) {
+
+        $self->{target} = $self->env->mqlevel;
+
+    }
+
+    return $self;
+
+}
 
 sub _match {
     my $buffer = shift;

@@ -1,6 +1,8 @@
 package XAS::Lib::Stomp::Frame;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
+
+use XAS::Constants 'CRLF :stomp';
 
 use XAS::Class
   debug     => 0,
@@ -8,7 +10,6 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'eol header',
   mutators  => 'command body',
-  constants => 'CRLF',
   codec     => 'unicode',
   constant => {
       LF  => "\n",
@@ -19,6 +20,7 @@ use XAS::Class
       -body    => { optional => 1, default => undef },
       -command => { optional => 1, default => undef },
       -headers => { optional => 1, default => undef },
+      -target  => { optional => 1, default => undef, regex => STOMP_LEVELS },
     }
   }
 ;
@@ -60,7 +62,7 @@ sub as_string {
 
     }
 
-    if ($self->env->mqlevel > 1.1) {
+    if ($self->target > 1.1) {
 
         $frame = encode('utf8', $command) . $self->eol;
 
@@ -82,7 +84,7 @@ sub as_string {
 
     if (keys %{$headers}) {
 
-        $self->_encode_headers(\$headers) if ($self->env->mqlevel > 1.1);
+        $self->_encode_headers(\$headers) if ($self->target > 1.1);
 
         while (my ($key, $value) = each(%{$headers})) {
 
@@ -117,11 +119,17 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
     
+    unless (defined($self->{target})) {
+
+        $self->{target} = $self->env->mqlevel;
+
+    }
+
     my $headers = $self->headers || {};
 
-    $self->{eol} = ($self->env->mqlevel > 1.1) ? CRLF : LF;
+    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
 
-    $self->_decode_headers(\$headers) if ($self->env->mqlevel > 1.1);
+    $self->_decode_headers(\$headers) if ($self->target > 1.1);
     $self->{header} = XAS::Lib::Stomp::Frame::Headers->new($headers);
 
     return $self;

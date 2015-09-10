@@ -1,15 +1,21 @@
 package XAS::Lib::Stomp::Parser;
 
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 
 use XAS::Lib::Stomp::Frame;
+use XAS::Constants ':stomp';
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  mixin   => 'XAS::Lib::Mixins::Bufops',
-  utils   => 'trim',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Bufops',
+  utils     => 'trim',
+  vars => {
+    PARAMS => {
+      -target  => { optional => 1, default => undef, regex => STOMP_LEVELS },
+    }
+  }
 ;
 
 our $EOF    = "\000";
@@ -129,7 +135,7 @@ sub parse {
                     # the last defined header is honored. The duplictes
                     # are discarded.
 
-                    if ($self->env->mqlevel < 1.2) {
+                    if ($self->target < 1.2) {
 
                         $self->{headers}->{$key} = $value;
 
@@ -234,7 +240,13 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
-    
+
+    unless (defined($self->{target})) {
+
+        $self->{target} = $self->env->mqlevel;
+
+    }
+
     $self->{state} = 'command';
 
     return $self;

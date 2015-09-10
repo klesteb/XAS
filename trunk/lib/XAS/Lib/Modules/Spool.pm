@@ -24,6 +24,8 @@ use XAS::Class
   }
 ;
 
+use Data::Dumper;
+
 # ------------------------------------------------------------------------
 # Public Methods
 # ------------------------------------------------------------------------
@@ -96,7 +98,7 @@ sub write {
 
         $self->throw_msg(
             dotid($self->class) . '.write.lock_error', 
-            'lock_error', 
+            'spooler_lock_error', 
             $self->directory->path
         ); 
 
@@ -110,13 +112,14 @@ sub scan {
     my $self = shift;
 
     my @files;
-    my $pattern = qr/$self->extension/i;
+    my $regex = $self->extension;
+    my $pattern = qr/$regex/i;
 
     if ($self->lockmgr->lock_directory($self->directory)) {
 
-        @files = sort(grep( $_->path =~ /$pattern/, $self->directory->files() ));
+        @files = sort(grep( $_->path =~ $pattern, $self->directory->files() ));
         $self->lockmgr->unlock_directory($self->directory);
-
+        
     } else {
 
         $self->throw_msg(
@@ -171,11 +174,12 @@ sub count {
 
     my @files;
     my $count;
-    my $pattern = qr/$self->extension/i;
+    my $regex = $self->extension;
+    my $pattern = qr/$regex/i;
 
     if ($self->lockmgr->lock_directory($self->directory)) {
 
-        @files = grep( $_->path =~ /$pattern/, $self->directory->files() );
+        @files = grep( $_->path =~ $pattern, $self->directory->files() );
         $count = scalar(@files);
 
         $self->lockmgr->unlock_directory($self->directory);
@@ -247,7 +251,7 @@ sub sequence {
     my $seqnum;
     my $mask = $self->mask + 0;
     my $file = File($self->directory, $self->seqfile);
-
+    
     try {
 
         if ($file->exists) {
