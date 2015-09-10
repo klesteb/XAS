@@ -1,15 +1,15 @@
 package XAS::Lib::Stomp::POE::Filter;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use XAS::Lib::Stomp::Parser;
+use XAS::Constants 'CRLF :stomp';
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'filter eol',
-  constants => 'CRLF :stomp',
   constant => {
     LF => "\n",
   },

@@ -2,7 +2,7 @@ package XAS::Lib::Stomp::Frame;
 
 our $VERSION = '0.03';
 
-use XAS::Constants 'CRLF :stomp';
+use XAS::Constants 'CRLF LF :stomp';
 
 use XAS::Class
   debug     => 0,
@@ -11,10 +11,6 @@ use XAS::Class
   accessors => 'eol header',
   mutators  => 'command body',
   codec     => 'unicode',
-  constant => {
-      LF  => "\n",
-      EOF => "\000",
-  },
   vars => {
     PARAMS => {
       -body    => { optional => 1, default => undef },
@@ -104,7 +100,7 @@ sub as_string {
 
     $frame .= $self->eol();
     $frame .= $body;
-    $frame .= EOF;
+    $frame .= STOMP_EOF;
 
     return $frame;
 

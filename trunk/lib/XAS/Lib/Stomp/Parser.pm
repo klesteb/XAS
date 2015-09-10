@@ -18,12 +18,13 @@ use XAS::Class
   }
 ;
 
-our $EOF    = "\000";
-our $CNTRL  = qr((?:[[:cntrl:]])+);
-our $HEADER = qr(([\w\-~]+)\s*:\s*(.*));
-our $EOL    = qr((\015\012?|\012\015?|\015|\012));
-our $BEOH   = qr((\015\012\000?|\012\015\000?|\015\000|\012\000));
-our $EOH    = qr((\015\012\015\012?|\012\015\012\015?|\015\015|\012\012));
+
+my $HEADER = STOMP_HEADER;
+my $CNTRL  = STOMP_CNTRL;
+my $BEOH   = STOMP_BEOH;
+my $EOF    = STOMP_EOF;
+my $EOH    = STOMP_EOH;
+my $EOL    = STOMP_EOL;
 
 #use Data::Dumper;
 #use Data::Hexdumper;
