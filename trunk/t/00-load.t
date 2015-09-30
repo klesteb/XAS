@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 51;
+use Test::More tests => 50;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -20,7 +20,6 @@ BEGIN {
     use_ok( 'XAS::Lib::Curl::HTTP' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Configs' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Handlers' )       || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Mixins::Iterator' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Keepalive' )      || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::JSON::Client' )   || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::JSON::Server' )   || print "Bail out!\n";

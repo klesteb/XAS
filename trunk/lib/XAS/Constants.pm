@@ -65,8 +65,8 @@ use Badger::Class
 
       # stomp
 
-      STOMP_LEVELS => qr/1\.[0-2]/,
       STOMP_EOF    => "\000",
+      STOMP_LEVELS => qr/1\.[0-2]/,
       STOMP_CNTRL  => qr((?:[[:cntrl:]])+),
       STOMP_HEADER => qr(([\w\-~]+)\s*:\s*(.*)),
       STOMP_EOL    => qr((\015\012?|\012\015?|\015|\012)),
@@ -143,13 +143,19 @@ constants.
 
  ALERT_PRIORITY ALERT_FACILITY
  
+ STOMP_LEVELS STOMP_EOF STOMP_CNTRL STOMP_HEADER STOMP_EOL 
+ STOMP_BEOH STOMP_EOH
+
+ CR LF
+
  Along with these tags
 
  jsonrpc
  supervisor
  logging
  alerts
- 
+ stomp
+
 =head1 SEE ALSO
 
 =over 4
