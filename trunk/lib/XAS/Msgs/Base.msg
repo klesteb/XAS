@@ -87,6 +87,7 @@ stomp_no_subscription        = v%s requires a subscription
 stomp_badval                 = invalid header value
 stomp_badkey                 = invalid header key
 tcp_keepalive_enabled        = %s: tcp_keepalive enabled
+unknownerror                 = unknown error: %s
 xml_error                    = %s
 xml_parser                   = unable to parse the document
 xml_validate                 = unable to validate the document
