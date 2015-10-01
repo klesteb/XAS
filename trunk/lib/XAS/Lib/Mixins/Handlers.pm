@@ -19,8 +19,8 @@ sub exception_handler {
 
     my ($ex) = $self->validate_params(\@_, [1]);
 
-    my $errors = $self->parse_exception($ex);
     my $script = $self->class->any_var('SCRIPT');
+    my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->error($errors);
 
@@ -65,7 +65,7 @@ sub error_handler {
     my $self = shift;
 
     my ($ex) = $self->validate_params(\@_, [1]);
-    my $errors = $self->parse_exception($ex);
+    my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->error($errors);
 
