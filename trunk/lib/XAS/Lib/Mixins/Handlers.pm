@@ -1,6 +1,6 @@
 package XAS::Lib::Mixins::Handlers;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Class
   debug   => 0,
@@ -24,7 +24,7 @@ sub exception_handler {
 
     $self->log->error($errors);
 
-    if ($self->alerts->check) {
+    if ($self->env->alerts) {
 
         $self->alert->send(
             -process  => $script,
@@ -46,7 +46,7 @@ sub exit_handler {
 
     $self->log->fatal($errors);
 
-    if ($self->alerts) {
+    if ($self->env->alerts) {
 
         $self->alert->send(
             -process  => $script,
