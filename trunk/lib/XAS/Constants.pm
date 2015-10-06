@@ -7,30 +7,6 @@ use Badger::Class
   version => $VERSION,
   base    => 'Badger::Constants',    # grab the badger constants
   constant => {
-      XAS_QUEUE  => '/queue/xas',
-
-      # Supervisor
-
-      START      => 'start',
-      STOP       => 'stop',
-      EXIT       => 'exit',
-      RELOAD     => 'reload',
-      STAT       => 'stat',
-      #
-      RUNNING    => 'running',
-      ALIVE      => 'alive',
-      DEAD       => 'dead',
-      NOCMD      => 'nocmd',
-      #
-      STOPPED    => 'stopped',
-      STARTED    => 'started',
-      RELOADED   => 'reloaded',
-      STATED     => 'stated',
-      EXITED     => 'exited',
-      #
-      SHUTDOWN   => 'shutdown',
-      KILLME     => 'killme',
-      PROC_ROOT  => '/proc',
 
       # generic
 
@@ -73,6 +49,9 @@ use Badger::Class
       STOMP_BEOH   => qr((\015\012\000?|\012\015\000?|\015\000|\012\000)),
       STOMP_EOH    => qr((\015\012\015\012?|\012\015\012\015?|\015\015|\012\012)),
 
+      # lockmgr
+
+      LOCK         => '__LOCK__',
   },
   exports => {
       all => 'RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
@@ -83,7 +62,7 @@ use Badger::Class
               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD
               LOG_LEVELS LOG_TYPES LOG_FACILITY ALERT_PRIORITY ALERT_FACILITY
               STOMP_LEVELS  STOMP_EOF STOMP_CNTRL STOMP_HEADER STOMP_EOL 
-              STOMP_BEOH STOMP_EOH LF CR',
+              STOMP_BEOH STOMP_EOH LF CR LOCK',
       any => 'RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
               RPC_ERR_REQ RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL 
               RPC_ERR_SERVER RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN 
@@ -92,14 +71,11 @@ use Badger::Class
               STATED EXITED SHUTDOWN KILLME PROC_ROOT NOCMD
               LOG_LEVELS LOG_TYPES LOG_FACILITY ALERT_PRIORITY ALERT_FACILITY
               STOMP_LEVELS  STOMP_EOF STOMP_CNTRL STOMP_HEADER STOMP_EOL 
-              STOMP_BEOH STOMP_EOH LF CR',
+              STOMP_BEOH STOMP_EOH LF CR LOCK',
       tags => {
           jsonrpc => 'RPC_JSON RPC_DEFAULT_PORT RPC_DEFAULT_ADDRESS RPC_ERR_PARSE 
                       RPC_ERR_REQ RPC_ERR_METHOD RPC_ERR_PARAMS RPC_ERR_INTERNAL 
                       RPC_ERR_SERVER RPC_SRV_ERR_MAX RPC_SRV_ERR_MIN RPC_ERR_APP',
-          supervisor => 'START STOP EXIT RELOAD STAT RUNNING ALIVE DEAD 
-                         STOPPED STARTED RELOADED STATED EXITED SHUTDOWN 
-                         KILLME PROC_ROOT NOCMD',
           logging => 'LOG_LEVELS LOG_TYPES LOG_FACILITY',
           alerts  => 'ALERT_PRIORITY ALERT_FACILITY',
           stomp   => 'STOMP_LEVELS STOMP_EOF STOMP_CNTRL STOMP_HEADER 
@@ -151,7 +127,6 @@ constants.
  Along with these tags
 
  jsonrpc
- supervisor
  logging
  alerts
  stomp

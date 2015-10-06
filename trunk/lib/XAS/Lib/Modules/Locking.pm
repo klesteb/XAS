@@ -117,7 +117,7 @@ sub init {
         -hold   => $self->hold,
         -delay  => $self->delay,
         -wfunc  => sub { my $msg = shift; $self->log->warn($msg); },
-        -efunc  => sub { my $msg = shift; $self->log->error($msg); }
+        -efunc  => sub { my $msg = shift; $self->log->error($msg); },
     );
 
     return $self;
