@@ -2,8 +2,6 @@ package XAS::Lib::Lockmgr;
 
 our $VERSION = '0.01';
 
-use Params::Validate 'HASHREF';
-
 use XAS::Class
   debug   => 0,
   version => $VERSION,

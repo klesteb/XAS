@@ -4,16 +4,27 @@ our $VERSION = '0.01';
 
 use Try::Tiny;
 use IPC::Semaphore;
+use XAS::Lib::Lockmgr::SharedMem;
 use Errno qw( EAGAIN EINTR );
 use IPC::SysV qw( IPC_CREAT IPC_RMID IPC_SET SEM_UNDO IPC_NOWAIT );
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   constants => 'TRUE FALSE LOCK',
   utils     => 'numlike textlike dotid',
-  mixins    => 'lock unlock try_lock allocate deallocate destroy init_driver',
+  constant => {
+    BUFSIZ => 256,
+  },
 ;
+
+# ----------------------------------------------------------------------
+# Constant Variables
+# ----------------------------------------------------------------------
+
+my $BLANK = pack('A256', '');
+my $LOCK  = pack('A256', LOCK);
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -23,25 +34,46 @@ sub allocate {
     my $self = shift;
     my ($key) = $self->validate_params(\@_, [1]);
 
+    my $buffer;
+    my $skey = pack('A256', $key);
     my $size = $self->args->{'nsems'};
 
-    if (scalar($self->{'locktable'})) < $size) {
+    try {
 
-        unless (grep { $_ eq $key } @$self->{'locktable'}) {
+        if (_lock_semaphore($self, 0)) {
 
-            push(@{$self->{'locktable'}}, $key);
+            for (my $x = 1; $x < $size; $x++) {
+
+                $buffer = $self->{'shmem'}->read($x, BUFSIZ) or die $!;
+                if ($buffer eq $BLANK) {
+
+                    $self->{'shmem'}->write($skey, $x, BUFSIZ) or die $!;
+                    last;
+
+                }
+
+            }
+
+            _unlock_semaphore($self, 0);
+
+        } else {
+
+            die 'unable to aquire the base lock';
 
         }
 
-    } else {
+    } catch {
 
+        my $ex = $_;
+
+        _unlock_semaphore($self, 0);
         $self->throw_msg(
             dotid($self->class) . '.allocate',
             'lock_allocate',
             $ex
         );
 
-    }
+    };
 
 }
 
@@ -49,24 +81,39 @@ sub deallocate {
     my $self = shift;
     my ($key) = $self->validate_params(\@_, [1]);
 
-    my @keys;
-    my $semano = _get_semano($self, $key);
+    my $buffer;
+    my $skey = pack('A256', $key);
+    my $size = $self->args->{'nsems'};
 
     try {
 
-        if ($semano) {
+        if (_lock_semaphore($self, 0)) {
 
-            _unlock_semaphore($self, $semano);
+            for (my $x = 1; $x < $size; $x++) {
 
-            @keys = grep { $_ ne $key } $self->{'locktable'};
-            $self->{'locktable'} = \@keys;
-            
+                $buffer = $self->{'shmem'}->read($x, BUFSIZ) or die $!;
+                if ($buffer eq $skey) {
+
+                    $self->{'shmem'}->write($BLANK, $x, BUFSIZ) or die $!;
+                    last;
+
+                }
+
+            }
+
+            _unlock_semaphore($self, 0);
+
+        } else {
+
+            die 'unable to aquire the base lock';
+
         }
 
     } catch {
 
         my $ex = $_;
 
+        _unlock_semaphore($self, 0);
         $self->throw_msg(
             dotid($self->class) . '.deallocate',
             'lock_deallocate',
@@ -81,9 +128,20 @@ sub lock {
     my $self = shift;
     my ($key) = $self->validate_params(\@_, [1]);
 
-    my $semno = _get_semano($self, $key);
+    my $stat;
+    my $semno;
 
-    return _lock_semaphore($self, $semno);
+    if (($semno = _get_semaphore($self, $key)) > 0) {
+
+        $stat = _lock_semaphore($self, $semno);
+
+    } else {
+
+        $stat = FALSE;
+
+    }
+
+    return $stat;
 
 }
 
@@ -91,9 +149,13 @@ sub unlock {
     my $self = shift;
     my ($key) = $self->validate_params(\@_, [1]);
 
-    my $semno = _get_semano($self, $key);
+    my $semno;
 
-    return _unlock_semaphore($self, $semno);
+    if (($semno = _get_semaphore($self, $key)) > 0) {
+
+        _unlock_semaphore($self, $semno);
+
+    }
 
 }
 
@@ -101,18 +163,31 @@ sub try_lock {
     my $self = shift;
     my ($key) = $self->validate_params(\@_, [1]);
 
-    my $semno = _get_semano($self, $key);
+    my $semno;
+    my $stat = FALSE;
 
-    return $self->{'engine'}->getncnt($semno) ? FALSE : TRUE;
+    if (($semno = _get_semaphore($self, $key)) > 0) {
+
+        $stat = $self->{'engine'}->getncnt($semno) ? FALSE : TRUE;
+
+    }
+
+    return $stat;
 
 }
 
 sub destroy {
     my $self = shift;
 
-    if (defined($self->{'engine'})) {
+    if (defined($self->{engine})) {
 
         $self->{'engine'}->remove();
+
+    }
+
+    if (defined($self->{shmem})) {
+
+        $self->{'shmem'}->remove();
 
     }
 
@@ -131,9 +206,7 @@ sub init_driver {
     my $size;
     my $buffer;
 
-    $self->{'locktable'} = ();
-
-    unless (defined($self->args->{'mode'})) {
+    unless (defined($aelf->args->{'mode'})) {
 
         # We are being really liberal here... but apache pukes on the
         # defaults.
@@ -144,9 +217,9 @@ sub init_driver {
 
     if (defined($self->args->{'uid'})) {
 
-        $uid = $self->args->{'uid'};
+        $uid = $self->args->{'gid'};
 
-        unless (numlike($self->args->{'uid'})) {
+        unless (numlike($self->args->{'gid'})) {
 
             $uid = getpwnam($self->args->{'uid'});
 
@@ -157,8 +230,6 @@ sub init_driver {
         $uid = $>;
 
     }
-
-    $self->args->{'uid'} = $uid;
 
     if (defined($self->args->{'gid'})) {
 
@@ -176,8 +247,6 @@ sub init_driver {
 
     };
 
-    $self->args->{'gid'} = $gid;
-  
     if (! defined($self->args->{'nsems'})) {
 
         if ($^O eq "aix") {
@@ -200,7 +269,7 @@ sub init_driver {
 
     }
 
-    $self->args->{'key'} = 'xas' unless defined $self->args->{'key'};
+    $self->args->{'key'} = 'xas' unless defined($self->args->{'key'}));
 
     if (textlike($self->args->{'key'})) {
 
@@ -218,8 +287,8 @@ sub init_driver {
 
     }
 
-    $self->args->{'limit'}   = 10 unless (defined($self->args->{'limit'}));
-    $self->args->{'timeout'} = 10 unless (defined($self->args->{'timeout'}));
+    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'}));
+    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'}));
 
     try {
 
@@ -227,33 +296,54 @@ sub init_driver {
             $self->args->{'key'},
             $self->args->{'nsems'},
             $mode
-        ) or do {
-
-            $self->throw_msg(
-                dotid($self->class) . '.init.nosemaphore',
-                'lock_nosemaphore',
-                $!
-            );
-
-        };
+        ) or die $!;
 
         if ((my $rc = $self->{'engine'}->set(uid => $uid, gid => $gid)) != 0) {
 
-            $self->throw_msg(
-                dotid($self->class) . '.init.ownership',
-                'lock_sema_ownership',
-                $rc
-            );
+            die "unable to set ownership on shared memory - $rc";
 
         };
 
-        $self->{'engine'}->setall((1) x $self->args->{'nsems'}) or do {
+        $self->{'engine'}->setall((1) x $self->args->{'nsems'}) or die $!;
 
-            $self->throw_msg(
-                dotid($self->class) . '.init.semawrite',
-                'lock_sema_write',
-                $!
-            );
+    } catch {
+
+        my $ex = $_;
+
+        $self->throw_msg(
+            dotid($self->class) . '.init_driver',
+            'lock_nosemaphores',
+            $ex
+        );
+
+    };
+
+    try {
+
+        $size = $self->args->{'nsems'} * BUFSIZ;
+
+        $self->{'shmem'} = XAS::Lockmgr::SharedMem->new(
+            $config->{key}, 
+            $size, 
+            $mode
+        ) or die $!;
+
+        if ((my $rc = $self->{'shmem'}->set(uid => $uid, gid => $gid)) != 0) {
+
+            die "unable to set ownership on shared memory - $rc";
+
+        };
+
+        $buffer = $self->{'shmem'}->read(0, BUFSIZ) or die $!;
+        if ($buffer ne $LOCK) {
+
+            $self->{'shmem'}->write($LOCK, 0, BUFSIZ) or die $!;
+
+            for (my $x = 1; $x < $config->{nsems}; $x++) {
+
+                $self->{'shmem'}->write($BLANK, $x, BUFSIZ) or die $!;
+
+            }
 
         }
 
@@ -262,8 +352,8 @@ sub init_driver {
         my $ex = $_;
 
         $self->throw_msg(
-            dotid($self->class) . '.unixmutex',
-            'lock_semaphores',
+            dotid($self->class) . '.init_driver',
+            'lock_nosharedmem',
             $ex
         );
 
@@ -273,48 +363,85 @@ sub init_driver {
 
 }
 
-sub _get_semano {
+sub _get_semaphore {
     my $self = shift;
     my $key  = shift;
 
-    my @keys = grep { $_ eq $key } $self->{'locktable'};            
+    my $buffer;
+    my $stat = -1;
+    my $skey = pack('A256', $key);
+    my $size = $self->args->{'nsems'};
 
-    if (scalar(@keys) > 1) {
+    try {
 
+        if (_lock_semaphore($self, 0)) {
+
+            for (my $x = 1; $x < $size; $x++) {
+
+                $buffer = $self->{'shmem'}->read($x, BUFSIZ) or die $!;
+                if ($buffer eq $skey) {
+
+                    $stat = $x;
+                    last;
+
+                }
+
+            }
+
+            _unlock_semaphore($self, 0);
+
+        } else {
+
+            die 'unable to aquire the base lock';
+
+        }
+
+    } catch {
+
+        my $ex = $_;
+
+        _unlock_semaphore($self, 0);
         $self->throw_msg(
-            dotid($self->class) . '.get_sema.duplicates',
-            'lock_duplicates',
-            $key
+            dotid($self->class) . '.get_semaphore.shmread',
+            'lock_shmread',
+            $ex
         );
 
-    }
+    };
 
-    return $keys[0];
+    return $stat;
 
 }
 
 sub _lock_semaphore {
-    my $self  = shift;
+    my $self = shift;
     my $semno = shift;
 
     my $count = 0;
-    my $stat = FALSE;
+    my $stat = TRUE;
     my $flags = ( SEM_UNDO | IPC_NOWAIT );
 
-    for (my $x = 1; $x < $self->args->{'limit'}; $x++) {
+    LOOP: {
 
         my $result = $self->{'engine'}->op($semno, -1, $flags);
         my $ex = $!;
 
         if (($result == 0) && ($ex == EAGAIN)) {
 
-            sleep $self->args->{'timeout'};
-            next;
+            $count++;
+
+            if ($count < $self->args->{'limit'}) {
+
+                sleep $self->args->{'timeout'};
+                next LOOP;
+
+            } else {
+
+                $stat = FALSE;
+
+            }
 
         }
-
-        $stat = TRUE;
-        last;
 
     }
 
@@ -326,15 +453,7 @@ sub _unlock_semaphore {
     my $self  = shift;
     my $semno = shift;
 
-    $self->{'engine'}->op($semno, 1, SEM_UNDO) or do {
-
-        $self->throw_msg(
-            dotid($self->class) . '.unlock_semaphore',
-            'lock_sema_release',
-            $1
-        );
-
-    };
+    $self->{'engine'}->op($semno, 1, SEM_UNDO) or die $!;
 
 }
 
@@ -344,28 +463,27 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Lockmgr::UnixMutex - Use SysV semaphores for resource locking.
+XAS::Lockmgr::UnixMutex - Use SysV semaphores for resource locking.
 
 =head1 SYNOPSIS
 
- my $lockmgr = XAS::Lib::Lockmgr->new(
-    -driver => 'UnixMutex',
-    -args => {
-        key     => 'xas',
-        nsems   => 8,
-        timeout => 10,
-        limit   => 10,
-        gid     => 100,
-        uid     => 100,
-        mode    => 0666,
-    }
- );
+ use XAS::Server;
+ use XAS::Lockmgr::UnixMutex;
 
- if ($lockmgr->lock($key)) {
+ my $psgi_handler;
 
-     ....
+ main: {
 
-     $lockmgr->unlock($key);
+    my $server = XAS::Server->new(
+        lockmgr => XAS::Lockmgr::UnixMutex->new(
+            key     => 1234,
+            nsems   => 32,
+            timeout => 10,
+            limit   => 10
+        },
+    );
+
+    $psgi_hander = $server->engine->psgi_handler();
 
  }
 
@@ -380,7 +498,7 @@ This implenments general purpose resource locking with SysV semaphores.
 =item key
 
 This is a numeric key to identify the semaphore set. The default is a hash
-of "xas".
+of "scaffold".
 
 =item nsems
 
