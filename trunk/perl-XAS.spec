@@ -29,6 +29,9 @@ Requires:       perl(Set::Light) >= 0.04
 Requires:       perl(Net::SSH2) >= 0.44
 Requires:       perl(WWW::Curl) >= 4.15
 Requires:       perl(XML::LibXML) => 0.0
+Requires:       perl(KeyedMutex)
+Requires:       perl(IPC::Semaphore)
+Requires:       perl(IPC::ShareMem)
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %define _initrddir  %{_sysconfdir}/init.d

@@ -20,50 +20,10 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub lock {
-    my $self = shift;
-    my $key = $self->validate_params(\@_, [1]);
-
-    $self->_lock($key);
-
-}
-
-sub unlock {
-    my $self = shift;
-    my $key = $self->validate_params(\@_, [1]);
-
-    $self->_unlock($key);
-
-}
-
-sub try_lock {
-    my $self = shift;
-    my $key = $self->validate_params(\@_, [1]);
-
-    $self->_try_lock($key);
-
-}
-
-sub allocate {
-    my $self = shift;
-    my $key = $self->validate_params(\@_, [1]);
-
-    $self->_allocate($key);
-
-}
-
-sub deallocate {
-    my $self = shift;
-    my $key = $self->validate_params(\@_, [1]);
-
-    $self->_deallocate($key);
-
-}
-
 sub DESTROY {
     my $self = shift;
 
-    $self->_destroy();
+    $self->destroy();
 
 }
 

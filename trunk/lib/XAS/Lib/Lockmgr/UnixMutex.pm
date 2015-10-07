@@ -1,6 +1,6 @@
 package XAS::Lib::Lockmgr::UnixMutex;
 
-our $VERSION = '0.03';
+our $VERSION = '0.01';
 
 use Try::Tiny;
 use IPC::Semaphore;
@@ -12,114 +12,61 @@ use XAS::Class
   base      => 'XAS::Base',
   constants => 'TRUE FALSE LOCK',
   utils     => 'numlike textlike dotid',
-  mixins    => '_lock _unlock _try_lock _allocate _deallocate',
-  accessors => 'shmem engine',
-  constant => {
-    BUFSIZ => 256,
-  },
+  mixins    => 'lock unlock try_lock allocate deallocate destroy init_driver',
 ;
-
-# ----------------------------------------------------------------------
-# Constant Variables
-# ----------------------------------------------------------------------
-
-my $BLANK = pack('A256', '');
-my $LOCK  = pack('A256', LOCK);
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub _allocate {
+sub allocate {
     my $self = shift;
-    my $key  = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
 
-    my $buffer;
-    my $skey = pack('A256', $key);
-    my $size = $self->config('nsems');
+    my $size = $self->args->{'nsems'};
 
-    try {
+    if (scalar($self->{'locktable'})) < $size) {
 
-        if (_lock_semaphore($self, 0)) {
+        unless (grep { $_ eq $key } @$self->{'locktable'}) {
 
-            for (my $x = 1; $x < $size; $x++) {
-
-                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
-                if ($buffer eq $BLANK) {
-
-                    $self->shmem->write($skey, $x, BUFSIZ) or die $!;
-                    last;
-
-                }
-
-            }
-
-            _unlock_semaphore(self, 0);
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.allocate',
-                'lock_base',
-            );
+            push(@{$self->{'locktable'}}, $key);
 
         }
 
-    } catch {
+    } else {
 
-        my $ex = $_;
-
-        $self->engine->op(0, 1, 0);
         $self->throw_msg(
             dotid($self->class) . '.allocate',
             'lock_allocate',
             $ex
         );
 
-    };
+    }
 
 }
 
-sub _deallocate {
+sub deallocate {
     my $self = shift;
-    my $key  = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
 
-    my $buffer;
-    my $skey = pack('A256', $key);
-    my $size = $self->args->{'nsems'};
+    my @keys;
+    my $semano = _get_semano($self, $key);
 
     try {
 
-        if (_lock_semaphore($self, 0)) {
+        if ($semano) {
 
-            for (my $x = 1; $x < $size; $x++) {
+            _unlock_semaphore($self, $semano);
 
-                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
-                if ($buffer eq $skey) {
-
-                    $self->shmem->write($BLANK, $x, BUFSIZ) or die $!;
-                    last;
-
-                }
-
-            }
-
-            _unlock_semaphore($self, 0);
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.deallocate',
-                'lock_base',
-            );
-
+            @keys = grep { $_ ne $key } $self->{'locktable'};
+            $self->{'locktable'} = \@keys;
+            
         }
 
     } catch {
 
         my $ex = $_;
 
-        $self->engine->op(0, 1, 0);
         $self->throw_msg(
             dotid($self->class) . '.deallocate',
             'lock_deallocate',
@@ -130,55 +77,44 @@ sub _deallocate {
 
 }
 
-sub _lock {
+sub lock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
 
-    my $stat;
-    my $semno;
+    my $semno = _get_semano($self, $key);
 
-    if (($semno = _get_semaphore($self, $key)) > 0) {
-
-        $stat = _lock_semaphore($self, $semno);
-
-    } else {
-
-        $stat = FALSE;
-
-    }
-
-    return $stat;
+    return _lock_semaphore($self, $semno);
 
 }
 
-sub _unlock {
+sub unlock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
 
-    my $semno;
+    my $semno = _get_semano($self, $key);
 
-    if (($semno = _get_semaphore($self, $key)) > 0) {
-
-        _unlock_semaphore($self, $semno);
-
-    }
+    return _unlock_semaphore($self, $semno);
 
 }
 
-sub _try_lock {
+sub try_lock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
 
-    my $semno;
-    my $stat = FALSE;
+    my $semno = _get_semano($self, $key);
 
-    if (($semno = _get_semaphore($self, $key)) > 0) {
+    return $self->{'engine'}->getncnt($semno) ? FALSE : TRUE;
 
-        $stat = $self->engine->getncnt($semno) ? FALSE : TRUE;
+}
+
+sub destroy {
+    my $self = shift;
+
+    if (defined($self->{'engine'})) {
+
+        $self->{'engine'}->remove();
 
     }
-
-    return $stat;
 
 }
 
@@ -195,20 +131,22 @@ sub init_driver {
     my $size;
     my $buffer;
 
+    $self->{'locktable'} = ();
+
     unless (defined($self->args->{'mode'})) {
 
         # We are being really liberal here... but apache pukes on the
         # defaults.
 
         $mode = ( 0666 | IPC_CREAT ); 
-        
+
     }
 
     if (defined($self->args->{'uid'})) {
 
-        $uid = $self->args->{'gid'};
+        $uid = $self->args->{'uid'};
 
-        unless (numlike($self->args->{'gid'})) {
+        unless (numlike($self->args->{'uid'})) {
 
             $uid = getpwnam($self->args->{'uid'});
 
@@ -219,6 +157,8 @@ sub init_driver {
         $uid = $>;
 
     }
+
+    $self->args->{'uid'} = $uid;
 
     if (defined($self->args->{'gid'})) {
 
@@ -236,6 +176,8 @@ sub init_driver {
 
     };
 
+    $self->args->{'gid'} = $gid;
+  
     if (! defined($self->args->{'nsems'})) {
 
         if ($^O eq "aix") {
@@ -276,8 +218,8 @@ sub init_driver {
 
     }
 
-    $self->args->{'limit'}   = $self->args->{'limit'} || 10;
-    $self->args->{'timeout'} = $self->args->{'timeout'} || 10;
+    $self->args->{'limit'}   = 10 unless (defined($self->args->{'limit'}));
+    $self->args->{'timeout'} = 10 unless (defined($self->args->{'timeout'}));
 
     try {
 
@@ -293,9 +235,9 @@ sub init_driver {
                 $!
             );
 
-        }
+        };
 
-        if ((my $rc = $self->engine->set(uid => $uid, gid => $gid)) != 0) {
+        if ((my $rc = $self->{'engine'}->set(uid => $uid, gid => $gid)) != 0) {
 
             $self->throw_msg(
                 dotid($self->class) . '.init.ownership',
@@ -305,8 +247,8 @@ sub init_driver {
 
         };
 
-        $self->engine->setall((1) x $self->args->{'nsems'}) or do {
-            
+        $self->{'engine'}->setall((1) x $self->args->{'nsems'}) or do {
+
             $self->throw_msg(
                 dotid($self->class) . '.init.semawrite',
                 'lock_sema_write',
@@ -327,160 +269,52 @@ sub init_driver {
 
     };
 
-    try {
-
-        $size = $self->args->{'nsems'} * BUFSIZ;
-
-        $self->{'shmem'} = XAS::Lib::Lockmgr::SharedMem->new(
-            $self->args->{'key'}, 
-            $size, 
-            $mode
-        ) or do {
-
-            $self->throw_msg(
-                dotid($self->class) . '.init.sharedmemory',
-                'lock_shmem',
-                $!
-            );
-
-        }
-
-        if ((my $rc = $self->shmem->set(uid => $uid, gid => $gid)) != 0) {
-
-            $self->throw_msg(
-                dotid($self->class) . '.init.ownership',
-                'lock_shmem_ownership',
-                $rc
-            );
-
-        };
-
-        $buffer = $self->shmem->read(0, BUFSIZ) or die $!;
-        if ($buffer ne $LOCK) {
-
-            $self->shmem->write($LOCK, 0, BUFSIZ) or die $!;
-
-            for (my $x = 1; $x < $self->args->{'nsems'}; $x++) {
-
-                $self->shmem->write($BLANK, $x, BUFSIZ) or die $!;
-
-            }
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-
-        $self->throw_msg(
-            dotid($self->class) . '.init.nosharedmem',
-            'lock_nosharedmem',
-            $ex
-        );
-
-    };
-
     return $self;
 
 }
 
-sub _destroy {
+sub _get_semano {
     my $self = shift;
+    my $key  = shift;
 
-    if (defined($self->{'engine'})) {
+    my @keys = grep { $_ eq $key } $self->{'locktable'};            
 
-        $self->engine->remove();
+    if (scalar(@keys) > 1) {
 
-    }
-
-    if (defined($self->{'shmem'})) {
-
-        $self->shmem->remove();
-
-    }
-
-}
-
-sub _get_semaphore {
-    my ($self, $key) = @_;
-
-    my $buffer;
-    my $stat = -1;
-    my $skey = pack('A256', $key);
-    my $size = $self->args->{'nsems'};
-
-    try {
-
-        if (_lock_semaphore($self, 0)) {
-
-            for (my $x = 1; $x < $size; $x++) {
-
-                $buffer = $self->shmem->read($x, BUFSIZ) or die $!;
-                if ($buffer eq $skey) {
-
-                    $stat = $x;
-                    last;
-
-                }
-
-            }
-
-            _unlock_semaphore($self, 0);
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get_semaphore',
-                'lock_base',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-
-        $self->engine->op(0, 1, 0);
         $self->throw_msg(
-            dotid($self->class) . '.get_semaphore',
-            'lock_shmread',
-            $ex
+            dotid($self->class) . '.get_sema.duplicates',
+            'lock_duplicates',
+            $key
         );
 
-    };
+    }
 
-    return $stat;
+    return $keys[0];
 
 }
 
 sub _lock_semaphore {
-    my ($self, $semno) = @_;
+    my $self  = shift;
+    my $semno = shift;
 
     my $count = 0;
-    my $stat = TRUE;
+    my $stat = FALSE;
     my $flags = ( SEM_UNDO | IPC_NOWAIT );
 
-    LOOP: {
+    for (my $x = 1; $x < $self->args->{'limit'}; $x++) {
 
-        my $result = $self->engine->op($semno, -1, $flags);
+        my $result = $self->{'engine'}->op($semno, -1, $flags);
         my $ex = $!;
 
         if (($result == 0) && ($ex == EAGAIN)) {
 
-            $count++;
-
-            if ($count < $self->args->{'limit'}) {
-
-                sleep $self->args->{'timeout'};
-                next LOOP;
-
-            } else {
-
-                $stat = FALSE;
-
-            }
+            sleep $self->args->{'timeout'};
+            next;
 
         }
+
+        $stat = TRUE;
+        last;
 
     }
 
@@ -489,47 +323,18 @@ sub _lock_semaphore {
 }
 
 sub _unlock_semaphore {
-    my ($self, $semno) = @_;
+    my $self  = shift;
+    my $semno = shift;
 
-    $self->engine->op($semno, 1, SEM_UNDO) or die $!;
+    $self->{'engine'}->op($semno, 1, SEM_UNDO) or do {
 
-}
+        $self->throw_msg(
+            dotid($self->class) . '.unlock_semaphore',
+            'lock_sema_release',
+            $1
+        );
 
-package # hide from PAUSE
-  XAS::Lib::Lockmgr::SharedMem;
-
-use base 'IPC::SharedMem';
-
-use Carp;
-use IPC::SysV qw( IPC_SET );
-
-sub set {
-    my $self = shift;
-
-    my $ds;
-
-    if (@_ == 1) {
-
-        $ds = shift;
-
-    } else {
-
-        croak 'Bad arg count' if @_ % 2;
-
-        my %arg = @_;
-
-        $ds = $self->stat or return undef;
-
-        while (my ($key, $val) = each %arg) {
-
-            $ds->$key($val);
-
-        }
-
-    }
-
-    my $v = shmctl($self->id, IPC_SET, $ds->pack);
-    $v ? 0 + $v : undef;
+    };
 
 }
 

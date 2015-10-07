@@ -39,6 +39,9 @@ my $requires = {
     'WWW::Curl'                   => 0.0,
     'HTTP::Response'              => 0.0,
     'XML::LibXML'                 => 0.0,
+    'KeyedMutex'                  => 0.0,
+    'IPC::Semaphore'              => 0.0,
+    'IPC::SharedMem'              => 0.0,
 };
 
 # Needed for Win32 installations

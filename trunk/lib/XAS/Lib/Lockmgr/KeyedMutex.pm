@@ -9,7 +9,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixins    => '_lock _unlock _try_lock, _allocate _deallocate',
+  mixins    => 'lock unlock try_lock, allocate deallocate destroy',
   constants => 'TRUE FALSE',
 ;
 
@@ -17,9 +17,9 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub _lock {
+sub lock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) $self->validate_params(\@_, [1]);
 
     my $stat = TRUE;
     my $count = 0;
@@ -48,7 +48,7 @@ sub _lock {
         my $ex = $_;
 
         $self->throw_msg(
-            doid($self->class) . '.keyedmutex.lock',
+            doid($self->class) . '.lock',
             'lock_error',
             $ex
         );
@@ -59,9 +59,9 @@ sub _lock {
 
 }
 
-sub _unlock {
+sub unlock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) $self->validate_params(\@_, [1]);
 
     my $stat = TRUE;
 
@@ -74,7 +74,7 @@ sub _unlock {
         my $ex = $_;
 
         $self->throw_msg(
-            dotid($self->class) . '.keyedmutex.unlock',
+            dotid($self->class) . '.unlock',
             'lock_error',
             $ex
         );
@@ -85,9 +85,9 @@ sub _unlock {
 
 }
 
-sub _try_lock {
+sub try_lock {
     my $self = shift;
-    my $key  = shift;
+    my ($key) $self->validate_params(\@_, [1]);
 
     my $stat = $self->engine->locked($key) ? FALSE : TRUE;
 
@@ -95,20 +95,20 @@ sub _try_lock {
 
 }
 
-sub _destroy {
+sub destroy {
     my $self = shift;
 
 }
 
-sub _allocate {
+sub allocate {
     my $self = shift;
-    my $key  = shift;
+    my ($key) $self->validate_params(\@_, [1]);
 
 }
 
-sub _deallocate {
+sub deallocate {
     my $self = shift;
-    my $key  = shift;
+    my ($key) $self->validate_params(\@_, [1]);
 
 }
 
