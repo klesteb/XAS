@@ -1,16 +1,16 @@
 package XAS::Lib::Process::Win32;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use POE;
 use Win32::Process;
-use Win32::OLE('in');
 use Win32::Socketpair 'winsocketpair';
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base',
+  mixin      => 'XAS::Lib::Mixins::Process',
   utils      => ':env dotid compress',
   filesystem => 'Dir Cwd',
   mixins     => 'start_process stop_process pause_process resume_process
@@ -169,50 +169,21 @@ sub start_process {
 sub stat_process {
     my $self = shift;
 
-    my $computer = 'localhost';
+    my $stat = 0;
     my $alias = $self->alias;
+    my $computer = 'localhost';
 
     $self->log->debug("$alias: entering stat_process");
 
     if (my $pid = $self->pid) {
 
-        # query wmi for the an existing process with this pid
-
-        my $objWMIService = Win32::OLE->GetObject("winmgmts:\\\\$computer\\root\\CIMV2") or
-            $self->throw_msg(
-                dotid($self->class) . '.stat_process.winole',
-                'unexpected',
-                'WMI connection failed'
-            );
-
-        my $colItems = $objWMIService->ExecQuery(
-            "SELECT * FROM Win32_Process WHERE ProcessID = $pid",
-            "WQL",
-            wbemFlagReturnImmediately | wbemFlagForwardOnly
-        );
-
-        # win32 wmi ExecutionState codes
-        # from http://msdn.microsoft.com/en-us/library/aa394372(v=vs.85).aspx
-        #
-        # unknown           - 0
-        # other             - 1
-        # ready             - 2
-        # running           - 3
-        # blocked           - 4
-        # suspended blocked - 5
-        # suspended ready   - 6
-
-        foreach my $objItem (in $colItems) {
-
-            return $objItem->{ExecutionState} + 0 if ($objItem->{ProcessId} eq $pid);
-
-        }
+        $stat = $self->proc_status($pid);
 
     }
 
     $self->log->debug("$alias: leaving stat_process");
 
-    return 0;
+    return $stat;
 
 }
 

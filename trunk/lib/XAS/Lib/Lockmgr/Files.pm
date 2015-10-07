@@ -25,7 +25,7 @@ sub lock {
 
     my $stat = FALSE;
     my $lock = LOCK_EX | LOCK_NB;
-    my $fh = $self->{'locktable'}->{$key}->{'fh'};
+    my $fh = _get_fh($self, $key);
 
     try {
 
@@ -64,7 +64,7 @@ sub unlock {
 
     my $stat = FALSE;
     my $lock = LOCK_UN | LOCK_NB;
-    my $fh = $self->{'locktable'}->{$key}->{'fh'};
+    my $fh = _get_fh($self, $key);
 
     try {
 
@@ -291,6 +291,20 @@ sub _lockfile {
 
 }
 
+sub _get_fh {
+    my $self = shift;
+    my $key  = shift;
+
+    unless (defined($self->{'locktable'}->{$key})) {
+
+        $self->allocate($key);
+
+    }
+
+    return $self->{'locktable'}->{$key}->{'fh'};
+
+}
+
 1;
 
 __END__
@@ -302,7 +316,7 @@ XAS::Lib::Lockmgr::Files - Use lock files for resource locking.
 =head1 SYNOPSIS
 
  my $lockmgr = XAS::Lib::Lockmgr->new(
-    -driver => 'KeyedMutex',
+    -driver => 'Files',
     -args => {
         port    => 9506,
         address => 127.0.0.1,

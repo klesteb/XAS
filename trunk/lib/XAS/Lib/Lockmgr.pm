@@ -2,14 +2,16 @@ package XAS::Lib::Lockmgr;
 
 our $VERSION = '0.01';
 
+use Params::Validate qw(HASHREF);
+
 use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
   vars => {
     PARAMS => {
-      -driver => { optional => 1, default => 'Files' },
       -args   => { optional => 1, default => {}, type => HASHREF },
+      -driver => { optional => 1, default => 'Files', regex => qr/UnixMutex|KeyedMutex|Files/ },
     }
   }
 ;
@@ -55,6 +57,8 @@ XAS::Lib::Lockmgr - The base class for locking within XAS
 =head1 SYNOPSIS
 
  my $lockmgr = XAS::Lib::Lockmgr->new();
+
+ $lockmgr->allocate($lock);
 
  if ($lockmgr->try_lock($lock)) {
 

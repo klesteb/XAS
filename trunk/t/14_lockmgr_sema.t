@@ -19,10 +19,7 @@ BEGIN {
 }
 
 my $lockmgr = XAS::Lib::Lockmgr->new(
-    -driver => 'Files',
-    -args => {
-        directory => '.'
-    }
+    -driver => 'UnixMutex',
 );
 
 # basic does it work..

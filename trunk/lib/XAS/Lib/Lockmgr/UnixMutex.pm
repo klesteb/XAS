@@ -14,6 +14,7 @@ use XAS::Class
   base      => 'XAS::Base',
   constants => 'TRUE FALSE LOCK',
   utils     => 'numlike textlike dotid',
+  mixins    => 'lock unlock try_lock, allocate deallocate destroy init_driver',
   constant => {
     BUFSIZ => 256,
   },
@@ -206,7 +207,7 @@ sub init_driver {
     my $size;
     my $buffer;
 
-    unless (defined($aelf->args->{'mode'})) {
+    unless (defined($self->args->{'mode'})) {
 
         # We are being really liberal here... but apache pukes on the
         # defaults.
@@ -269,7 +270,7 @@ sub init_driver {
 
     }
 
-    $self->args->{'key'} = 'xas' unless defined($self->args->{'key'}));
+    $self->args->{'key'} = 'xas' unless defined($self->args->{'key'});
 
     if (textlike($self->args->{'key'})) {
 
@@ -287,8 +288,8 @@ sub init_driver {
 
     }
 
-    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'}));
-    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'}));
+    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
+    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
 
     try {
 
@@ -322,8 +323,8 @@ sub init_driver {
 
         $size = $self->args->{'nsems'} * BUFSIZ;
 
-        $self->{'shmem'} = XAS::Lockmgr::SharedMem->new(
-            $config->{key}, 
+        $self->{'shmem'} = XAS::Lib::Lockmgr::SharedMem->new(
+            $self->args->{'key'}, 
             $size, 
             $mode
         ) or die $!;
@@ -339,7 +340,7 @@ sub init_driver {
 
             $self->{'shmem'}->write($LOCK, 0, BUFSIZ) or die $!;
 
-            for (my $x = 1; $x < $config->{nsems}; $x++) {
+            for (my $x = 1; $x < $self->args->{nsems}; $x++) {
 
                 $self->{'shmem'}->write($BLANK, $x, BUFSIZ) or die $!;
 

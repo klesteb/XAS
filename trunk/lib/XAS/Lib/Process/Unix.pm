@@ -1,6 +1,6 @@
 package XAS::Lib::Process::Unix;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use POE;
 use Socket;
@@ -11,6 +11,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
+  mixin   => 'XAS::Lib::Mixins::Process',
   utils   => ':env dotid compress run_cmd trim',
   mixins  => 'start_process stop_process pause_process resume_process
               stat_process kill_process init_process _parse_command
@@ -184,34 +185,7 @@ sub stat_process {
 
     if (my $pid = $self->pid) {
 
-        my $cmd = "ps -p $pid -o state=";
-        my (@output, $rc) = run_cmd($cmd);
-
-        if ($rc == 0) {
-
-            my $line = trim($output[0]);
-
-            # UNIX states
-            # from man ps
-            #
-            #   D    Uninterruptible sleep (usually IO)
-            #   R    Running or runnable (on run queue)
-            #   S    Interruptible sleep (waiting for an event to complete)
-            #   T    Stopped, either by a job control signal or because it 
-            #        is being traced.
-            #   W    paging (not valid since the 2.6.xx kernel)
-            #   X    dead (should never be seen)
-            #   Z    Defunct ("zombie") process, terminated but not reaped 
-            #        by its parent.
-
-            $stat = 6 if ($line eq 'T');    # suspended ready
-            $stat = 5 if ($line eq 'D');    # suspended blocked
-#           $stat = 4 if ($line eq '?');    # blocked
-            $stat = 3 if ($line eq 'R');    # running
-            $stat = 2 if ($line eq 'S');    # ready
-            $stat = 1 if ($line eq 'Z');    # other
-
-        }
+        $stat = $self->proc_status($pid);
 
     }
 
