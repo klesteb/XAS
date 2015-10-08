@@ -1,0 +1,328 @@
+package XAS::Lib::Lockmgr::Mutex::Unix;
+
+our $VERSION = '0.01';
+
+use Try::Tiny;
+use IPC::Semaphore;
+use Errno qw( EAGAIN );
+use IPC::SysV qw( IPC_CREAT SEM_UNDO IPC_NOWAIT );
+
+use XAS::Class
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Process',
+  constants => 'TRUE FALSE',
+  utils     => 'numlike textlike dotid',
+  mixins    => 'lock unlock try_lock destroy init_driver',
+;
+
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
+
+sub lock {
+    my $self = shift;
+
+    my $stat = FALSE;
+    my $flags = ( SEM_UNDO | IPC_NOWAIT );
+
+    for (my $x = 1; $x < $self->args->{'limit'}; $x++) {
+
+        my $rc = $self->{'sema'}->op(0, -1, $flags);
+        my $ex = $!;
+
+        if (($rc == 0) && ($ex == EAGAIN)) {
+
+            sleep $self->args->{'timeout'};
+
+        } else {
+
+            $stat = TRUE;
+            last;
+
+        }
+
+    }
+
+    if ($stat == FALSE) {
+
+        # Check to see if the last process to access the 
+        # semaphore is still active. If not, throw an exception.
+
+        my $pstat;
+        my $pid = $self->{'sema'}->getpid();
+
+        if ($pid != $$) {
+
+            $pstat = $self->proc_status($pid);
+
+            unless (($pstat == 2) || ($pstat == 1)) {
+
+                $self->throw_msg(
+                    dotid($self->class) . '.lock.deadlock',
+                    'lock_deadlock',
+                    $pid
+                );
+
+            }
+
+        }
+
+    }
+
+    return $stat;
+
+}
+
+sub unlock {
+    my $self = shift;
+
+    my $flags = SEM_UNDO;
+
+    $self->{'sema'}->op(0, 1, $flags) or die $!;
+
+}
+
+sub try_lock {
+    my $self = shift;
+
+    return $self->{'sema'}->getncnt(0) ? FALSE : TRUE;
+
+}
+
+sub destroy {
+    my $self = shift;
+
+    $self->{'sema'}->remove();
+
+}
+
+sub init_driver {
+    my $self = shift;
+
+    my $key;
+    my $gid;
+    my $uid;
+    my $mode;
+    my $count = 0;
+
+    unless (defined($self->args->{'key'})) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.init_driver.nokey',
+            'lock_key',
+        );
+
+    }
+
+    unless (defined($self->args->{'mode'})) {
+
+        # We are being really liberal here... but apache pukes on the
+        # defaults.
+
+        $self->args->{'mode'} = 0666;
+
+    }
+
+    $mode = ($self->args->{'mode'} | IPC_CREAT);
+
+    if (defined($self->args->{'uid'})) {
+
+        $uid = $self->args->{'gid'};
+
+        unless (numlike($self->args->{'gid'})) {
+
+            $uid = getpwnam($self->args->{'uid'});
+
+        }
+
+    } else {
+
+        $uid = $>;
+
+    }
+
+    $self->args->{'uid'} = $uid;
+
+    if (defined($self->args->{'gid'})) {
+
+        $gid = $self->args->{'gid'};
+
+        unless (numlike($self->args->{'gid'})) {
+
+            $gid = getgrnam($self->args->{'gid'});
+
+        }
+
+    } else {
+
+        $gid = $);
+
+    };
+
+    $self->args->{'gid'} = $gid;
+
+    if (textlike($self->args->{'key'})) {
+
+        my $hash;
+        my $name = $self->args->{'key'};
+        my $len = length($name);
+
+        for (my $x = 0; $x < $len; $x++) {
+
+            $hash += ord(substr($name, $x, 1));
+
+        }
+
+        $key = $self->args->{'key'} = $hash;
+
+    }
+
+    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
+    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
+
+    try {
+
+        LOOP: {
+
+            # Create the semaphore. There is a potinential race 
+            # condition where another process may also be trying 
+            # to create our semaphore. So loop until the return is 
+            # defined or the count is exceeded. If count is exceeded, 
+            # throw an exception.
+
+            $self->{'sema'} = IPC::Sempahore->new($key, 1, $mode);
+
+            if (defined($self->{'sema'})) {
+
+                # set ownership and the initial value to 0
+
+                $self->{'sema'}->set(uid => $uid, gid => $gid) or die $!;
+                $self->{'sema'}->setval(0, 0) or die $!;
+
+                last LOOP;
+
+            } else {
+
+                $count++;
+
+                if ($count < $self->args->{'limit'}) {
+
+                    sleep $self->args->{'timeout'};
+                    next LOOP;
+
+                }
+
+                # unable to aquire a semaphore
+
+                die $self->message('lock_nosemaphores');
+            
+            }
+
+        };
+
+    } catch {
+
+        my $ex = $_;
+
+        $self->throw_msg(
+            dotid($self->class) . '.init_driver',
+            'lock_nosemaphores',
+            $ex
+        );
+
+    };
+
+}
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+1;
+
+__END__
+
+=head1 NAME
+
+XAS::Lib::Lockmgr::Mutex - Use SysV semaphores for resource locking.
+
+=head1 SYNOPSIS
+
+ use XAS::Lib::Lockmgr;
+
+ my $lockmgr = XAS::Lib::Lockmgr->new(
+     -driver => 'Mutex',
+     -args => {
+         key => 'xas',
+     }
+ );
+
+ if ($lockmgr->try_lock) {
+
+     $lockmgr->lock;
+
+     ...
+
+     $lockmgr->unlock;
+
+ }
+
+=head1 DESCRIPTION
+
+This mixin uses SysV semaphores as a mutex. 
+
+=head1 CONFIGURATION
+
+=over 4
+
+=item key
+
+This field is mandatory.
+
+=item timeout
+
+The number of seconds to sleep if the lock is not available. Default is 10
+seconds.
+
+=item limit
+
+The number of attempts to try the lock. If the limit is passed an exception
+is thrown. The default is 10.
+
+=item uid
+
+The uid used to create the semaphore. Defaults to effetive uid.
+
+=item gid
+
+The gid used to create the semaphore. Defaults to effetive gid.
+
+=item mode
+
+The access permissions which is used by the semaphore. Defaults to  0666.
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=back
+
+=head1 AUTHOR
+
+Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2015 Kevin L. Esteb
+
+This is free software; you can redistribute it and/or modify it under
+the terms of the Artistic License 2.0. For details, see the full text
+of the license at http://www.perlfoundation.org/artistic_license_2_0.
+
+=cut
