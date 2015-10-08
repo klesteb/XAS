@@ -4,14 +4,14 @@ our $VERSION = '0.01';
 
 use Try::Tiny;
 use IPC::Semaphore;
-use Errno qw( EAGAIN );
+use Errno qw( EAGAIN EINVAL );
 use IPC::SysV qw( IPC_CREAT SEM_UNDO IPC_NOWAIT );
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixins::Process',
+  mixin     => 'XAS::Lib::Mixins::Process::Unix',
   constants => 'TRUE FALSE',
   utils     => 'numlike textlike dotid',
   mixins    => 'lock unlock try_lock destroy init_driver',
@@ -24,17 +24,29 @@ use XAS::Class
 sub lock {
     my $self = shift;
 
-    my $stat = FALSE;
+    my $stat  = FALSE;
     my $flags = ( SEM_UNDO | IPC_NOWAIT );
+
+    $self->log->debug(sprintf('lock - before: %s', $self->{'sema'}->getval(0)));
 
     for (my $x = 1; $x < $self->args->{'limit'}; $x++) {
 
-        my $rc = $self->{'sema'}->op(0, -1, $flags);
+        my $rc = $self->{'sema'}->op(0, 1, $flags);
         my $ex = $!;
+
+        $self->log->debug(sprintf('lock - rc: %s, ex: %s', $rc, $ex));
 
         if (($rc == 0) && ($ex == EAGAIN)) {
 
             sleep $self->args->{'timeout'};
+
+        } elsif ($rc < 0) {
+
+            $self->throw_msg(
+                dotid($self->class) . 'lock',
+                'lock_error',
+                $ex
+            );
 
         } else {
 
@@ -45,31 +57,7 @@ sub lock {
 
     }
 
-    if ($stat == FALSE) {
-
-        # Check to see if the last process to access the 
-        # semaphore is still active. If not, throw an exception.
-
-        my $pstat;
-        my $pid = $self->{'sema'}->getpid();
-
-        if ($pid != $$) {
-
-            $pstat = $self->proc_status($pid);
-
-            unless (($pstat == 2) || ($pstat == 1)) {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.lock.deadlock',
-                    'lock_deadlock',
-                    $pid
-                );
-
-            }
-
-        }
-
-    }
+    $self->log->debug(sprintf('lock - after: %s', $self->{'sema'}->getval(0)));
 
     return $stat;
 
@@ -80,7 +68,19 @@ sub unlock {
 
     my $flags = SEM_UNDO;
 
-    $self->{'sema'}->op(0, 1, $flags) or die $!;
+    $self->log->debug(sprintf('unlock - before: %s', $self->{'sema'}->getval(0)));
+
+    if ($self->{'sema'}->op(0, -1, $flags) < 0) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.unlock',
+            'lock_error',
+            $!
+        );
+
+    }
+
+    $self->log->debug(sprintf('unlock - after: %s', $self->{'sema'}->getval(0)));
 
 }
 
@@ -192,14 +192,14 @@ sub init_driver {
             # defined or the count is exceeded. If count is exceeded, 
             # throw an exception.
 
-            $self->{'sema'} = IPC::Sempahore->new($key, 1, $mode);
+            $self->{'sema'} = IPC::Semaphore->new($key, 1, $mode);
 
             if (defined($self->{'sema'})) {
 
                 # set ownership and the initial value to 0
 
-                $self->{'sema'}->set(uid => $uid, gid => $gid) or die $!;
-                $self->{'sema'}->setval(0, 0) or die $!;
+                die $! if ($self->{'sema'}->set(uid => $uid, gid => $gid) < 0);
+                die $! if ($self->{'sema'}->setval(0, 0) < 0);
 
                 last LOOP;
 
@@ -216,7 +216,7 @@ sub init_driver {
 
                 # unable to aquire a semaphore
 
-                die $self->message('lock_nosemaphores');
+                die 'exceeded limit';
             
             }
 

@@ -1,4 +1,4 @@
-package XAS::Lib::Lockmgr::Mutex ;
+package XAS::Lib::Lockmgr::Mutex;
 
 our $VERSION = '0.01';
 my $mixin;
@@ -8,6 +8,8 @@ BEGIN {
     $mixin = 'XAS::Lib::Lockmgr::Mutex::Win32' if ($^O eq 'MSWin32');    
 }
 
+use Params::Validate qw(HASHREF);
+
 use XAS::Class
   debug   => 0,
   version => $VERSION,
@@ -15,6 +17,7 @@ use XAS::Class
   mixin   => $mixin,
   vars => {
     PARAMS => {
+      -args => { type => HASHREF },
     }
   }
 ;
@@ -22,6 +25,13 @@ use XAS::Class
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
+
+sub DESTROY {
+    my $self = shift;
+
+    $self->destroy();
+
+}
 
 # ----------------------------------------------------------------------
 # Private Methods
@@ -31,6 +41,8 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
+
+    $self->init_driver();
 
     return $self;
 
