@@ -240,7 +240,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Lockmgr::Mutex::Unix - Use SysV semaphores for resource locking.
+XAS::Lib::Lockmgr::Mutex::Unix - Use SysV semaphores for locking.
 
 =head1 SYNOPSIS
 
@@ -251,51 +251,44 @@ XAS::Lib::Lockmgr::Mutex::Unix - Use SysV semaphores for resource locking.
  $lockmgr->add(
      -key    => 'xas',
      -driver => 'Mutex',
+     -args => {
+         mode => 0600,
+         gid  => 'kevin',
+         uid  => 'kevin',
+     }
  );
 
- if ($lockmgr->try_lock($key)) {
+ if ($lockmgr->try_lock()) {
 
-     $lockmgr->lock($key);
+     $lockmgr->lock();
 
      ...
 
-     $lockmgr->unlock($key);
+     $lockmgr->unlock();
 
  }
 
 =head1 DESCRIPTION
 
-This mixin uses SysV semaphores as a mutex. 
+This mixin uses SysV semaphores as a mutex. It allocates one semaphore.
 
 =head1 CONFIGURATION
 
+This module adds the following fields to -args.
+
 =over 4
 
-=item key
-
-This field is mandatory.
-
-=item timeout
-
-The number of seconds to sleep if the lock is not available. Default is 10
-seconds.
-
-=item limit
-
-The number of attempts to try the lock. If the limit is passed an exception
-is thrown. The default is 10.
-
-=item uid
+=item B<uid>
 
 The uid used to create the semaphore. Defaults to effetive uid.
 
-=item gid
+=item B<gid>
 
 The gid used to create the semaphore. Defaults to effetive gid.
 
-=item mode
+=item B<mode>
 
-The access permissions which is used by the semaphore. Defaults to  0666.
+The access permissions for the semaphore. Defaults to 0666.
 
 =back
 

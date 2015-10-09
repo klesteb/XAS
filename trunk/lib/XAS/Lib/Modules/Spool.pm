@@ -19,7 +19,7 @@ use XAS::Class
       -mask      => { optional => 1, default => 0664 },
       -extension => { optional => 1, default => '.pkt' },
       -seqfile   => { optional => 1, default => '.SEQ' },
-      -key       => { optional => 1, default => 'spool' },
+      -lock      => { optional => 1, default => 'spool' },
     }
   }
 ;
@@ -38,18 +38,18 @@ sub read {
 
     my $packet;
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         try {
 
             $packet = $self->read_packet($filename);
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
             die $ex;
 
@@ -75,20 +75,20 @@ sub write {
 
     my $seqnum;
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         try {
 
             $seqnum = $self->sequence();
 
             $self->write_packet($packet, $seqnum);
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
             die $ex;
 
@@ -115,10 +115,10 @@ sub scan {
     my $regex = $self->extension;
     my $pattern = qr/$regex/i;
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         @files = sort(grep( $_->path =~ $pattern, $self->directory->files() ));
-        $self->lockmgr->unlock($self->key);
+        $self->lockmgr->unlock($self->lock);
 
     } else {
 
@@ -140,18 +140,18 @@ sub delete {
         { isa => 'Badger::Filesystem::File' },
     ]);
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         try {
 
             $file->delete;
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock($self->key);
+            $self->lockmgr->unlock($self->lock);
 
             die $ex;
 
@@ -177,12 +177,12 @@ sub count {
     my $regex = $self->extension;
     my $pattern = qr/$regex/i;
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         @files = grep( $_->path =~ $pattern, $self->directory->files() );
         $count = scalar(@files);
 
-        $self->lockmgr->unlock($self->key);
+        $self->lockmgr->unlock($self->lock);
 
     } else {
 
@@ -205,12 +205,12 @@ sub get {
     my $filename;
     my $pattern = qr/$self->extension/i;
 
-    if ($self->lockmgr->lock($self->key)) {
+    if ($self->lockmgr->lock($self->lock)) {
 
         @files = sort(grep( $_->path =~ /$pattern/, $self->directory->files() ));
         $filename = $files[0];
 
-        $self->lockmgr->unlock($self->key);
+        $self->lockmgr->unlock($self->lock);
 
     } else {
 
@@ -237,7 +237,7 @@ sub init {
 
     $self->{lockmgr} = XAS::Factory->module('lockmgr');
     $self->lockmgr->add(
-        -key    => $self->key,
+        -key    => $self->lock,
         -driver => 'Mutex'
     );
 
@@ -378,7 +378,8 @@ XAS::Lib::Modules::Spool - A Perl extension for the XAS environment
 
  my $spl = XAS::Factory->module(
      spool => {
-         -directory => 'spool'
+         -directory => 'spool',
+         -lock      => 'spool',
      }
  );
 
@@ -425,7 +426,7 @@ This will initialize the base object. It takes the following parameters:
 
 This is the directory to use for spool files.
 
-=item B<-key>
+=item B<-lock>
 
 The name of the lock to use. Defaults to 'spool'.
 
@@ -489,9 +490,9 @@ This method will retrieve a file name from the spool directory.
 
 This method will get the current file extension.
 
-=head2 lockfile
+=head2 lock
 
-This method will get the current lock file name.
+This method will get the current locks name.
 
 =head2 segfile
 

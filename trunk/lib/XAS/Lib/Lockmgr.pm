@@ -181,37 +181,84 @@ XAS::Lib::Lockmgr - The base class for locking within XAS
 
 This module provides a general purpose locking mechanism to protect shared 
 resources. It is rather interesting to ask a developer how they protect 
-session data and/or global shared data. They usually answer, "I use 
-such-and-such session module, and what do you mean by "global shared data" ?". 
-Well, for those who understand the need for resource locking, this module 
-provides it for XAS.
+global shared data. They usually answer, "what do you mean by "global shared 
+data" ?". Well, for those who understand the need, this module provides it 
+for XAS.
 
 =head1 METHODS
 
+=head2 new
+
+This method initializes the module.
+
+=head2 add(...)
+
+This method adds a key and defines the module that is used to manage that key.
+It takes the following named parameters:
+
 =over 4
 
-=item allocate($key)
+=item B<-key>
 
-Reserve a lock by this name. This needs to be done before a lock is used.
-This name can be used when trying to lock and unlock resources.
+The name of the key. This parameter is required.
 
-=item deallocate($key)
+=item B<-driver>
 
-Removes the reservation for the name. This frees up a lock that can be 
-subseqently reused.
+The module that will manage the lock. The default is 'Mutex'. Which will load
+L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>.
 
-=item lock($key)
+=item B<-args>
 
-Aquires a lock on a resource, return true if successful.
+An optional hash reference of arguments to pass to the driver.
 
-=item unlock($key)
+=back
 
-Releases the lock on a resource.
+=head2 remove($key)
 
-=item try_lock($key)
+This method will remove the key from management. This will call the destroy 
+method for the managing module.
 
-Tests to see if the lock on a resource is available, returns true if the lock
-is available.
+=over 4
+
+=item B<$key>
+
+The name of the managed key.
+
+=back
+
+=head2 lock($key)
+
+Aquires a lock, returns true if successful.
+
+=over 4
+
+=item B<$key>
+
+The name of the managed key.
+
+=back
+
+=head2 unlock($key)
+
+Releases the lock.
+
+=over 4
+
+=item B<$key>
+
+The name of the managed key.
+
+=back
+
+=head2 try_lock($key)
+
+Tests to see if the lock is available, returns true if the lock is available.
+
+=over 4
+
+=item B<$key>
+
+The name of the managed key.
 
 =back
 

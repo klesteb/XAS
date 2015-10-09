@@ -152,64 +152,35 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Lockmgr::Mutex - Use SysV semaphores for resource locking.
+XAS::Lib::Lockmgr::Mutex::Win32 - Use Win32 Mutexs for locking.
 
 =head1 SYNOPSIS
 
- use XAS::Lib::Lockmgr;
+ my $lockmgr = XAS::Lib::Lockmgr->new();
 
- my $lockmgr = XAS::Lib::Lockmgr->new(
+ $lockmgr->add(
+     -key    => 'xas',
      -driver => 'Mutex',
-     -args => {
-         key => 'xas',
-     }
  );
 
- if ($lockmgr->try_lock) {
+ if ($lockmgr->try_lock()) {
 
-     $lockmgr->lock;
+     $lockmgr->lock();
 
      ...
 
-     $lockmgr->unlock;
+     $lockmgr->unlock();
 
  }
 
 =head1 DESCRIPTION
 
-This mixin uses SysV semaphores as a mutex. 
+This mixin uses native Win32 Mutexes for locking. The mutexes are named with
+the key.
 
 =head1 CONFIGURATION
 
-=over 4
-
-=item key
-
-This field is mandatory.
-
-=item timeout
-
-The number of seconds to sleep if the lock is not available. Default is 10
-seconds.
-
-=item limit
-
-The number of attempts to try the lock. If the limit is passed an exception
-is thrown. The default is 10.
-
-=item uid
-
-The uid used to create the semaphore. Defaults to effetive uid.
-
-=item gid
-
-The gid used to create the semaphore. Defaults to effetive gid.
-
-=item mode
-
-The access permissions which is used by the semaphore. Defaults to  0666.
-
-=back
+No additional configuration is provided.
 
 =head1 SEE ALSO
 

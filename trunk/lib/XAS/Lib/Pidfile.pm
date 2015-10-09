@@ -1,7 +1,6 @@
 package XAS::Lib::Pidfile;
 
 our $VERSION = '0.01';
-
 my $mixin;
 
 BEGIN {
@@ -9,7 +8,7 @@ BEGIN {
     $mixin = 'XAS::Lib::Pidfile::Win32' if ($^O eq 'MSWin32');
 }
 
-use XAS::Lib::Modules::Locking;
+use XAS::Factory;
 
 use XAS::Class
   debug      => 0,
@@ -17,7 +16,7 @@ use XAS::Class
   base       => 'XAS::Base',
   mixin      => $mixin,
   utils      => 'trim dotid',
-  accessors  => 'lockmgr',
+  accessors  => 'lockmgr lock',
   filesystem => 'Dir',
   vars => {
     PARAMS => {
@@ -37,7 +36,7 @@ sub write {
     my $self = shift;
 
     my $stat = 0;
-    my $lock = Dir($self->file->volume, $self->file->directory);
+    my $lock = $self->lock;
     my $output = sub {
 
         my $fh = $self->file->open('w');
@@ -46,7 +45,7 @@ sub write {
 
     };
 
-    if ($self->lockmgr->lock_directory($lock)) {
+    if ($self->lockmgr->lock($lock)) {
 
         if ($self->file->exists) {
 
@@ -60,7 +59,7 @@ sub write {
         }
 
         $stat = 1;
-        $self->lockmgr->unlock_directory($lock);
+        $self->lockmgr->unlock($lock);
 
     }
 
@@ -71,12 +70,12 @@ sub write {
 sub remove {
     my $self = shift;
 
-    my $lock = Dir($self->file->volume, $self->file->directory);
+    my $lock = $self->lock;
 
-    if ($self->lockmgr->lock_directory($lock)) {
+    if ($self->lockmgr->lock($lock)) {
 
         $self->file->delete() if ($self->file->exists);
-        $self->lockmgr->unlock_directory($lock);
+        $self->lockmgr->unlock($lock);
 
     }
 
@@ -91,9 +90,9 @@ sub _get_pid {
     my $self = shift;
 
     my $pid = undef;
-    my $lock = Dir($self->file->volume, $self->file->directory);
+    my $lock = $self->lock;
 
-    if ($self->lockmgr->lock_directory($lock)) {
+    if ($self->lockmgr->lock($lock)) {
 
         if ($self->file->exists) {
 
@@ -104,7 +103,7 @@ sub _get_pid {
 
         }
 
-        $self->lockmgr->unlock_directory($lock);
+        $self->lockmgr->unlock($lock);
 
     }
 
@@ -117,13 +116,16 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{lockmgr} = XAS::Lib::Modules::Locking->new();
+    $self->{'lockmgr'} = XAS::Factory->modules('lockmgr');
 
-    unless (defined($self->{file})) {
+    unless (defined($self->{'file'})) {
 
-        $self->{file} = $self->env->pidfile;
+        $self->{'file'} = $self->env->pidfile;
 
     }
+
+    $self->{'lock'} = $self->file->path;
+    $self->lockmgr->add(-key => $self->lock);
 
     return $self;
 
