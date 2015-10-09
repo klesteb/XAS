@@ -45,30 +45,30 @@ sub mqlevel {
 
 }
 
-sub log_type {
+sub logtype {
     my $self = shift;
     my ($type) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
 
-    $self->{log_type} = $type if (defined($type));
+    $self->{logtype} = $type if (defined($type));
 
-    return $self->{log_type};
+    return $self->{logtype};
 
 }
 
-sub log_facility {
+sub logfacility {
     my $self = shift;
     my ($type) = $self->validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_FACILITY }
     ]);
 
-    $self->{log_facility} = $type if (defined($type));
+    $self->{logfacility} = $type if (defined($type));
 
-    return $self->{log_facility};
+    return $self->{logfacility};
 
 }
-    
+
 sub get_msgs {
     my $self = shift;
 
@@ -285,11 +285,13 @@ sub init {
         ? $ENV{'XAS_BIN'}   
         : [$self->{root}, 'bin']);
 
-    $self->{log_type} = defined($ENV{'XAS_LOG_TYPE'})
+    # define some logging options
+
+    $self->{logtype} = defined($ENV{'XAS_LOG_TYPE'})
         ? $ENV{'XAS_LOG_TYPE'}
         : 'console';
 
-    $self->{log_facility} = defined($ENV{'XAS_LOG_FACILITY'})
+    $self->{logfacility} = defined($ENV{'XAS_LOG_FACILITY'})
         ? $ENV{'XAS_LOG_FACILITY'}
         : 'local6';
 

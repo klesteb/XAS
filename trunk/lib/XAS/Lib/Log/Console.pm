@@ -1,12 +1,12 @@
-package XAS::Lib::Modules::Log::Console;
+package XAS::Lib::Log::Console;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Params::Validate 'HASHREF';
+
 use XAS::Class
-  version   => $VERSION,
-  base      => 'XAS::Base',
-  mixins    => 'init_log output destroy',
+  version => $VERSION,
+  base    => 'XAS::Base',
 ;
 
 # ----------------------------------------------------------------------
@@ -26,19 +26,9 @@ sub output {
 
 }
 
-sub destroy {
-    my $self = shift;
-
-}
-
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub init_log {
-    my $self = shift;
-    return $self;
-}
 
 1;
 

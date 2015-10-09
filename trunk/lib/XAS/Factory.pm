@@ -1,6 +1,6 @@
 package XAS::Factory;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Badger::Factory::Class
   debug   => 0,
@@ -11,13 +11,13 @@ use Badger::Factory::Class
     alert       => 'XAS::Lib::Modules::Alerts',
     email       => 'XAS::Lib::Modules::Email',
     environment => 'XAS::Lib::Modules::Environment',
-    log         => 'XAS::Lib::Modules::Log',
-    logger      => 'XAS::Lib::Modules::Log',
+    log         => 'XAS::Lib::Log',
+    logger      => 'XAS::Lib::Log',
     locking     => 'XAS::Lib::Modules::Locking',
-    lockmgr     => 'XAS::Lib::Modules::Locking',
+    lockmgr     => 'XAS::Lib::Lockmgr',
+    pidfile     => 'XAS::Lib::Pidfile',
     spool       => 'XAS::Lib::Modules::Spool',
     spooler     => 'XAS::Lib::Modules::Spool',
-    pidfile     => 'XAS::Lib::Modules::PidFile',
   }
 ;
 
@@ -71,15 +71,15 @@ This will load L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment>
 
 =item B<log logger>
 
-This will load L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+This will load L<XAS::Lib::Log|XAS::Lib::Log>
 
 =item B<locking lockmgr>
 
-This will load L<XAS::Lib::Modules::Locking|XAS::Lib::Modules::Locking>.
+This will load L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>.
 
 =item B<pidfile>
 
-This will load L<XAS::Lib::Modules::PidFile|XAS::Lib::Modules::PidFile>.
+This will load L<XAS::Lib::PidFile|XAS::Lib::PidFile>.
 
 =item B<spool spooler>
 

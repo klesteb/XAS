@@ -1,6 +1,6 @@
-package XAS::Lib::Modules::Log;
+package XAS::Lib::Log;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use DateTime;
 use XAS::Constants ':logging';
@@ -8,9 +8,10 @@ use Params::Validate 'HASHREF';
 
 use XAS::Class
   version    => $VERSION,
-  base       => 'XAS::Singleton',
+  base       => 'XAS::Base Badger::Prototype',
+  accessors  => 'logger',
   filesystem => 'File',
-  utils      => ':boolean',
+  utils      => ':boolean load_module',
   vars => {
     LEVELS => {
       trace => 0,
@@ -19,25 +20,11 @@ use XAS::Class
       warn  => 1,
       error => 1,
       fatal => 1,
-    },
-    PARAMS => {
-      -filename => { optional => 1 },
-      -process  => { optional => 1, default => 'XAS' },
-      -levels   => { optional => 1, default => {}, type => HASHREF },
-      -facility => { optional => 1, default => undef, regex => LOG_FACILITY },
-      -type     => { optional => 1, default => 'console', regex => LOG_TYPES },
     }
-  },
+  }
 ;
 
 #use Data::Dumper;
-
-my $mixins = {
-    console => 'XAS::Lib::Modules::Log::Console',
-    file    => 'XAS::Lib::Modules::Log::File',
-    json    => 'XAS::Lib::Modules::Log::Json',
-    syslog  => 'XAS::Lib::Modules::Log::Syslog',
-};
 
 # ------------------------------------------------------------------------
 # Public Methods
@@ -75,13 +62,25 @@ sub build {
     return {
         hostname => $self->env->host,
         datetime => DateTime->now(time_zone => 'local'),
-        process  => $self->process,
+        process  => $self->env->script,
         pid      => $$,
         msgid    => 0,
-        facility => $self->facility,
+        facility => $self->env->logfacility,
         priority => $level,
         message  => $message,
     };
+
+}
+
+sub activate {
+    my $self = shift;
+
+    my $type = $self->env->logtype;
+    my $logger = 'XAS::Lib::Log::' . ucfirst($type);
+
+    load_module($logger);
+
+    $self->{'logger'} = $logger->new();
 
 }
 
@@ -93,24 +92,11 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
-    my $type = $self->type();
-
-    if (defined($self->{filename})) {
-
-        $self->{filename} = File($self->{filename});
-
-    }
-
-    unless (defined($self->{facility})) {
-
-        $self->{facility} = $self->env->log_facility;
-
-    }
 
     # populate $self for each level using the 
-    # value in $self->levels, or the default in $LEVELS
+    # value in $LEVELS
 
-    my $l = $self->class->hash_vars( LEVELS => $self->levels );
+    my $l = $self->class->hash_vars('LEVELS');
 
     while (my ($level, $default) = each %$l) {
 
@@ -130,7 +116,7 @@ sub init {
             if ($self->{$level}) {
 
                 my $args = $self->build("$level", join(" ", @_));
-                $self->output($args);
+                $self->logger->output($args);
 
             }
 
@@ -144,7 +130,7 @@ sub init {
             if ($self->{$level}) {
 
                 my $args = $self->build("$level", $self->message(@_));
-                $self->output($args);
+                $self->logger->output($args);
 
             }
 
@@ -154,19 +140,9 @@ sub init {
 
     # load and initialize our output mixin
 
-    $self->class->mixin($mixins->{$type});
-    $self->class->var('MESSAGES', $self->env->get_msgs);
-
-    $self->init_log();
+    $self->activate();
 
     return $self;
-
-}
-
-sub DESTROY {
-    my $self = shift;
-
-    $self->destroy() if ($self->can('destroy'));
 
 }
 
@@ -176,13 +152,13 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Modules::Log - A class for logging in the XAS Environment
+XAS::Lib::Log - A class for logging in the XAS Environment
 
 =head1 SYNOPSIS
 
-    use XAS::Lib::Modules::Log;
+    use XAS::Lib::Log;
 
-    my $log = XAS::Lib::Modules::Log->new();
+    my $log = XAS::Lib::Log->new();
 
     $log->debug('a debug message');
     $log->info('an info message');
@@ -202,50 +178,7 @@ extension by sub-classing.
 
 =head2 new
 
-This will initialize the base object. It takes the following parameters:
-
-=over 4
-
-=item B<-type>
-
-The type of the log. This can be "console", "file", "json" or "syslog".
-Defaults to "console". Which means all logging goes to the current terminal.
-
-=item B<-filename>
-
-The name of the log file. This only is relevant if the log type is "file".
-
-=item B<-facility>
-
-The facility of the log message. Primarily has meaning when using a log type of
-"json" or "syslog". The following have been defined and follows the syslog
-standard.
- 
-    auth, authpriv, cron, daemon, ftp,
-    local[0-7], lpr, mail, news, user, uucp
-
-Defaults to "local6".
-
-=item B<-process>
-
-The name of the process. Defaults to "XAS", which is not to useful.
-
-=item B<-levels>
-
-A hashref of values to set the internal logging level with.
-
-Example:
-
-    my $log = XAS::Lib::Modules::Log->new(
-        -levels => {
-            debug => $self->debugging ? 1 : 0,
-        }
-    );
-
-This would set the debug level of logging, depending on the value of
-$self->debugging.
-
-=back
+This will initialize the base object.
 
 =head2 level($level, $boolean)
 

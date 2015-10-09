@@ -39,9 +39,7 @@ my $requires = {
     'WWW::Curl'                   => 0.0,
     'HTTP::Response'              => 0.0,
     'XML::LibXML'                 => 0.0,
-    'KeyedMutex'                  => 0.0,
     'IPC::Semaphore'              => 0.0,
-    'IPC::SharedMem'              => 0.0,
 };
 
 # Needed for Win32 installations
@@ -49,6 +47,7 @@ my $requires = {
 if ($^O eq 'MSWin32') {
 
     $requires->{'Win32'}          = 0.45;
+    $requires->{'Win32::IPC'}     = 0.0;
     $requires->{'Win32::OLE'}     = 0.1709;
     $requires->{'Win32::Daemon'}  = 20110117;
     $requires->{'Win32::Service'} = 0.06;

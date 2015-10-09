@@ -1,15 +1,10 @@
 use lib '../lib';
 use XAS::Factory;
 
-my $log = XAS::Factory->module('log', { 
-   -type     => 'syslog',
-#   -facility => 'local7',
-   -process  => $0,
-   -levels => {
-       debug => 1,
-       trace => 1,
-   }
-});
+my $log = XAS::Factory->module('log');
+
+$log->env->logtype('syslog');
+$log->activate();
 
 $log->info('it works');
 $log->level('debug', 1);

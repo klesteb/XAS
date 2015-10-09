@@ -94,6 +94,9 @@ sub try_lock {
 sub destroy {
     my $self = shift;
 
+    # If the permissions on the semaphore are not 0666. 
+    # This will not remove it. It must be removed with ipcrm.
+
     $self->{'sema'}->remove();
 
 }
@@ -101,20 +104,11 @@ sub destroy {
 sub init_driver {
     my $self = shift;
 
-    my $key;
     my $gid;
     my $uid;
     my $mode;
     my $count = 0;
-
-    unless (defined($self->args->{'key'})) {
-
-        $self->throw_msg(
-            dotid($self->class) . '.init_driver.nokey',
-            'lock_key',
-        );
-
-    }
+    my $key = $self->key;
 
     unless (defined($self->args->{'mode'})) {
 
@@ -163,10 +157,10 @@ sub init_driver {
 
     $self->args->{'gid'} = $gid;
 
-    if (textlike($self->args->{'key'})) {
+    if (textlike($key)) {
 
         my $hash;
-        my $name = $self->args->{'key'};
+        my $name = $key;
         my $len = length($name);
 
         for (my $x = 0; $x < $len; $x++) {
@@ -175,7 +169,7 @@ sub init_driver {
 
         }
 
-        $key = $self->args->{'key'} = $hash;
+        $key = $hash;
 
     }
 
@@ -246,26 +240,26 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Lockmgr::Mutex - Use SysV semaphores for resource locking.
+XAS::Lib::Lockmgr::Mutex::Unix - Use SysV semaphores for resource locking.
 
 =head1 SYNOPSIS
 
  use XAS::Lib::Lockmgr;
 
- my $lockmgr = XAS::Lib::Lockmgr->new(
+ my $lockmgr = XAS::Lib::Lockmgr->new();
+
+ $lockmgr->add(
+     -key    => 'xas',
      -driver => 'Mutex',
-     -args => {
-         key => 'xas',
-     }
  );
 
- if ($lockmgr->try_lock) {
+ if ($lockmgr->try_lock($key)) {
 
-     $lockmgr->lock;
+     $lockmgr->lock($key);
 
      ...
 
-     $lockmgr->unlock;
+     $lockmgr->unlock($key);
 
  }
 

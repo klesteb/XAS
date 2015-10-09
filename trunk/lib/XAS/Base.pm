@@ -1,6 +1,5 @@
 package XAS::Base;
 
-our $MESSAGES;
 our $VERSION = '0.05';
 our $EXCEPTION = 'XAS::Exception';
 
@@ -94,18 +93,7 @@ sub _auto_load {
 
     if ($name eq 'log') {
 
-        return sub { 
-
-            XAS::Factory->module('logger', {
-                -type     => $self->env->log_type,
-                -filename => $self->env->logfile,
-                -process  => $self->env->script,
-                -levels => {
-                    debug => $self->env->xdebug,
-                }
-            }); 
-
-        }
+        return sub { XAS::Factory->module('logger'); } 
 
     }
 
@@ -141,10 +129,16 @@ sub _create_methods {
 sub init {
     my $self = shift;
 
+    my $messages;
+
     # load the environment
 
     $self->{env} = XAS::Factory->module('environment');
-    $XAS::Base::MESSAGES = $self->env->get_msgs();
+
+    # load the messages
+
+    $messages = $self->env->get_msgs();
+    $self->class->var('MESSAGES', $messages);
 
     # process PARAMS
 

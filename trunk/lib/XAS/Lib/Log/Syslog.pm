@@ -1,4 +1,4 @@
-package XAS::Lib::Modules::Log::Syslog;
+package XAS::Lib::Log::Syslog;
 
 our $VERSION = '0.01';
 
@@ -6,9 +6,8 @@ use Params::Validate 'HASHREF';
 use Sys::Syslog qw(:standard :extended);
 
 use XAS::Class
-  version    => $VERSION,
-  base       => 'XAS::Base',
-  mixins     => 'init_log output destroy',
+  version => $VERSION,
+  base    => 'XAS::Base',
 ;
 
 # ----------------------------------------------------------------------
@@ -28,7 +27,7 @@ sub output {
 
 }
 
-sub destroy {
+sub DESTROY {
     my $self = shift;
 
     closelog();
@@ -55,11 +54,15 @@ sub _translate {
 
 }
 
-sub init_log {
-    my $self = shift;
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
 
     setlogsock('unix');
-    openlog($self->process, 'pid', $self->facility);
+    openlog($self->env->script, 'pid', $self->env->logfacility);
+
+    return $self;
 
 }
 

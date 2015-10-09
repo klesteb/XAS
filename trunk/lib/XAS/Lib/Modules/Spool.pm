@@ -19,12 +19,12 @@ use XAS::Class
       -mask      => { optional => 1, default => 0664 },
       -extension => { optional => 1, default => '.pkt' },
       -seqfile   => { optional => 1, default => '.SEQ' },
-      -lockfile  => { optional => 1, default => 'spool' },
+      -key       => { optional => 1, default => 'spool' },
     }
   }
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ------------------------------------------------------------------------
 # Public Methods
@@ -38,18 +38,18 @@ sub read {
 
     my $packet;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         try {
 
             $packet = $self->read_packet($filename);
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
             die $ex;
 
@@ -75,20 +75,20 @@ sub write {
 
     my $seqnum;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         try {
 
             $seqnum = $self->sequence();
 
             $self->write_packet($packet, $seqnum);
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
             die $ex;
 
@@ -115,11 +115,11 @@ sub scan {
     my $regex = $self->extension;
     my $pattern = qr/$regex/i;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         @files = sort(grep( $_->path =~ $pattern, $self->directory->files() ));
-        $self->lockmgr->unlock_directory($self->directory);
-        
+        $self->lockmgr->unlock($self->key);
+
     } else {
 
         $self->throw_msg(
@@ -140,18 +140,18 @@ sub delete {
         { isa => 'Badger::Filesystem::File' },
     ]);
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         try {
 
             $file->delete;
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
         } catch {
 
             my $ex = $_;
 
-            $self->lockmgr->unlock_directory($self->directory);
+            $self->lockmgr->unlock($self->key);
 
             die $ex;
 
@@ -177,12 +177,12 @@ sub count {
     my $regex = $self->extension;
     my $pattern = qr/$regex/i;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         @files = grep( $_->path =~ $pattern, $self->directory->files() );
         $count = scalar(@files);
 
-        $self->lockmgr->unlock_directory($self->directory);
+        $self->lockmgr->unlock($self->key);
 
     } else {
 
@@ -205,12 +205,12 @@ sub get {
     my $filename;
     my $pattern = qr/$self->extension/i;
 
-    if ($self->lockmgr->lock_directory($self->directory)) {
+    if ($self->lockmgr->lock($self->key)) {
 
         @files = sort(grep( $_->path =~ /$pattern/, $self->directory->files() ));
         $filename = $files[0];
 
-        $self->lockmgr->unlock_directory($self->directory);
+        $self->lockmgr->unlock($self->key);
 
     } else {
 
@@ -235,10 +235,12 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{lockmgr} = XAS::Factory->module('lockmgr', {
-        -lockfile => $self->lockfile
-    });
-    
+    $self->{lockmgr} = XAS::Factory->module('lockmgr');
+    $self->lockmgr->add(
+        -key    => $self->key,
+        -driver => 'Mutex'
+    );
+
     return $self;
 
 }
@@ -423,9 +425,9 @@ This will initialize the base object. It takes the following parameters:
 
 This is the directory to use for spool files.
 
-=item B<-lockfile>
+=item B<-key>
 
-The name of the lock file to use. Defaults to 'spool'.
+The name of the lock to use. Defaults to 'spool'.
 
 =item B<-extension>
 

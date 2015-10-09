@@ -17,6 +17,7 @@ use XAS::Class
   mixin   => $mixin,
   vars => {
     PARAMS => {
+      -key  => 1,
       -args => { type => HASHREF },
     }
   }

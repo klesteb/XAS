@@ -1,4 +1,4 @@
-package XAS::Lib::Modules::Log::Json;
+package XAS::Lib::Log::Json;
 
 our $VERSION = '0.01';
 
@@ -6,12 +6,12 @@ use XAS::Factory;
 use Params::Validate 'HASHREF';
 
 use XAS::Class
+  debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base',
-  codecs     => 'JSON',
+  codec      => 'JSON',
   accessors  => 'spool',
   filesystem => 'Dir',
-  mixins     => 'init_log output destroy',
 ;
 
 # ----------------------------------------------------------------------
@@ -45,27 +45,29 @@ sub output {
         pid          => $args->{pid}
     };
 
+    my $json = encode($data);
+
     # write the spool file
 
-    $self->spool->write(encode($data));
+    $self->spool->write($json);
 
-}
-
-sub destroy {
-    my $self = shift;
-    
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub init_log {
-    my $self = shift;
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
 
     $self->{spool} = XAS::Factory->module('spool', {
-        -directory => Dir($self->env->spool, 'logs')
+        -key       => 'logs',
+        -directory => Dir($self->env->spool, 'logs'),
     });
+
+    return $self;
 
 }
 
@@ -75,16 +77,16 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Modules::Log::JSON - A mixin class for logging
+XAS::Lib::Log::JSON - A class for logging with JSON output
 
 =head1 DESCRIPTION
 
-This module is a mixin for logging. It creates JSON output in the logstash 
-"json_event" format which is then logged to the logs spool directory.
+This module creates JSON output in the logstash "json_event" format which 
+is then logged to the logs spool directory.
 
 =head1 METHODS
 
-=head2 init_log
+=head2 new
 
 This method initializes the module. It creates a spool object for writing
 the "json_event".
@@ -106,15 +108,11 @@ structure has the following fields:
     facility       - the facility from -facility
     process        - the process  from -process
 
-=head2 destroy
-
-This methods deinitializes the module.
-
 =head1 SEE ALSO
 
 =over 4
 
-=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+=item L<XAS::Lib::Log|XAS::Lib::Log>
 
 =item L<XAS|XAS>
 

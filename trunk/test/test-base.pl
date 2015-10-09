@@ -14,3 +14,5 @@ my $test = Test->new(-xdebug => 1, -alerts => 1);
 printf("xdebug = %s\n", $test->xdebug);
 printf("alerts = %s\n", $test->alerts);
 
+$test->log->info('logging works');
+

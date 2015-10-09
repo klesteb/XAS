@@ -5,25 +5,133 @@ our $VERSION = '0.01';
 use Params::Validate qw(HASHREF);
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  vars => {
-    PARAMS => {
-      -args   => { optional => 1, default => {}, type => HASHREF },
-      -driver => { optional => 1, default => 'Files', regex => qr/UnixMutex|KeyedMutex|Files/ },
-    }
-  }
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Singleton',
+  accessors => 'lockers',
+  utils     => 'dotid load_module',
 ;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub DESTROY {
+sub add {
     my $self = shift;
+    my $p = $self->validate_params(\@_, {
+        -key    => 1,
+        -args   => { optional => 1, default => {}, type => HASHREF },
+        -driver => { optional => 1, default => 'Mutex', regex => qr/Mutex/ },
+    });
 
-    $self->destroy();
+    my $key    = $p->{'key'};
+    my $args   = $p->{'args'};
+    my $module = 'XAS::Lib::Lockmgr::' . $p->{'driver'};
+
+    unless (defined($self->lockers->{$key})) {
+
+        load_module($module);
+
+        $self->lockers->{$key} = $module->new(-key => $key, -args => $args);
+
+    }
+
+}
+
+sub remove {
+    my $self = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
+
+    my $stat;
+
+    if (my $locker = $self->lockers->{$key}) {
+
+        $stat = $locker->destroy();
+        delete $self->lockers->{$key};
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.remove.nokey',
+            'lock_nokey',
+            $key
+        );
+
+    }
+
+    return $stat;
+
+}
+
+sub lock {
+    my $self = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
+
+    my $stat;
+
+    if (my $locker = $self->lockers->{$key}) {
+
+        $stat = $locker->lock();
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.lock.nokey',
+            'lock_nokey',
+            $key
+        );
+
+    }
+
+    return $stat;
+
+}
+
+sub unlock {
+    my $self = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
+
+    my $stat;
+
+    if (my $locker = $self->lockers->{$key}) {
+
+        $stat = $locker->unlock();
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.unlock.nokey',
+            'lock_nokey',
+            $key
+        );
+
+    }
+
+    return $stat;
+
+}
+
+sub try_lock {
+    my $self = shift;
+    my ($key) = $self->validate_params(\@_, [1]);
+
+    my $stat;
+
+    if (my $locker = $self->lockers->{$key}) {
+
+        $stat = $locker->try_lock();
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.try_lock.nokey',
+            'lock_nokey',
+            $key
+        );
+
+    }
+
+    return $stat;
 
 }
 
@@ -36,11 +144,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    my $args   = $self->args;
-    my $driver = 'XAS::Lib::Lockmgr::' . $self->driver;
-
-    $self->class->mixin($driver);
-    $self->init_driver();
+    $self->{'lockers'} = {};
 
     return $self;
 
@@ -56,9 +160,10 @@ XAS::Lib::Lockmgr - The base class for locking within XAS
 
 =head1 SYNOPSIS
 
+ my $lock = 'testing';
  my $lockmgr = XAS::Lib::Lockmgr->new();
 
- $lockmgr->allocate($lock);
+ $lockmgr->add(-key => $lock);
 
  if ($lockmgr->try_lock($lock)) {
 

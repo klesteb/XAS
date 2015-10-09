@@ -113,15 +113,6 @@ sub init_driver {
 
     $self->{'locks'} = ();
 
-    unless (defined($self->args->{'key'})) {
-
-        $self->throw_msg(
-            dotid($self->class) . '.init_driver.nokey',
-            'lock_key',
-        );
-
-    }
-
     $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
     $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
 
@@ -129,7 +120,7 @@ sub init_driver {
 
         # Create the mutex. 
 
-        $self->{'mutex'} = Win32::Mutex->new(1, $self->args->{'key'});
+        $self->{'mutex'} = Win32::Mutex->new(1, $self->key);
 
     } catch {
 
