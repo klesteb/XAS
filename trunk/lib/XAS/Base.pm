@@ -129,15 +129,13 @@ sub _create_methods {
 sub init {
     my $self = shift;
 
-    my $messages;
-
     # load the environment
 
     $self->{env} = XAS::Factory->module('environment');
 
     # load the messages
 
-    $messages = $self->env->get_msgs();
+    my $messages = $self->env->get_msgs();
     $self->class->var('MESSAGES', $messages);
 
     # process PARAMS

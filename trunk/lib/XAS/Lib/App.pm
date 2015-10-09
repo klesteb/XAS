@@ -126,21 +126,27 @@ sub _default_options {
     my $script  = $self->env->script;
 
     return {
-        'log-type=s'     => sub { $self->env->log_type($_[1]); },
-        'log-facility=s' => sub { $self->env->log_facility($_[1]); },
-        'alerts!'        => sub { $self->env->alerts($_[1]); },
-        'help|h|?'       => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
-        'manual'         => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
-        'version'        => sub { printf("%s - v%s\n", $script, $version); exit 0; },
-        'debug'          => sub { 
+        'alerts!'  => sub { $self->env->alerts($_[1]); },
+        'help|h|?' => sub { pod2usage(-verbose => 0, -exitstatus => 0); },
+        'manual'   => sub { pod2usage(-verbose => 2, -exitstatus => 0); },
+        'version'  => sub { printf("%s - v%s\n", $script, $version); exit 0; },
+        'debug'    => sub { 
             $self->env->xdebug(1); 
             $self->log->level('debug', 1);
         },
         'logfile=s' => sub {
             my $logfile = File($_[1]);
-            $self->env->log_type('file');
+            $self->env->logtype('file');
             $self->env->logfile($logfile);
+            $self->log->activate();
         }
+        'log-type=s' => sub { 
+            $self->env->logtype($_[1]);
+            $self->log->activate()
+        },
+        'log-facility=s' => sub { 
+            $self->env->logfacility($_[1]); 
+        },
     };
 
 }
