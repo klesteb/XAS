@@ -296,6 +296,8 @@ The access permissions for the semaphore. Defaults to 0666.
 
 =over 4
 
+=item L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>
+
 =item L<XAS|XAS>
 
 =back

@@ -36,15 +36,15 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Modules::Log::Console - A mixin class for logging
+XAS::Lib::Log::Console - A class for logging
 
 =head1 DESCRIPTION
 
-This module is a mixin for logging. It logs to stderr.
+This module is for logging to the terminal. It logs to stderr.
 
 =head1 METHODS
 
-=head2 init_log
+=head2 new
 
 This method initializes the module.
 
@@ -52,15 +52,11 @@ This method initializes the module.
 
 The method formats the hashref and writes out the results.
 
-=head2 destroy
-
-This methods deinitializes the module.
-
 =head1 SEE ALSO
 
 =over 4
 
-=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+=item L<XAS::Lib::Log|XAS::Lib::Log>
 
 =item L<XAS|XAS>
 

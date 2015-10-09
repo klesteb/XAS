@@ -90,6 +90,24 @@ The following section describes how this environment works.
 
 =item L<XAS::Lib::Iterator|XAS::Lib::Iterator>
 
+=item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
+
+=item L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>
+
+=item L<XAS::Lib::Lockmgr::Mutex::Unix|XAS::Lib::Lockmgr::Mutex::Unix>
+
+=item L<XAS::Lib::Lockmgr::Mutex::Win32|XAS::Lib::Lockmgr::Mutex::Win32>
+
+=item L<XAS::Lib::Log|XAS::Lib::Log>
+
+=item L<XAS::Lib::Log::Console|XAS::Lib::Log::Console>
+
+=item L<XAS::Lib::Log::File|XAS::Lib::Log::File>
+
+=item L<XAS::Lib::Log::Json|XAS::Lib::Log::Json>
+
+=item L<XAS::Lib::Log::Syslog|XAS::Lib::Log::Syslog>
+
 =item L<XAS::Lib::Mixins::Bufops|XAS::Lib::Mixins::Bufops>
 
 =item L<XAS::Lib::Mixins::Configs|XAS::Lib::Mixins::Configs>
@@ -107,18 +125,6 @@ The following section describes how this environment works.
 =item L<XAS::Lib::Modules::Email|XAS::Lib::Modules::Email>
 
 =item L<XAS::Lib::Modules::Environment|XAS::Lib::Modules::Environment>
-
-=item L<XAS::Lib::Modules::Locking|XAS::Lib::Modules::Locking>
-
-=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
-
-=item L<XAS::Lib::Modules::Log::Console|XAS::Lib::Modules::Log::Console>
-
-=item L<XAS::Lib::Modules::Log::File|XAS::Lib::Modules::Log::File>
-
-=item L<XAS::Lib::Modules::Log::Json|XAS::Lib::Modules::Log::Json>
-
-=item L<XAS::Lib::Modules::Log::Syslog|XAS::Lib::Modules::Log::Syslog>
 
 =item L<XAS::Lib::Modules::Spool|XAS::Lib::Modules::Spool>
 

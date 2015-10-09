@@ -96,7 +96,7 @@ following fields:
 
 =head2 lock
 
-Aquire a lock. This returns true on success.
+Acquire a lock. This returns true on success.
 
 =head2 unlock
 
@@ -104,7 +104,7 @@ Release the lock.
 
 =head2 try_lock
 
-This checks if you can aquire a lock.
+This checks if you can acquire a lock.
 
 =head2 destroy
 
@@ -112,11 +112,13 @@ This deallocates the module. It should release any OS resources used.
 
 =head2 init_driver
 
-This initalizes the mixin. It should allocate any OS resources needed.
+This initializes the mixin. It should allocate any OS resources needed.
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
 
 =item L<XAS|XAS>
 

@@ -72,15 +72,15 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Modules::Log::Syslog - A mixin class for logging
+XAS::Lib::Log::Syslog - A class for logging syslog
 
 =head1 DESCRIPTION
 
-This module is a mixin for logging. This logs to syslog.
+This module is for logging to syslog.
 
 =head1 METHODS
 
-=head2 init_log
+=head2 new
 
 This method initializes syslog. Sets the process, facility and requests that
 the pid be included.
@@ -105,7 +105,7 @@ Closes the connection to syslog.
 
 =over 4
 
-=item L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>
+=item L<XAS::Lib::Log|XAS::Lib::Log>
 
 =item L<XAS|XAS>
 

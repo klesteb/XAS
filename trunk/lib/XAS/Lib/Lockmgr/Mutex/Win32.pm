@@ -186,6 +186,8 @@ No additional configuration is provided.
 
 =over 4
 
+=item L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>
+
 =item L<XAS|XAS>
 
 =back

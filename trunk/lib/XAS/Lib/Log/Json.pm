@@ -77,7 +77,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Log::JSON - A class for logging with JSON output
+XAS::Lib::Log::Json - A class for logging with JSON output
 
 =head1 DESCRIPTION
 
