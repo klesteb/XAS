@@ -55,7 +55,6 @@ lib/XAS/Lib/Mixins/JSON/Server.pm
 lib/XAS/Lib/Modules/Alerts.pm
 lib/XAS/Lib/Modules/Email.pm
 lib/XAS/Lib/Modules/Environment.pm
-lib/XAS/Lib/Modules/Locking.pm
 lib/XAS/Lib/Modules/Spool.pm
 lib/XAS/Lib/Net/Client.pm
 lib/XAS/Lib/Net/POE/Client.pm
@@ -123,4 +122,5 @@ t/09_stomp_utils.t
 t/10_stomp_frame.t
 t/10_stomp_utils.t
 t/11_stomp_frame.t
-t/12_spool_basic.t
+t/spool_basic.t
+t/lockmgr_basic.t

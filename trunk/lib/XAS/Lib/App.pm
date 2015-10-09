@@ -142,7 +142,7 @@ sub _default_options {
         }
         'log-type=s' => sub { 
             $self->env->logtype($_[1]);
-            $self->log->activate()
+            $self->log->activate();
         },
         'log-facility=s' => sub { 
             $self->env->logfacility($_[1]); 

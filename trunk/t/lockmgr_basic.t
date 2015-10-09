@@ -11,25 +11,19 @@ BEGIN {
 
     } else {
 
-       plan(tests => 6);
+       plan(tests => 4);
        use_ok("XAS::Lib::Lockmgr");
 
     }
 
 }
 
-my $lockmgr = XAS::Lib::Lockmgr->new(
-    -driver => 'Files',
-    -args => {
-        directory => '.'
-    }
-);
+my $lockmgr = XAS::Lib::Lockmgr->new();
+$lockmgr->add(-key => 'testing');
 
 # basic does it work..
 
 isa_ok($lockmgr, 'XAS::Lib::Lockmgr');
-ok($lockmgr->allocate('testing'));
 ok($lockmgr->lock('testing'));
 ok($lockmgr->unlock('testing'));
-ok($lockmgr->deallocate('testing'));
 

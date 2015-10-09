@@ -23,6 +23,7 @@ unless ( $ENV{RELEASE_TESTING} ) {
 my $data = 'this is data';
 my $spl = XAS::Lib::Modules::Spool->new(
     -directory => Dir('spool'),
+    -lock      => 'spool',
 );
 isa_ok($spl, "XAS::Lib::Modules::Spool");
 

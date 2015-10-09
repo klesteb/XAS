@@ -82,6 +82,8 @@ sub unlock {
 
     $self->log->debug(sprintf('unlock - after: %s', $self->{'sema'}->getval(0)));
 
+    return 1;
+
 }
 
 sub try_lock {

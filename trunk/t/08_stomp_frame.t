@@ -11,7 +11,7 @@ BEGIN {
 
     } else {
 
-       plan(tests => 13);
+       plan(tests => 10);
        use_ok("XAS::Lib::Stomp::Parser");
 
     }
