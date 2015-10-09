@@ -139,7 +139,7 @@ sub _default_options {
             $self->env->logtype('file');
             $self->env->logfile($logfile);
             $self->log->activate();
-        }
+        },
         'log-type=s' => sub { 
             $self->env->logtype($_[1]);
             $self->log->activate();
