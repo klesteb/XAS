@@ -99,7 +99,12 @@ sub destroy {
     # If the permissions on the semaphore are not 0666. 
     # This will not remove it. It must be removed with ipcrm.
 
-    $self->{'sema'}->remove();
+    if (my $sema = $self->{'sema'}) {
+
+        $sema->remove();
+        $self->{'sema'} = undef;
+
+    }
 
 }
 
