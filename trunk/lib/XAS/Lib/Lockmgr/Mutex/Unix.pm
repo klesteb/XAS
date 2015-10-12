@@ -200,12 +200,14 @@ sub init_driver {
                 # set ownership and the initial value to 0
 
                 my $rc;
-  
-                $rc = $self->{'sema'}->set(uid => $uid, gid => $gid);
-                die $! if (($rc < 0) || ($rc == undef));
 
+                $rc = $self->{'sema'}->set(uid => $uid, gid => $gid);
+                die 'semaphore problem' unless (defined($rc));
+                die $! if ($rc < 0);
+                
                 $rc = $self->{'sema'}->setval(0, 0);
-                die $! if (($rc < 0) || ($rc == undef));
+                die 'semaphore problem' unless (defined($rc));
+                die $! if ($rc < 0);
 
                 last LOOP;
 
