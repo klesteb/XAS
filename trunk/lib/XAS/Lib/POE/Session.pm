@@ -215,9 +215,10 @@ sub _session_stop {
 
     $self->log->debug("$alias: _session_stop()");
 
+    $poe_kernel->sig('DIE');
+
     $self->session_stop();
 
-    $poe_kernel->sig('DIE');
     $poe_kernel->alias_remove($self->alias);
 
 }
@@ -255,6 +256,7 @@ sub _session_exception {
 
     } else {
 
+        $self->log->debug(sprintf('%s: handling execption: %s', $alias));
         $self->session_exception($ex);
 
     }
