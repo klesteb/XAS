@@ -116,7 +116,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{'lockmgr'} = XAS::Factory->modules('lockmgr');
+    $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
 
     unless (defined($self->{'file'})) {
 
