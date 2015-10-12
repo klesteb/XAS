@@ -58,14 +58,14 @@ sub register {
             foreach my $part (@parts) {
 
                 next if ($part eq '');
-                push(@{$self->{sessions}}, $part);
+                push(@{$self->{'sessions'}}, $part);
 
             }
 
         } else {
 
             next if ($session eq '');
-            push(@{$self->{sessions}}, $session);
+            push(@{$self->{'sessions'}}, $session);
 
         }
 
@@ -132,7 +132,7 @@ sub _service_startup {
 
     $self->log->debug("$alias: _service_startup");
 
-    foreach my $session (@{$self->sessions}) {
+    foreach my $session (@{$self->{'sessions'}}) {
 
         $poe_kernel->post($session, 'session_startup');
 
@@ -147,7 +147,7 @@ sub _service_shutdown {
 
     $self->log->debug("$alias: _service_shutdown");
 
-    foreach my $session (@{$self->sessions}) {
+    foreach my $session (@{$self->{'sessions'}}) {
 
         $poe_kernel->post($session, 'session_shutdown');
 
@@ -162,7 +162,7 @@ sub _service_idle {
 
     $self->log->debug("$alias: _service_idle");
 
-    foreach my $session (@{$self->sessions}) {
+    foreach my $session (@{$self->{'sessions'}}) {
 
         $poe_kernel->post($session, 'session_idle');
 
@@ -177,7 +177,7 @@ sub _service_paused {
 
     $self->log->debug("$alias: _service_paused");
 
-    foreach my $session (@{$self->sessions}) {
+    foreach my $session (@{$self->{'sessions'}}) {
 
         $poe_kernel->post($session, 'session_pause');
 
@@ -192,7 +192,7 @@ sub _service_resumed {
 
     $self->log->debug("$alias: _service_resumed");
 
-    foreach my $session (@{$self->sessions}) {
+    foreach my $session (@{$self->{'sessions'}}) {
 
         $poe_kernel->post($session, 'session_resume');
 
