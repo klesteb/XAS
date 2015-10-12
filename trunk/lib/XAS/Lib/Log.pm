@@ -8,7 +8,7 @@ use Params::Validate 'HASHREF';
 
 use XAS::Class
   version    => $VERSION,
-  base       => 'XAS::Base Badger::Prototype',
+  base       => 'XAS::Singleton',
   accessors  => 'logger',
   filesystem => 'File',
   utils      => ':boolean load_module',
