@@ -63,7 +63,7 @@ sub init {
     my $self = $class->SUPER::init(@_);
 
     $self->{spool} = XAS::Factory->module('spool', {
-        -key       => 'logs',
+        -lock      => 'logs',
         -directory => Dir($self->env->spool, 'logs'),
     });
 
