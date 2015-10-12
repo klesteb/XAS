@@ -28,7 +28,6 @@ my $requires = {
     'Config::IniFiles'            => 2.65,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
-    'LockFile::Simple'            => 0.207,
     'MIME::Lite'                  => 3.027,
     'Params::Validate'            => 0.92,
     'Pod::Usage'                  => 1.35,

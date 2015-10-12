@@ -19,7 +19,6 @@ Requires:       perl(Config::IniFiles) >= 2.72
 Requires:       perl(Hash::Merge) >= 0.12
 Requires:       perl(HTTP::Response) >= 0.0
 Requires:       perl(JSON::XS) >= 2.27
-Requires:       perl(LockFile::Simple) >= 0.207
 Requires:       perl(MIME::Lite) >= 3.027
 Requires:       perl(Params::Validate) >= 0.92
 Requires:       perl(Pod::Usage) >= 1.35

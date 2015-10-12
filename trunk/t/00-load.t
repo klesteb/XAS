@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 50;
+use Test::More tests => 51;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -18,6 +18,13 @@ BEGIN {
     use_ok( 'XAS::Lib::App::Daemon' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Curl::HTTP' )             || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Lockmgr' )                || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Lockmgr::Mutex' )         || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Log' )                    || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Log::Console' )           || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Log::File' )              || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Log::Json' )              || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Log::Syslog' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Configs' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Handlers' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Keepalive' )      || print "Bail out!\n";
@@ -26,12 +33,6 @@ BEGIN {
     use_ok( 'XAS::Lib::Modules::Alerts' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Email' )         || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Environment' )   || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Locking' )       || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log' )           || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log::Console' )  || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log::File' )     || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log::Json' )     || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Modules::Log::Syslog' )   || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Spool' )         || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::Client' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::Net::POE::Client' )       || print "Bail out!\n";
