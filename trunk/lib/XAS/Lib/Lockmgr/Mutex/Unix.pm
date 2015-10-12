@@ -199,8 +199,13 @@ sub init_driver {
 
                 # set ownership and the initial value to 0
 
-                die $! if ($self->{'sema'}->set(uid => $uid, gid => $gid) < 0);
-                die $! if ($self->{'sema'}->setval(0, 0) < 0);
+                my $rc;
+  
+                $rc = $self->{'sema'}->set(uid => $uid, gid => $gid);
+                die $! if (($rc < 0) || ($rc == undef));
+
+                $rc = $self->{'sema'}->setval(0, 0);
+                die $! if (($rc < 0) || ($rc == undef));
 
                 last LOOP;
 
