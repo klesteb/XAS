@@ -217,6 +217,7 @@ sub _session_stop {
 
     $self->session_stop();
 
+    $poe_kernel->sig('DIE');
     $poe_kernel->alias_remove($self->alias);
 
 }
@@ -249,6 +250,7 @@ sub _session_exception {
 
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
+        $self->log->debug(sprintf('sending execption to: %s', $ex->{'source_session'}));
         $poe_kernel->signal($ex->{'source_session'}, 'DIE', $sig, $ex);
 
     } else {
