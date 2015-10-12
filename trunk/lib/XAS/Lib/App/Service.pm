@@ -69,7 +69,11 @@ sub run {
 
     my $rc = $self->SUPER::run();
 
-    $self->pid->remove();
+    if (my $pid = $self->{'pid'}) {
+
+        $pid->remove();
+
+    }
 
     return $rc;
 
