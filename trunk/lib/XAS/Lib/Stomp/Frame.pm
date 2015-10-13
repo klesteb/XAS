@@ -8,6 +8,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  utils     => 'dotid',
   accessors => 'eol header',
   mutators  => 'command body',
   codec     => 'unicode',
@@ -205,7 +206,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   constants => 'REFS',
-  accessor  => 'methods',
+  accessors => 'methods',
 ;
 
 #use Data::Dumper;
