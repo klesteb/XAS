@@ -47,7 +47,7 @@ sub parse {
 
     $self->{buffer} .= $buffer;
 
-    $self->log->debug('stomp parse');
+    $self->log->debug('stomp-parser: begin');
 #    $self->log->debug(hexdump($self->{buffer}));
 
     # A valid frame is usually this:
@@ -76,7 +76,7 @@ sub parse {
 
     for (;;) {
 
-        $self->log->debug('state = ' . $self->{state});
+        $self->log->debug('stomp-parser: state = ' . $self->{state});
 
         if ($self->{state} eq 'command') {
 

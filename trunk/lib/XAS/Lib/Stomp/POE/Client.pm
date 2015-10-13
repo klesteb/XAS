@@ -141,15 +141,15 @@ sub handle_error {
     my $message_id = '';
     my $alias = $self->alias;
 
-    if ($frame->headers->methods->has('message_id')) {
+    if ($frame->header->methods->has('message_id')) {
 
-        $message_id = $frame->headers->message_id;
+        $message_id = $frame->header->message_id;
 
     }
 
-    if ($frame->headers->methods->has('message')) {
+    if ($frame->header->methods->has('message')) {
 
-        $message = $frame->headers->message;
+        $message = $frame->header->message;
 
     }
 
