@@ -233,11 +233,11 @@ sub _server_connected {
 
     my $host = gethostbyaddr($peeraddr, AF_INET);
 
-    $self->{host}     = $host;
-    $self->{port}     = $peerport;
-    $self->{wheel}    = $wheel;
-    $self->{socket}   = $socket;
-    $self->{attempts} = 0;
+    $self->{'host'}     = $host;
+    $self->{'port'}     = $peerport;
+    $self->{'wheel'}    = $wheel;
+    $self->{'socket'}   = $socket;
+    $self->{'attempts'} = 0;
 
     $poe_kernel->post($alias, 'handle_connection');
 
@@ -250,7 +250,7 @@ sub _server_connect {
 
     $self->log->debug("$alias: _server_connect()");
 
-    $self->{listner} = POE::Wheel::SocketFactory->new(
+    $self->{'listner'} = POE::Wheel::SocketFactory->new(
         RemoteAddress  => $self->host,
         RemotePort     => $self->port,
         SocketType     => SOCK_STREAM,
@@ -271,9 +271,9 @@ sub _server_connection_failed {
     $self->log->debug("$alias: _server_connection_failed()");
     $self->log->error_msg('net_server_connection_failed', $alias, $operation, $errnum, $errstr);
 
-    delete $self->{socket};
-    delete $self->{listner};
-    delete $self->{wheel};
+    delete $self->{'socket'};
+    delete $self->{'listner'};
+    delete $self->{'wheel'};
 
     foreach my $error (@ERRORS) {
 
@@ -296,9 +296,9 @@ sub _server_error {
     $self->log->debug("$alias: _server_error()");
     $self->log->error_msg('net_server_error', $alias, $operation, $errnum, $errstr);
 
-    delete $self->{socket};
-    delete $self->{listner};
-    delete $self->{wheel};
+    delete $self->{'socket'};
+    delete $self->{'listner'};
+    delete $self->{'wheel'};
 
     $poe_kernel->post($alias, 'connection_down');
 
@@ -323,11 +323,11 @@ sub _server_reconnect {
 
     $self->log->warn_msg('net_server_reconnect', $alias, $self->{attempts}, $self->{count});
 
-    if ($self->{attempts} < $self->{count}) {
+    if ($self->{'attempts'} < $self->{count}) {
 
         my $delay = $RECONNECTIONS[$self->{attempts}];
         $self->log->warn_msg('net_server_attempts', $alias, $self->{attempts}, $delay);
-        $self->{attempts} += 1;
+        $self->{'attempts'} += 1;
         $poe_kernel->delay('server_connect', $delay);
 
     } else {
@@ -337,7 +337,7 @@ sub _server_reconnect {
         if ($retry) {
 
             $self->log->warn_msg('net_server_recycle', $alias);
-            $self->{attempts} = 0;
+            $self->{'attempts'} = 0;
             $poe_kernel->post($alias, 'server_connect');
 
         } else {
@@ -360,12 +360,12 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{attempts} = 0;
-    $self->{count} = scalar(@RECONNECTIONS);
+    $self->{'attempts'} = 0;
+    $self->{'count'} = scalar(@RECONNECTIONS);
 
-    unless (defined($self->{filter})) {
+    unless (defined($self->{'filter'})) {
 
-        $self->{filter} = POE::Filter::Line->new(
+        $self->{'filter'} = POE::Filter::Line->new(
             InputLiteral  => $self->eol,
             OutputLiteral => $self->eol,
         );

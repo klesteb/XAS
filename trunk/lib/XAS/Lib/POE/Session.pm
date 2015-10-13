@@ -115,7 +115,7 @@ sub init {
 
     # set up the session
 
-    $self->{session} = POE::Session->create(
+    $self->{'session'} = POE::Session->create(
         object_states => [
             $self => {
                 _start            => '_session_start',
@@ -130,7 +130,7 @@ sub init {
         ]
     );
 
-    weaken($self->{session});
+    weaken($self->{'session'});
 
     return $self;
 
