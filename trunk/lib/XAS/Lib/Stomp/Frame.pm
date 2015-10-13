@@ -115,18 +115,18 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
     
-    unless (defined($self->{target})) {
+    unless (defined($self->{'target'})) {
 
-        $self->{target} = $self->env->mqlevel;
+        $self->{'target'} = $self->env->mqlevel;
 
     }
 
     my $headers = $self->headers || {};
 
-    $self->{eol} = ($self->target > 1.1) ? CRLF : LF;
+    $self->{'eol'} = ($self->target > 1.1) ? CRLF : LF;
 
     $self->_decode_headers(\$headers) if ($self->target > 1.1);
-    $self->{header} = XAS::Lib::Stomp::Frame::Headers->new($headers);
+    $self->{'header'} = XAS::Lib::Stomp::Frame::Headers->new($headers);
 
     return $self;
 
@@ -166,7 +166,7 @@ sub _decode_headers {
             unless ($v =~ s/(\\.)/$DECODE_MAP{$1}/eg) {
 
                 $self->throw_msg(
-                    'xas.lib.stomp.frame.decode_header.badval',
+                    dotid($self->class) . '.decode_header.badval',
                     'stomp_badval',
                 );
 
@@ -179,7 +179,7 @@ sub _decode_headers {
             unless ($k =~ s/(\\.)/$DECODE_MAP{$1}/eg) {
 
                 $self->throw_msg(
-                    'xas.lib.stomp.frame.decode_header.badkey',
+                    dotid($self->class) . '.decode_header.badkey',
                     'stomp_badkey'
                 );
 
@@ -193,16 +193,19 @@ sub _decode_headers {
 
 }
 
-package # hide from cpan...
+package # hide from pause...
       XAS::Lib::Stomp::Frame::Headers;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
+use XAS::Lib::Set::Light;
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   constants => 'REFS',
+  accessor  => 'methods',
 ;
 
 #use Data::Dumper;
@@ -210,8 +213,7 @@ use XAS::Class
 sub remove {
     my ($self, $key) = @_;
 
-    my @x = grep { $_ ne $key } @{$self->{_methods}};
-    $self->{_methods} = \@x;
+    $self->methods->remove($key);
 
     delete($self->{$key});
 
@@ -228,7 +230,7 @@ sub add {
     $key =~ s/-/_/g;
 
     $self->{$key} = $value;
-    push(@{$self->{_methods}}, $key);
+    $self->methods->insert($key);
 
     no warnings;
     no strict REFS;
@@ -241,20 +243,13 @@ sub add {
 
 }
 
-sub introspect {
-    my $self = shift;
-
-    return $self->{_methods};
-
-}
-
 sub devolve {
     my $self = shift;
 
     my $value;
     my $header = {};
 
-    foreach my $key (@{$self->{_methods}}) {
+    foreach my $key ($self->methods->items()) {
 
         $value = $self->{$key};
         $key =~ s/_/-/g;
@@ -270,8 +265,8 @@ sub init {
     my $self    = shift;
     my $configs = shift;
 
-    $self->{config}   = $configs;
-	$self->{_methods} = undef;
+    $self->{'config'}  = $configs;
+	$self->{'methods'} = XAS::Lib::Set::Light->new();
 
     # turn frame headers into mutators of there values
 
@@ -280,7 +275,7 @@ sub init {
         $key =~ s/-/_/g;
 
         $self->{$key} = $value;
-        push(@{$self->{_methods}}, $key);
+        $self->methods->insert($key);
 
         no warnings;
         no strict REFS;
@@ -415,9 +410,9 @@ This will create a hash with header/value pairs. Any underscores are
 converted to dashes in the headers name. Primarily used during
 stringification of the STOMP frame.
 
-=head2 introspect
+=head2 methods
 
-This will return a list of headers.
+Returns a L<Set::Light|Set::Light> object of available methods.
 
 =head2 add($name, $value)
 

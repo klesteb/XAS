@@ -109,7 +109,7 @@ sub handle_connected {
 
     if ($self->tcp_keepalive) {
 
-        $self->log->info('tcp_keepalive_enabled', $alias);
+        $self->log->info_msg('tcp_keepalive_enabled', $alias);
 
         $self->init_keepalive();
         $self->enable_keepalive($self->socket);
@@ -137,12 +137,26 @@ sub handle_receipt {
 sub handle_error {
     my ($self, $frame) = @_[OBJECT, ARG0];
 
+    my $message = '';
+    my $message_id = '';
     my $alias = $self->alias;
+
+    if ($frame->headers->methods->has('message_id')) {
+
+        $message_id = $frame->headers->message_id;
+
+    }
+
+    if ($frame->headers->methods->has('message')) {
+
+        $message = $frame->headers->message;
+
+    }
 
     $self->log->error_msg('stomp_errors',
         $alias,
-        $frame->header->message_id,
-        $frame->header->message,
+        $message_id,
+        $message,
         $frame->body
     );
 
@@ -212,20 +226,20 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    unless (defined($self->{host})) {
+    unless (defined($self->{'host'})) {
 
-        $self->{host} = $self->env->mqserver;
-
-    }
-
-    unless (defined($self->{port})) {
-
-        $self->{port} = $self->env->mqport;
+        $self->{'host'} = $self->env->mqserver;
 
     }
 
-    $self->{stomp}  = XAS::Lib::Stomp::Utils->new();
-    $self->{filter} = XAS::Lib::Stomp::POE::Filter->new();
+    unless (defined($self->{'port'})) {
+
+        $self->{'port'} = $self->env->mqport;
+
+    }
+
+    $self->{'stomp'}  = XAS::Lib::Stomp::Utils->new();
+    $self->{'filter'} = XAS::Lib::Stomp::POE::Filter->new();
 
     return $self;
 

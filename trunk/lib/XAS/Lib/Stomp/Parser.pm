@@ -85,7 +85,7 @@ sub parse {
 
             if ($line = $self->buf_get_line(\$self->{buffer}, $EOL)) {
 
-                $self->log->debug('command');
+                $self->log->debug('stomp-parser: command');
 #                $self->log->debug(hexdump($line));
 
                 $line = trim($line);
@@ -100,14 +100,14 @@ sub parse {
             # start of the headers, they last until a standalone <eol>
             # or <eof> is reached. 
 
-            $self->log->debug("header");
+            $self->log->debug("stomp-parser: header");
 
             $length = length($self->{buffer});
 
             $self->{buffer} =~ m/$EOH/g;
             $clength = pos($self->{buffer}) || -1;
 
-            $self->log->debug("end of headers $clength");
+            $self->log->debug("stomp-parser: end of headers, length: $clength");
 
             if ($clength == -1) {
 
@@ -115,7 +115,7 @@ sub parse {
                 $self->{buffer} =~ m/$BEOH/g;
                 $clength = pos($self->{buffer}) || -1;
 
-                $self->log->debug("end of frame $clength");
+                $self->log->debug("stomp-parser: end of frame, length: $clength");
 
             }
 
@@ -126,7 +126,7 @@ sub parse {
 
                 while ($line =~ s/^$HEADER//) {
 
-                    $self->log->debug('valid header');
+                    $self->log->debug('stomp-parser: valid header');
 
                     my $key   = lc($1);
                     my $value = trim($2);
@@ -160,7 +160,7 @@ sub parse {
 
         } elsif ($self->{state} eq 'body') {
 
-            $self->log->debug('body');
+            $self->log->debug('stomp-parser: body');
 
             # start of the body, determine wither to use
             # content-length or EOF to find the end 
@@ -169,7 +169,7 @@ sub parse {
 
             if ($clength = $self->{headers}->{'content-length'}) {
 
-                $self->log->debug('using content-length');
+                $self->log->debug('stomp-parser: using content-length');
 
                 if ($clength <= $length) {
 
@@ -180,7 +180,7 @@ sub parse {
 
             } else {
 
-                $self->log->debug('using EOF');
+                $self->log->debug('stomp-parser: using EOF');
 
                 $clength = index($self->{buffer}, $EOF);
 
@@ -196,7 +196,7 @@ sub parse {
 
         } elsif ($self->{state} eq 'frame') {
 
-            $self->log->debug('building frame');
+            $self->log->debug('stomp-parser: building frame');
 
             # clear out inter-frame crap and create the object.
 

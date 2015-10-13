@@ -68,6 +68,7 @@ lib/XAS/Lib/POE/Session.pm
 lib/XAS/Lib/Process.pm
 lib/XAS/Lib/Process/Unix.pm
 lib/XAS/Lib/Process/Win32.pm
+lib/XAS/Lib/Set/Light.pm
 lib/XAS/Lib/Service.pm
 lib/XAS/Lib/Service/Unix.pm
 lib/XAS/Lib/Service/Win32.pm
