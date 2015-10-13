@@ -12,6 +12,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::Net::POE::Client',
   mixins    => 'XAS::Lib::Mixins::Keepalive',
+  utils     => 'trim',
   accessors => 'stomp',
   vars => {
     PARAMS => {
@@ -155,9 +156,9 @@ sub handle_error {
 
     $self->log->error_msg('stomp_errors',
         $alias,
-        $message_id,
-        $message,
-        $frame->body
+        trim($message_id),
+        trim($message),
+        trim($frame->body)
     );
 
 }
