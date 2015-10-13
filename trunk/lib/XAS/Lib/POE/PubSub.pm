@@ -23,7 +23,7 @@ sub subscribe {
         { optional => 1, default => 'default' }
     ]);
 
-    $self->{registry}->{$channel}->{$session} = $session;
+    $self->{'registry'}->{$channel}->{$session} = $session;
 
 }
 
@@ -34,7 +34,7 @@ sub unsubscribe {
         { optional => 1, default => 'default' }
     ]);
 
-    delete $self->{registry}->{$channel}->{$session};
+    delete $self->{'registry'}->{$channel}->{$session};
 
 }
 
@@ -50,7 +50,7 @@ sub publish {
     my $channel = $p->{channel};
     my $args    = $p->{args};
 
-    foreach my $session (keys %{$self->{registry}->{$channel}}) {
+    foreach my $session (keys %{$self->{'registry'}->{$channel}}) {
 
         $poe_kernel->post($session, $event, $args);
 
@@ -67,7 +67,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{registry} = {};
+    $self->{'registry'} = {};
 
     return $self;
 
