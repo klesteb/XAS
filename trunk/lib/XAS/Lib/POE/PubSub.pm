@@ -46,9 +46,9 @@ sub publish {
        -channel => { optional => 1, default => 'default' },
     });
 
-    my $event   = $p->{event};
-    my $channel = $p->{channel};
-    my $args    = $p->{args};
+    my $event   = $p->{'event'};
+    my $channel = $p->{'channel'};
+    my $args    = $p->{'args'};
 
     foreach my $session (keys %{$self->{'registry'}->{$channel}}) {
 

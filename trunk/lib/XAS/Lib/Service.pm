@@ -119,7 +119,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{sessions} = [];
+    $self->{'sessions'} = ();
 
     return $self;
 

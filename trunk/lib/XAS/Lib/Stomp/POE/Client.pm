@@ -46,11 +46,11 @@ sub session_initialize {
 
     $self->log->debug("$alias: doing public events");
 
-    $poe_kernel->state('handle_noop',       $self);
-    $poe_kernel->state('handle_error',      $self);
-    $poe_kernel->state('handle_message',    $self);
-    $poe_kernel->state('handle_receipt',    $self);
-    $poe_kernel->state('handle_connected',  $self);
+    $poe_kernel->state('handle_noop',      $self);
+    $poe_kernel->state('handle_error',     $self);
+    $poe_kernel->state('handle_message',   $self);
+    $poe_kernel->state('handle_receipt',   $self);
+    $poe_kernel->state('handle_connected', $self);
 
     # walk the chain
 
