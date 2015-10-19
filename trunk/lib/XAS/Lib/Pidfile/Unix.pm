@@ -36,9 +36,9 @@ sub is_running {
         # use ps to scan for an existing process with this pid
 
         my $command = "ps -p $pid -o comm=";
-        my ($output, $rc) = run_cmd($command);
+        my ($output, $rc, $sig) = run_cmd($command);
 
-        if ($rc == 0) {
+        if (defined($rc) && $rc == 0) {
 
             foreach my $line (@$output) {
 
