@@ -153,7 +153,7 @@ sub _session_start {
 
     }
 
-    $poe_kernel->sig('DIE', 'session_exception');
+#    $poe_kernel->sig('DIE', 'session_exception');
     $poe_kernel->post($alias, 'session_init');
 
 }
@@ -211,7 +211,7 @@ sub _session_stop {
 
     $self->log->debug("$alias: _session_stop()");
 
-    $poe_kernel->sig('DIE');
+#    $poe_kernel->sig('DIE');
 
     $self->session_stop();
 

@@ -65,7 +65,6 @@ sub start_process {
     # save the current environment
 
     my $oldenv = env_store();
-warn Dumper($oldenv);
       
     if ($self->redirect) {
 
@@ -166,8 +165,8 @@ warn Dumper($oldenv);
     # recover the old environment
 
     env_restore($oldenv);
-
-warn Dumper($ENV);
+warn Dumper(\%ENV);
+    
     $self->status(STARTED);
 
     $poe_kernel->sig_child($pid, 'poll_child');
@@ -253,7 +252,7 @@ sub stop_process {
 
         if (kill('TERM', $pid)) {
 
-            $self->status(STOPPED);
+            $self->status(STOPPED) unless ($self->status == SHUTDOWN);
             $self->retries(0);    
             $self->log->warn_msg('process_stopped', $alias, $self->pid);
 

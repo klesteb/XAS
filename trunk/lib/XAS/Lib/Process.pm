@@ -154,7 +154,6 @@ sub session_stop {
 
     $self->log->debug("$alias: entering session_stop()");
 
-    $self->status(KILLED);
     $self->kill_process();
     $poe_kernel->sig_handled();
 
@@ -341,8 +340,7 @@ sub _child_exit {
 
         if ($self->auto_restart) {
 
-            if (($retries < $self->exit_retries) ||
-                ($self->exit_retries < 0)) {
+            if (($retries < $self->exit_retries) || ($self->exit_retries < 0)) {
 
                 $retries += 1;
                 $self->retries($retries);
