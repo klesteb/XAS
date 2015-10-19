@@ -11,7 +11,7 @@ use XAS::Class
   base       => 'XAS::Singleton',
   accessors  => 'logger',
   filesystem => 'File',
-  utils      => ':boolean load_module',
+  utils      => ':boolean :validation load_module',
   vars => {
     LEVELS => {
       trace => 0,
@@ -32,7 +32,7 @@ use XAS::Class
 
 sub level {
     my $self  = shift;
-    my ($level, $action) = $self->validate_params(\@_, [
+    my ($level, $action) = validate_params(\@_, [
         { regex => LOG_LEVELS },
         { optional => 1, default => undef , 
           callbacks => {
@@ -54,7 +54,7 @@ sub level {
 
 sub build {
     my $self = shift;
-    my ($level, $message) = $self->validate_params(\@_, [
+    my ($level, $message) = validate_params(\@_, [
         { regex => LOG_LEVELS },
         1
     ]);

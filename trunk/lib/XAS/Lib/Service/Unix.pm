@@ -8,6 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
+  utils   => ':validation',
   constant => {
     SERVICE_START_PENDING    => 1,
     SERVICE_STOP_PENDING     => 2,
@@ -211,7 +212,7 @@ sub poll {
 
 sub _current_state {
     my $self = shift;
-    my ($state, $delay) = $self->validate_params(\@_, [
+    my ($state, $delay) = validate_params(\@_, [
         { optional => 1, default => undef },
         { optional => 1, default => 0 },
     ]);

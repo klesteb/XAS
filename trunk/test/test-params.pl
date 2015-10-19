@@ -5,6 +5,7 @@ package Test;
 use XAS::Class
   version => '0.01',
   base    => 'XAS::Base',
+  utils   => ':validation',
   vars => {
       PARAMS => {
           -test => 1,
@@ -26,8 +27,7 @@ use Data::Dumper;
 
 sub test1 {
     my $self = shift;
-
-    my $params = $self->validate_params(\@_, {
+    my $params = validate_params(\@_, {
        -param1 => 1,
        -param2 => 1
    });
@@ -38,8 +38,7 @@ warn Dumper($params);
 
 sub test2 {
     my $self = shift;
-
-    my ($p1, $p2) = $self->validate_params(\@_, [1, 1]);
+    my ($p1, $p2) = validate_params(\@_, [1, 1]);
 
 warn "$p1\n";
 warn "$p2\n";
@@ -48,8 +47,7 @@ warn "$p2\n";
 
 sub test3 {
     my $self = shift;
-
-    my $p = $self->validate_params(\@_, [1, 1]);
+    my $p = validate_params(\@_, [1, 1]);
 
 warn Dumper($p);
 
@@ -57,8 +55,8 @@ warn Dumper($p);
 
 package main;
 
-#my $test = Test->new(-test => 'testing');
-my $test = Test->new();
+my $test = Test->new(-test => 'testing');
+#my $test = Test->new();
 
 $test->test1(
     -param1 => 'testing',

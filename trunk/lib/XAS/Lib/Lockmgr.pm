@@ -9,7 +9,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Singleton',
   accessors => 'lockers',
-  utils     => 'dotid load_module',
+  utils     => ':validation load_module',
 ;
 
 # ----------------------------------------------------------------------
@@ -18,7 +18,7 @@ use XAS::Class
 
 sub add {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -key    => 1,
         -args   => { optional => 1, default => {}, type => HASHREF },
         -driver => { optional => 1, default => 'Mutex', regex => qr/Mutex/ },
@@ -40,7 +40,7 @@ sub add {
 
 sub remove {
     my $self = shift;
-    my ($key) = $self->validate_params(\@_, [1]);
+    my ($key) = validate_params(\@_, [1]);
 
     my $stat;
 
@@ -65,7 +65,7 @@ sub remove {
 
 sub lock {
     my $self = shift;
-    my ($key) = $self->validate_params(\@_, [1]);
+    my ($key) = validate_params(\@_, [1]);
 
     my $stat;
 
@@ -89,7 +89,7 @@ sub lock {
 
 sub unlock {
     my $self = shift;
-    my ($key) = $self->validate_params(\@_, [1]);
+    my ($key) = validate_params(\@_, [1]);
 
     my $stat;
 
@@ -113,7 +113,7 @@ sub unlock {
 
 sub try_lock {
     my $self = shift;
-    my ($key) = $self->validate_params(\@_, [1]);
+    my ($key) = validate_params(\@_, [1]);
 
     my $stat;
 

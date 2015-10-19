@@ -7,7 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::SSH::Client',
-  utils   => 'trim',
+  utils   => ':validation trim',
   vars => {
     PARAMS => {
       -eol => { optional => 1, default => "\012" }
@@ -95,7 +95,7 @@ sub setup {
 
 sub run {
     my $self = shift;
-    my ($command) = $self->validate_params(\@_, [1] );
+    my ($command) = validate_params(\@_, [1] );
 
     $self->puts($command);    # send the command
     $self->get();             # strip the echo back
@@ -104,7 +104,7 @@ sub run {
 
 sub call {
     my $self = shift;
-    my ($command, $parser) = $self->validate_params(\@_, [
+    my ($command, $parser) = validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
     ]);

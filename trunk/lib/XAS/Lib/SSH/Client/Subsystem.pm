@@ -7,7 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::SSH::Client',
-  utils   => 'trim',
+  utils   => ':validation trim',
 ;
 
 #use Data::Hexdumper;
@@ -29,7 +29,7 @@ sub setup {
 
 sub run {
     my $self = shift;
-    my ($subsystem) = $self->validate_params(\@_, [1] );
+    my ($subsystem) = validate_params(\@_, [1] );
 
     # Invoke the subsystem.
 
@@ -45,7 +45,7 @@ sub run {
 
 sub call {
     my $self = shift;
-    my ($command, $parser) = $self->validate_params(\@_, [
+    my ($command, $parser) = validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
     ]);

@@ -14,7 +14,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Handlers',
-  utils     => 'weaken params',
+  utils     => ':validation weaken params',
   accessors => 'session',
   constants => 'ARRAY',
   vars => {
@@ -86,18 +86,18 @@ sub session_shutdown {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{clients};
+    my $clients = $self->{'clients'};
 
     $self->log->debug("$alias: entering session_shutdown()");
 
     while (my $client = keys %$clients) {
 
-        $poe_kernel->alarm_remove($client->{watchdog});
+        $poe_kernel->alarm_remove($client->{'watchdog'});
         $client = undef;
 
     }
 
-    delete $self->{listener};
+    delete $self->{'listener'};
 
     # walk the chain
 
@@ -111,14 +111,14 @@ sub session_pause {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{clients};
+    my $clients = $self->{'clients'};
 
     $self->log->debug("$alias: entering session_pause()");
 
     while (my $wheel = keys %$clients) {
 
         $wheel->pause_input();
-        $poe_kernel->alarm_remove($wheel->{watchdog});
+        $poe_kernel->alarm_remove($wheel->{'watchdog'});
 
     }
 
@@ -134,7 +134,7 @@ sub session_resume {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{clients};
+    my $clients = $self->{'clients'};
     my $inactivity = $self->inactivity_timer;
 
     $self->log->debug("$alias: entering session_resume()");
@@ -156,7 +156,7 @@ sub session_resume {
 
 sub reaper {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
 
     my $alias = $self->alias;
 
@@ -166,7 +166,7 @@ sub reaper {
 
 sub process_request {
     my $self = shift;
-    my ($input, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($input, $ctx) = validate_params(\@_, [1,1]);
 
     return $input;
 
@@ -174,7 +174,7 @@ sub process_request {
 
 sub process_response {
     my $self = shift;
-    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($output, $ctx) = validate_params(\@_, [1,1]);
 
     return $output;
 
@@ -182,7 +182,7 @@ sub process_response {
 
 sub process_errors {
     my $self = shift;
-    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($output, $ctx) = validate_params(\@_, [1,1]);
 
     return $output;
 
@@ -190,7 +190,7 @@ sub process_errors {
 
 sub handle_connection {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
     
 }
 
@@ -200,25 +200,25 @@ sub handle_connection {
 
 sub peerport {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{clients}->{$wheel}->{port};
+    return $self->{'clients'}->{$wheel}->{'port'};
 
 }
 
 sub peerhost {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{clients}->{$wheel}->{host};
+    return $self->{'clients'}->{$wheel}->{'host'};
 
 }
 
 sub client {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{clients}->{$wheel}->{client};
+    return $self->{'clients'}->{$wheel}->{'client'};
 
 }
 
@@ -282,7 +282,7 @@ sub _client_connection {
 
     # start listening for connections
 
-    $self->{listener} = POE::Wheel::SocketFactory->new(
+    $self->{'listener'} = POE::Wheel::SocketFactory->new(
         BindAddress    => $self->address,
         BindPort       => $self->port,
         SocketType     => SOCK_STREAM,
@@ -313,12 +313,12 @@ sub _client_connected {
     my $wheel = $client->ID;
     my $host = gethostbyaddr($peeraddr, AF_INET);
 
-    $self->{clients}->{$wheel}->{host}   = $host;
-    $self->{clients}->{$wheel}->{port}   = $peerport;
-    $self->{clients}->{$wheel}->{client} = $client;
-    $self->{clients}->{$wheel}->{active} = time();
-    $self->{clients}->{$wheel}->{socket} = $socket;
-    $self->{clients}->{$wheel}->{watchdog} = $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
+    $self->{'clients'}->{$wheel}->{'host'}   = $host;
+    $self->{'clients'}->{$wheel}->{'port'}   = $peerport;
+    $self->{'clients'}->{$wheel}->{'client'} = $client;
+    $self->{'clients'}->{$wheel}->{'active'} = time();
+    $self->{'clients'}->{$wheel}->{'socket'} = $socket;
+    $self->{'clients'}->{$wheel}->{'watchdog'} = $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
 
     $self->log->info_msg('net_client_connect', $alias, $host, $peerport);
 
@@ -333,7 +333,7 @@ sub _client_connection_failed {
 
     $self->log->error_msg('net_client_connection_failed', $alias, $errnum, $errstr);
 
-    delete $self->{listener};
+    delete $self->{'listener'};
 
 }
 
@@ -347,7 +347,7 @@ sub _client_input {
 
     $self->log->debug("$alias: _client_input()");
 
-    $self->{clients}->{$wheel}->{active} = time();
+    $self->{'clients'}->{$wheel}->{'active'} = time();
 
     $poe_kernel->post($alias, 'process_request', $input, $ctx);
 
@@ -357,7 +357,7 @@ sub _client_output {
     my ($self, $data, $ctx) = @_[OBJECT,ARG0,ARG1];
 
     my $alias = $self->alias;
-    my $wheel = $ctx->{wheel};
+    my $wheel = $ctx->{'wheel'};
     my @buffer;
 
     $self->log->debug("$alias: _client_output()");
@@ -370,10 +370,10 @@ sub _client_output {
             # calls getpeername(). getpeername() returns undef when
             # the network stack can't validate the socket. 
 
-            if (getpeername($self->{clients}->{$wheel}->{socket})) {
+            if (getpeername($self->{'clients'}->{$wheel}->{'socket'})) {
 
                 push(@buffer, $data);
-                $self->{clients}->{$wheel}->{client}->put(@buffer);
+                $self->{'clients'}->{$wheel}->{'client'}->put(@buffer);
 
             } else {
 
@@ -383,7 +383,7 @@ sub _client_output {
                     $self->peerhist($wheel), 
                     $self->peerport($wheel)
                 );
-                delete $self->{clients}->{$wheel};
+                delete $self->{'clients'}->{$wheel};
 
             }
 
@@ -399,7 +399,7 @@ sub _client_output {
 
         $self->exception_handler($ex);
 
-        delete $self->{clients}->{$wheel};
+        delete $self->{'clients'}->{$wheel};
 
     };
 
@@ -422,7 +422,7 @@ sub _client_error {
 
     }
 
-    delete $self->{clients}->{$wheel};
+    delete $self->{'clients'}->{$wheel};
 
 }
 
@@ -431,7 +431,7 @@ sub _client_reaper {
 
     my $timeout = time() - $self->inactivity_timer;
 
-    if ($self->{clients}->{$wheel}->{active} < $timeout) {
+    if ($self->{'clients'}->{$wheel}->{'active'} < $timeout) {
 
         $self->reaper($wheel);
 
@@ -450,7 +450,7 @@ sub init {
 
     unless (defined($self->filter)) {
 
-        $self->{filter} = POE::Filter::Line->new(
+        $self->{'filter'} = POE::Filter::Line->new(
             InputLiteral  => $self->eol,
             OutputLiteral => $self->eol,
         );

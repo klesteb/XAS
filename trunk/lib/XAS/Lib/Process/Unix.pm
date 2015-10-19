@@ -8,21 +8,18 @@ use IO::Socket;
 use POSIX qw(setsid);
 
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  mixin   => 'XAS::Lib::Mixins::Process',
-  utils   => ':env dotid compress run_cmd trim',
-  mixins  => 'start_process stop_process pause_process resume_process
-              stat_process kill_process init_process _parse_command
-              _poll_child RUNNING STOPPED PAUSED SHUTDOWN',
-  constant => {
-    RUNNING  => 0,
-    STOPPED  => 1,
-    PAUSED   => 2,
-    SHUTDOWN => 3,
-  }
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  mixin     => 'XAS::Lib::Mixins::Process',
+  utils     => ':env dotid compress run_cmd trim',
+  mixins    => 'start_process stop_process pause_process resume_process
+               stat_process kill_process init_process _parse_command
+               _poll_child',
+  constants => ':process',
 ;
+
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -68,7 +65,8 @@ sub start_process {
     # save the current environment
 
     my $oldenv = env_store();
-
+warn Dumper($oldenv);
+      
     if ($self->redirect) {
 
         my $child;
@@ -165,16 +163,17 @@ sub start_process {
 
     }
 
-    $self->status(RUNNING);
+    # recover the old environment
+
+    env_restore($oldenv);
+
+warn Dumper($ENV);
+    $self->status(STARTED);
 
     $poe_kernel->sig_child($pid, 'poll_child');
     $self->{pid} = $pid;
 
     $self->log->info_msg('process_started', $alias, $self->pid);
-
-    # recover the old environment
-
-    env_restore($oldenv);
 
 }
 
@@ -275,7 +274,7 @@ sub kill_process {
 
         if (kill('KILL', $pid)) {
 
-            $self->status(STOPPED);
+            $self->status(KILLED);
             $self->retries(0);
             $self->log->warn_msg('process_killed', $alias, $self->pid);
 
@@ -301,7 +300,11 @@ sub _poll_child {
 
     $self->log->debug("$alias: entering poll_child");
 
-    $self->status(STOPPED);
+    unless (($self->status == KILLED) || ($self->status == SHUTDOWN)) {
+
+        $self->status(STOPPED);
+
+    }
 
     # notify 'child_exit' that we are done
 
@@ -319,7 +322,7 @@ sub _parse_command {
     my @args = split(' ', $self->command);
 
     my @extensions         = ('');
-    my @path               = split(':', $ENV{PATH});
+    my @path               = split(':', $ENV{'PATH'});
     my $is_absolute_re     = '^/';
     my $has_dir_element_re = "/";
  

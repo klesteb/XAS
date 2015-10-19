@@ -21,7 +21,7 @@ sub define_pidfile {
 
     $self->log('debug', "entering define_pidfile()");
 
-    $self->{pid} = XAS::Lib::Pidfile->new();
+    $self->{pid} = XAS::Lib::Pidfile->new(-pid => $$);
     if (my $num = $self->pid->is_running()) {
 
         $self->throw_msg(

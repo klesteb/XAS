@@ -6,7 +6,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'compress',
+  utils   => ':validation compress',
   mixins  => 'exit_handler exception_handler error_handler parse_exception',
 ;
 
@@ -16,8 +16,7 @@ use XAS::Class
 
 sub exception_handler {
     my $self = shift;
-
-    my ($ex) = $self->validate_params(\@_, [1]);
+    my ($ex) = validate_params(\@_, [1]);
 
     my $script = $self->class->any_var('SCRIPT');
     my ($errors, $rc) = $self->parse_exception($ex);
@@ -39,8 +38,8 @@ sub exception_handler {
 
 sub exit_handler {
     my $self = shift;
+    my ($ex) = validate_params(\@_, [1]);
 
-    my ($ex) = $self->validate_params(\@_, [1]);
     my $script = $self->class->any_var('SCRIPT');
     my ($errors, $rc) = $self->parse_exception($ex);
 
@@ -63,8 +62,8 @@ sub exit_handler {
 
 sub error_handler {
     my $self = shift;
+    my ($ex) = validate_params(\@_, [1]);
 
-    my ($ex) = $self->validate_params(\@_, [1]);
     my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->error($errors);
@@ -73,8 +72,7 @@ sub error_handler {
 
 sub parse_exception {
     my $self= shift;
-
-    my ($ex) = $self->validate_params(\@_, [1]);
+    my ($ex) = validate_params(\@_, [1]);
 
     my $rc = 0;
     my $errors;

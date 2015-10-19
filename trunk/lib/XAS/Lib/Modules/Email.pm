@@ -10,7 +10,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Singleton',
-  utils   => 'dotid compress',
+  utils   => ':validation compress',
 ;
 
 #use Data::Dumper;
@@ -21,7 +21,7 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -to         => 1, 
         -from       => 1, 
         -subject    => 1,

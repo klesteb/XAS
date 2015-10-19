@@ -7,14 +7,15 @@ use Win32;
 use Win32::Daemon;
 
 use XAS::Class
-  debug    => 0,
-  version  => $VERSION,
-  base     => 'XAS::Base',
-  mixins   => 'init_service _current_state poll
-               SERVICE_START_PENDING
-               SERVICE_STOP_PENDING SERVICE_PAUSE_PENDING
-               SERVICE_CONTINUE_PENDING SERVICE_CONTROL_SHUTDOWN
-               SERVICE_RUNNING SERVICE_STOPPED SERVICE_PAUSED'
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Base',
+  utils   => ':validation',
+  mixins  => 'init_service _current_state poll
+              SERVICE_START_PENDING
+              SERVICE_STOP_PENDING SERVICE_PAUSE_PENDING
+              SERVICE_CONTINUE_PENDING SERVICE_CONTROL_SHUTDOWN
+              SERVICE_RUNNING SERVICE_STOPPED SERVICE_PAUSED'
 ;
 
 # ----------------------------------------------------------------------
@@ -180,8 +181,7 @@ sub _get_error {
 
 sub _current_state {
     my $self = shift;
-
-    my ($state, $delay) = $self->validate_params(\@_, [
+    my ($state, $delay) = validate_params(\@_, [
         { optional => 1, default => undef },
         { optional => 1, default => 0 },
     ]);

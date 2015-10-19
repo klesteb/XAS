@@ -10,7 +10,7 @@ use XAS::Class
 
 package main;
 
-my $test = Test->new(-xdebug => 1, -alerts => 1);
+my $test = Test->new();
 
 printf("logfile = %s\n", $test->env->logfile);
 printf("alerts = %s\n",  $test->env->alerts);

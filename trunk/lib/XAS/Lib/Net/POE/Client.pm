@@ -105,9 +105,9 @@ sub session_shutdown {
 
     $self->log->debug("$alias: entering session_shutdown");
 
-    $self->{socket}   = undef;
-    $self->{wheel}    = undef;
-    $self->{listener} = undef;
+    $self->{'socket'}   = undef;
+    $self->{'wheel'}    = undef;
+    $self->{'listener'} = undef;
 
     # walk the chain
 
@@ -321,12 +321,12 @@ sub _server_reconnect {
     my $retry;
     my $alias = $self->alias;
 
-    $self->log->warn_msg('net_server_reconnect', $alias, $self->{attempts}, $self->{count});
+    $self->log->warn_msg('net_server_reconnect', $alias, $self->{'attempts'}, $self->{'count'});
 
-    if ($self->{'attempts'} < $self->{count}) {
+    if ($self->{'attempts'} < $self->{'count'}) {
 
-        my $delay = $RECONNECTIONS[$self->{attempts}];
-        $self->log->warn_msg('net_server_attempts', $alias, $self->{attempts}, $delay);
+        my $delay = $RECONNECTIONS[$self->{'attempts'}];
+        $self->log->warn_msg('net_server_attempts', $alias, $self->{'attempts'}, $delay);
         $self->{'attempts'} += 1;
         $poe_kernel->delay('server_connect', $delay);
 

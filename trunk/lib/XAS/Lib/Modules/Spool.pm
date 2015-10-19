@@ -12,7 +12,7 @@ use XAS::Class
   mixin      => 'XAS::Lib::Mixins::Handlers',
   filesystem => 'File',
   accessors  => 'lockmgr',
-  utils      => 'dotid',
+  utils      => ':validation',
   vars => {
     PARAMS => {
       -directory => { isa => 'Badger::Filesystem::Directory' }, 
@@ -32,7 +32,7 @@ use XAS::Class
 
 sub read {
     my $self = shift;
-    my ($filename) = $self->validate_params(\@_, [
+    my ($filename) = validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' },
     ]);
 
@@ -71,7 +71,7 @@ sub read {
 
 sub write {
     my $self = shift;
-    my ($packet) = $self->validate_params(\@_, [ 1 ]);
+    my ($packet) = validate_params(\@_, [ 1 ]);
 
     my $seqnum;
 
@@ -136,7 +136,7 @@ sub scan {
 
 sub delete {
     my $self = shift;
-    my ($file) = $self->validate_params(\@_, [
+    my ($file) = validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' },
     ]);
 
@@ -235,10 +235,10 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{lockmgr} = XAS::Factory->module('lockmgr');
+    $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
     $self->lockmgr->add(
         -key    => $self->lock,
-        -driver => 'Mutex'
+        -driver => 'Mutex',
     );
 
     return $self;
@@ -300,7 +300,7 @@ sub sequence {
 
 sub write_packet {
     my $self = shift;
-    my ($packet, $seqnum) = $self->validate_params(\@_, [1,1]);
+    my ($packet, $seqnum) = validate_params(\@_, [1,1]);
 
     my $fh;
     my $cnt;
@@ -335,7 +335,7 @@ sub write_packet {
 
 sub read_packet {
     my $self = shift;
-    my ($file) = $self->validate_params(\@_, [
+    my ($file) = validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' }
     ]);
 

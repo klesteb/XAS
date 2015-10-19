@@ -8,7 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'dotid',
+  utils   => ':validation',
 ;
 
 # ----------------------------------------------------------------------
@@ -17,15 +17,15 @@ use XAS::Class
 
 sub output {
     my $self  = shift;
-    my ($args) = $self->validate_params(\@_, [
+    my ($args) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
     $self->env->logfile->append(
         sprintf("[%s] %-5s - %s\n", 
-            $args->{datetime}->strftime('%Y-%m-%d %H:%M:%S'),
-            uc($args->{priority}), 
-            $args->{message}
+            $args->{'datetime'}->strftime('%Y-%m-%d %H:%M:%S'),
+            uc($args->{'priority'}), 
+            $args->{'message'}
     ));
 
 }

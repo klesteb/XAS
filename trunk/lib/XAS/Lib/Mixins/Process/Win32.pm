@@ -8,6 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
+  utils   => ':validation',
   mixins  => 'proc_status',
 ;
 
@@ -17,7 +18,7 @@ use XAS::Class
 
 sub proc_status {
     my $self = shift;
-    my ($pid) = $self->validate_params(\@_, [1]);
+    my ($pid) = validate_params(\@_, [1]);
     
     my $stat = 0;
 

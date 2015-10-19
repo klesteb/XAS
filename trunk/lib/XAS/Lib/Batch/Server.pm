@@ -3,9 +3,10 @@ package XAS::Lib::Batch::Server;
 our $VERSION = '0.01';
 
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Lib::Batch',
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Lib::Batch',
+  utils   => ':validation',
 ;
 
 # ----------------------------------------------------------------------
@@ -14,7 +15,7 @@ use XAS::Class
 
 sub qstat {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -queue => { optional => 1, default => undef },
         -host  => { optional => 1, default => undef },
     });
@@ -25,7 +26,7 @@ sub qstat {
 
 sub qenable {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -queue => { optional => 1, default => undef },
         -host  => { optional => 1, default => undef },
     });
@@ -36,7 +37,7 @@ sub qenable {
 
 sub qdisable {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -queue => { optional => 1, default => undef },
         -host  => { optional => 1, default => undef },
     });

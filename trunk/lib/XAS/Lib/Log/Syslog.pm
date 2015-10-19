@@ -8,6 +8,7 @@ use Sys::Syslog qw(:standard :extended);
 use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
+  utils   => ':validation',
 ;
 
 # ----------------------------------------------------------------------
@@ -16,7 +17,7 @@ use XAS::Class
 
 sub output {
     my $self  = shift;
-    my ($args) = $self->validate_params(\@_, [
+    my ($args) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 

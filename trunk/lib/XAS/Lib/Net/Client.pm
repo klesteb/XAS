@@ -11,7 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Bufops',
-  utils     => 'trim dotid',
+  utils     => ':validation trim',
   accessors => 'handle select attempts',
   mutators  => 'timeout',
   import    => 'class',
@@ -88,7 +88,7 @@ sub disconnect {
 
 sub get {
     my $self = shift;
-    my ($length) = $self->validate_params(\@_, [
+    my ($length) = validate_params(\@_, [
         { optional => 1, default => 512 }
     ]);
 
@@ -96,14 +96,14 @@ sub get {
 
     if ($self->pending > $length) {
 
-        $output = $self->buf_slurp(\$self->{buffer}, $length);
+        $output = $self->buf_slurp(\$self->{'buffer'}, $length);
 
     } else {
 
         $self->_fill_buffer();
 
         my $l = ($self->pending > $length) ? $length : $self->pending;
-        $output = $self->buf_slurp(\$self->{buffer}, $l);
+        $output = $self->buf_slurp(\$self->{'buffer'}, $l);
 
     }
 
@@ -123,7 +123,7 @@ sub gets {
 
         if ($output = $self->buf_get_line(\$buffer, $self->eol)) {
 
-            $self->{buffer} = $buffer . $self->{buffer};
+            $self->{'buffer'} = $buffer . $self->{'buffer'};
             last;
 
         }
@@ -136,7 +136,7 @@ sub gets {
 
 sub put {
     my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
+    my ($buffer) = validate_params(\@_, [1]);
 
     my $counter = 0;
     my $working = 1;
@@ -202,18 +202,18 @@ sub put {
 
 sub puts {
     my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
+    my ($buffer) = validate_params(\@_, [1]);
 
     my $data = sprintf("%s%s", trim($buffer), $self->eol);
     my $written = $self->put($data);
-    
+
     return $written;
 
 }
 
 sub errno {
     my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
+    my ($value) = validate_params(\@_, [
         { optional => 1, default => undef }
     ]);
 
@@ -225,7 +225,7 @@ sub errno {
 
 sub errstr {
     my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
+    my ($value) = validate_params(\@_, [
         { optional => 1, default => undef }
     ]);
 
@@ -249,8 +249,8 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{attempts} = 5;
-    $self->{buffer}   = '';
+    $self->{'attempts'} = 5;
+    $self->{'buffer'}   = '';
 
     return $self;
 
@@ -277,7 +277,7 @@ sub _fill_buffer {
 
             if (my $bytes = $self->handle->sysread($buf, 512)) {
 
-                $self->{buffer} .= $buf;
+                $self->{'buffer'} .= $buf;
                 $read += $bytes;
 
             } else {

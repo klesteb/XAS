@@ -8,7 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'dotid compress',
+  utils   => ':validation compress',
   mixins  => 'load_config',
 ;
 
@@ -18,7 +18,7 @@ use XAS::Class
 
 sub load_config {
     my $self = shift;
-    my ($filename, $handle) = $self->validate_params(\@_, [
+    my ($filename, $handle) = validate_params(\@_, [
         { optional => 1, isa => 'Badger::Filesystem::File', default => $self->env->cfgfile },
         { optional => 1, default => 'cfg' },
     ]);

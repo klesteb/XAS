@@ -11,7 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Session',
   accessors => 'client peerhost peerport',
-  utils     => 'trim',
+  utils     => ':validation trim',
   vars => {
     PARAMS => {
       -filter => { optional => 1, default => undef },
@@ -83,7 +83,7 @@ sub session_startup {
 
 sub process_request {
     my $self = shift;
-    my ($input, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($input, $ctx) = validate_params(\@_, [1,1]);
 
     return $input;
 
@@ -91,7 +91,7 @@ sub process_request {
 
 sub process_response {
     my $self = shift;
-    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($output, $ctx) = validate_params(\@_, [1,1]);
 
     return $output;
 
@@ -99,7 +99,7 @@ sub process_response {
 
 sub process_errors {
     my $self = shift;
-    my ($output, $ctx) = $self->validate_params(\@_, [1,1]);
+    my ($output, $ctx) = validate_params(\@_, [1,1]);
 
     return $output;
 
@@ -107,7 +107,7 @@ sub process_errors {
 
 sub handle_connection {
     my $self = shift;
-    my ($wheel) = $self->validate_params(\@_, [1]);
+    my ($wheel) = validate_params(\@_, [1]);
 
 }
 

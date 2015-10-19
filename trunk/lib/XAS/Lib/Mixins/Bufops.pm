@@ -7,6 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
+  utils   => ':validation',
   mixins  => 'buf_slurp buf_get_line'
 ;
 
@@ -16,7 +17,7 @@ use XAS::Class
 
 sub buf_slurp {
     my $self = shift;
-    my ($buffer, $pos) = $self->validate_params(\@_, [
+    my ($buffer, $pos) = validate_params(\@_, [
         { type => SCALARREF },
         { type => SCALAR },
     ]);
@@ -35,7 +36,7 @@ sub buf_slurp {
 
 sub buf_get_line {
     my $self = shift;
-    my ($buffer, $eol) = $self->validate_params(\@_, [
+    my ($buffer, $eol) = validate_params(\@_, [
         { type => SCALARREF },
         { type => SCALAR | SCALARREF },
     ]);

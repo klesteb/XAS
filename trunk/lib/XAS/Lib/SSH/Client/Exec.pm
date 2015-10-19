@@ -8,7 +8,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::SSH::Client',
   accessors => 'exit_code exit_signal',
-  utils     => 'trim',
+  utils     => ':validation trim',
 ;
 
 #use Data::Hexdumper;
@@ -31,13 +31,13 @@ sub setup {
 
 sub run {
     my $self = shift;
-    my ($command) = $self->validate_params(\@_, [1] );
+    my ($command) = validate_params(\@_, [1] );
 
 }
 
 sub call {
     my $self = shift;
-    my ($command, $parser) = $self->validate_params(\@_, [
+    my ($command, $parser) = validate_params(\@_, [
        { type => SCALAR },
        { type => CODEREF },
     ]);

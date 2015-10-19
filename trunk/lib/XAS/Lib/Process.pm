@@ -1,6 +1,6 @@
 package XAS::Lib::Process;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $mixin;
 
@@ -17,10 +17,11 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
-  mixin     => $mixin,
+  mixin     => "XAS::Lib::Mixins::Process $mixin",
   utils     => 'dotid',
   mutators  => 'is_active input_handle output_handle status retries',
   accessors => 'pid exit_code exit_signal process ID',
+  constants => ':process',
   vars => {
     PARAMS => {
       -command       => 1,
@@ -56,14 +57,21 @@ sub session_initialize {
 
     $self->log->debug("$alias: entering session_initialize()");
 
-    $poe_kernel->state('get_output',  $self);
-    $poe_kernel->state('put_input',   $self);
-    $poe_kernel->state('flush_event', $self);
-    $poe_kernel->state('error_event', $self);
-    $poe_kernel->state('close_event', $self);
-    $poe_kernel->state('poll_child',  $self, '_poll_child');
-    $poe_kernel->state('child_exit',  $self, '_child_exit');
+    $poe_kernel->state('get_output',   $self);
+    $poe_kernel->state('put_input',    $self);
+    $poe_kernel->state('flush_event',  $self);
+    $poe_kernel->state('error_event',  $self);
+    $poe_kernel->state('close_event',  $self);
+    $poe_kernel->state('check_status', $self);
+    $poe_kernel->state('poll_child',   $self, '_poll_child');
+    $poe_kernel->state('child_exit',   $self, '_child_exit');
 
+    # signal handlers
+
+    $poe_kernel->sig('INT',  'session_interrupt');
+    $poe_kernel->sig('TERM', 'session_interrupt');
+    $poe_kernel->sig('QUIT', 'session_interrupt');
+    
     # walk the chain
 
     $self->SUPER::session_initialize();
@@ -77,13 +85,19 @@ sub session_initialize {
 sub session_startup {
     my $self = shift;
 
+    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_startup()");
 
     if ($self->auto_start) {
 
-        $self->start_process();
+        if ($self->status == STOPPED) {
+
+            $self->start_process();
+            $poe_kernel->post($alias, 'check_status', $count);
+
+        }
 
     }
 
@@ -98,11 +112,13 @@ sub session_startup {
 sub session_pause {
     my $self = shift;
 
+    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_pause()");
 
     $self->pause_process();
+    $poe_kernel->post($alias, 'check_status', $count);
 
     # walk the chain
 
@@ -115,11 +131,13 @@ sub session_pause {
 sub session_resume {
     my $self = shift;
 
+    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_resume()");
 
     $self->resume_process();
+    $poe_kernel->post($alias, 'check_status', $count);
 
     # walk the chain
 
@@ -136,7 +154,9 @@ sub session_stop {
 
     $self->log->debug("$alias: entering session_stop()");
 
-    $self->stop_process();
+    $self->status(KILLED);
+    $self->kill_process();
+    $poe_kernel->sig_handled();
 
     # walk the chain
 
@@ -149,12 +169,17 @@ sub session_stop {
 sub session_shutdown {
     my $self = shift;
 
+    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_shutdown()");
 
-    $self->kill_process();
+    $self->status(SHUTDOWN);
+    $self->stop_process();
 
+    $poe_kernel->sig_handled();
+    $poe_kernel->post($alias, 'check_status', $count);
+  
     # walk the chain
 
     $self->SUPER::session_shutdown();
@@ -166,6 +191,66 @@ sub session_shutdown {
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
+
+sub check_status {
+    my ($self, $count) = @_[OBJECT, ARG0, ARG1];
+    
+    my $stat = $self->stat_process();
+    
+    $count++;
+    
+    if ($self->status == STARTED) {
+            
+        if (($stat == 3) || ($stat == 2)) {
+                        
+            $self->status(RUNNING);
+                        
+        } else {
+                                    
+            $poe_kernel->delay('check_status', 5, $count);
+                                    
+        }
+
+    } elsif ($self->status == RUNNING) {
+                
+        if (($stat != 3) || ($stat != 2)) {
+                            
+            $self->resume_process();
+            $poe_kernel->delay('check_status', 5, $count);
+                            
+        }
+                
+    } elsif ($self->status == PAUSED) {
+                        
+        if ($stat != 6) {
+                                    
+            $self->pause_process();
+            $poe_kernel->delay('check_status', 5, $count);
+                                    
+        }
+                        
+    } elsif ($self->status == STOPPED) {
+                                
+
+        if ($stat != 0) {
+                                            
+            $self->stop_process();
+            $poe_kernel->delay('check_status', 5, $count);
+                                            
+        }
+                                
+    } elsif($self->status == KILLED) {
+                                        
+        if ($stat != 0) {
+                                                    
+            $self->kill_process();
+            $poe_kernel->delay('check_status', 5, $count);
+                                                    
+        }
+                                        
+    }
+
+}
 
 sub get_output {
     my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
@@ -256,7 +341,8 @@ sub _child_exit {
 
         if ($self->auto_restart) {
 
-            if ($retries < $self->exit_retries) {
+            if (($retries < $self->exit_retries) ||
+                ($self->exit_retries < 0)) {
 
                 $retries += 1;
                 $self->retries($retries);
@@ -267,13 +353,18 @@ sub _child_exit {
 
                 } else {
 
-                    $self->log->warn_msg('process_unknown_exitcode', $alias);
+                    $self->log->warn_msg(
+                        'process_unknown_exitcode', 
+                        $alias,
+                        $self->exit_code || '',
+                        $self->exit_signal || '',
+                    );
 
                 }
 
             } else {
 
-                $self->log->warn_msg('process_nomore_retries', $alias);
+                $self->log->warn_msg('process_nomore_retries', $alias, $retries);
 
             }
 
@@ -415,7 +506,7 @@ sub _resolve_path {
     my $has_dir_element_re = shift;
     my $extensions         = shift;
     my $xpath              = shift;
-    
+
     # Stolen from Proc::Background
     #
     # Make the path to the progam absolute if it isn't already.  If the
@@ -424,9 +515,9 @@ sub _resolve_path {
     # path is not absolute, then look through the PATH environment to
     # find the executable.  In all cases, look for the programs with any
     # extensions added to the original path name.
-  
+
     my $path;
-    
+
     if ($command =~ /$is_absolute_re/o) {
 
         foreach my $ext (@$extensions) {
@@ -529,6 +620,7 @@ sub init {
     $self->retries(1);
     $self->is_active(1);
     $self->init_process();
+    $self->status(STOPPED);
 
     return $self;
 

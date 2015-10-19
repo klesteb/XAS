@@ -7,7 +7,7 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   mixins  => 'proc_status',
-  utils   => 'run_cmd trim',
+  utils   => 'run_cmd trim :validation',
 ;
 
 # ----------------------------------------------------------------------
@@ -16,13 +16,13 @@ use XAS::Class
 
 sub proc_status {
     my $self = shift;
-    my ($pid) = $self->validate_params(\@_, [1]);
+    my ($pid) = validate_params(\@_, [1]);
 
     my $stat = 0;
     my $cmd = "ps -p $pid -o state=";
     my (@output, $rc, $sig) = run_cmd($cmd);
 
-    if ($rc == 0) {
+    if (defined($rc) && $rc == 0) {
 
         my $line = trim($output[0]);
 

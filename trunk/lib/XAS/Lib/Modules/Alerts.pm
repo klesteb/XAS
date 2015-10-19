@@ -13,7 +13,7 @@ use XAS::Class
   constants  => ':alerts',
   accessors  => 'spooler',
   codec      => 'JSON',
-  utils      => 'dt2db',
+  utils      => 'dt2db :validation',
   filesystem => 'Dir'
 ;
 
@@ -23,7 +23,7 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-    my $p = $self->validate_params(\@_, { 
+    my $p = validate_params(\@_, { 
         -message  => 1,
         -process  => 1,
         -facility => { optional => 1, default => 'systems', regex => ALERT_FACILITY },

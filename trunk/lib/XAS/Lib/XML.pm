@@ -12,7 +12,7 @@ use XAS::Class
   base      => 'XAS::Base',
   import    => 'class',
   accessors => 'parser schema doc xpc',
-  utils     => 'dotid compress',
+  utils     => ':validation compress',
   constants => 'TRUE FALSE',
   vars => {
     PARAMS => {
@@ -29,7 +29,7 @@ use XAS::Class
 
 sub get_items {
     my $self = shift;
-    my ($xpath) = $self->validate_params(\@_, [1]);
+    my ($xpath) = validate_params(\@_, [1]);
 
     my @nodes;
     my $xpc  = $self->xpc;
@@ -51,7 +51,7 @@ sub get_items {
 
 sub get_item {
     my $self = shift;
-    my ($xpath) = $self->validate_params(\@_, [1]);
+    my ($xpath) = validate_params(\@_, [1]);
 
     my $value = '';
     my $xpc   = $self->xpc;
@@ -97,7 +97,7 @@ sub is_valid {
 
 sub load {
     my $self = shift;
-    my ($xml) = $self->validate_params(\@_, [1]);
+    my ($xml) = validate_params(\@_, [1]);
 
     try {
 
@@ -124,7 +124,7 @@ sub load {
 
 sub xmlerr {
     my $class = shift;
-    my ($value) = $class->validate_params(\@_, [ 
+    my ($value) = validate_params(\@_, [ 
         { optional => 1, default => undef }
     ]);
 

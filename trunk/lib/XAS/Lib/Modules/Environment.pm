@@ -10,7 +10,7 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Singleton',
-  utils      => 'dir_walk',
+  utils      => ':validation dir_walk',
   constants  => ':logging', 
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username script commandline',
@@ -23,7 +23,7 @@ use XAS::Class
 
 sub mxmailer {
     my $self = shift;
-    my ($mailer) = $self->validate_params(\@_, [
+    my ($mailer) = validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/sendmail|smtp/ }
     ]);
 
@@ -35,7 +35,7 @@ sub mxmailer {
 
 sub mqlevel {
     my $self = shift;
-    my ($level) = $self->validate_params(\@_, [
+    my ($level) = validate_params(\@_, [
         { optional => 1, default => undef, regex => qr/(1\.0|1\.1|1\.2)/ },
     ]);
 
@@ -47,7 +47,7 @@ sub mqlevel {
 
 sub logtype {
     my $self = shift;
-    my ($type) = $self->validate_params(\@_, [
+    my ($type) = validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
 
@@ -59,7 +59,7 @@ sub logtype {
 
 sub logfacility {
     my $self = shift;
-    my ($type) = $self->validate_params(\@_, [
+    my ($type) = validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_FACILITY }
     ]);
 
@@ -309,7 +309,7 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, [
+            my ($p) = validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
                 ],
                 "xas.lib.modules.environment.$datum"
@@ -327,7 +327,7 @@ sub init {
 
         $self->class->method($datum => sub {
             my $self = shift;
-            my ($p) = $self->validate_params(\@_, [
+            my ($p) = validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
                 ],
                 "xas.lib.modules.environment.$datum"

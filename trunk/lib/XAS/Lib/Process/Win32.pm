@@ -15,12 +15,9 @@ use XAS::Class
   filesystem => 'Dir Cwd',
   mixins     => 'start_process stop_process pause_process resume_process
                  stat_process kill_process init_process _poll_child
-                 _parse_command RUNNING STOPPED PAUSED SHUTDOWN',
+                 _parse_command',
+  constants  => ':process',
   constant => {
-    RUNNING  => 0,
-    STOPPED  => 1,
-    PAUSED   => 2,
-    SHUTDOWN => 3,    
     wbemFlagReturnImmediately => 0x10,
     wbemFlagForwardOnly => 0x20,
   }
@@ -151,7 +148,7 @@ sub start_process {
 
     # retrieve the process id and the process object
 
-    $self->status(RUNNING);
+    $self->status(STARTED);
 
     $self->{pid} = $process->GetProcessID();
     $self->{process} = $process;
@@ -247,7 +244,7 @@ sub stop_process {
 
     if (my $pid = $self->pid) {
 
-        $self->status(STOPPED);
+        $self->status(STOPPED) unless ($self->status == SHUTDOWN);
         $self->retries(0);
 
         Win32::Process::KillProcess($pid, $exitcode);
@@ -262,17 +259,29 @@ sub stop_process {
 sub kill_process {
     my $self = shift;
 
+    my $exitcode = 0;
     my $alias = $self->alias;
 
     $self->log->warn_msg('process_killed', $alias, $self->pid);
-    $self->stop_process();
+
+    if (my $pid = $self->pid) {
+
+        $self->status(KILLED);
+        $self->retries(0);
+
+        Win32::Process::KillProcess($pid, $exitcode);
+        $self->log->warn_msg('killed_process', $alias, $self->pid);
+
+    }
+
+    $self->log->debug("$alias: leaving kill_process");
 
 }
 
 sub init_process {
     my $self = shift;
 
-    $self->{process} = undef;
+    $self->{'process'} = undef;
 
 }
 
@@ -297,11 +306,17 @@ sub _poll_child {
 
     }
 
-    $self->status(STOPPED);
+    unless (($self->status == KILLED) || ($self->status == SHUTDOWN)) {
+
+        $self->status(STOPPED);
+
+    }
+
     $self->process->GetExitCode($exitcode);
     $exitcode = ($exitcode * 256); # convert to perl semantics
 
-    # turn off various POE 'selects' and 'delays', otherwise the session 'hangs'
+    # turn off various POE 'selects' and 'delays', 
+    # otherwise the session 'hangs'
 
     $poe_kernel->delay('poll_child');
     $poe_kernel->select_read($self->input_handle)   if (defined($self->input_handle));

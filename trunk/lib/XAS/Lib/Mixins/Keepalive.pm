@@ -13,6 +13,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  utils     => ':validation',
   accessors => 'tcp_keepidle tcp_keepcnt tcp_keepintvl',
   mixins    => 'init_keepalive enable_keepalive tcp_keepidle tcp_keepcnt tcp_keepintvl',
 ;
@@ -23,7 +24,7 @@ use XAS::Class
 
 sub enable_keepalive {
     my $self = shift;
-    my ($socket) = $self->validate_params(\@_, [1]);
+    my ($socket) = validate_params(\@_, [1]);
 
     # turn keepalive on, this should send a keepalive 
     # packet once every 2 hours according to the RFC.
@@ -47,7 +48,7 @@ sub enable_keepalive {
 
 sub init_keepalive {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -tcp_keepcnt   => { optional => 1, default => 3 },   # number of packets
         -tcp_keepidle  => { optional => 1, default => 900 }, # 15 minutes
         -tcp_keepintvl => { optional => 1, default => 5 },   # interval seconds

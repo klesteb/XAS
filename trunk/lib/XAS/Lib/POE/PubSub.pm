@@ -8,6 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Singleton',
+  utils   => ':validation',
 ;
 
 #use Data::Dumper;
@@ -18,7 +19,7 @@ use XAS::Class
 
 sub subscribe {
     my $self = shift;
-    my ($session, $channel) = $self->validate_params(\@_, [
+    my ($session, $channel) = validate_params(\@_, [
         1,
         { optional => 1, default => 'default' }
     ]);
@@ -29,7 +30,7 @@ sub subscribe {
 
 sub unsubscribe {
     my $self = shift;
-    my ($session, $channel) = $self->validate_params(\@_, [
+    my ($session, $channel) = validate_params(\@_, [
         1,
         { optional => 1, default => 'default' }
     ]);
@@ -40,7 +41,7 @@ sub unsubscribe {
 
 sub publish {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
        -event   => 1,
        -args    => { optional => 1, default => undef },
        -channel => { optional => 1, default => 'default' },

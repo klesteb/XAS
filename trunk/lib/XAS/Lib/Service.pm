@@ -26,8 +26,9 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Session',
+  utils     => ':validation',
   mixin     => $mixin,
-  accessors => 'sessions',
+  accessors => 'sessions :validation',
   mutators  => 'last_state',
   constants => 'DELIMITER',
   vars => {
@@ -47,7 +48,7 @@ use XAS::Class
 
 sub register {
     my $self = shift;
-    my $sessions = $self->validate_params(\@_, [
+    my $sessions = validate_params(\@_, [
         (0) x (@_)
     ]);
 

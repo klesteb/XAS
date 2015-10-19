@@ -6,7 +6,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'dotid run_cmd trim',
+  utils   => ':validation run_cmd trim',
   vars => {
     PARAMS => {
       -interface => { optional => 1, default => 'XAS::Lib::Batch::Interface::Torque' },
@@ -26,7 +26,7 @@ use XAS::Class
 
 sub do_cmd {
     my $self = shift;
-    my ($cmd, $sub) = $self->validate_params(\@_, [1,1]);
+    my ($cmd, $sub) = validate_params(\@_, [1,1]);
 
     $self->log->debug("command = $cmd");
 

@@ -6,9 +6,10 @@ use XAS::Lib::Stomp::Frame;
 use XAS::Constants ':stomp';
 
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Base',
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Base',
+  utils   => ':validation',
   vars => {
     PARAMS => {
       -target  => { optional => 1, default => undef, regex => STOMP_LEVELS },
@@ -24,7 +25,7 @@ use XAS::Class
 
 sub connect {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -login      => { optional => 1, default => undef },
         -passcode   => { optional => 1, default => undef },
         -host       => { optional => 1, default => 'localhost' },
@@ -62,7 +63,7 @@ sub connect {
 
 sub stomp {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -login      => { optional => 1, default => undef },
         -passcode   => { optional => 1, default => undef },
         -prefetch   => { optional => 1, default => undef },
@@ -115,7 +116,7 @@ sub stomp {
 
 sub subscribe {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -destination  => 1,
         -prefetch     => { optional => 1, default => 0 },
         -id           => { optional => 1, default => undef },
@@ -164,7 +165,7 @@ sub subscribe {
 
 sub unsubscribe {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -id           => { optional => 1, default => undef },
         -destination  => { optional => 1, default => undef },
         -receipt      => { optional => 1, default => undef },
@@ -229,7 +230,7 @@ sub unsubscribe {
 
 sub begin {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
     });
@@ -252,7 +253,7 @@ sub begin {
 
 sub commit {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
     });
@@ -275,7 +276,7 @@ sub commit {
 
 sub abort {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -transaction => 1,
         -receipt     => { optional => 1, default => undef },
     });
@@ -298,7 +299,7 @@ sub abort {
 
 sub ack {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -message_id   => 1,
         -subscription => { optional => 1, default => undef },
         -receipt      => { optional => 1, default => undef },
@@ -351,7 +352,7 @@ sub ack {
 
 sub nack {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -message_id   => 1,
         -receipt      => { optional => 1, default => undef },
         -subscription => { optional => 1, default => undef },
@@ -416,7 +417,7 @@ sub nack {
 
 sub disconnect {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -receipt => { optional => 1, default => undef }
     });
 
@@ -437,7 +438,7 @@ sub disconnect {
 
 sub send {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -destination => 1,
         -message     => 1,
         -receipt     => { optional => 1, default => undef },

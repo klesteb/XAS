@@ -1,6 +1,9 @@
 package XAS::Class;
 
+our $VERSION = '0.02';
+
 use Badger::Class
+  version  => $VERSION,
   uber     => 'Badger::Class',
   constant => {
       UTILS     => 'XAS::Utils',

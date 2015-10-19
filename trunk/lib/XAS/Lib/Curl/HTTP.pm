@@ -11,7 +11,7 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'curl',
   mutators  => 'retcode',
-  utils     => 'dotid',
+  utils     => ':validation',
   vars => {
     PARAMS => {
       -keep_alive      => { optional => 1, default => 1 },
@@ -42,7 +42,7 @@ use XAS::Class
 
 sub request {
     my $self = shift;
-    my ($request) = $self->validate_params(\@_, [
+    my ($request) = validate_params(\@_, [
         { isa => 'HTTP::Request' }
     ]);
 

@@ -13,7 +13,7 @@ use XAS::Class
   mixin     => 'XAS::Lib::Mixins::Bufops',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
-  utils     => 'trim dotid',
+  utils     => ':validation trim',
   import    => 'class',
   vars => {
     PARAMS => {
@@ -135,7 +135,7 @@ sub disconnect {
 
 sub get {
     my $self = shift;
-    my ($length) = $self->validate_params(\@_, [
+    my ($length) = validate_params(\@_, [
         { optional => 1, default => 512 }
     ]);
 
@@ -192,7 +192,7 @@ sub gets {
 
 sub put {
     my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
+    my ($buffer) = validate_params(\@_, [1]);
 
     my $counter = 0;
     my $working = 1;
@@ -255,7 +255,7 @@ sub put {
 
 sub puts {
     my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
+    my ($buffer) = validate_params(\@_, [1]);
 
     my $output  = sprintf("%s%s", trim($buffer), $self->eol);
     my $written = $self->put($output);
@@ -266,7 +266,7 @@ sub puts {
 
 sub errno {
     my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
+    my ($value) = validate_params(\@_, [
         { optional => 1, default => undef }
     ]);
 
@@ -278,7 +278,7 @@ sub errno {
 
 sub errstr {
     my $class = shift;
-    my ($value) = XAS::Base->validate_params(\@_, [
+    my ($value) = validate_params(\@_, [
         { optional => 1, default => undef }
     ]);
 

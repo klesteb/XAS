@@ -14,7 +14,7 @@ use POSIX qw(:sys_wait_h setsid);
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
-  base       => 'Badger::Utils XAS::Base',
+  base       => 'Badger::Utils',
   constants  => 'HASH ARRAY',
   filesystem => 'Dir File',
   exports => {
@@ -22,19 +22,22 @@ use XAS::Class
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr is_truthy is_falsey run_cmd',
+            left right mid instr is_truthy is_falsey run_cmd
+            validate_params validation_exception',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump
-            left right mid instr is_truthy is_falsey run_cmd',
+            left right mid instr is_truthy is_falsey run_cmd
+            validate_params validation_exception',
     tags => {
-      dates   => 'db2dt dt2db',
-      env     => 'env_store env_restore env_create env_parse env_dump',
-      modules => 'init_module load_module',
-      strings => 'trim ltrim rtrim compress left right mid instr',
-      process => 'daemonize spawn kill_proc exitcode _do_fork',
-      boolean => 'is_truthy is_falsey bool',
+      dates      => 'db2dt dt2db',
+      env        => 'env_store env_restore env_create env_parse env_dump',
+      modules    => 'init_module load_module',
+      strings    => 'trim ltrim rtrim compress left right mid instr',
+      process    => 'daemonize spawn kill_proc exitcode _do_fork',
+      boolean    => 'is_truthy is_falsey bool',
+      validation => 'dotid validate_params validation_exception',
     }
   }
 ;
@@ -45,9 +48,57 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
+sub validation_exception {
+    my $param = shift;
+    my $class = shift;
+
+    my $format = 'invalid parameters passed, reason: %s';
+    my $method = Badger::Utils::dotid($class) . '.invparams';
+
+    $param = trim(lcfirst($param));
+
+    my $ex = XAS::Exception->new(
+        type => $method,
+        info => Badger::Utils::xprintf($format, $param),
+    );
+
+    $ex->throw();
+
+}
+
+sub validate_params {
+    my $params = shift;
+    my $specs  = shift;
+    my $class  = shift;
+
+    unless (defined($class)) {
+
+        $class = (caller(1))[3];
+
+    }
+
+    my $results = validate_with(
+        params => $params,
+        called => $class,
+        spec   => $specs,
+        normalize_keys => sub {
+            my $key = shift; 
+            $key =~ s/^-//; 
+            return lc $key;
+        },
+        on_fail => sub {
+            my $param = shift;
+            validation_exception($param, $class);
+        },
+    );
+
+    return wantarray ? @$results : $results;
+
+}
+
 # recursively walk a HOH
 sub hash_walk {
-    my $p = XAS::Base->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -hash     => { type => HASHREF }, 
         -keys     => { type => ARRAYREF }, 
         -callback => { type => CODEREF },
@@ -87,7 +138,7 @@ sub hash_walk {
 
 # recursively walk a directory structure
 sub dir_walk {
-    my $p = XAS::Base->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -directory => { isa  => 'Badger::Filesystem::Directory' },
         -callback  => { type => CODEREF },
         -filter    => { optional => 1, default => qr/.*/, callbacks => {
@@ -120,7 +171,7 @@ sub dir_walk {
 
 # Perl trim function to remove whitespace from the start and end of the string
 sub trim {
-    my ($string) = XAS::Base->validate_params(\@_, [1]);
+    my ($string) = validate_params(\@_, [1]);
 
     $string =~ s/^\s+//;
     $string =~ s/\s+$//;
@@ -131,7 +182,7 @@ sub trim {
 
 # Left trim function to remove leading whitespace
 sub ltrim {
-    my ($string) = XAS::Base->validate_params(\@_, [1]);
+    my ($string) = validate_params(\@_, [1]);
 
     $string =~ s/^\s+//;
 
@@ -141,7 +192,7 @@ sub ltrim {
 
 # Right trim function to remove trailing whitespace
 sub rtrim {
-    my ($string) = XAS::Base->validate_params(\@_, [1]);
+    my ($string) = validate_params(\@_, [1]);
 
     $string =~ s/\s+$//;
 
@@ -151,7 +202,7 @@ sub rtrim {
 
 # replace multiple whitspace with a single space
 sub compress {
-    my ($string) = XAS::Base->validate_params(\@_, [1]);
+    my ($string) = validate_params(\@_, [1]);
 
     $string =~ s/\s+/ /gms;
 
@@ -161,7 +212,7 @@ sub compress {
 
 # emulate Basics string function left()
 sub left {
-    my ($string, $offset) = XAS::Base->validate_params(\@_, [1,1]);
+    my ($string, $offset) = validate_params(\@_, [1,1]);
 
     return substr($string, 0, $offset);
 
@@ -169,7 +220,7 @@ sub left {
 
 # emulate Basics string function right()
 sub right {
-    my ($string, $offset) = XAS::Base->validate_params(\@_, [1,1]);
+    my ($string, $offset) = validate_params(\@_, [1,1]);
 
     return substr($string, -($offset));
 
@@ -177,7 +228,7 @@ sub right {
 
 # emulate Basics string function mid()
 sub mid {
-    my ($string, $start, $length) = XAS::Base->validate_params(\@_, [1,1,1]);
+    my ($string, $start, $length) = validate_params(\@_, [1,1,1]);
 
     return substr($string, $start - 1, $length);
 
@@ -185,7 +236,7 @@ sub mid {
 
 # emulate Basics string function instr()
 sub instr {
-    my ($start, $string, $compare) = XAS::Base->validate_params(\@_, [1,1,1]);
+    my ($start, $string, $compare) = validate_params(\@_, [1,1,1]);
 
     if ($start =~ /^[0-9\-]+/) {
 
@@ -207,7 +258,7 @@ sub instr {
 # or the number 1.
 #
 sub is_truthy {
-    my ($parm) = XAS::Base->validate_params(\@_, [1]);
+    my ($parm) = validate_params(\@_, [1]);
 
     my @truth = qw(yes true t 1 0e0);
 
@@ -219,7 +270,7 @@ sub is_truthy {
 # the number 0.
 #
 sub is_falsey {
-    my ($parm) = XAS::Base->validate_params(\@_, [1]);
+    my ($parm) = validate_params(\@_, [1]);
 
     my @truth = qw(no false f 0);
 
@@ -228,7 +279,7 @@ sub is_falsey {
 }
 
 sub bool {
-    my ($item) = XAS::Base->validate_params(\@_, [1]);
+    my ($item) = validate_params(\@_, [1]);
 
     my @truth = qw(yes true 1 0e0 no false f 0);
     return grep {lc($item) eq $_} @truth;
@@ -236,7 +287,7 @@ sub bool {
 }
 
 sub spawn {
-    my $p = XAS::Base->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -command => 1,
         -timeout => { optional => 1, default => 0 },
     });
@@ -326,7 +377,7 @@ sub spawn {
 }
 
 sub kill_proc {
-    my $p = XAS::Base->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -signal => 1,
         -pid    => 1,
     });
@@ -398,7 +449,7 @@ sub daemonize {
 }
 
 sub db2dt {
-    my ($p) = XAS::Base->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { regex => qr/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ }
     ]);
 
@@ -420,7 +471,7 @@ sub db2dt {
 }
 
 sub dt2db {
-    my ($dt) = XAS::Base->validate_params(\@_, [
+    my ($dt) = validate_params(\@_, [
         { isa => 'DateTime' }
     ]);
 
@@ -429,7 +480,7 @@ sub dt2db {
 }
 
 sub run_cmd {
-    my ($command) = XAS::Base->validate_params(\@_, [1]);
+    my ($command) = validate_params(\@_, [1]);
 
     my @output = `$command 2>&1`;
     my ($rc, $sig) = exitcode();
@@ -439,7 +490,7 @@ sub run_cmd {
 }
 
 sub init_module {
-    my ($module, $params) = XAS::Base->validate_params(@_, [ 
+    my ($module, $params) = validate_params(@_, [ 
         1, 
         { optional => 1, type => HASHREF, default => {} }
     ]);
@@ -474,7 +525,7 @@ sub init_module {
 }
 
 sub load_module {
-    my ($module) = XAS::Base->validate_params(\@_, [1]);
+    my ($module) = validate_params(\@_, [1]);
 
     my @parts;
     my $filename;
@@ -502,7 +553,7 @@ sub load_module {
 }
 
 sub glob2regex {
-    my ($globstr) = XAS::Base->validate_params(\@_, [1]);
+    my ($globstr) = validate_params(\@_, [1]);
 
     my %patmap = (
         '*' => '.*',
@@ -533,7 +584,7 @@ sub env_store {
 }
 
 sub env_restore {
-    my ($env) = XAS::Base->validate_params(\@_, [1]);
+    my ($env) = validate_params(\@_, [1]);
 
     while ((my $key, my $value) = each(%ENV)) {
 
@@ -550,7 +601,7 @@ sub env_restore {
 }
 
 sub env_create {
-    my ($env) = XAS::Base->validate_params(\@_, [1]);
+    my ($env) = validate_params(\@_, [1]);
 
     while ((my $key, my $value) = each(%{$env})) {
 
@@ -561,7 +612,7 @@ sub env_create {
 }
 
 sub env_parse {
-    my ($env) = XAS::Base->validate_params(\@_, [1]);
+    my ($env) = validate_params(\@_, [1]);
 
     my ($key, $value, %env);
     my @envs = split(';;', $env);

@@ -125,7 +125,15 @@ sub init {
     }
 
     $self->{'lock'} = $self->file->path;
-    $self->lockmgr->add(-key => $self->lock);
+
+    $self->lockmgr->add(
+        -key    => $self->lock,
+        -driver => 'Mutex',
+        -args => {
+            gid => 'xas',
+            uid => 'xas'
+        }
+    );
 
     return $self;
 

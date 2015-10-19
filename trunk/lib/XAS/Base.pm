@@ -1,73 +1,39 @@
 package XAS::Base;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 our $EXCEPTION = 'XAS::Exception';
 
 use XAS::Factory;
 use XAS::Exception;
-use Params::Validate ':all';
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'Badger::Base',
-  utils      => 'dotid',
+  utils      => ':validation xprintf',
   auto_can   => '_auto_load',
-  accessors  => 'env',
   filesystem => 'Dir',
-  vars => {
-    PARAMS => {
-      -alerts => { optional => 1, default => 0 },
-      -xdebug => { optional => 1, default => 0 },
-    },
-  }
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub validation_exception {
-    my $param = shift;
-    my $class = shift;
+sub message {
+    my $self = shift;
+    my $name = shift
+      || $self->fatal("message() called without format name");
 
-    my $method = dotid($class) . '.invparams';
-    $param = lcfirst($param);
+    my $format;
+    my $messages = $self->env->get_msgs();
 
-    __PACKAGE__->throw_msg($method, 'invparams', $param);
+    $self->class->var('MESSAGES', $messages);
+    $format = $self->class->hash_value('MESSAGES', $name)
+      || $self->fatal("message() called with invalid message type: $name");
 
-}
-
-sub validate_params {
-    my $self   = shift;
-    my $params = shift;
-    my $specs  = shift;
-    my $class  = shift;
-
-    unless (defined($class)) {
-
-        $class = (caller(1))[3];
-
-    }
-
-    my $results = validate_with(
-        params => $params,
-        called => $class,
-        spec   => $specs,
-        normalize_keys => sub {
-            my $key = shift; 
-            $key =~ s/^-//; 
-            return lc $key;
-        },
-        on_fail => sub {
-            my $param = shift;
-            validation_exception($param, $class);
-        },
-    );
-
-    return wantarray ? @$results : $results;
+    xprintf($format, @_);
 
 }
 
@@ -83,17 +49,17 @@ sub _auto_load {
 
         return sub { XAS::Factory->module('alert'); } 
 
-    }
-
-    if ($name eq 'email') {
+    } elsif ($name eq 'email') {
 
         return sub { XAS::Factory->module('email'); } 
 
-    }
-
-    if ($name eq 'log') {
+    } elsif ($name eq 'log') {
 
         return sub { XAS::Factory->module('logger'); } 
+
+    } elsif ($name eq 'env') {
+
+        return sub { XAS::Factory->module('environment'); }
 
     }
 
@@ -129,30 +95,16 @@ sub _create_methods {
 sub init {
     my $self = shift;
 
-    # load the environment
-
-    $self->{env} = XAS::Factory->module('environment');
-
-    # load the messages
-
-    my $messages = $self->env->get_msgs();
-    $self->class->var('MESSAGES', $messages);
-
     # process PARAMS
 
     my $class = $self->class;
     my $params = $self->class->hash_vars('PARAMS');
-    my $p = $self->validate_params(\@_, $params, $class);
+    my $p = validate_params(\@_, $params, $class);
 
     # build our object
 
     $self->{config} = $p;
     $self->_create_methods($p);
-
-    # set defaults
-
-    $self->env->alerts($self->alerts);
-    $self->env->xdebug($self->xdebug);
 
     return $self;
 

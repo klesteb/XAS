@@ -6,6 +6,7 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Lib::Batch',
+  utils      => ':validation',
   filesystem => 'Dir',
   constants  => 'DELIMITER',
   constant => {
@@ -20,7 +21,7 @@ use XAS::Class
 
 sub qsub {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -jobname => 1,
         -queue   => 1,
         -email   => 1,
@@ -54,7 +55,7 @@ sub qsub {
 
 sub qstat {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job  => 1,
         -host => { optional => 1, default => undef },
     });
@@ -65,7 +66,7 @@ sub qstat {
 
 sub qdel {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job     => 1,
         -host    => { optional => 1, default => undef },
         -force   => { optional => 1, default => undef },
@@ -78,7 +79,7 @@ sub qdel {
 
 sub qsig {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job    => 1,
         -signal => 1,
         -host   => { optional => 1, default => undef },
@@ -90,7 +91,7 @@ sub qsig {
 
 sub qhold {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job  => 1,
         -type => { regex => TYPES }, 
         -host => { optional => 1, default => undef },
@@ -102,7 +103,7 @@ sub qhold {
 
 sub qrls {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job  => 1,
         -type => { regex => TYPES }, 
         -host => { optional => 1, default => undef },
@@ -114,7 +115,7 @@ sub qrls {
 
 sub qmove {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job   => 1,
         -queue => 1,
         -host  => { optional => 1, default => undef },
@@ -127,7 +128,7 @@ sub qmove {
 
 sub qmsg {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job     => 1,
         -message => 1,
         -output  => { regex => /E|O/ },
@@ -140,7 +141,7 @@ sub qmsg {
 
 sub qrerun {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job  => 1,
         -host => { optional => 1, default => undef },
     });
@@ -151,7 +152,7 @@ sub qrerun {
 
 sub qalter {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -job         => 1,
         -jobname     => { optional => 1, default => undef },
         -rerunable   => { optional => 1, default => undef },
