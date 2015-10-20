@@ -8,6 +8,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
+  utils     => ':validation dotid',
   codec     => 'JSON',
   constants => ':jsonrpc',
   mixins    => 'call',
@@ -21,7 +22,7 @@ use XAS::Class
 
 sub call {
     my $self = shift;
-    my $p = $self->validate_params(\@_, {
+    my $p = validate_params(\@_, {
         -method => 1,
         -id     => 1,
         -params => { type => HASHREF }
@@ -49,13 +50,13 @@ sub call {
 
     $response = decode($response);
 
-    if ($response->{id} eq $p->{'id'}) {
+    if ($response->{'id'} eq $p->{'id'}) {
 
-        if ($response->{error}) {
+        if ($response->{'error'}) {
 
-            if ($response->{error}->{code} eq RPC_ERR_APP) {
+            if ($response->{'error'}->{'code'} eq RPC_ERR_APP) {
 
-                my ($type, $info) = split(' - ', $response->{error}->{data});
+                my ($type, $info) = split(' - ', $response->{'error'}->{'data'});
 
                 $self->throw_msg(
                     $type,
@@ -66,7 +67,7 @@ sub call {
             } else {
 
                 $self->throw_msg(
-                    'xas.lib.mixin.json.client',
+                    dotid($self->class) . '.client.rpc_error',
                     'json_rpc_error',
                     $response->{error}->{code},
                     $response->{error}->{message},
@@ -80,13 +81,13 @@ sub call {
     } else {
 
         $self->throw_msg(
-            'xas.lib.mixin.json.client',
+            dotid($self->class) . '.client.invalid_id',
             'rpc_invalid_id',
         );
 
     }
 
-    return $response->{result};
+    return $response->{'result'};
 
 }
 

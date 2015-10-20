@@ -10,7 +10,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Singleton',
-  utils   => ':validation compress',
+  utils   => ':validation dotid compress',
 ;
 
 #use Data::Dumper;

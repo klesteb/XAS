@@ -12,7 +12,7 @@ use XAS::Class
   base      => 'XAS::Base',
   import    => 'class',
   accessors => 'parser schema doc xpc',
-  utils     => ':validation compress',
+  utils     => ':validation dotid compress',
   constants => 'TRUE FALSE',
   vars => {
     PARAMS => {
@@ -72,7 +72,7 @@ sub is_valid {
 
     my $doc = $self->doc;
 
-    return TRUE unless (defined($self->{schema}));
+    return TRUE unless (defined($self->{'schema'}));
 
     try {
 
@@ -147,12 +147,12 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{parser} = XML::LibXML->new();
-    $self->{xpc}    = XML::LibXML::XPathContext->new();
+    $self->{'parser'} = XML::LibXML->new();
+    $self->{'xpc'}    = XML::LibXML::XPathContext->new();
 
-    if (defined($self->{xsd})) {
+    if (defined($self->{'xsd'})) {
 
-       $self->{schema} = XML::LibXML::Schema->new(location => $self->xsd);
+       $self->{'schema'} = XML::LibXML::Schema->new(location => $self->xsd);
 
     }
 

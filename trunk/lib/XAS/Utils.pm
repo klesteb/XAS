@@ -37,7 +37,7 @@ use XAS::Class
       strings    => 'trim ltrim rtrim compress left right mid instr',
       process    => 'daemonize spawn kill_proc exitcode _do_fork',
       boolean    => 'is_truthy is_falsey bool',
-      validation => 'dotid validate_params validation_exception',
+      validation => 'validate_params validation_exception',
     }
   }
 ;

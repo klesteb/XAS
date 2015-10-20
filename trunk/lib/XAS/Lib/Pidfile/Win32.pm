@@ -7,7 +7,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  utils     => 'run_cmd trim compress',
+  utils     => 'run_cmd trim compress dotid',
   constants => 'TRUE FALSE',
   mixins    => 'is_running scan_name',
   constant => {

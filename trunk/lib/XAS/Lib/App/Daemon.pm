@@ -14,7 +14,7 @@ use XAS::Class
   version   => $VERSION,
   import    => 'class CLASS',
   base      => 'XAS::Lib::App',
-  utils     => ':process',
+  utils     => ':process dotid',
   constants => 'TRUE FALSE',
   accessors => 'daemon pid',
 ;
@@ -40,7 +40,7 @@ sub define_pidfile {
 
     $self->log->debug('entering define_pidfile()');
 
-    $self->{pid} = XAS::Lib::Pidfile->new(-pid => $$);
+    $self->{'pid'} = XAS::Lib::Pidfile->new(-pid => $$);
 
     if (my $num = $self->pid->is_running()) {
 

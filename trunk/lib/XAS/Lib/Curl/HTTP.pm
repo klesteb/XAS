@@ -11,7 +11,7 @@ use XAS::Class
   base      => 'XAS::Base',
   accessors => 'curl',
   mutators  => 'retcode',
-  utils     => ':validation',
+  utils     => ':validation dotid',
   vars => {
     PARAMS => {
       -keep_alive      => { optional => 1, default => 1 },
@@ -101,7 +101,7 @@ sub request {
 
     # perform the request and create the response
 
-    if (($self->{retcode} = $self->curl->perform) == 0) {
+    if (($self->{'retcode'} = $self->curl->perform) == 0) {
 
         my @temp;
         my $message;

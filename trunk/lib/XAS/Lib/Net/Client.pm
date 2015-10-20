@@ -11,7 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Bufops',
-  utils     => ':validation trim',
+  utils     => ':validation dotid trim',
   accessors => 'handle select attempts',
   mutators  => 'timeout',
   import    => 'class',

@@ -8,7 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => ':validation',
+  utils   => ':validation dotid',
   mixins  => 'proc_status',
 ;
 

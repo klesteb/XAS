@@ -12,6 +12,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Handlers',
+  utils     => ':validation dotid',
   accessors => 'methods',
   codec     => 'JSON',
   constants => 'HASH ARRAY :jsonrpc',
@@ -37,11 +38,11 @@ use Data::Dumper;
 
 sub init_json_server {
     my $self = shift;
-    my ($methods) = $self->validate_params(\@_, [
+    my ($methods) = validate_params(\@_, [
         { type => ARRAYREF }
     ]);
 
-    $self->{methods} = Set::Light->new(@$methods);
+    $self->{'methods'} = Set::Light->new(@$methods);
 
 }
 
@@ -108,7 +109,7 @@ sub process_errors {
 
     $self->log->debug("$alias: entering process_errors");
 
-    $json = _rpc_error($self, $ctx->{id}, $output->{code}, $output->{message});
+    $json = _rpc_error($self, $ctx->{id}, $output->{'code'}, $output->{'message'});
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
@@ -131,19 +132,19 @@ sub _exception_handler {
             my $type = $ex->type;
             my $info = $ex->info;
 
-            if ($type eq ('xas.lib.mixins.json.server.rpc_method')) {
+            if ($type =~ /server\.rpc_method$/) {
 
                 $packet = _rpc_error($self, $id, RPC_ERR_METHOD, $info);
 
-            } elsif ($type eq ('xas.lib.mixins.json.server.rpc_version')) {
+            } elsif ($type =~ /server\.rpc_version$/) {
 
                 $packet = _rpc_error($self, $id, RPC_ERR_REQ, $info);
 
-            } elsif ($type eq ('xas.lib.mixins.json.server.rpc_format')) {
+            } elsif ($type =~ /server\.rpc_format$/) {
 
                 $packet = _rpc_error($self, $id, RPC_ERR_PARSE, $info);
 
-            } elsif ($type eq ('xas.lib.mixins.json.server.rpc_notify')) {
+            } elsif ($type =~ /server\.rpc_notify$/) {
 
                 $packet = _rpc_error($self, $id, RPC_ERR_INTERNAL, $info);
 
@@ -189,25 +190,25 @@ sub _rpc_request {
         if (ref($request) ne HASH) {
 
             $self->throw_msg(
-                'xas.lib.mixins.json.server.format', 
+                dotid($self->class) . '.server.rpc_format', 
                 'json_rpc_format'
             );
 
         }
 
-        if ($request->{jsonrpc} ne RPC_JSON) {
+        if ($request->{'jsonrpc'} ne RPC_JSON) {
 
             $self->throw_msg(
-                'xas.lib.mixins.json.server.rpc_version', 
+                dotid($self->class) . '.server.rpc_version', 
                 'json_rpc_version'
             );
 
         }
 
-        unless (defined($request->{id})) {
+        unless (defined($request->{'id'})) {
 
             $self->throw_msg(
-                'xas.lib.mixins.json.server.nonotifications', 
+                dotid($self->class) . '.server.rpc_notify', 
                 'json_rpc_notify'
             );
 
@@ -215,17 +216,17 @@ sub _rpc_request {
 
         if ($self->methods->has($request->{method})) {
 
-            $ctx->{id} = $request->{id};
-            $self->log->debug("$alias: performing \"" . $request->{method} . '"');
+            $ctx->{'id'} = $request->{'id'};
+            $self->log->debug("$alias: performing \"" . $request->{'method'} . '"');
 
-            $poe_kernel->post($alias, $request->{method}, $request->{params}, $ctx);
+            $poe_kernel->post($alias, $request->{'method'}, $request->{'params'}, $ctx);
 
         } else {
 
             $self->throw_msg(
-                'xas.lib.mixins.json.server.rpc_method', 
+                dotid($self->class) . '.server.rpc_method', 
                 'json_rpc_method', 
-                $request->{method}
+                $request->{'method'}
             );
 
         }
@@ -234,7 +235,7 @@ sub _rpc_request {
 
         my $ex = $_;
 
-        my $output = _exception_handler($self, $ex, $request->{id});
+        my $output = _exception_handler($self, $ex, $request->{'id'});
         $poe_kernel->post($alias, 'client_output', encode($output), $ctx);
 
     };

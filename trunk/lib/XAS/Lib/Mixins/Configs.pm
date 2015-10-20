@@ -8,7 +8,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => ':validation compress',
+  utils   => ':validation dotid compress',
   mixins  => 'load_config',
 ;
 

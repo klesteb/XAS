@@ -13,7 +13,7 @@ use XAS::Class
   mixin     => 'XAS::Lib::Mixins::Bufops',
   accessors => 'ssh chan sock select',
   mutators  => 'attempts', 
-  utils     => ':validation trim',
+  utils     => ':validation dotid trim',
   import    => 'class',
   vars => {
     PARAMS => {

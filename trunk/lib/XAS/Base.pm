@@ -10,32 +10,38 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'Badger::Base',
-  utils      => ':validation xprintf',
+  utils      => ':validation xprintf dotid',
+  import     => 'class',
   auto_can   => '_auto_load',
-  filesystem => 'Dir',
 ;
 
 #use Data::Dumper;
 
 # ----------------------------------------------------------------------
-# Public Methods
+# Overrides
 # ----------------------------------------------------------------------
 
-sub message {
-    my $self = shift;
-    my $name = shift
-      || $self->fatal("message() called without format name");
+class('Badger::Base')->methods(
+    message => sub {
+        my $self = shift;
+        my $name = shift
+          || $self->fatal("message() called without format name");
 
-    my $format;
-    my $messages = $self->env->get_msgs();
+        my $format;
 
-    $self->class->var('MESSAGES', $messages);
-    $format = $self->class->hash_value('MESSAGES', $name)
-      || $self->fatal("message() called with invalid message type: $name");
+        $self->class->var('MESSAGES', XAS::Base->env->get_msgs());
 
-    xprintf($format, @_);
+        $format = $self->class->hash_value('MESSAGES', $name)
+          || $self->fatal("message() called with invalid message type: $name");
 
-}
+        xprintf($format, @_);
+
+    }
+);
+
+# ----------------------------------------------------------------------
+# Public Methods
+# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Private Methods

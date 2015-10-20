@@ -12,7 +12,7 @@ use XAS::Class
   mixin      => 'XAS::Lib::Mixins::Handlers',
   filesystem => 'File',
   accessors  => 'lockmgr',
-  utils      => ':validation',
+  utils      => ':validation dotid',
   vars => {
     PARAMS => {
       -directory => { isa => 'Badger::Filesystem::Directory' }, 
