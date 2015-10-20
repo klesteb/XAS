@@ -279,7 +279,7 @@ sub put_input {
  
     push(@chunks, $chunk);
 
-    if ($self->{buffer} = $driver->put($filter->put(\@chunks))) {
+    if ($self->{'buffer'} = $driver->put($filter->put(\@chunks))) {
 
         $poe_kernel->select_resume_write($self->input_handle);
 
@@ -324,7 +324,7 @@ sub close_event {
 # ----------------------------------------------------------------------
 
 sub _child_exit {
-    my ($self, $signal, $pid, $exitcode) = @_[OBJECT,ARG0,ARG1,ARG2];
+    my ($self, $signal, $pid, $exitcode) = @_[OBJECT,ARG0...ARG2];
 
     my $alias   = $self->alias;
     my $status  = $self->status;
@@ -444,7 +444,7 @@ sub _process_input {
     my $driver      = $self->input_driver;
     my $filter      = $self->input_filter;
     my $input       = $self->input_handle;
-    my $buffer      = \$self->{buffer};
+    my $buffer      = \$self->{'buffer'};
     my $state       = ref($self) . "($id) -> select input";
 
     $poe_kernel->state(
@@ -477,6 +477,7 @@ sub _process_input {
 }
 
 sub DESTROY {
+
     my $self = shift;
 
     if ($self->input_handle) {

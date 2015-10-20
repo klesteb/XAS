@@ -21,18 +21,18 @@ use XAS::Class
     all => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
-            env_store env_restore env_create env_parse env_dump
+            env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
-            env_store env_restore env_create env_parse env_dump
+            env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception',
     tags => {
       dates      => 'db2dt dt2db',
-      env        => 'env_store env_restore env_create env_parse env_dump',
+      env        => 'env_store env_restore env_create env_parse env_dump env_clear',
       modules    => 'init_module load_module',
       strings    => 'trim ltrim rtrim compress left right mid instr',
       process    => 'daemonize spawn kill_proc exitcode _do_fork',
@@ -572,9 +572,8 @@ sub env_store {
 
     my %env;
 
-    while ((my $key, my $value) = each(%ENV)) {
+    while (my ($key, $value) = each(%ENV)) {
 
-        delete $ENV{$key};
         $env{$key} = $value;
 
     }
@@ -583,16 +582,26 @@ sub env_store {
 
 }
 
+sub env_clear {
+    
+    while (my ($key, $value) = each(%ENV)) {
+        
+        delete $ENV{$key};
+        
+    }
+    
+}
+
 sub env_restore {
     my ($env) = validate_params(\@_, [1]);
 
-    while ((my $key, my $value) = each(%ENV)) {
+    while (my ($key, $value) = each(%ENV)) {
 
         delete $ENV{$key};
 
     }
 
-    while ((my $key, my $value) = each(%{$env})) {
+    while (my ($key, $value) = each(%{$env})) {
 
         $ENV{$key} = $value;
 
@@ -603,7 +612,7 @@ sub env_restore {
 sub env_create {
     my ($env) = validate_params(\@_, [1]);
 
-    while ((my $key, my $value) = each(%{$env})) {
+    while (my ($key, $value) = each(%{$env})) {
 
         $ENV{$key} = $value;
 
@@ -632,7 +641,7 @@ sub env_dump {
 
     my $env;
 
-    while ((my $key, my $value) = each(%ENV)) {
+    while (my ($key, $value) = each(%ENV)) {
 
         $env .= "$key=$value;;";
 

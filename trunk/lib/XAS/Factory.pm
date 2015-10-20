@@ -13,7 +13,6 @@ use Badger::Factory::Class
     environment => 'XAS::Lib::Modules::Environment',
     log         => 'XAS::Lib::Log',
     logger      => 'XAS::Lib::Log',
-    locking     => 'XAS::Lib::Modules::Locking',
     lockmgr     => 'XAS::Lib::Lockmgr',
     pidfile     => 'XAS::Lib::Pidfile',
     spool       => 'XAS::Lib::Modules::Spool',

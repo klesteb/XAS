@@ -161,11 +161,6 @@ sub start_process {
         }
 
     }
-
-    # recover the old environment
-
-    env_restore($oldenv);
-warn Dumper(\%ENV);
     
     $self->status(STARTED);
 
@@ -173,6 +168,10 @@ warn Dumper(\%ENV);
     $self->{pid} = $pid;
 
     $self->log->info_msg('process_started', $alias, $self->pid);
+
+    # recover the old environment
+
+    env_restore($oldenv);
 
 }
 
