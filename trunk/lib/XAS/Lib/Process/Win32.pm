@@ -50,7 +50,9 @@ sub start_process {
     # create the new environment, this is inherited by the new process
 
     my $oldenv = env_store();
-    env_create($env);
+    my $newenv = $self->merger->merge($oldenv, $env);
+
+    env_crate($newenv);
 
     # dup stdin, stdout and stderr
 
@@ -150,8 +152,8 @@ sub start_process {
 
     $self->status(STARTED);
 
-    $self->{pid} = $process->GetProcessID();
-    $self->{process} = $process;
+    $self->{'pid'} = $process->GetProcessID();
+    $self->{'process'} = $process;
 
     $self->log->info_msg('process_started', $alias, $self->pid);
 
@@ -168,13 +170,12 @@ sub stat_process {
 
     my $stat = 0;
     my $alias = $self->alias;
-    my $computer = 'localhost';
 
     $self->log->debug("$alias: entering stat_process");
 
     if (my $pid = $self->pid) {
 
-        $stat = $self->proc_status($pid);
+        $stat = $self->proc_status($pid, $alias);
 
     }
 

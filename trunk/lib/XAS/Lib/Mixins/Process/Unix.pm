@@ -18,7 +18,10 @@ use Data::Dumper;
 
 sub proc_status {
     my $self = shift;
-    my ($pid) = validate_params(\@_, [1]);
+    my ($pid, $alias) = validate_params(\@_, [
+        1,
+        { optional => 1, default => "" },
+    ]);
 
     my $stat = 0;
     my $cmd = "ps -p $pid -o state=";
