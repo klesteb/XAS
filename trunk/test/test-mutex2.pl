@@ -6,6 +6,7 @@ use warnings;
 use XAS::Lib::Lockmgr::Mutex;
 
 my $locker = XAS::Lib::Lockmgr::Mutex->new(
+    -key => 'testing',
     -args => {
         key => 'testing',
         mode => 0660,

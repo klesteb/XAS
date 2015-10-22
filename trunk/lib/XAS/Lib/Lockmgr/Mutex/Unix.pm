@@ -27,7 +27,7 @@ sub lock {
     my $stat  = FALSE;
     my $flags = ( SEM_UNDO | IPC_NOWAIT );
 
-#    $self->log->debug(sprintf('lock - before: %s', $self->{'sema'}->getval(0)));
+    $self->log->debug(sprintf('lock - before: %s', $self->{'sema'}->getval(0)));
 
     for (my $x = 1; $x < $self->args->{'limit'}; $x++) {
 
@@ -57,7 +57,7 @@ sub lock {
 
     }
 
-#    $self->log->debug(sprintf('lock - after: %s', $self->{'sema'}->getval(0)));
+    $self->log->debug(sprintf('lock - after: %s', $self->{'sema'}->getval(0)));
 
     return $stat;
 
@@ -68,7 +68,7 @@ sub unlock {
 
     my $flags = SEM_UNDO;
 
-#    $self->log->debug(sprintf('unlock - before: %s', $self->{'sema'}->getval(0)));
+    $self->log->debug(sprintf('unlock - before: %s', $self->{'sema'}->getval(0)));
 
     if ($self->{'sema'}->op(0, -1, $flags) < 0) {
 
@@ -80,7 +80,7 @@ sub unlock {
 
     }
 
-#    $self->log->debug(sprintf('unlock - after: %s', $self->{'sema'}->getval(0)));
+    $self->log->debug(sprintf('unlock - after: %s', $self->{'sema'}->getval(0)));
 
     return 1;
 

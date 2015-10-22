@@ -12,7 +12,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Process',
-  utils     => ':env dotid compress run_cmd trim',
+  utils     => ':env dotid compress trim',
   mixins    => 'start_process stop_process pause_process resume_process
                stat_process kill_process init_process _parse_command
                _poll_child',
@@ -40,31 +40,32 @@ sub start_process {
 
     $self->log->debug("$alias: command @args");
 
+    # save the current environment
+
+    my $oldenv = env_store();
+    my $newenv = $self->merger->merge($oldenv, $env);
+
     my $spawn = sub {
 
-        setsid();           # become a session lead
+        setsid();            # become a session lead
 
-        eval {              # set priority, fail silently
+        eval {               # set priority, fail silently
             my $p = getpriority(0, $$);
             setpriority(0, $$, $p + $priority);
         };
 
-        $( = $) = $gid;     # set new group id
-        $< = $> = $uid;     # set new user id
+        $( = $) = $gid;      # set new group id
+        $< = $> = $uid;      # set new user id
 
-        env_create($env);   # create the new environment
+        env_create($newenv); # create the new environment
 
-        chdir($directory);  # change directory
-        umask($umask);      # set protection mask
-        exec(@args);        # become a new process
+        chdir($directory);   # change directory
+        umask($umask);       # set protection mask
+        exec(@args);         # become a new process
 
         exit 0;
 
     };
-
-    # save the current environment
-
-    my $oldenv = env_store();
       
     if ($self->redirect) {
 
@@ -161,17 +162,15 @@ sub start_process {
         }
 
     }
-    
+
     $self->status(STARTED);
 
     $poe_kernel->sig_child($pid, 'poll_child');
-    $self->{pid} = $pid;
-
-    $self->log->info_msg('process_started', $alias, $self->pid);
+    $self->{'pid'} = $pid;
 
     # recover the old environment
 
-    env_restore($oldenv);
+#    env_restore($oldenv);
 
 }
 

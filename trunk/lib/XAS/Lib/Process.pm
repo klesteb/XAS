@@ -10,7 +10,9 @@ BEGIN {
 }
 
 use Set::Light;
+use Hash::Merge;
 use Badger::Filesystem 'Cwd Dir';
+use Params::Validate qw(CODEREF);
 use POE qw(Wheel Driver::SysRW Filter::Line);
 
 use XAS::Class
@@ -18,28 +20,29 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
   mixin     => "XAS::Lib::Mixins::Process $mixin",
-  utils     => 'dotid',
+  utils     => ':validation dotid',
   mutators  => 'is_active input_handle output_handle status retries',
-  accessors => 'pid exit_code exit_signal process ID',
+  accessors => 'pid exit_code exit_signal process ID merger',
   constants => ':process',
   vars => {
     PARAMS => {
-      -command       => 1,
-      -auto_start    => { optional => 1, default => 1 },
-      -auto_restart  => { optional => 1, default => 1 },
-      -environment   => { optional => 1, default => {} },
-      -exit_codes    => { optional => 1, default => '0,1' },
-      -exit_retries  => { optional => 1, default => 5 },
-      -group         => { optional => 1, default => 'nobody' },
-      -priority      => { optional => 1, default => 0 },
-      -umask         => { optional => 1, default => '0022' },
-      -user          => { optional => 1, default => 'nobody' },
-      -redirect      => { optional => 1, default => 0 },
-      -input_driver  => { optional => 1, default => POE::Driver::SysRW->new() },
-      -output_driver => { optional => 1, default => POE::Driver::SysRW->new() },
-      -input_filter  => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
-      -output_filter => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
-      -directory     => { optional => 1, default => Cwd, isa => 'Badger::Filesystem::Directory' },
+      -command        => 1,
+      -auto_start     => { optional => 1, default => 1 },
+      -auto_restart   => { optional => 1, default => 1 },
+      -environment    => { optional => 1, default => {} },
+      -exit_codes     => { optional => 1, default => '0,1' },
+      -exit_retries   => { optional => 1, default => 5 },
+      -group          => { optional => 1, default => 'nobody' },
+      -priority       => { optional => 1, default => 0 },
+      -umask          => { optional => 1, default => '0022' },
+      -user           => { optional => 1, default => 'nobody' },
+      -redirect       => { optional => 1, default => 0 },
+      -output_handler => { optional => 1, type => CODEREF, default => undef },
+      -input_driver   => { optional => 1, default => POE::Driver::SysRW->new() },
+      -output_driver  => { optional => 1, default => POE::Driver::SysRW->new() },
+      -input_filter   => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
+      -output_filter  => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
+      -directory      => { optional => 1, default => Cwd, isa => 'Badger::Filesystem::Directory' },
     }
   }
 ;
@@ -57,12 +60,11 @@ sub session_initialize {
 
     $self->log->debug("$alias: entering session_initialize()");
 
-    $poe_kernel->state('get_output',   $self);
-    $poe_kernel->state('put_input',    $self);
-    $poe_kernel->state('flush_event',  $self);
-    $poe_kernel->state('error_event',  $self);
-    $poe_kernel->state('close_event',  $self);
-    $poe_kernel->state('check_status', $self);
+    $poe_kernel->state('get_event',    $self);
+    $poe_kernel->state('flush_event',  $self, '_flush_event');
+    $poe_kernel->state('error_event',  $self, '_error_event');
+    $poe_kernel->state('close_event',  $self, '_close_event');
+    $poe_kernel->state('check_status', $self, '_check_status');
     $poe_kernel->state('poll_child',   $self, '_poll_child');
     $poe_kernel->state('child_exit',   $self, '_child_exit');
 
@@ -187,79 +189,9 @@ sub session_shutdown {
 
 }
 
-# ----------------------------------------------------------------------
-# Public Events
-# ----------------------------------------------------------------------
-
-sub check_status {
-    my ($self, $count) = @_[OBJECT, ARG0, ARG1];
-    
-    my $stat = $self->stat_process();
-    
-    $count++;
-    
-    if ($self->status == STARTED) {
-            
-        if (($stat == 3) || ($stat == 2)) {
-                        
-            $self->status(RUNNING);
-                        
-        } else {
-                                    
-            $poe_kernel->delay('check_status', 5, $count);
-                                    
-        }
-
-    } elsif ($self->status == RUNNING) {
-                
-        if (($stat != 3) || ($stat != 2)) {
-                            
-            $self->resume_process();
-            $poe_kernel->delay('check_status', 5, $count);
-                            
-        }
-                
-    } elsif ($self->status == PAUSED) {
-                        
-        if ($stat != 6) {
-                                    
-            $self->pause_process();
-            $poe_kernel->delay('check_status', 5, $count);
-                                    
-        }
-                        
-    } elsif ($self->status == STOPPED) {
-                                
-
-        if ($stat != 0) {
-                                            
-            $self->stop_process();
-            $poe_kernel->delay('check_status', 5, $count);
-                                            
-        }
-                                
-    } elsif($self->status == KILLED) {
-                                        
-        if ($stat != 0) {
-                                                    
-            $self->kill_process();
-            $poe_kernel->delay('check_status', 5, $count);
-                                                    
-        }
-                                        
-    }
-
-}
-
-sub get_output {
-    my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
-
-    print $output . "\n";
-
-}
-
-sub put_input {
-    my ($self, $chunk) = @_[OBJECT,ARG0];
+sub put {
+    my $self = shift;
+    my ($chunk) = validate_params(\@_, [1]);
 
     my @chunks;
     my $driver = $self->input_driver;
@@ -289,7 +221,114 @@ sub put_input {
 
 }
 
-sub flush_event {
+sub DESTROY {
+    my $self = shift;
+
+    if ($self->input_handle) {
+
+        $poe_kernel->select_write($self->input_handle);
+        $self->input_handle(undef);
+
+    }
+
+    if ($self->output_handle) {
+
+        $poe_kernel->select_read($self->output_handle);
+        $self->output_handle(undef);
+
+    }
+
+    POE::Wheel::free_wheel_id($self->ID);
+
+}
+
+# ----------------------------------------------------------------------
+# Public Events
+# ----------------------------------------------------------------------
+
+sub get_event {
+    my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
+
+    if (defined($self->{'output_handler'})) {
+
+        $self->output_handler->($output);
+
+    } else {
+
+        print $output . "\n";
+
+    }
+
+}
+
+# ----------------------------------------------------------------------
+# Private Events
+# ----------------------------------------------------------------------
+
+sub _check_status {
+    my ($self, $count) = @_[OBJECT, ARG0];
+
+    my $alias = $self->alias;
+    my $stat = $self->stat_process();
+
+    $self->log->debug(sprintf('%s: check_status: process: %s, status: %s, count %s', $alias, $stat, $self->status, $count));
+
+    $count++;
+
+    if ($self->status == STARTED) {
+
+        if (($stat == 3) || ($stat == 2)) {
+
+            $self->status(RUNNING);
+            $self->log->info_msg('process_started', $alias, $self->pid);
+
+        } else {
+
+            $poe_kernel->delay('check_status', 5, $count);
+
+        }
+
+    } elsif ($self->status == RUNNING) {
+
+        if (($stat != 3) || ($stat != 2)) {
+
+            $self->resume_process();
+            $poe_kernel->delay('check_status', 5, $count);
+
+        }
+
+    } elsif ($self->status == PAUSED) {
+
+        if ($stat != 6) {
+
+            $self->pause_process();
+            $poe_kernel->delay('check_status', 5, $count);
+
+        }
+
+    } elsif ($self->status == STOPPED) {
+
+        if ($stat != 0) {
+
+            $self->stop_process();
+            $poe_kernel->delay('check_status', 5, $count);
+
+        }
+
+    } elsif($self->status == KILLED) {
+
+        if ($stat != 0) {
+
+            $self->kill_process();
+            $poe_kernel->delay('check_status', 5, $count);
+
+        }
+
+    }
+
+}
+
+sub _flush_event {
     my ($self, $wheel) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
@@ -298,7 +337,7 @@ sub flush_event {
 
 }
 
-sub error_event {
+sub _error_event {
     my ($self, $operation, $errno, $errstr, $wheel, $type) = @_[OBJECT,ARG0..ARG4];
 
     my $alias = $self->alias;
@@ -310,29 +349,32 @@ sub error_event {
 
 }
 
-sub close_event {
+sub _close_event {
     my ($self, $wheel) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
 
     $self->log->debug("$alias: close_event");
 
-}
+    $poe_kernel->select_write($self->input_handle);
+    $self->input_handle(undef);
 
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
+    $poe_kernel->select_read($self->output_handle);
+    $self->output_handle(undef);
+
+}
 
 sub _child_exit {
     my ($self, $signal, $pid, $exitcode) = @_[OBJECT,ARG0...ARG2];
 
+    my $count   = 1;
     my $alias   = $self->alias;
     my $status  = $self->status;
     my $retries = $self->retries;
 
-    $self->{pid}         = undef;
-    $self->{exit_code}   = $exitcode >> 8;
-    $self->{exit_signal} = $exitcode & 127;
+    $self->{'pid'}         = undef;
+    $self->{'exit_code'}   = $exitcode >> 8;
+    $self->{'exit_signal'} = $exitcode & 127;
 
     $self->log->warn_msg('process_exited', $alias, $pid, $self->exit_code);
 
@@ -348,6 +390,7 @@ sub _child_exit {
                 if ($self->exit_codes->has($self->exit_code)) {
 
                     $self->start_process();
+                    $poe_kernel->post($alias, 'check_status', $count);
 
                 } else {
 
@@ -376,15 +419,21 @@ sub _child_exit {
 
 }
 
-sub _process_output {
-    my $self   = shift;
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
 
-    my $id         = $self->ID;
-    my $is_active  = $self->is_active;
-    my $driver     = $self->output_driver;
-    my $filter     = $self->output_filter;
-    my $output     = $self->output_handle;
-    my $state      = ref($self) . "($id) -> select output";
+# stolen from POE::Wheel::Run - more or less
+
+sub _process_output {
+    my $self = shift;
+
+    my $id        = $self->ID;
+    my $is_active = $self->is_active;
+    my $driver    = $self->output_driver;
+    my $filter    = $self->output_filter;
+    my $output    = $self->output_handle;
+    my $state     = ref($self) . "($id) -> select output";
 
     if ($filter->can('get_one') and $filter->can('get_one_start')) {
 
@@ -392,20 +441,18 @@ sub _process_output {
             $state,
             sub {
                 my ($k, $me, $handle) = @_[KERNEL, SESSION, ARG0];
-                if (defined(my $raw_output = $driver->get($handle))) {
-                    $filter->get_one_start($raw_output);
+                if (defined(my $raw = $driver->get($handle))) {
+                    $filter->get_one_start($raw);
                     while (1) {
                         my $next_rec = $filter->get_one();
                         last unless @$next_rec;
-                        foreach my $cooked_output (@$next_rec) {
-                            $k->call($me, 'get_output', $cooked_output, $id);
+                        foreach my $cooked (@$next_rec) {
+                            $k->call($me, 'get_event', $cooked, $id);
                         }
                     }
                 } else {
                     $k->call($me, 'error_event', 'read', ($!+0), $!, $id, 'OUTPUT');
-                    unless (--$is_active) {
-                        $k->call($me, 'close_event', $id);
-                    }
+                    $k->call($me, 'close_event', $id);
                     $k->select_read($output);
                 }
             }
@@ -417,15 +464,13 @@ sub _process_output {
             $state,
             sub {
                 my ($k, $me, $handle) = @_[KERNEL, SESSION, ARG0];
-                if (defined(my $raw_output = $driver->get($handle))) {
-                    foreach my $cooked_output (@{$filter->get($raw_output)}) {
-                        $k->call($me, 'get_output', $cooked_output, $id);
+                if (defined(my $raw = $driver->get($handle))) {
+                    foreach my $cooked (@{$filter->get($raw)}) {
+                        $k->call($me, 'get_event', $cooked, $id);
                     }
                 } else {
                     $k->call($me, 'error_event', 'read', ($!+0), $!, $id, 'OUTPUT');
-                    unless (--$is_active) {
-                        $k->call($me, 'close_event', $id);
-                    }
+                    $k->call($me, 'close_event', $id);
                     $k->select_read($output);
                 }
             }
@@ -476,27 +521,7 @@ sub _process_input {
 
 }
 
-sub DESTROY {
-
-    my $self = shift;
-
-    if ($self->input_handle) {
-
-        $poe_kernel->select_write($self->input_handle);
-        $self->input_handle(undef);
-
-    }
-
-    if ($self->output_handle) {
-
-        $poe_kernel->select_read($self->output_handle);
-        $self->output_handle(undef);
-
-    }
-
-    POE::Wheel::free_wheel_id($self->ID);
-
-}
+# Stolen from Proc::Background
 
 sub _resolve_path {
     my $self               = shift;
@@ -506,7 +531,6 @@ sub _resolve_path {
     my $extensions         = shift;
     my $xpath              = shift;
 
-    # Stolen from Proc::Background
     #
     # Make the path to the progam absolute if it isn't already.  If the
     # path is not absolute and if the path contains a directory element
@@ -613,8 +637,9 @@ sub init {
 
     my @exit_codes = split(',', $self->exit_codes);
 
-    $self->{exit_codes} = Set::Light->new(@exit_codes);
-    $self->{ID}         = POE::Wheel::allocate_wheel_id();
+    $self->{'exit_codes'} = Set::Light->new(@exit_codes);
+    $self->{'ID'}         = POE::Wheel::allocate_wheel_id();
+    $self->{'merger'}     = Hash::Merge->new('RIGHT_PRECEDENT');
 
     $self->retries(1);
     $self->is_active(1);

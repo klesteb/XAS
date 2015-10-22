@@ -570,15 +570,15 @@ sub glob2regex {
 
 sub env_store {
 
-    my %env;
+    my $env;
 
     while (my ($key, $value) = each(%ENV)) {
 
-        $env{$key} = $value;
+        $env->{$key} = $value;
 
     }
 
-    return \%env;
+    return $env;
 
 }
 
@@ -593,26 +593,21 @@ sub env_clear {
 }
 
 sub env_restore {
-    my ($env) = validate_params(\@_, [1]);
+    my ($env) = validate_params(\@_, [
+        { type => HASHREF },
+    ]);
 
-    while (my ($key, $value) = each(%ENV)) {
-
-        delete $ENV{$key};
-
-    }
-
-    while (my ($key, $value) = each(%{$env})) {
-
-        $ENV{$key} = $value;
-
-    }
+    env_clear();
+    env_create($env);
 
 }
 
 sub env_create {
-    my ($env) = validate_params(\@_, [1]);
+    my ($env) = validate_params(\@_, [
+        { type => HASHREF },
+    ]);
 
-    while (my ($key, $value) = each(%{$env})) {
+    while (my ($key, $value) = each(%$env)) {
 
         $ENV{$key} = $value;
 
@@ -621,19 +616,21 @@ sub env_create {
 }
 
 sub env_parse {
-    my ($env) = validate_params(\@_, [1]);
+    my ($e) = validate_params(\@_, [
+        { type => SCALAR },
+    ]);
 
-    my ($key, $value, %env);
-    my @envs = split(';;', $env);
+    my $env;
+    my @envs = split(';;', $e);
 
     foreach my $y (@envs) {
 
-        ($key, $value) = split('=', $y);
-        $env{$key} = $value;
+        my ($key, $value) = split('=', $y);
+        $env->{$key} = $value;
 
     }
 
-    return \%env;
+    return $env;
 
 }
 

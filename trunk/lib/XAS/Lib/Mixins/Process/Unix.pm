@@ -10,6 +10,8 @@ use XAS::Class
   utils   => 'run_cmd trim :validation',
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
@@ -20,11 +22,11 @@ sub proc_status {
 
     my $stat = 0;
     my $cmd = "ps -p $pid -o state=";
-    my (@output, $rc, $sig) = run_cmd($cmd);
+    my ($output, $rc, $sig) = run_cmd($cmd);
 
     if (defined($rc) && $rc == 0) {
 
-        my $line = trim($output[0]);
+        my $line = trim($output->[0]);
 
         # UNIX states
         # from man ps
@@ -63,7 +65,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Mixins::xxxx - A mixin for the XAS environment
+XAS::Lib::Mixins::Process::Unix - A mixin for the XAS environment
 
 =head1 SYNOPSIS
 

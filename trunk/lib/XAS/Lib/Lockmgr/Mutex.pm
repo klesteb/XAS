@@ -18,7 +18,7 @@ use XAS::Class
   vars => {
     PARAMS => {
       -key  => 1,
-      -args => { optional => 1, type => HASHREF },
+      -args => { optional => 1, type => HASHREF, default => {} },
     }
   }
 ;

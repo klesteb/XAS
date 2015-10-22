@@ -9,7 +9,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Singleton',
   accessors => 'lockers',
-  utils     => ':validation dotid',
+  utils     => ':validation dotid load_module',
 ;
 
 # ----------------------------------------------------------------------
@@ -30,7 +30,7 @@ sub add {
 
     unless (defined($self->lockers->{$key})) {
 
-        $self->class->load($module);
+        load_module($module);
 
         $self->lockers->{$key} = $module->new(-key => $key, -args => $args);
 

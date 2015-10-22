@@ -50,11 +50,13 @@ sub proc_status {
 
     foreach my $objItem (in $colItems) {
 
-        if ($objItem->{ProcessId} eq $pid) {
+        if ($objItem->{'ProcessId'} eq $pid) {
 
-            $stat = $objItem->{ExecutionState} + 0;
-            last;
+            # for whaterver reason this field is not always filled in.
+            # so if the process is found, assume a "2".
 
+            $stat = $objItem->{'ExecutionState'} || 2;
+            
         }
 
     }
