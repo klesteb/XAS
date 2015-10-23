@@ -201,7 +201,7 @@ sub pause_process {
 
         if (($code == 3) || ($code == 2)) {   # process is running or ready
 
-            if (kill('TSTP', $pid)) {
+            if (kill('STOP', $pid)) {
 
                 $self->status(PAUSED);
                 $self->log->warn_msg('process_paused', $alias, $self->pid);

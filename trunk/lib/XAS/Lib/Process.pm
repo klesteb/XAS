@@ -68,12 +68,6 @@ sub session_initialize {
     $poe_kernel->state('poll_child',   $self, '_poll_child');
     $poe_kernel->state('child_exit',   $self, '_child_exit');
 
-    # signal handlers
-
-    $poe_kernel->sig('INT',  'session_interrupt');
-    $poe_kernel->sig('TERM', 'session_interrupt');
-    $poe_kernel->sig('QUIT', 'session_interrupt');
-    
     # walk the chain
 
     $self->SUPER::session_initialize();
