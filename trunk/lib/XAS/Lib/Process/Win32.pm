@@ -221,7 +221,7 @@ sub resume_process {
 
         my $code = $self->stat_process();
 
-        unless ($code == 6) {   # process is suspended ready
+        if ($code == 6) {   # process is suspended ready
 
             $self->status(RUNNING);
             $self->process->Resume();

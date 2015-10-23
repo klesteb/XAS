@@ -224,7 +224,7 @@ sub resume_process {
         my $pid = ($self->pid * -1);
         my $code = $self->stat_process();
 
-        unless ($code == 6) {   # process is suspended ready
+        if ($code == 6) {   # process is suspended ready
 
             if (kill('CONT', $pid)) {
 
