@@ -21,7 +21,7 @@ use XAS::Class
   base      => 'XAS::Lib::POE::Service',
   mixin     => "XAS::Lib::Mixins::Process $mixin",
   utils     => ':validation dotid',
-  mutators  => 'is_active input_handle output_handle status retries',
+  mutators  => 'input_handle output_handle status retries',
   accessors => 'pid exit_code exit_signal process ID merger',
   constants => ':process',
   vars => {
@@ -34,15 +34,20 @@ use XAS::Class
       -exit_retries   => { optional => 1, default => 5 },
       -group          => { optional => 1, default => 'nobody' },
       -priority       => { optional => 1, default => 0 },
+      -pty            => { optional => 1, default => 0 },
       -umask          => { optional => 1, default => '0022' },
       -user           => { optional => 1, default => 'nobody' },
       -redirect       => { optional => 1, default => 0 },
-      -output_handler => { optional => 1, type => CODEREF, default => undef },
       -input_driver   => { optional => 1, default => POE::Driver::SysRW->new() },
       -output_driver  => { optional => 1, default => POE::Driver::SysRW->new() },
       -input_filter   => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
       -output_filter  => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
       -directory      => { optional => 1, default => Cwd, isa => 'Badger::Filesystem::Directory' },
+      -output_handler => { optional => 1, type => CODEREF, default => sub {
+              my $output = shift;
+              printf("%s\n", $output);
+          }
+      },
     }
   }
 ;
@@ -60,7 +65,7 @@ sub session_initialize {
 
     $self->log->debug("$alias: entering session_initialize()");
 
-    $poe_kernel->state('get_event',    $self);
+    $poe_kernel->state('get_event',    $self, '_get_event');
     $poe_kernel->state('flush_event',  $self, '_flush_event');
     $poe_kernel->state('error_event',  $self, '_error_event');
     $poe_kernel->state('close_event',  $self, '_close_event');
@@ -232,6 +237,8 @@ sub DESTROY {
 
     }
 
+    $self->destroy();
+
     POE::Wheel::free_wheel_id($self->ID);
 
 }
@@ -240,24 +247,16 @@ sub DESTROY {
 # Public Events
 # ----------------------------------------------------------------------
 
-sub get_event {
-    my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
-
-    if (defined($self->{'output_handler'})) {
-
-        $self->output_handler->($output);
-
-    } else {
-
-        print $output . "\n";
-
-    }
-
-}
-
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _get_event {
+    my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
+
+    $self->output_handler->($output);
+
+}
 
 sub _check_status {
     my ($self, $count) = @_[OBJECT, ARG0];
@@ -422,12 +421,11 @@ sub _child_exit {
 sub _process_output {
     my $self = shift;
 
-    my $id        = $self->ID;
-    my $is_active = $self->is_active;
-    my $driver    = $self->output_driver;
-    my $filter    = $self->output_filter;
-    my $output    = $self->output_handle;
-    my $state     = ref($self) . "($id) -> select output";
+    my $id     = $self->ID;
+    my $driver = $self->output_driver;
+    my $filter = $self->output_filter;
+    my $output = $self->output_handle;
+    my $state  = ref($self) . "($id) -> select output";
 
     if ($filter->can('get_one') and $filter->can('get_one_start')) {
 
@@ -447,7 +445,7 @@ sub _process_output {
                 } else {
                     $k->call($me, 'error_event', 'read', ($!+0), $!, $id, 'OUTPUT');
                     $k->call($me, 'close_event', $id);
-                    $k->select_read($output);
+                    $k->select_read($handle);
                 }
             }
         );
@@ -465,7 +463,7 @@ sub _process_output {
                 } else {
                     $k->call($me, 'error_event', 'read', ($!+0), $!, $id, 'OUTPUT');
                     $k->call($me, 'close_event', $id);
-                    $k->select_read($output);
+                    $k->select_read($handle);
                 }
             }
         );
@@ -479,12 +477,12 @@ sub _process_output {
 sub _process_input {
     my $self = shift;
 
-    my $id          = $self->ID;
-    my $driver      = $self->input_driver;
-    my $filter      = $self->input_filter;
-    my $input       = $self->input_handle;
-    my $buffer      = \$self->{'buffer'};
-    my $state       = ref($self) . "($id) -> select input";
+    my $id     = $self->ID;
+    my $driver = $self->input_driver;
+    my $filter = $self->input_filter;
+    my $input  = $self->input_handle;
+    my $buffer = \$self->{'buffer'};
+    my $state  = ref($self) . "($id) -> select input";
 
     $poe_kernel->state(
         $state,
@@ -636,7 +634,6 @@ sub init {
     $self->{'merger'}     = Hash::Merge->new('RIGHT_PRECEDENT');
 
     $self->retries(1);
-    $self->is_active(1);
     $self->init_process();
     $self->status(STOPPED);
 

@@ -15,11 +15,11 @@ use XAS::Class
   utils     => ':env dotid compress trim',
   mixins    => 'start_process stop_process pause_process resume_process
                stat_process kill_process init_process _parse_command
-               _poll_child',
+               _poll_child destroy',
   constants => ':process',
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -281,9 +281,12 @@ sub kill_process {
 
 }
 
+sub destory {
+    my $self = shift;
+}
+
 sub init_process {
     my $self = shift;
-
 }
 
 # ----------------------------------------------------------------------

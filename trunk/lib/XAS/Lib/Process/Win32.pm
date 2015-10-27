@@ -3,6 +3,7 @@ package XAS::Lib::Process::Win32;
 our $VERSION = '0.02';
 
 use POE;
+use Win32::Console;
 use Win32::Process;
 use Win32::Socketpair 'winsocketpair';
 
@@ -15,7 +16,7 @@ use XAS::Class
   filesystem => 'Dir Cwd',
   mixins     => 'start_process stop_process pause_process resume_process
                  stat_process kill_process init_process _poll_child
-                 _parse_command',
+                 _parse_command destroy',
   constants  => ':process',
   constant => {
     wbemFlagReturnImmediately => 0x10,
@@ -86,6 +87,7 @@ sub start_process {
 
         $inherit = 1;   # tell Create() to inherit open file handles
                         # note: doesn't seem to work as documented
+                        # note: it does work for console handles
 
         unless (Win32::Process::Create($process, $args[0], "@args", $inherit, $flags, $dir)) {
 
@@ -279,10 +281,43 @@ sub kill_process {
 
 }
 
+sub destory {
+    my $self = shift;
+
+    if (my $console = $self->{'console'}) {
+
+        $console->Flush();
+        $console->Free();
+
+    }
+
+}
+
 sub init_process {
     my $self = shift;
 
+    my $alias = $self->alias;
+
     $self->{'process'} = undef;
+    $self->{'console'} = undef;
+
+    if ($self->pty) {
+
+        # A Windows service must allocate a console to redirect stdin,
+        # stdout and stderr, even when using sockets to communicate.
+        # Doing so at Create() time dosen't seem to work correctly.
+
+        unless (defined($self->{console} = Win32::Console->Alloc())) {
+
+            $self->throw_msg(
+                dotid($self->class) . '.init_process.nopty',
+                'process_nopty',
+                $alias, _get_error()
+            );
+
+        }
+
+    }
 
 }
 

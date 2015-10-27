@@ -72,6 +72,7 @@ process_nomore_retries       = %s: no more retries, count: %s
 process_no_autorestart       = %s: auto restart disabled
 process_location             = %s: can not find absolution location of %s
 process_writerr              = unable to write, reason: %s
+process_nopty                = %s: unable to allocate a pty, reason: %s
 service_signaled             = %s: recieved signal %s
 service_unpaused             = the service is not paused
 service_que_delay            = %s: unable to queue delay, reason: %s
