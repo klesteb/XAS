@@ -11,7 +11,7 @@ BEGIN {
 
 use Set::Light;
 use Hash::Merge;
-use Badger::Filesystem 'Cwd Dir';
+use Badger::Filesystem 'Cwd Dir File';
 use Params::Validate qw(CODEREF);
 use POE qw(Wheel Driver::SysRW Filter::Line);
 
@@ -20,7 +20,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
   mixin     => "XAS::Lib::Mixins::Process $mixin",
-  utils     => ':validation dotid',
+  utils     => ':validation dotid trim',
   mutators  => 'input_handle output_handle status retries',
   accessors => 'pid exit_code exit_signal process ID merger',
   constants => ':process',
@@ -45,7 +45,7 @@ use XAS::Class
       -directory      => { optional => 1, default => Cwd, isa => 'Badger::Filesystem::Directory' },
       -output_handler => { optional => 1, type => CODEREF, default => sub {
               my $output = shift;
-              printf("%s\n", $output);
+              printf("%s\n", trim($output));
           }
       },
     }
@@ -516,64 +516,59 @@ sub _process_input {
 # Stolen from Proc::Background
 
 sub _resolve_path {
-    my $self               = shift;
-    my $command            = shift;
-    my $is_absolute_re     = shift;
-    my $has_dir_element_re = shift;
-    my $extensions         = shift;
-    my $xpath              = shift;
+    my $self       = shift;
+    my $command    = shift;
+    my $extensions = shift;
+    my $xpath      = shift;
 
-    #
     # Make the path to the progam absolute if it isn't already.  If the
     # path is not absolute and if the path contains a directory element
     # separator, then only prepend the current working to it.  If the
     # path is not absolute, then look through the PATH environment to
-    # find the executable.  In all cases, look for the programs with any
-    # extensions added to the original path name.
+    # find the executable.
 
-    my $path;
+    my $alias = $self->alias;
+    my $path = File($command);
 
-    if ($command =~ /$is_absolute_re/o) {
+    if ($path->is_absolute) {
 
-        foreach my $ext (@$extensions) {
+        if ($path->exists) {
 
-            my $p = "$command$ext";
-
-            if (-f $p and -x _) {
-
-                $path = $p;
-                last;
-
-            }
-
-        }
-        
-        unless (defined $path) {
-
-            $self->throw_msg(
-                dotid($self->class) . '.resolve_path.path',
-                'process_location',
-                $command
-            );
+            return $path->absolute;
 
         }
 
-    } else {
+    } elsif ($path->is_relative) {
 
-        my $cwd = Cwd->path;
+        if ($path->name eq $path) {
 
-        if ($command =~ /$has_dir_element_re/o) {
+            foreach my $xpath (@$xpaths) {
 
-            my $p1 = "$cwd/$command";
+                next if ($xpath eq '');
 
-            foreach my $ext (@$extensions) {
+                if ($path->extension) {
 
-                my $p2 = "$p1$ext";
+                    my $p = File($xpath, $path->name);
 
-                if (-f $p2 and -x _) {
+                    if ($p->exists) {
 
-                    $path = $p2;
-                    last;
+                        return $p->absolute;
+
+                    }
+
+                } else {
+
+                    foreach my $ext (@$extensions) {
+
+                        my $p = File($xpath, $path->basename . $ext);
+
+                        if ($p->exists) {
+
+                            return $p->absolute;
+
+                        }
+
+                    }
 
                 }
 
@@ -581,44 +576,24 @@ sub _resolve_path {
 
         } else {
 
-            foreach my $dir (@$xpath) {
+            my $p = File($path->absoulte);
 
-                next unless length $dir;
+            if ($p->exists) {
 
-                $dir = "$cwd/$dir" unless $dir =~ /$is_absolute_re/o;
-                my $p1 = "$dir/$command";
-            
-                foreach my $ext (@$extensions) {
-
-                    my $p2 = "$p1$ext";
-                    if (-f $p2 and -x _) {
-
-                        $path = $p2;
-                        last;
-
-                    }
-
-                }
-
-                last if defined $path;
+                return $p->absolute;
 
             }
 
         }
 
-        unless (defined $path) {
-
-            $self->throw_msg(
-                dotid($self->class) . '.resolve_path.path',
-                'process_location',
-                $command
-            );
-
-        }
-
     }
 
-    return $path;
+    $self->throw_msg(
+        dotid($self->class) . '.resolve_path.path',
+        'location',
+        $alias, $command
+    );
+
 
 }
 

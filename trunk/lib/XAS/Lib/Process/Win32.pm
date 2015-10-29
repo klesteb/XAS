@@ -371,12 +371,9 @@ sub _poll_child {
 sub _parse_command {
     my $self = shift;
 
-    my @args = split(' ', $self->command);
-
-    my @extensions         = ('.exe', '.bat', '.cmd', '.pl');
-    my @path               = split(';', $ENV{PATH});
-    my $is_absolute_re     = '^(?:(?:[a-zA-Z]:[\\\\/])|(?:[\\\\/]{2}\w+[\\\\/]))';
-    my $has_dir_element_re = "[\\\\/]";
+    my @args       = split(' ', $self->command);
+    my @extensions = ('.exe', '.bat', '.cmd', '.pl');
+    my @path       = split(';', $ENV{PATH});
 
     # Stolen from Proc::Background
     #
@@ -416,7 +413,7 @@ sub _parse_command {
     # pathname has a space in it, convert the full pathname to the
     # Windows short 8.3 format which contains no spaces.
 
-    $args[0] = $self->_resolve_path($args[0], $is_absolute_re, $has_dir_element_re, \@extensions, \@path) or return;
+    $args[0] = $self->_resolve_path($args[0], \@extensions, \@path) or return;
     $args[0] = Win32::GetShortPathName($args[0]); 
 
     return @args;
