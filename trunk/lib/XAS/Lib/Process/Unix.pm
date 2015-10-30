@@ -163,7 +163,7 @@ sub start_process {
 
     }
 
-    $self->status(STARTED);
+    $self->status(PROC_STARTED);
 
     $poe_kernel->sig_child($pid, 'poll_child');
     $self->{'pid'} = $pid;
@@ -203,7 +203,7 @@ sub pause_process {
 
             if (kill('STOP', $pid)) {
 
-                $self->status(PAUSED);
+                $self->status(PROC_PAUSED);
                 $self->log->warn_msg('process_paused', $alias, $self->pid);
 
             }
@@ -228,7 +228,7 @@ sub resume_process {
 
             if (kill('CONT', $pid)) {
 
-                $self->status(RUNNING);
+                $self->status(PROC_RUNNING);
                 $self->log->warn_msg('process_started', $alias, $self->pid);
 
             }
@@ -250,7 +250,7 @@ sub stop_process {
 
         if (kill('TERM', $pid)) {
 
-            $self->status(STOPPED) unless ($self->status == SHUTDOWN);
+            $self->status(PROC_STOPPED) unless ($self->status == PROC_SHUTDOWN);
             $self->retries(0);    
             $self->log->warn_msg('process_stopped', $alias, $self->pid);
 
@@ -271,7 +271,7 @@ sub kill_process {
 
         if (kill('KILL', $pid)) {
 
-            $self->status(KILLED);
+            $self->status(PROC_KILLED);
             $self->retries(0);
             $self->log->warn_msg('process_killed', $alias, $self->pid);
 
@@ -300,9 +300,9 @@ sub _poll_child {
 
     $self->log->debug("$alias: entering poll_child");
 
-    unless (($self->status == KILLED) || ($self->status == SHUTDOWN)) {
+    unless (($self->status == PROC_KILLED) || ($self->status == PROC_SHUTDOWN)) {
 
-        $self->status(STOPPED);
+        $self->status(PROC_STOPPED);
 
     }
 

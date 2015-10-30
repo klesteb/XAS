@@ -93,7 +93,7 @@ sub session_startup {
 
     if ($self->auto_start) {
 
-        if ($self->status == STOPPED) {
+        if ($self->status == PROC_STOPPED) {
 
             $self->start_process();
             $poe_kernel->post($alias, 'check_status', $count);
@@ -174,7 +174,7 @@ sub session_shutdown {
 
     $self->log->debug("$alias: entering session_shutdown()");
 
-    $self->status(SHUTDOWN);
+    $self->status(PROC_SHUTDOWN);
     $self->stop_process();
 
     $poe_kernel->sig_handled();
@@ -268,11 +268,11 @@ sub _check_status {
 
     $count++;
 
-    if ($self->status == STARTED) {
+    if ($self->status == PROC_STARTED) {
 
         if (($stat == 3) || ($stat == 2)) {
 
-            $self->status(RUNNING);
+            $self->status(PROC_RUNNING);
             $self->log->info_msg('process_started', $alias, $self->pid);
 
         } else {
@@ -281,7 +281,7 @@ sub _check_status {
 
         }
 
-    } elsif ($self->status == RUNNING) {
+    } elsif ($self->status == PROC_RUNNING) {
 
         if (($stat != 3) || ($stat != 2)) {
 
@@ -290,7 +290,7 @@ sub _check_status {
 
         }
 
-    } elsif ($self->status == PAUSED) {
+    } elsif ($self->status == PROC_PAUSED) {
 
         if ($stat != 6) {
 
@@ -299,7 +299,7 @@ sub _check_status {
 
         }
 
-    } elsif ($self->status == STOPPED) {
+    } elsif ($self->status == PROC_STOPPED) {
 
         if ($stat != 0) {
 
@@ -308,7 +308,7 @@ sub _check_status {
 
         }
 
-    } elsif($self->status == KILLED) {
+    } elsif($self->status == PROC_KILLED) {
 
         if ($stat != 0) {
 
@@ -513,7 +513,7 @@ sub _process_input {
 
 }
 
-# Stolen from Proc::Background
+# Stolen from Proc::Background - more or less
 
 sub _resolve_path {
     my $self       = shift;
@@ -610,7 +610,7 @@ sub init {
 
     $self->retries(1);
     $self->init_process();
-    $self->status(STOPPED);
+    $self->status(PROC_STOPPED);
 
     return $self;
 

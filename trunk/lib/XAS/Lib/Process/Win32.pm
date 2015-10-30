@@ -87,7 +87,8 @@ sub start_process {
 
         $inherit = 1;   # tell Create() to inherit open file handles
                         # note: doesn't seem to work as documented
-                        # note: it does work for console handles
+                        # note: it does work for console handles which
+                        #       are needed to redirect stdin, stdout, stderr
 
         unless (Win32::Process::Create($process, $args[0], "@args", $inherit, $flags, $dir)) {
 
@@ -152,7 +153,7 @@ sub start_process {
 
     # retrieve the process id and the process object
 
-    $self->status(STARTED);
+    $self->status(PROC_STARTED);
 
     $self->{'pid'} = $process->GetProcessID();
     $self->{'process'} = $process;
@@ -200,7 +201,7 @@ sub pause_process {
 
         if (($code == 3) || ($code == 2)) {   # process is running or ready
 
-            $self->status(PAUSED);
+            $self->status(PROC_PAUSED);
             $self->process->Suspend();
             $self->log->warn_msg('process_paused', $alias, $self->pid);
 
@@ -225,12 +226,12 @@ sub resume_process {
 
         if ($code == 6) {   # process is suspended ready
 
-            $self->status(RUNNING);
+            $self->status(PROC_RUNNING);
             $self->process->Resume();
             $self->log->warn_msg('process_started', $alias, $self->pid);
 
         }
-   
+
     }
 
     $self->log->debug("$alias: leavin resume_process");
@@ -247,7 +248,7 @@ sub stop_process {
 
     if (my $pid = $self->pid) {
 
-        $self->status(STOPPED) unless ($self->status == SHUTDOWN);
+        $self->status(PROC_STOPPED) unless ($self->status == PROC_SHUTDOWN);
         $self->retries(0);
 
         Win32::Process::KillProcess($pid, $exitcode);
@@ -269,7 +270,7 @@ sub kill_process {
 
     if (my $pid = $self->pid) {
 
-        $self->status(KILLED);
+        $self->status(PROC_KILLED);
         $self->retries(0);
 
         Win32::Process::KillProcess($pid, $exitcode);
@@ -307,7 +308,7 @@ sub init_process {
         # stdout and stderr, even when using sockets to communicate.
         # Doing so at Create() time dosen't seem to work correctly.
 
-        unless (defined($self->{console} = Win32::Console->Alloc())) {
+        unless (defined($self->{'console'} = Win32::Console->Alloc())) {
 
             $self->throw_msg(
                 dotid($self->class) . '.init_process.nopty',
@@ -342,9 +343,9 @@ sub _poll_child {
 
     }
 
-    unless (($self->status == KILLED) || ($self->status == SHUTDOWN)) {
+    unless (($self->status == PROC_KILLED) || ($self->status == PROC_SHUTDOWN)) {
 
-        $self->status(STOPPED);
+        $self->status(PROC_STOPPED);
 
     }
 
