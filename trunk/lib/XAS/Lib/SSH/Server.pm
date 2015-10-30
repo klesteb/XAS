@@ -51,8 +51,8 @@ sub session_initialize {
 
     my ($rhost, $rport, $lhost, $lport) = split(' ', $ENV{SSH_CONNECTION});
 
-    $self->{peerhost} = $rhost;
-    $self->{peerport} = $rport;
+    $self->{'peerhost'} = $rhost;
+    $self->{'peerport'} = $rport;
 
     # walk the chain
 
@@ -232,7 +232,7 @@ sub _client_error {
 
         $self->log->info_msg('net_server_disconnect', $alias, $self->peerhost, $self->peerport);
 
-        delete $self->{client};
+        delete $self->{'client'};
         $poe_kernel->post($alias, 'session_shutdown');
 
     } else {

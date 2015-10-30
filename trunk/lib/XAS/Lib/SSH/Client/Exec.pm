@@ -49,8 +49,8 @@ sub call {
     $self->chan->pty('vt100');
     $self->chan->exec($command);
 
-    $self->{exit_code}   = $self->chan->exit_status();
-    $self->{exit_signal} = $self->chan->exit_signal();
+    $self->{'exit_code'}   = $self->chan->exit_status();
+    $self->{'exit_signal'} = $self->chan->exit_signal();
 
     do {
 

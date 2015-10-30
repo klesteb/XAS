@@ -10,6 +10,7 @@ use XAS::Class
   base      => 'XAS::Singleton',
   accessors => 'lockers',
   utils     => ':validation dotid load_module',
+  constants => 'LOCK_DRIVERS',
 ;
 
 # ----------------------------------------------------------------------
@@ -21,7 +22,7 @@ sub add {
     my $p = validate_params(\@_, {
         -key    => 1,
         -args   => { optional => 1, default => {}, type => HASHREF },
-        -driver => { optional => 1, default => 'Mutex', regex => qr/Mutex/ },
+        -driver => { optional => 1, default => 'Mutex', regex => LOCK_DRIVERS },
     });
 
     my $key    = $p->{'key'};

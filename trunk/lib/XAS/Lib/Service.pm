@@ -28,7 +28,7 @@ use XAS::Class
   base      => 'XAS::Lib::POE::Session',
   utils     => ':validation',
   mixin     => $mixin,
-  accessors => 'sessions :validation',
+  accessors => 'sessions',
   mutators  => 'last_state',
   constants => 'DELIMITER',
   vars => {

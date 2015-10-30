@@ -52,7 +52,7 @@ sub setup {
             # Also KpyM (cmd.exe??) needs a \r\n eol for command
             # execution. Bitvise dosen't seem to require this.
 
-            $self->{eol} = "\015\012";
+            $self->{'eol'} = "\015\012";
 
             # Need to wait for the "continue" line. Pay the
             # danegield, but don't register the key, or this
@@ -74,7 +74,7 @@ sub setup {
             # be set for this code to work. DCL expects a \r\n
             # eol for command execution.
 
-            $self->{eol} = "\015\012";
+            $self->{'eol'} = "\015\012";
 
             # Wait for this line, it indicates that the terminal
             # capabilities negotiation has finished.

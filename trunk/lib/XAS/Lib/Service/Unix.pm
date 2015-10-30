@@ -93,7 +93,6 @@ sub poll {
     my $state = $self->_current_state();
 
     $self->log->debug("$alias: entering _poll()");
-    $self->log->debug("$alias: state = $state");
 
     if ($state == SERVICE_START_PENDING) {
 
@@ -219,11 +218,11 @@ sub _current_state {
 
     if (defined($state)) {
 
-        $self->{state} = $state;
+        $self->{'state'} = $state;
 
     }
 
-    return $self->{state};
+    return $self->{'state'};
 
 }
 

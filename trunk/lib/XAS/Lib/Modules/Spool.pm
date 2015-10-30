@@ -4,6 +4,7 @@ our $VERSION = '0.03';
 
 use Try::Tiny;
 use XAS::Factory;
+use XAS::Constants 'LOCK_DRIVERS';
 
 use XAS::Class
   debug      => 0,
@@ -20,6 +21,7 @@ use XAS::Class
       -extension => { optional => 1, default => '.pkt' },
       -seqfile   => { optional => 1, default => '.SEQ' },
       -lock      => { optional => 1, default => 'spool' },
+      -driver    => { optional => 1, default => 'Mutex', regex => LOCK_DRIVERS },
     }
   }
 ;
@@ -238,7 +240,7 @@ sub init {
     $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
     $self->lockmgr->add(
         -key    => $self->lock,
-        -driver => 'Mutex',
+        -driver => $self->driver,
     );
 
     return $self;

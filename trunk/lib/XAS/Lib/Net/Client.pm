@@ -71,7 +71,7 @@ sub connect {
 sub pending {
     my $self = shift;
 
-    return length($self->{buffer});
+    return length($self->{'buffer'});
 
 }
 

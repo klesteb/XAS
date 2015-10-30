@@ -84,9 +84,9 @@ sub connect {
 
         }
 
-        $self->{sock}   = $self->ssh->sock();
-        $self->{chan}   = $self->ssh->channel();
-        $self->{select} = IO::Select->new($self->sock);
+        $self->{'sock'}   = $self->ssh->sock();
+        $self->{'chan'}   = $self->ssh->channel();
+        $self->{'select'} = IO::Select->new($self->sock);
 
         $self->setup();
 
@@ -115,7 +115,7 @@ sub setup {
 sub pending {
     my $self = shift;
 
-    return length($self->{buffer});
+    return length($self->{'buffer'});
 
 }
 
@@ -144,7 +144,7 @@ sub get {
     my $working = 1;
 
     # extract $length from buffer. if the buffer size is > $length then
-    # try to refill buffer. If there is nothing to read, the return
+    # try to refill buffer. If there is nothing to read, then return
     # the remainder of the buffer.
     #
     # Patterned after some libssh2 examples and C network programming
@@ -152,14 +152,14 @@ sub get {
 
     if ($self->pending > $length) {
 
-        $output = $self->buf_slurp(\$self->{buffer}, $length);
+        $output = $self->buf_slurp(\$self->{'buffer'}, $length);
 
     } else {
 
         $self->_fill_buffer();
 
         my $l = ($self->pending > $length) ? $length : $self->pending;
-        $output = $self->buf_slurp(\$self->{buffer}, $l);
+        $output = $self->buf_slurp(\$self->{'buffer'}, $l);
 
     }
 
@@ -179,7 +179,7 @@ sub gets {
 
         if ($output = $self->buf_get_line(\$buffer, $self->eol)) {
 
-            $self->{buffer} = $buffer . $self->{buffer};
+            $self->{'buffer'} = $buffer . $self->{'buffer'};
             last;
 
         }
@@ -304,8 +304,8 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{ssh} = Net::SSH2->new();
-    $self->{buffer} = '';
+    $self->{'ssh'} = Net::SSH2->new();
+    $self->{'buffer'} = '';
 
     $self->attempts(5);       # number of EAGAIN attempts
 
@@ -331,7 +331,7 @@ sub _fill_buffer {
 
         if (my $bytes = $self->chan->read($buf, 512)) {
 
-            $self->{buffer} .= $buf;
+            $self->{'buffer'} .= $buf;
             $read += $bytes;
 
         } else {
