@@ -24,6 +24,8 @@ sub load_config {
         { optional => 1, default => 'cfg' },
     ]);
 
+    # really... using carp() as an exception handler is lame
+
     local $SIG{__WARN__} = sub {
         my $error = shift;
 
