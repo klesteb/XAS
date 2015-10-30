@@ -81,13 +81,13 @@ sub proc_status {
             # from https://msdn.microsoft.com/en-us/library/aa394494%28v=vs.85%29.aspx
             #
             # 0 - Initialized — It is recognized by the microkernel
-            # 1 - Ready - Ready — It is prepared to run on the next available processor
-            # 2 - Running — It is executing.
-            # 3 - Standby — It is about to run, only one thread may be in this state at a time
-            # 4 - Terminated — It is finished executing
-            # 5 - Waiting — It is not ready for the processor, when ready, it will be rescheduled
-            # 6 - Transition — The thread is waiting for resources other than the processor
-            # 7 - Unknown — The thread state is unknown
+            # 1 - Ready       - It is prepared to run on the next available processor
+            # 2 - Running     — It is executing.
+            # 3 - Standby     — It is about to run, only one thread may be in this state at a time
+            # 4 - Terminated  — It is finished executing
+            # 5 - Waiting     — It is not ready for the processor, when ready, it will be rescheduled
+            # 6 - Transition  — The thread is waiting for resources other than the processor
+            # 7 - Unknown     — The thread state is unknown
             #
             # when ThreadState = 5, you need to query the ThreadWaitReason to find out why.
             #

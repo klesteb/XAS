@@ -371,7 +371,7 @@ sub _child_exit {
 
     $self->log->warn_msg('process_exited', $alias, $pid, $self->exit_code);
 
-    if ($status == STOPPED) {
+    if ($status == PROC_STOPPED) {
 
         if ($self->auto_restart) {
 
@@ -519,7 +519,7 @@ sub _resolve_path {
     my $self       = shift;
     my $command    = shift;
     my $extensions = shift;
-    my $xpath      = shift;
+    my $xpaths     = shift;
 
     # Make the path to the progam absolute if it isn't already.  If the
     # path is not absolute and if the path contains a directory element

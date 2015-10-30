@@ -281,7 +281,7 @@ sub kill_process {
 
 }
 
-sub destory {
+sub destroy {
     my $self = shift;
 }
 

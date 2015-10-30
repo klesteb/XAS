@@ -32,7 +32,7 @@
 # ============================================================================
 #
 
-use lib "../lib";
+use lib "/home/kevin/dev/XAS/trunk/lib";
 use XAS::Apps::Test::Process;
 
 main: {

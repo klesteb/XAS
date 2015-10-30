@@ -2,6 +2,7 @@ package XAS::Lib::Mixins::Configs;
 
 our $VERSION = '0.01';
 
+use Try::Tiny;
 use Config::IniFiles;
 
 use XAS::Class
@@ -23,16 +24,32 @@ sub load_config {
         { optional => 1, default => 'cfg' },
     ]);
 
-    $self->{$handle} = Config::IniFiles->new(
-        -file => $filename->path,
-    ) or do {
-        $self->log->warn(compress(join('', @Config::IniFiles::errors)));
+    local $SIG{__WARN__} = sub {
+        my $error = shift;
+
+        my ($reason) = $error =~ /(.*)at\s+\.\./;
+
         $self->throw_msg(
             dotid($self->class) . '.load_config.badini',
             'config_badini',
-            $filename->path
+            $filename->path,
+            $reason,
         );
+
     };
+
+    $self->{$handle} = Config::IniFiles->new(-file => $filename->path);
+
+    unless (defined($self->{$handle})) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.load_config.badini',
+            'config_badini',
+            $filename->path,
+            compress(join('', @Config::IniFiles::errors)),
+        );
+
+    }
 
 }
 

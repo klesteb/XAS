@@ -47,6 +47,11 @@ sub setup {
             -user         => $self->cfg->val($section, 'user', 'wpm'),
             -redirect     => $self->cfg->val($section, 'redirect' , '0'),
             -directory    => Dir($self->cfg->val($section, 'directory', $cwd)),
+            -output_handler => sub {
+               my $output = shift;
+               my $line  = trim($output) || '';
+               $self->log->info(sprintf('%s: %s', trim($alias), $line));
+           }
         );
 
         $self->service->register($alias);
