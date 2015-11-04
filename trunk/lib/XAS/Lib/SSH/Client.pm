@@ -129,7 +129,11 @@ sub disconnect {
 
     }
 
-    $self->ssh->disconnect();
+    if (my $ssh = $self->ssh) {
+
+        $ssh->disconnect();
+
+    }
 
 }
 
