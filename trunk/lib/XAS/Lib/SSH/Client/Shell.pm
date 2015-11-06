@@ -1,13 +1,15 @@
 package XAS::Lib::SSH::Client::Shell;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Params::Validate qw(SCALAR CODEREF);
+
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Lib::SSH::Client',
-  utils   => ':validation trim',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Lib::SSH::Client',
+  utils     => ':validation trim',
+  constants => 'CRLF',
   vars => {
     PARAMS => {
       -eol => { optional => 1, default => "\012" }
@@ -30,12 +32,17 @@ sub setup {
 
     $self->chan->ext_data('merge');
 
-    # The following needs to be done to talk with a
-    # KpyM SSH Server, other servers don't seem to care.
+    # The following needs to be done for shell access
+    #
+    # KpyM    SSH needs a pty and dosen't seem to care what type
+    # Bitvise SSH needs a pty that is undefined
+    # OpenVMS SSH needs a pty and would really like a DEC terminal
+    # OpenSSH dosen't seem to care
+    # freeSSHD flat out doesn't work
 
-    $self->chan->pty('vt100');   # set up a default pty
+    $self->chan->pty('');        # set up a default pty
     $self->chan->shell();        # ask for a shell
-    $self->put($self->eol);      # flush output buffer
+    $self->puts('');             # flush output buffer
 
     # Flush the input buffer. Discards any banners, welcomes,
     # announcements, motds and other assorted stuff.
@@ -49,10 +56,9 @@ sub setup {
 
             # Found a KpyM SSH Server, with the naq screen...
             #
-            # Also KpyM (cmd.exe??) needs a \r\n eol for command
-            # execution. Bitvise dosen't seem to require this.
+            # cmd.exe expects a \r\n eol for command execution
 
-            $self->{'eol'} = "\015\012";
+            $self->{'eol'} = CRLF;
 
             # Need to wait for the "continue" line. Pay the
             # danegield, but don't register the key, or this
@@ -60,21 +66,18 @@ sub setup {
 
             while ($output = $self->get()) {
 
-                if ($output =~ /continue\./) {
-
-                    $self->put($self->eol);
-
-                }
+                last if ($output =~ /continue\./);
 
             }
 
         } elsif ($output =~ /\[c$/) {
 
             # Found an OpenVMS SSH server. SET TERM/INQUIRE must
-            # be set for this code to work. DCL expects a \r\n
-            # eol for command execution.
+            # be set for this code to work. 
+            #
+            # DCL expects a \r\n eol for command execution.
 
-            $self->{'eol'} = "\015\012";
+            $self->{'eol'} = CRLF;
 
             # Wait for this line, it indicates that the terminal
             # capabilities negotiation has finished.
@@ -85,11 +88,35 @@ sub setup {
 
             } until ($output =~ /\[0c$/);
 
-            $self->put($self->eol);
+            # give it a knudge, no terminal type was defined so 
+            # the terminal driver is pondering this situation...
+
+            $self->puts('');
+
+            # get the "unknown terminal type" error
+
+            do {
+
+                $output = $self->gets;
+
+            } while ($self->pending);
+
+            # continue on
+
+        } elsif ($output =~ /Microsoft/) {
+
+            # found a Microsoft copyright notice. 
+            #
+            # cmd.exe expects a \r\n eol for command execution
+
+            $self->{eol} = CRLF;
 
         }
 
     }
+
+    $self->puts('');       # get a command prompt
+    $self->gets();         # remove it from the buffer
 
 }
 
@@ -98,7 +125,7 @@ sub run {
     my ($command) = validate_params(\@_, [1] );
 
     $self->puts($command);    # send the command
-    $self->get();             # strip the echo back
+    $self->gets();            # strip the echo back
 
 }
 
@@ -109,14 +136,25 @@ sub call {
        { type => CODEREF },
     ]);
 
-    my $output;
+    my @output;
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->puts($command);      # send the command
-    $output = $self->gets();    # get the command result
+    $self->run($command);      # send the command
 
-    return $parser->(trim($output));    # remove line endings
+    $self->{'exit_code'}   = $self->chan->exit_status;
+    $self->{'exit_signal'} = $self->chan->exit_signal;
+
+    # retrieve the response
+
+    do {
+
+        my $line = $self->gets;
+        push(@output, $line);
+
+    } while ($self->pending);
+
+    return $parser->(\@output);
 
 }
 

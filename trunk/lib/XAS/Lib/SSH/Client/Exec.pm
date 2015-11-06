@@ -4,11 +4,10 @@ our $VERSION = '0.01';
 
 use Params::Validate qw(SCALAR CODEREF);
 use XAS::Class
-  debug     => 0,
-  version   => $VERSION,
-  base      => 'XAS::Lib::SSH::Client',
-  accessors => 'exit_code exit_signal',
-  utils     => ':validation trim',
+  debug   => 0,
+  version => $VERSION,
+  base    => 'XAS::Lib::SSH::Client',
+  utils   => ':validation trim',
 ;
 
 #use Data::Hexdumper;
@@ -46,7 +45,6 @@ sub call {
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->chan->pty('vt100');
     $self->chan->exec($command);
 
     $self->{'exit_code'}   = $self->chan->exit_status();
@@ -54,13 +52,10 @@ sub call {
 
     do {
 
-        while (my $line = $self->gets()) {
+        my $line = $self->gets;
+        push(@output, trim($line));
 
-            push(@output, trim($line));
-
-        }
-
-    } while ($self->pending());
+    } while ($self->pending);
 
     return $parser->(\@output);
 

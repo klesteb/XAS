@@ -38,8 +38,8 @@ sub run {
 
     # flush the buffers
 
-    $self->put($self->eol);
-    $self->get();
+    $self->puts("");
+    $self->gets();
 
 }
 
@@ -50,14 +50,20 @@ sub call {
        { type => CODEREF },
     ]);
 
-    my $output;
+    my @output;
 
     # execute a command, retrieve the output and dispatch to a parser.
 
     $self->puts($command);
-    $output = $self->get();
 
-    return $parser->(trim($output));
+    do {
+
+        my $line = $self->gets;
+        push(@output, $line);
+
+    } while ($self->pending);
+
+    return $parser->(\@output);
 
 }
 

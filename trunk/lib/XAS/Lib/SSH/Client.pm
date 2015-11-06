@@ -11,7 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Bufops',
-  accessors => 'ssh chan sock select',
+  accessors => 'ssh chan sock select exit_code exit_signal',
   mutators  => 'attempts', 
   utils     => ':validation dotid trim',
   import    => 'class',
@@ -143,9 +143,7 @@ sub get {
         { optional => 1, default => 512 }
     ]);
 
-    my $state  = 1;
     my $output = '';
-    my $working = 1;
 
     # extract $length from buffer. if the buffer size is > $length then
     # try to refill buffer. If there is nothing to read, then return
