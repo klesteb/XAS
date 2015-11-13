@@ -239,7 +239,7 @@ sub init {
 
     unless (defined($self->{'lock'})) {
 
-        $self->{'lock'} = Dir($self->env->lock, 'spool')->path;
+        $self->{'lock'} = Dir($self->env->locks, 'spool')->path;
 
     }
 

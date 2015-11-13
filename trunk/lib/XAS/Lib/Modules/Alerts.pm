@@ -61,7 +61,7 @@ sub init {
 
     $self->{spooler} = XAS::Factory->module('spooler', {
         -directory => Dir($self->env->spool, 'alerts'),
-        -lock      => Dir($self->env->lock, 'alerts')->path,
+        -lock      => 'alerts',
         -mask      => 0777,
     });
 

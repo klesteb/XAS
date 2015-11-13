@@ -118,8 +118,6 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
-
     unless (defined($self->{'file'})) {
 
         $self->{'file'} = $self->env->pidfile;
@@ -129,6 +127,7 @@ sub init {
     my $basename = fileparse($self->env->script, qr/\.[^.]*/);
 
     $self->{'lock'} = Dir($self->file->volume, $self->file->directory, $basename)->path;
+    $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
 
     $self->lockmgr->add(
         -key    => $self->lock,

@@ -59,5 +59,5 @@ package main;
 my $test = testing->new();
 
 $test->run();
-#$test->pid->remove();
+$test->pid->remove();
 
