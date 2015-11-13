@@ -23,9 +23,9 @@ my $requires = {
     'Badger'                      => 0.09,
     'POE'                         => 1.294,
     'DateTime'                    => 0.53,
-    'DateTime::Format::Strptime'  => 1.10,
-    'DateTime::Format::Pg'        => 0.0,
     'DateTime::Span'              => 0.0,
+    'DateTime::Format::Pg'        => 0.0,
+    'DateTime::Format::Strptime'  => 1.10,
     'Config::IniFiles'            => 2.65,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
@@ -39,7 +39,6 @@ my $requires = {
     'WWW::Curl'                   => 0.0,
     'HTTP::Response'              => 0.0,
     'XML::LibXML'                 => 0.0,
-    'IPC::Semaphore'              => 0.0,
 };
 
 # Needed for Win32 installations
