@@ -11,6 +11,7 @@ $log->debug('debug works');
 $log->trace('trace works');
 $log->info("this is", "a test");
 $log->info_msg('exception', 'first', 'second');
+$log->info_msg('caller', 'one', 'two', 'three', 'four');
 
 #my $messages = $log->class->var('MESSAGES');
 #warn Dumper($messages);

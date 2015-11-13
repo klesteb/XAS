@@ -19,7 +19,7 @@ BEGIN {
     use_ok( 'XAS::Lib::App::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Curl::HTTP' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::Lockmgr' )                || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Lockmgr::Mutex' )         || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Lockmgr::Filesystem' )    || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log' )                    || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log::Console' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log::File' )              || print "Bail out!\n";

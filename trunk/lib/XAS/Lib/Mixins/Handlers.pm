@@ -80,13 +80,11 @@ sub parse_exception {
 
     if ($ref) {
 
-        if ($ex->can('info') && 
-            $ex->can('type') && 
-            $ex->can('match_type')) {
+        if ($ex->isa('Badger::Exception')) {
 
             my $type = $ex->type;
             my $info = compress($ex->info);
-
+            
             if ($ex->match_type('dbix.class')) {
 
                 if ($info =~ m/(.*) XAS::Database::Model::dbix_exception/) {

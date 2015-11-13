@@ -2,16 +2,26 @@ package XAS::Lib::Lockmgr;
 
 our $VERSION = '0.01';
 
+use DateTime;
+use DateTime::Span;
 use Params::Validate qw(HASHREF);
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Singleton',
-  accessors => 'lockers',
+  mixin     => 'XAS::Lib::Mixins::Process',
   utils     => ':validation dotid load_module',
-  constants => 'LOCK_DRIVERS',
+  accessors => 'lockers',
+  constants => 'LOCK_DRIVERS TRUE FALSE',
+  vars => {
+    PARAMS => {
+      deadlocked => { optional => 1, default => 5 }
+    }
+  }
 ;
+
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -22,7 +32,7 @@ sub add {
     my $p = validate_params(\@_, {
         -key    => 1,
         -args   => { optional => 1, default => {}, type => HASHREF },
-        -driver => { optional => 1, default => 'Mutex', regex => LOCK_DRIVERS },
+        -driver => { optional => 1, default => 'Filesystem', regex => LOCK_DRIVERS },
     });
 
     my $key    = $p->{'key'};
@@ -72,7 +82,11 @@ sub lock {
 
     if (my $locker = $self->lockers->{$key}) {
 
-        $stat = $locker->lock();
+        unless($stat = $locker->lock()) {
+
+            $stat = $self->_deadlock($key);
+            
+        }
 
     } else {
 
@@ -139,6 +153,69 @@ sub try_lock {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub _deadlock {
+    my $self = shift;
+    my ($key) = validate_params(\@_, [1]);
+
+    my $stat = FALSE;
+
+    if (my $locker = $self->lockers->{$key}) {
+
+        my $now = DateTime->now(time_zone => 'local');
+        my ($host, $pid, $time) = $locker->whose_lock();
+
+        $time->set_time_zone('local');
+
+        my $span = DateTime::Span->from_datetimes(
+            start => $now->clone->subtract(minutes => $self->deadlocked),
+            end   => $now
+        );
+
+        $self->log->debug(sprintf('deadlock: start - %s', $span->start));
+        $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
+        $self->log->debug(sprintf('deadlock: lock  - %s', $time));
+
+        unless ($span->contains($time)) {
+
+            if ($host eq $self->env->host) {
+
+                my $status = $self->proc_status($pid);
+
+                unless (($status == 3) || ($status == 2)) {
+
+                    $locker->break_lock();
+                    $self->log->warn_msg('lock_broken', $key);
+                    $stat = $self->lock($key);
+
+                }
+
+            } else {
+
+                $self->throw_msg(
+                    dotid($self->class) . '.deadlock.remote',
+                    'lock_remote',
+                    $key
+
+                );
+
+            }
+
+        }
+
+    } else {
+
+        $self->throw_msg(
+            dotid($self->class) . '.deadlock.nokey',
+            'lock_nokey',
+            $key
+        );
+
+    }
+
+    return $stat;
+
+}
 
 sub init {
     my $class = shift;

@@ -28,6 +28,7 @@
 #export XAS_VAR="/var'
 #export XAS_LIB="/var/lib/xas"
 #export XAS_LOG="/var/log/xas"
+#export XAS_LOCK="/var/lock/xas"
 #export XAS_RUN="/var/run/xas"
 #export XAS_SPOOL="/var/spool/xas"
 #

@@ -72,7 +72,7 @@ sub logfacility {
 sub get_msgs {
     my $self = shift;
 
-    return $self->class->any_var('MESSAGES');
+    return $self->class->var('MESSAGES');
 
 }
 
@@ -83,7 +83,7 @@ sub get_msgs {
 sub _load_msgs {
     my $self = shift;
 
-    my $messages = $self->class->hash_vars('MESSAGES');
+    my $messages = $self->class->any_var('MESSAGES');
 
     foreach my $path (@INC) {
 
@@ -211,6 +211,10 @@ sub init {
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log']);
 
+        $self->{lock} = Dir(defined($ENV{'XAS_LOCK'})   
+            ? $ENV{'XAS_LOCK'}   
+            : [$self->{root}, 'var', 'lock']);
+
         $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
             ? $ENV{'XAS_RUN'}   
             : [$self->{root}, 'var', 'run']);
@@ -258,6 +262,10 @@ sub init {
         $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log', 'xas']);
+
+        $self->{lock} = Dir(defined($ENV{'XAS_LOCK'})   
+            ? $ENV{'XAS_LOCK'}   
+            : [$self->{root}, 'var', 'lock', 'xas']);
 
         $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
             ? $ENV{'XAS_RUN'}   
@@ -323,7 +331,7 @@ sub init {
 
     }
 
-    for my $datum (qw( root etc sbin tmp var bin lib log run spool )) {
+    for my $datum (qw( root etc sbin tmp var bin lib log lock run spool )) {
 
         $self->class->method($datum => sub {
             my $self = shift;
@@ -392,6 +400,11 @@ The root of the directory structure. On Unix like boxes this will be
 
 The path for log files. On Unix like boxes this will be /var/log/xas and on
 Windows this will be %XAS_ROOT%\var\log.
+
+=item B<XAS_LOCK>
+
+The path for lock files. On Unix like boxes this will be /var/lock/xas and on
+Windows this will be %XAS_ROOT%\var\lock.
 
 =item B<XAS_RUN>
 

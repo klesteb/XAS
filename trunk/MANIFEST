@@ -38,9 +38,7 @@ lib/XAS/Lib/Batch/Interface/Torque.pm
 lib/XAS/Lib/Curl/HTTP.pm
 lib/XAS/Lib/Iterator.pm
 lib/XAS/Lib/Lockmgr.pm
-lib/XAS/Lib/Lockmgr/Mutex.pm
-lib/XAS/Lib/Lockmgr/Mutex/Unix.pm
-lib/XAS/Lib/Lockmgr/Mutex/Win32.pm
+lib/XAS/Lib/Lockmgr/Filesystem.pm
 lib/XAS/Lib/Log.pm
 lib/XAS/Lib/Log/Console.pm
 lib/XAS/Lib/Log/File.pm

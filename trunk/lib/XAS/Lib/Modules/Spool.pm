@@ -11,17 +11,17 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Base',
   mixin      => 'XAS::Lib::Mixins::Handlers',
-  filesystem => 'File',
-  accessors  => 'lockmgr',
   utils      => ':validation dotid',
+  filesystem => 'Dir File',
+  accessors  => 'lockmgr',
   vars => {
     PARAMS => {
       -directory => { isa => 'Badger::Filesystem::Directory' }, 
       -mask      => { optional => 1, default => 0664 },
+      -lock      => { optional => 1, default => undef },
       -extension => { optional => 1, default => '.pkt' },
       -seqfile   => { optional => 1, default => '.SEQ' },
-      -lock      => { optional => 1, default => 'spool' },
-      -driver    => { optional => 1, default => 'Mutex', regex => LOCK_DRIVERS },
+      -driver    => { optional => 1, default => 'Filesystem', regex => LOCK_DRIVERS },
     }
   }
 ;
@@ -237,7 +237,14 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
+    unless (defined($self->{'lock'})) {
+
+        $self->{'lock'} = Dir($self->env->lock, 'spool')->path;
+
+    }
+
     $self->{'lockmgr'} = XAS::Factory->module('lockmgr');
+
     $self->lockmgr->add(
         -key    => $self->lock,
         -driver => $self->driver,

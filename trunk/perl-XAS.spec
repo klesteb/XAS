@@ -89,6 +89,7 @@ install -m 755 -d %{buildroot}/etc/xas
 install -m 775 -d %{buildroot}/var/lib/xas
 install -m 775 -d %{buildroot}/var/run/xas
 install -m 775 -d %{buildroot}/var/log/xas
+install -m 775 -d %{buildroot}/var/lock/xas
 install -m 775 -d %{buildroot}/var/spool/xas
 install -m 775 -d %{buildroot}/var/spool/xas/alerts
 install -m 775 -d %{buildroot}/var/spool/xas/logs
@@ -107,11 +108,13 @@ chown -R root.xas /etc/xas
 chown -R xas.xas  /var/lib/xas
 chown -R xas.xas  /var/log/xas
 chown -R xas.xas  /var/run/xas
+chown -R xas.xas  /var/lock/xas
 chown -R xas.xas  /var/spool/xas
 
 chmod g+ws /var/lib/xas
 chmod g+ws /var/run/xas
 chmod g+ws /var/log/xas
+chmod g+ws /var/lock/xas
 chmod g+ws /var/spool/xas
 chmod g+ws /var/spool/xas/alerts
 chmod g+ws /var/spool/xas/logs
@@ -122,6 +125,7 @@ if [ "$1" = 0 ]; then
     rm -Rf /var/lib/xas
     rm -Rf /var/run/xas
     rm -Rf /var/log/xas
+    rm -Rf /var/lock/xas
     rm -Rf /var/spool/xas
 fi
 

@@ -7,12 +7,12 @@ use XAS::Factory;
 use XAS::Exception;
 
 use XAS::Class
-  debug      => 0,
-  version    => $VERSION,
-  base       => 'Badger::Base',
-  utils      => ':validation xprintf dotid',
-  import     => 'class',
-  auto_can   => '_auto_load',
+  debug    => 0,
+  version  => $VERSION,
+  base     => 'Badger::Base',
+  utils    => ':validation xprintf dotid',
+  import   => 'class',
+  auto_can => '_auto_load',
 ;
 
 #use Data::Dumper;
@@ -27,11 +27,22 @@ class('Badger::Base')->methods(
         my $name = shift
           || $self->fatal("message() called without format name");
 
-        my $format;
+        my $m1 = XAS::Base->env->get_msgs;
+        my $m2 = $self->class->all_vars('MESSAGES');
 
-        $self->class->var('MESSAGES', XAS::Base->env->get_msgs());
+        foreach my $h (@$m2) {
 
-        $format = $self->class->hash_value('MESSAGES', $name)
+            while (my ($key, $value) = each(%$h)) {
+
+                $m1->{$key} = $value;
+
+            }
+
+        }
+
+        $self->class->var('MESSAGES', $m1);
+
+        my $format = $self->class->hash_value('MESSAGES', $name)
           || $self->fatal("message() called with invalid message type: $name");
 
         xprintf($format, @_);

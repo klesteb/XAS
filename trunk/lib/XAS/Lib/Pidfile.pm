@@ -9,6 +9,7 @@ BEGIN {
 }
 
 use XAS::Factory;
+use File::Basename;
 
 use XAS::Class
   debug      => 0,
@@ -37,6 +38,7 @@ sub write {
 
     my $stat = 0;
     my $lock = $self->lock;
+
     my $output = sub {
 
         my $fh = $self->file->open('w');
@@ -124,15 +126,13 @@ sub init {
 
     }
 
-    $self->{'lock'} = $self->file->path;
+    my $basename = fileparse($self->env->script, qr/\.[^.]*/);
+
+    $self->{'lock'} = Dir($self->file->volume, $self->file->directory, $basename)->path;
 
     $self->lockmgr->add(
         -key    => $self->lock,
-        -driver => 'Mutex',
-        -args => {
-            gid => 'xas',
-            uid => 'xas'
-        }
+        -driver => 'Filesystem',
     );
 
     return $self;

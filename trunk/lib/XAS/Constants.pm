@@ -60,7 +60,7 @@ use Badger::Class
 
       # lockmgr
 
-      LOCK_DRIVERS => qr(Mutex),
+      LOCK_DRIVERS => qr(Mutex|Filesystem),
 
   },
   exports => {

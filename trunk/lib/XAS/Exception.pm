@@ -3,6 +3,22 @@ package XAS::Exception;
 use base Badger::Exception;
 $Badger::Exception::TRACE = 1;
 
+sub type {
+    my $self = shift;
+
+    return @_
+      ? ($self->{'type'} = shift)
+      : ($self->{'type'} || $TYPE);
+    
+}
+
+sub type_info {
+    my $self = shift;
+
+    return $self->type, $self->info;
+
+}
+
 sub stack_trace {
     my $self = shift;
 

@@ -25,6 +25,7 @@ my $requires = {
     'DateTime'                    => 0.53,
     'DateTime::Format::Strptime'  => 1.10,
     'DateTime::Format::Pg'        => 0.0,
+    'DateTime::Span'              => 0.0,
     'Config::IniFiles'            => 2.65,
     'Hash::Merge'                 => 0.12,
     'JSON::XS'                    => 2.27,
@@ -152,6 +153,7 @@ my $class = Module::Build->subclass(code => <<'EOC');
             # using the standard filesystem layout
 
             system("mkdir /etc/xas")       unless ( -e '/etc/xas');
+            system("mkdir /var/lock/xas")  unless ( -e '/var/lock/xas');
             system("mkdir /var/log/xas")   unless ( -e '/var/log/xas');
             system("mkdir /var/lib/xas")   unless ( -e '/var/lib/xas');
             system("mkdir /var/run/xas")   unless ( -e '/var/run/xas');
@@ -168,17 +170,20 @@ my $class = Module::Build->subclass(code => <<'EOC');
             system("chown -R xas:xas  /var/lib/xas");
             system("chown -R xas:xas  /var/run/xas");
             system("chown -R xas:xas  /var/spool/xas");
+            system("chown -R xas:xas  /var/lock/xas");
 
             system("chmod 0775 /var/log/xas");
             system("chmod 0775 /var/lib/xas");
             system("chmod 0775 /var/run/xas");
             system("chmod 0775 /var/spool/xas");
+            system("chmod 0775 /var/lock/xas");
             system("chmod 0775 /var/spool/xas/alerts");
             system("chmod 0775 /var/spool/xas/logs");
 
             system("chmod g+s /var/log/xas");
             system("chmod g+s /var/lib/xas");
             system("chmod g+s /var/run/xas");
+            system("chmod g+s /var/lock/xas");
             system("chmod g+s /var/spool/xas");
             system("chmod g+s /var/spool/xas/alerts");
             system("chmod g+s /var/spool/xas/logs");
@@ -195,6 +200,9 @@ my $class = Module::Build->subclass(code => <<'EOC');
             system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'log');
+            system("mkdir $dir") unless ( -e $dir);
+
+            $dir = catdir($base, 'var', 'lock');
             system("mkdir $dir") unless ( -e $dir);
 
             $dir = catdir($base, 'var', 'run');

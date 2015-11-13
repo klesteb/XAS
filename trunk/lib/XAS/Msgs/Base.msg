@@ -8,6 +8,7 @@
 
 [messages]
 messages_loaded              = don't remove this...
+caller                       = <4> called from <1> in <2> at line <3>
 startup                      = starting up
 shutdown                     = shutting down
 exception                    = %s: %s
@@ -39,9 +40,10 @@ json_rpc_invalid_id          = the returned id doesn't match the supplied id
 json_rpc_errorapp            = %s
 lock_dir_error               = unable to acquire a lock on %s
 lock_allocate                = unable to allocate a lock, reason: %s
+lock_broken                  = lock "%s" has been broken
 lock_deallocate              = unable to deallocate a lock, reason: %s
-lock_nosemaphores            = unable to aquire a semaphore, reason: %s
 lock_nokey                   = no locker defined for this key: %s
+lock_remote                  = lock "%s" is not held by local resources
 lock_error                   = %s
 net_client_error             = %s: the client experienced error: %s, reason: %s
 net_client_reaper            = %s: reaper invoked for %s on port %s
