@@ -239,7 +239,7 @@ sub DESTROY {
 sub _lockfile {
     my $self = shift;
 
-    my $extension = $$;
+    my $extension = ".$$";
     my $name = $self->env->host;
 
     return File($self->key, $name . $extension);
