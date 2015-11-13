@@ -211,8 +211,8 @@ sub init {
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log']);
 
-        $self->{lock} = Dir(defined($ENV{'XAS_LOCK'})   
-            ? $ENV{'XAS_LOCK'}   
+        $self->{locks} = Dir(defined($ENV{'XAS_LOCKS'})   
+            ? $ENV{'XAS_LOCKS'}   
             : [$self->{root}, 'var', 'lock']);
 
         $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
@@ -263,8 +263,8 @@ sub init {
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log', 'xas']);
 
-        $self->{lock} = Dir(defined($ENV{'XAS_LOCK'})   
-            ? $ENV{'XAS_LOCK'}   
+        $self->{locks} = Dir(defined($ENV{'XAS_LOCKS'})   
+            ? $ENV{'XAS_LOCKS'}   
             : [$self->{root}, 'var', 'lock', 'xas']);
 
         $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
@@ -331,7 +331,7 @@ sub init {
 
     }
 
-    for my $datum (qw( root etc sbin tmp var bin lib log lock run spool )) {
+    for my $datum (qw( root etc sbin tmp var bin lib log locks run spool )) {
 
         $self->class->method($datum => sub {
             my $self = shift;
@@ -348,9 +348,9 @@ sub init {
         });
 
     }
-    
+
     $self->_load_msgs();
-      
+
     return $self;
 
 }
@@ -401,7 +401,7 @@ The root of the directory structure. On Unix like boxes this will be
 The path for log files. On Unix like boxes this will be /var/log/xas and on
 Windows this will be %XAS_ROOT%\var\log.
 
-=item B<XAS_LOCK>
+=item B<XAS_LOCKS>
 
 The path for lock files. On Unix like boxes this will be /var/lock/xas and on
 Windows this will be %XAS_ROOT%\var\lock.

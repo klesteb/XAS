@@ -13,7 +13,6 @@ use XAS::Class
   constants  => 'TRUE FALSE',
   utils      => 'dotid',
   filesystem => 'Dir File',
-  mixins     => 'lock unlock try_lock break_lock whose_lock destroy init_driver',
   vars => {
     PARAMS => {
       -key  => 1,
@@ -171,7 +170,7 @@ sub whose_lock {
 
     my $pid  = '';
     my $host = '';
-    my $time = 0;
+    my $time = undef;
     my $lock = $self->_lockfile();
     my $dir = Dir($lock->volume, $lock->directory);
 
@@ -180,6 +179,8 @@ sub whose_lock {
         if ($dir->exists) {
 
             if (my @files = $dir->files) {
+
+                # should only be one file in the directory
 
                 $host = $files[0]->basename;
                 $pid  = $files[0]->extension;
@@ -224,27 +225,10 @@ sub destroy {
 
 }
 
-sub init {
-    my $class = shift;
+sub DESTROY {
+    my $self = shift;
 
-    my $self = $class->SUPER::init(@_);
-
-    unless (defined($self->args->{'name'})) {
-
-        $self->args->{'name'} = $self->env->host;
-
-    }
-
-    unless (defined($self->args->{'extension'})) {
-
-        $self->args->{'extension'} = ".$$";
-
-    }
-
-    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
-    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
-
-    return $self;
+    $self->destroy();
 
 }
 
@@ -255,7 +239,29 @@ sub init {
 sub _lockfile {
     my $self = shift;
 
-    return File($self->key, $self->args->{'name'} . $self->args->{'extension'});
+    my $extension = $$;
+    my $name = $self->env->host;
+
+    return File($self->key, $name . $extension);
+
+}
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+    my $key  = Dir($self->{'key'});
+
+    if ($key->is_relative) {
+
+        $self->{'key'} = Dir($self->env->locks, $self->{'key'});
+
+    }
+
+    $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
+    $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
+
+    return $self;
 
 }
 
@@ -271,34 +277,84 @@ XAS::Lib::Lockmgr::Filsystem - Use the file system for locking.
 
  use XAS::Lib::Lockmgr;
 
+ my $key = '/var/lock/xas/alerts';
  my $lockmgr = XAS::Lib::Lockmgr->new();
 
  $lockmgr->add(
-     -key    => '/var/run/wpm',
+     -key    => $key,
      -driver => 'Filesystem',
  );
 
- if ($lockmgr->try_lock()) {
+ if ($lockmgr->try_lock($key)) {
 
-     $lockmgr->lock();
+     $lockmgr->lock($key);
 
      ...
 
-     $lockmgr->unlock();
+     $lockmgr->unlock($key);
 
  }
 
 =head1 DESCRIPTION
 
-This mixin uses the manipulation of directories in the file system as a mutex.
+This class uses the manipulation of directories within the file system as a 
+mutex. This leverages the atomicity of creating directories and allows for 
+discretionary locking of resources.
 
 =head1 CONFIGURATION
 
-This module adds the following fields to -args.
+This module uses the following fields in -args.
 
 =over 4
 
+=item B<limit>
+
+The number of attempts to aquire the lock. The default is 10.
+
+=item B<timeout>
+
+The number of seconds to wait between lock attempts. The default is 10.
+
 =back
+
+=head1 METHODS
+
+=head2 lock
+
+Attempt to aquire a lock. This is done by creating a directory and writing
+a status file into that directory. Returns TRUE for success, FALSE otherwise.
+
+=head2 unlock
+
+Remove the lock. This is done by removing the status file and then the 
+directory. Returns TRUE for success, FALSE otherwise.
+
+=head2 try_lock
+
+Check to see if a lock could be aquired. Returns FALSE if the directory exists,
+TRUE otherwise.
+
+=head2 break_lock
+
+Unconditionally remove the contains of the directory and than remove the 
+directory.
+
+=head2 whose_lock
+
+Query the status file. This file provides the following information:
+
+=over 4
+
+=item host
+
+=item pid
+
+=item modification time
+
+=back
+
+This information is implicit in the name of the file and the modification time
+stored within the filesystem.
 
 =head1 SEE ALSO
 

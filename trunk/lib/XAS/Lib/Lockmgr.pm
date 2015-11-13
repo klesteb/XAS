@@ -267,7 +267,16 @@ for XAS.
 
 =head2 new
 
-This method initializes the module.
+This method initializes the module. It takes the following parameters:
+
+=over 4
+
+=item B<-deadlock>
+
+The number of minutes before a lock is considered deadlocked. At which point 
+an attempt will be made to remove the lock.
+
+=back
 
 =head2 add(...)
 
@@ -282,8 +291,8 @@ The name of the key. This parameter is required.
 
 =item B<-driver>
 
-The module that will manage the lock. The default is 'Mutex'. Which will load
-L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>.
+The module that will manage the lock. The default is 'Filesystem'. Which will 
+load L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Filesystem>.
 
 =item B<-args>
 
@@ -294,7 +303,7 @@ An optional hash reference of arguments to pass to the driver.
 =head2 remove($key)
 
 This method will remove the key from management. This will call the destroy 
-method for the managing module.
+method of the managing module.
 
 =over 4
 
@@ -318,7 +327,7 @@ The name of the managed key.
 
 =head2 unlock($key)
 
-Releases the lock.
+Releases the lock. Returns true if successful.
 
 =over 4
 

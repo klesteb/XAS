@@ -92,11 +92,7 @@ The following section describes how this environment works.
 
 =item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
 
-=item L<XAS::Lib::Lockmgr::Mutex|XAS::Lib::Lockmgr::Mutex>
-
-=item L<XAS::Lib::Lockmgr::Mutex::Unix|XAS::Lib::Lockmgr::Mutex::Unix>
-
-=item L<XAS::Lib::Lockmgr::Mutex::Win32|XAS::Lib::Lockmgr::Mutex::Win32>
+=item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Filesystem>
 
 =item L<XAS::Lib::Log|XAS::Lib::Log>
 
