@@ -73,16 +73,20 @@ sub remove {
     my $self = shift;
 
     my $lock = $self->lock;
+    my $pid = $self->_get_pid;
 
-    if ($self->lockmgr->lock($lock)) {
+    if ($pid == $$) {
 
-        $self->file->delete() if ($self->file->exists);
-        $self->lockmgr->unlock($lock);
+        if ($self->lockmgr->lock($lock)) {
+
+            $self->file->delete() if ($self->file->exists);
+            $self->lockmgr->unlock($lock);
+
+        }
 
     }
 
 }
-
 
 # ----------------------------------------------------------------------
 # Private Methods
