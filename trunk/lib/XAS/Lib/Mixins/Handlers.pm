@@ -84,7 +84,7 @@ sub parse_exception {
 
             my $type = $ex->type;
             my $info = compress($ex->info);
-            
+
             if ($ex->match_type('dbix.class')) {
 
                 if ($info =~ m/(.*) XAS::Database::Model::dbix_exception/) {

@@ -35,10 +35,10 @@ sub send {
     my $data = {
         hostname => $self->env->host,
         datetime => dt2db($dt),
-        process  => $p->{'process'},
+        process  => $p->{'process'} || '',
         pid      => $$,
         tid      => 0,
-        msgid    => 0,
+        msgnum   => 0,
         priority => $p->{'priority'},
         facility => $p->{'facility'},
         message  => $p->{'message'},
