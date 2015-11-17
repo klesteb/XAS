@@ -3,7 +3,6 @@ package XAS::Lib::Log::Json;
 our $VERSION = '0.01';
 
 use XAS::Factory;
-use Params::Validate 'HASHREF';
 
 use XAS::Class
   debug      => 0,
@@ -12,6 +11,7 @@ use XAS::Class
   utils      => ':validation',
   codec      => 'JSON',
   accessors  => 'spool',
+  constants  => 'HASHREF',
   filesystem => 'Dir',
 ;
 
@@ -26,24 +26,24 @@ sub output {
     ]);
 
     my $message = sprintf('[%s] %-5s - %s',
-        $args->{datetime}->strftime('%Y-%m-%d %H:%M:%S'),
-        uc($args->{priority}), 
-        $args->{message}
+        $args->{'datetime'}->strftime('%Y-%m-%d %H:%M:%S'),
+        uc($args->{'priority'}), 
+        $args->{'message'}
     );
 
     # create a logstash "json_event"
 
     my $data = {
-        '@timestamp' => $args->{datetime}->strftime('%Y-%m-%dT%H:%M:%S.%3N%z'),
+        '@timestamp' => $args->{'datetime'}->strftime('%Y-%m-%dT%H:%M:%S.%3N%z'),
         '@version'   => '1',
         '@message'   => $message,
         type         => 'xas-logs',
-        message      => $args->{message},
-        hostname     => $args->{hostname},
-        priority     => $args->{priority},
-        facility     => $args->{facility},
-        process      => $args->{process},
-        pid          => $args->{pid}
+        message      => $args->{'message'},
+        hostname     => $args->{'hostname'},
+        priority     => $args->{'priority'},
+        facility     => $args->{'facility'},
+        process      => $args->{'process'},
+        pid          => $args->{'pid'}
     };
 
     my $json = encode($data);
@@ -64,7 +64,7 @@ sub init {
     my $self = $class->SUPER::init(@_);
 
     $self->{spool} = XAS::Factory->module('spool', {
-        -lock      => 'logs',
+        -lock      => Dir($self->env->spool, 'logs', 'locked')->path,
         -directory => Dir($self->env->spool, 'logs'),
     });
 

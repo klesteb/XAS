@@ -2,14 +2,12 @@ package XAS::Lib::SSH::Client::Shell;
 
 our $VERSION = '0.02';
 
-use Params::Validate qw(SCALAR CODEREF);
-
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::SSH::Client',
   utils     => ':validation trim',
-  constants => 'CRLF',
+  constants => 'CRLF CODEREF',
   vars => {
     PARAMS => {
       -eol => { optional => 1, default => "\012" }
@@ -132,7 +130,7 @@ sub run {
 sub call {
     my $self = shift;
     my ($command, $parser) = validate_params(\@_, [
-       { type => SCALAR },
+       1,
        { type => CODEREF },
     ]);
 

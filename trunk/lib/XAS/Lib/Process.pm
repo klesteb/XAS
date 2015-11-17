@@ -12,7 +12,7 @@ BEGIN {
 use Set::Light;
 use Hash::Merge;
 use Badger::Filesystem 'Cwd Dir File';
-use Params::Validate qw(CODEREF);
+use XAS::Constants ':process CODEREF';
 use POE qw(Wheel Driver::SysRW Filter::Line);
 
 use XAS::Class
@@ -23,7 +23,6 @@ use XAS::Class
   utils     => ':validation dotid trim',
   mutators  => 'input_handle output_handle status retries',
   accessors => 'pid exit_code exit_signal process ID merger',
-  constants => ':process',
   vars => {
     PARAMS => {
       -command        => 1,

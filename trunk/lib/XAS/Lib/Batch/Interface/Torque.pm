@@ -2,8 +2,7 @@ package XAS::Lib::Batch::Interface::Torque;
 
 our $VERSION = '0.01';
 
-use Params::Validate qw/HASHREF ARRAYREF/;
-
+use XAS::Constants 'HASHREF ARRAYREF';
 use XAS::Class
   debug   => 0,
   version => $VERSION,

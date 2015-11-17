@@ -4,13 +4,12 @@ our $VERSION = '0.01';
 
 use DateTime;
 use Try::Tiny;
-use Params::Validate qw(HASHREF);
+use XAS::Constants 'TRUE FALSE HASHREF';
 
 use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base',
-  constants  => 'TRUE FALSE',
   utils      => 'dotid',
   filesystem => 'Dir File',
   vars => {
@@ -41,7 +40,8 @@ sub lock {
             unless ($dir->exists) {
 
                 $dir->create;
-                $lock->create;
+                $lock->open('w', 0664);
+                $lock->close();
                 $stat = TRUE;
                 last;
 

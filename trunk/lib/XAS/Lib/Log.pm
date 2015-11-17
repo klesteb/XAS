@@ -3,8 +3,7 @@ package XAS::Lib::Log;
 our $VERSION = '0.03';
 
 use DateTime;
-use XAS::Constants ':logging';
-use Params::Validate 'HASHREF';
+use XAS::Constants ':logging HASHREF';
 
 use XAS::Class
   version    => $VERSION,

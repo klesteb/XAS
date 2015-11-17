@@ -2,13 +2,12 @@ package XAS::Lib::Log::File;
 
 our $VERSION = '0.01';
 
-use Params::Validate 'HASHREF';
-
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Base',
-  utils   => ':validation dotid',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  utils     => ':validation dotid',
+  constants => 'HASHREF',
 ;
 
 # ----------------------------------------------------------------------

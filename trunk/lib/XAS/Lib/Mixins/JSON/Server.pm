@@ -5,7 +5,6 @@ our $VERSION = '0.04';
 use POE;
 use Try::Tiny;
 use Set::Light;
-use Params::Validate 'ARRAYREF';
 
 use XAS::Class
   debug     => 0,
@@ -15,7 +14,7 @@ use XAS::Class
   utils     => ':validation dotid',
   accessors => 'methods',
   codec     => 'JSON',
-  constants => 'HASH ARRAY :jsonrpc',
+  constants => 'HASH ARRAY :jsonrpc ARRAYREF',
   mixins    => 'process_request process_response process_errors 
                 methods init_json_server',
 ;

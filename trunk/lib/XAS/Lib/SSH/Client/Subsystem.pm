@@ -2,12 +2,12 @@ package XAS::Lib::SSH::Client::Subsystem;
 
 our $VERSION = '0.01';
 
-use Params::Validate qw(CODEREF SCALAR);;
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Lib::SSH::Client',
-  utils   => ':validation trim',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Lib::SSH::Client',
+  utils     => ':validation trim',
+  constants => 'CODEREF',
 ;
 
 #use Data::Hexdumper;
@@ -46,7 +46,7 @@ sub run {
 sub call {
     my $self = shift;
     my ($command, $parser) = validate_params(\@_, [
-       { type => SCALAR },
+       1,
        { type => CODEREF },
     ]);
 

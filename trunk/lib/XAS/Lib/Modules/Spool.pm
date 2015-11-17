@@ -44,7 +44,7 @@ sub read {
 
         try {
 
-            $packet = $self->read_packet($filename);
+            $packet = $self->_read_packet($filename);
             $self->lockmgr->unlock($self->lock);
 
         } catch {
@@ -81,9 +81,9 @@ sub write {
 
         try {
 
-            $seqnum = $self->sequence();
+            $seqnum = $self->_sequence();
 
-            $self->write_packet($packet, $seqnum);
+            $self->_write_packet($packet, $seqnum);
             $self->lockmgr->unlock($self->lock);
 
         } catch {
@@ -254,7 +254,7 @@ sub init {
 
 }
 
-sub sequence {
+sub _sequence {
     my $self = shift;
 
     my $fh;
@@ -307,7 +307,7 @@ sub sequence {
 
 }
 
-sub write_packet {
+sub _write_packet {
     my $self = shift;
     my ($packet, $seqnum) = validate_params(\@_, [1,1]);
 
@@ -342,7 +342,7 @@ sub write_packet {
 
 }
 
-sub read_packet {
+sub _read_packet {
     my $self = shift;
     my ($file) = validate_params(\@_, [
         { isa => 'Badger::Filesystem::File' }

@@ -2,13 +2,14 @@ package XAS::Lib::Log::Syslog;
 
 our $VERSION = '0.01';
 
-use Params::Validate 'HASHREF';
 use Sys::Syslog qw(:standard :extended);
 
 use XAS::Class
-  version => $VERSION,
-  base    => 'XAS::Base',
-  utils   => ':validation',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Base',
+  utils     => ':validation',
+  constants => 'HASHREF',
 ;
 
 # ----------------------------------------------------------------------
@@ -21,8 +22,8 @@ sub output {
         { type => HASHREF }
     ]);
 
-    my $priority = _translate($args->{priority});
-    my $message = sprintf('%s', $args->{message});
+    my $priority = _translate($args->{'priority'});
+    my $message = sprintf('%s', $args->{'message'});
 
     syslog($priority, $message);
 

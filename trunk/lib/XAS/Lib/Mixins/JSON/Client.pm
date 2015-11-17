@@ -2,15 +2,13 @@ package XAS::Lib::Mixins::JSON::Client;
 
 our $VERSION = '0.02';
 
-use Params::Validate 'HASHREF';
-
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   utils     => ':validation dotid',
   codec     => 'JSON',
-  constants => ':jsonrpc',
+  constants => ':jsonrpc HASHREF',
   mixins    => 'call',
 ;
 

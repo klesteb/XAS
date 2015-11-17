@@ -4,7 +4,6 @@ our $VERSION = '0.01';
 
 use DateTime;
 use DateTime::Span;
-use Params::Validate qw(HASHREF);
 
 use XAS::Class
   debug     => 0,
@@ -13,7 +12,7 @@ use XAS::Class
   mixin     => 'XAS::Lib::Mixins::Process',
   utils     => ':validation dotid load_module',
   accessors => 'lockers',
-  constants => 'LOCK_DRIVERS TRUE FALSE',
+  constants => 'LOCK_DRIVERS TRUE FALSE HASHREF',
   vars => {
     PARAMS => {
       deadlocked => { optional => 1, default => 5 }
