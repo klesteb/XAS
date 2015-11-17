@@ -47,9 +47,9 @@ sub main {
     my $self = shift;
 
     $self->log('info', 'starting up');
-    
+
     sleep(60);
-    
+
     $self->log('info', 'shutting down');
     
 }
@@ -59,5 +59,5 @@ package main;
 my $test = testing->new();
 
 $test->run();
-$test->pid->remove();
+#$test->pid->remove();
 

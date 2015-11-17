@@ -39,9 +39,23 @@ sub lock {
 
             unless ($dir->exists) {
 
-                $dir->create;
-                $lock->open('w', 0664);
-                $lock->close();
+                if ($^O ne 'MSWin32') {
+
+                    # temporarily change the umask to create the 
+                    # directory and files with correct file permissions
+
+                    my $omode = umask(0012);
+                    $dir->create;
+                    $lock->create;
+                    umask($omode);
+
+                } else {
+
+                    $dir->create;
+                    $lock->create;
+
+                }
+
                 $stat = TRUE;
                 last;
 
