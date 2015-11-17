@@ -18,19 +18,13 @@ sub exception_handler {
     my $self = shift;
     my ($ex) = validate_params(\@_, [1]);
 
-    my $script = $self->class->any_var('SCRIPT');
     my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->error($errors);
 
     if ($self->env->alerts) {
 
-        $self->alert->send(
-            -process  => $script,
-            -priority => $self->priority,
-            -facility => $self->facility,
-            -message  => $errors
-        );
+        $self->alert->send($errors);
 
     }
 
@@ -40,19 +34,13 @@ sub exit_handler {
     my $self = shift;
     my ($ex) = validate_params(\@_, [1]);
 
-    my $script = $self->class->any_var('SCRIPT');
     my ($errors, $rc) = $self->parse_exception($ex);
 
     $self->log->fatal($errors);
 
     if ($self->env->alerts) {
 
-        $self->alert->send(
-            -process  => $script,
-            -priority => $self->priority,
-            -facility => $self->facility,
-            -message  => $errors
-        );
+        $self->alert->send($errors);
 
     }
 

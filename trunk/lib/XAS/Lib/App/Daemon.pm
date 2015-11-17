@@ -101,7 +101,7 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{daemon}  = FALSE;
+    $self->{'daemon'} = FALSE;
 
     $options->{'daemon'} = \$self->{daemon};
 

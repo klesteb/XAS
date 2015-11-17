@@ -11,7 +11,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Singleton',
   utils      => ':validation dir_walk',
-  constants  => ':logging', 
+  constants  => ':logging :alerts STOMP_LEVELS',
   filesystem => 'File Dir Path Cwd',
   accessors  => 'path host domain username script commandline',
   mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs alerts xdebug',
@@ -27,21 +27,21 @@ sub mxmailer {
         { optional => 1, default => undef, regex => qr/sendmail|smtp/ }
     ]);
 
-    $self->{mxmailer} = $mailer if (defined($mailer));
+    $self->{'mxmailer'} = $mailer if (defined($mailer));
 
-    return $self->{mxmailer};
+    return $self->{'mxmailer'};
 
 }
 
 sub mqlevel {
     my $self = shift;
     my ($level) = validate_params(\@_, [
-        { optional => 1, default => undef, regex => qr/(1\.0|1\.1|1\.2)/ },
+        { optional => 1, default => undef, regex => STOMP_LEVELS },
     ]);
 
-    $self->{mqlevel} = $level if (defined($level));
+    $self->{'mqlevel'} = $level if (defined($level));
 
-    return $self->{mqlevel};
+    return $self->{'mqlevel'};
 
 }
 
@@ -51,9 +51,9 @@ sub logtype {
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
 
-    $self->{logtype} = $type if (defined($type));
+    $self->{'logtype'} = $type if (defined($type));
 
-    return $self->{logtype};
+    return $self->{'logtype'};
 
 }
 
@@ -63,9 +63,45 @@ sub logfacility {
         { optional => 1, default => undef, regex => LOG_FACILITY }
     ]);
 
-    $self->{logfacility} = $type if (defined($type));
+    $self->{'logfacility'} = $type if (defined($type));
 
-    return $self->{logfacility};
+    return $self->{'logfacility'};
+
+}
+
+sub throws {
+    my $self = shift;
+    my ($throws) = validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+
+    $self->{'throws'} = $throws if (defined($throws));
+
+    return $self->{'throws'};
+
+}
+
+sub priority {
+    my $self = shift;
+    my ($level) = validate_params(\@_, [
+        { optional => 1, default => undef, regex => ALERT_PRIORITY }
+    ]);
+
+    $self->{'priority'} = $level if (defined($level));
+
+    return $self->{'priority'};
+
+}
+
+sub facility {
+    my $self = shift;
+    my ($level) = validate_params(\@_, [
+        { optional => 1, default => undef, regex => ALERT_FACILITY }
+    ]);
+
+    $self->{'facility'} = $level if (defined($level));
+
+    return $self->{'facility'};
 
 }
 
@@ -137,40 +173,40 @@ sub init {
 
     # set some defaults
 
-    $self->{alerts} = 1;
-    $self->{xdebug} = 0;
-    $self->{mxtimeout} = 60;
-    $self->{script} = $script;
-    $self->{path} = $ENV{'PATH'};
-    $self->{commandline} = $commandline;
+    $self->{'alerts'} = 1;
+    $self->{'xdebug'} = 0;
+    $self->{'mxtimeout'} = 60;
+    $self->{'script'} = $script;
+    $self->{'path'} = $ENV{'PATH'};
+    $self->{'commandline'} = $commandline;
       
     # Initialize variables - these are defaults
 
-    $self->{mqserver} = defined($ENV{'XAS_MQSERVER'}) 
+    $self->{'mqserver'} = defined($ENV{'XAS_MQSERVER'}) 
         ? $ENV{'XAS_MQSERVER'} 
         : 'localhost';
 
-    $self->{mqport} = defined($ENV{'XAS_MQPORT'}) 
+    $self->{'mqport'} = defined($ENV{'XAS_MQPORT'}) 
         ? $ENV{'XAS_MQPORT'} 
         : '61613';
 
-    $self->{mqlevel} = defined ($ENV{'XAS_MQLEVEL'})
+    $self->{'mqlevel'} = defined ($ENV{'XAS_MQLEVEL'})
         ? $ENV{'XAS_MQLEVEL'}
         : '1.0';
 
-    $self->{mxserver} = defined($ENV{'XAS_MXSERVER'}) 
+    $self->{'mxserver'} = defined($ENV{'XAS_MXSERVER'}) 
         ? $ENV{'XAS_MXSERVER'} 
         : 'localhost';
 
-    $self->{mxport} = defined($ENV{'XAS_MXPORT'}) 
+    $self->{'mxport'} = defined($ENV{'XAS_MXPORT'}) 
         ? $ENV{'XAS_MXPORT'} 
         : '25';
 
-    $self->{domain} = defined($ENV{'XAS_DOMAIN'}) 
+    $self->{'domain'} = defined($ENV{'XAS_DOMAIN'}) 
         ? $ENV{'XAS_DOMAIN'} 
         : hostdomain();
 
-    $self->{msgs} = defined($ENV{'XAS_MSGS'}) 
+    $self->{'msgs'} = defined($ENV{'XAS_MSGS'}) 
         ? qr/$ENV{'XAS_MSGS'}/i 
         : qr/.*\.msg$/i;
 
@@ -183,123 +219,123 @@ sub init {
 
         require Win32;
 
-        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+        $self->{'host'} = defined($ENV{'XAS_HOSTNAME'}) 
             ? $ENV{'XAS_HOSTNAME'} 
             : Win32::NodeName();
 
-        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+        $self->{'root'} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
             : ['C:', 'XAS']);
 
-        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
+        $self->{'etc'} = Dir(defined($ENV{'XAS_ETC'})   
             ? $ENV{'XAS_ETC'}   
             : [$self->{root}, 'etc']);
 
-        $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
+        $self->{'tmp'} = Dir(defined($ENV{'XAS_TMP'})   
             ? $ENV{'XAS_TMP'}   
             : [$self->{root}, 'tmp']);
 
-        $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
+        $self->{'var'} = Dir(defined($ENV{'XAS_VAR'})   
             ? $ENV{'XAS_VAR'}   
             : [$self->{root}, 'var']);
 
-        $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
+        $self->{'lib'} = Dir(defined($ENV{'XAS_LIB'})   
             ? $ENV{'XAS_LIB'}   
             : [$self->{root}, 'var', 'lib']);
 
-        $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
+        $self->{'log'} = Dir(defined($ENV{'XAS_LOG'})   
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log']);
 
-        $self->{locks} = Dir(defined($ENV{'XAS_LOCKS'})   
+        $self->{'locks'} = Dir(defined($ENV{'XAS_LOCKS'})   
             ? $ENV{'XAS_LOCKS'}   
             : [$self->{root}, 'var', 'lock']);
 
-        $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
+        $self->{'run'} = Dir(defined($ENV{'XAS_RUN'})   
             ? $ENV{'XAS_RUN'}   
             : [$self->{root}, 'var', 'run']);
 
-        $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
+        $self->{'spool'} = Dir(defined($ENV{'XAS_SPOOL'}) 
             ? $ENV{'XAS_SPOOL'} 
             : [$self->{root}, 'var', 'spool']);
 
-        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+        $self->{'mxmailer'}  = defined($ENV{'XAS_MXMAILER'}) 
             ? $ENV{'XAS_MXMAILER'} 
             : 'smtp';
 
-        $self->{username} = Win32::LoginName();
+        $self->{'username'} = Win32::LoginName();
 
     } else {
 
         # this assumes a unix like working environment
 
-        $self->{host} = defined($ENV{'XAS_HOSTNAME'}) 
+        $self->{'host'} = defined($ENV{'XAS_HOSTNAME'}) 
             ? $ENV{'XAS_HOSTNAME'} 
             : `hostname -s`;
 
-        chomp($self->{host});
+        chomp($self->{'host'});
 
-        $self->{root} = Dir(defined($ENV{'XAS_ROOT'}) 
+        $self->{'root'} = Dir(defined($ENV{'XAS_ROOT'}) 
             ? $ENV{'XAS_ROOT'} 
             : ['/']);
 
-        $self->{etc} = Dir(defined($ENV{'XAS_ETC'})   
+        $self->{'etc'} = Dir(defined($ENV{'XAS_ETC'})   
             ? $ENV{'XAS_ETC'}   
             : [$self->{root}, 'etc', 'xas']);
 
-        $self->{tmp} = Dir(defined($ENV{'XAS_TMP'})   
+        $self->{'tmp'} = Dir(defined($ENV{'XAS_TMP'})   
             ? $ENV{'XAS_TMP'} 
             : ['/', 'tmp']);
 
-        $self->{var} = Dir(defined($ENV{'XAS_VAR'})   
+        $self->{'var'} = Dir(defined($ENV{'XAS_VAR'})   
             ? $ENV{'XAS_VAR'}   
             : [$self->{root}, 'var']);
 
-        $self->{lib} = Dir(defined($ENV{'XAS_LIB'})   
+        $self->{'lib'} = Dir(defined($ENV{'XAS_LIB'})   
             ? $ENV{'XAS_LIB'}   
             : [$self->{root}, 'var', 'lib', 'xas']);
 
-        $self->{log} = Dir(defined($ENV{'XAS_LOG'})   
+        $self->{'log'} = Dir(defined($ENV{'XAS_LOG'})   
             ? $ENV{'XAS_LOG'}   
             : [$self->{root}, 'var', 'log', 'xas']);
 
-        $self->{locks} = Dir(defined($ENV{'XAS_LOCKS'})   
+        $self->{'locks'} = Dir(defined($ENV{'XAS_LOCKS'})   
             ? $ENV{'XAS_LOCKS'}   
             : [$self->{root}, 'var', 'lock', 'xas']);
 
-        $self->{run} = Dir(defined($ENV{'XAS_RUN'})   
+        $self->{'run'} = Dir(defined($ENV{'XAS_RUN'})   
             ? $ENV{'XAS_RUN'}   
             : [$self->{root}, 'var', 'run', 'xas']);
 
-        $self->{spool} = Dir(defined($ENV{'XAS_SPOOL'}) 
+        $self->{'spool'} = Dir(defined($ENV{'XAS_SPOOL'}) 
             ? $ENV{'XAS_SPOOL'} 
             : [$self->{root}, 'var', 'spool', 'xas']);
 
-        $self->{mxmailer}  = defined($ENV{'XAS_MXMAILER'}) 
+        $self->{'mxmailer'}  = defined($ENV{'XAS_MXMAILER'}) 
           ? $ENV{'XAS_MXMAILER'} 
           : 'sendmail';
 
-        $self->{username} = getpwuid($<);
+        $self->{'username'} = getpwuid($<);
 
     }
 
     # build some common paths
 
-    $self->{sbin} = Dir(defined($ENV{'XAS_SBIN'})  
+    $self->{'sbin'} = Dir(defined($ENV{'XAS_SBIN'})  
         ? $ENV{'XAS_SBIN'}  
-        : [$self->{root}, 'sbin']);
+        : [$self->{'root'}, 'sbin']);
 
-    $self->{bin} = Dir(defined($ENV{'XAS_BIN'})   
+    $self->{'bin'} = Dir(defined($ENV{'XAS_BIN'})   
         ? $ENV{'XAS_BIN'}   
-        : [$self->{root}, 'bin']);
+        : [$self->{'root'}, 'bin']);
 
     # define some logging options
 
-    $self->{logtype} = defined($ENV{'XAS_LOG_TYPE'})
+    $self->{'logtype'} = defined($ENV{'XAS_LOG_TYPE'})
         ? $ENV{'XAS_LOG_TYPE'}
         : 'console';
 
-    $self->{logfacility} = defined($ENV{'XAS_LOG_FACILITY'})
+    $self->{'logfacility'} = defined($ENV{'XAS_LOG_FACILITY'})
         ? $ENV{'XAS_LOG_FACILITY'}
         : 'local6';
 
@@ -307,9 +343,9 @@ sub init {
 
     ($name, $path, $suffix) = fileparse($0, qr{\..*});
 
-    $self->{logfile} = File($self->{log}, $name . '.log');
-    $self->{pidfile} = File($self->{run}, $name . '.pid');
-    $self->{cfgfile} = File($self->{etc}, $name . '.ini');
+    $self->{'logfile'} = File($self->{'log'}, $name . '.log');
+    $self->{'pidfile'} = File($self->{'run'}, $name . '.pid');
+    $self->{'cfgfile'} = File($self->{'etc'}, $name . '.ini');
 
     # build some methods, saves typing
 
@@ -394,7 +430,7 @@ using the following variables:
 =item B<XAS_ROOT>
 
 The root of the directory structure. On Unix like boxes this will be 
-/ and Windows this will be C:\xas.
+/ and Windows this will be C:\XAS.
 
 =item B<XAS_LOG>
 
@@ -414,7 +450,7 @@ on Windows this will be %XAS_ROOT%\var\run.
 =item B<XAS_SPOOL>
 
 The base path for spool files. On Unix like boxes this will be /var/spool/xas 
-and on Windows this will be %XRS_ROOT%\var\spool.
+and on Windows this will be %XAS_ROOT%\var\spool.
 
 =item B<XAS_LIB>
 

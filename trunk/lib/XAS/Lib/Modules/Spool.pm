@@ -254,15 +254,32 @@ sub init {
 
 }
 
+sub _chmod {
+    my $self = shift;
+    my $file = shift;
+
+    my $mask = $self->mask + 0;
+    my $cnt = chmod($mask, $file);
+
+    if ($cnt < 1) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.chmod.invperms', 
+            'invperms', 
+            $file
+        );
+
+    }
+
+}
+
 sub _sequence {
     my $self = shift;
 
     my $fh;
-    my $cnt;
     my $seqnum;
-    my $mask = $self->mask + 0;
     my $file = File($self->directory, $self->seqfile);
-    
+
     try {
 
         if ($file->exists) {
@@ -280,12 +297,7 @@ sub _sequence {
             $fh->print("1");
             $fh->close;
 
-            $cnt = chmod($mask, $file);
-            $self->throw_msg(
-                dotid($self->class) . '.sequence.invperms', 
-                'invperms', 
-                $file
-            ) if ($cnt < 1);
+            $self->_chmod($file);
 
             $seqnum = 1;
 
@@ -312,8 +324,6 @@ sub _write_packet {
     my ($packet, $seqnum) = validate_params(\@_, [1,1]);
 
     my $fh;
-    my $cnt;
-    my $mask = $self->mask + 0;
     my $file = File($self->directory, $seqnum . $self->extension);
 
     try {
@@ -321,12 +331,8 @@ sub _write_packet {
         $fh = $file->open("w");
         $fh->print($packet);
         $fh->close;
-        $cnt = chmod($mask, $file->path) or 
-          $self->throw_msg(
-              dotid($self->class) . '.write_packet.invperms',
-              'invperms',
-              $file->path
-          );
+
+        $self->_chmod($file->path);
 
     } catch {
 

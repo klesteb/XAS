@@ -110,6 +110,10 @@ sub init {
 
     $self->class->throws($self->throws);
 
+    $self->env->throws($self->throws);
+    $self->env->priority($self->priority);
+    $self->env->facility($self->facility);
+
     my $options = $self->options();
     my $defaults = $self->_default_options();
 

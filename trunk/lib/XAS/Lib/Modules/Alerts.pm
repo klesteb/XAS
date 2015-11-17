@@ -1,6 +1,6 @@
 package XAS::Lib::Modules::Alerts;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use DateTime;
 use Try::Tiny;
@@ -23,25 +23,20 @@ use XAS::Class
 
 sub send {
     my $self = shift;
-    my $p = validate_params(\@_, { 
-        -message  => 1,
-        -process  => 1,
-        -facility => { optional => 1, default => 'systems', regex => ALERT_FACILITY },
-        -priority => { optional => 1, default => 'low', regex => ALERT_PRIORITY }, 
-    });
+    my ($message) = validate_params(\@_, [1]);
 
     my $dt = DateTime->now(time_zone => 'local');
 
     my $data = {
         hostname => $self->env->host,
         datetime => dt2db($dt),
-        process  => $p->{'process'},
+        process  => $self->env->script,
         pid      => $$,
         tid      => 0,
         msgnum   => 0,
-        priority => $p->{'priority'},
-        facility => $p->{'facility'},
-        message  => $p->{'message'},
+        priority => $self->env->priority,
+        facility => $self->env->facility,
+        message  => $message,
     };
 
     my $json = encode($data);
@@ -59,9 +54,9 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{spooler} = XAS::Factory->module('spooler', {
+    $self->{'spooler'} = XAS::Factory->module('spooler', {
         -directory => Dir($self->env->spool, 'alerts'),
-        -lock      => 'alerts',
+        -lock      => Dir($self->env->spool, 'alerts', 'locked')->path,
         -mask      => 0777,
     });
 

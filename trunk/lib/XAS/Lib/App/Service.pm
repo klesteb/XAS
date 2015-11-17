@@ -88,7 +88,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{service} = XAS::Lib::Service->new();
+    $self->{'service'} = XAS::Lib::Service->new();
 
     return $self;
 
@@ -99,9 +99,9 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
-    $self->{daemon}  = FALSE;
-    $self->{cfgfile} = $self->env->cfgfile;
-    $self->{pidfile} = $self->env->pidfile;
+    $self->{'daemon'}  = FALSE;
+    $self->{'cfgfile'} = $self->env->cfgfile;
+    $self->{'pidfile'} = $self->env->pidfile;
 
     $options->{'daemon'} = \$self->{daemon};
 
