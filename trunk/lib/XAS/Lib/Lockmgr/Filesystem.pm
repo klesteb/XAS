@@ -24,7 +24,7 @@ use XAS::Class
 #use Data::Dumper;
 
 # note to self: Don't put log->debug() statements in here, it produces
-# a nice race condidtion. Especially when doing json logging.
+# a nice race condidtion. Especially when doing spooling.
 
 # ----------------------------------------------------------------------
 # Overrides

@@ -210,6 +210,17 @@ sub init {
         ? qr/$ENV{'XAS_MSGS'}/i 
         : qr/.*\.msg$/i;
 
+    $self->{'throws'} = defined($ENV{'XAS_ERR_THROWS'}) 
+        ? $ENV{'XAS_ERR_THROWS'} 
+        : 'changeme';
+
+    $self->{'priority'} = defined($ENV{'XAS_ERR_PRIORITY'}) 
+        ? $ENV{'XAS_ERR_PRIORITY'} 
+        : 'low';
+
+    $self->{'facility'} = defined($ENV{'XAS_MSG_ERR_FACILITY'}) 
+        ? $ENV{'XAS_ERR_FACILITY'} 
+        : 'systems';
 
     # platform specific
 
@@ -521,6 +532,18 @@ conventions.
 
 The log type. This can be "console", "file", "json" or "syslog". Defaults
 to "console">
+
+=item B<XAS_ERR_THROWS>
+
+The default error message type. Defaults to 'changeme'.
+
+=item B<XAS_ERR_PRIORITY>
+
+The error message priority type. Defaults to "low".
+
+=item B<XAS_ERR_FACILITY>
+
+The error message facility type. Defaults to "systems".
 
 =back
 
