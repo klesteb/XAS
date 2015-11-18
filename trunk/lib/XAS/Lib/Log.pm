@@ -95,26 +95,22 @@ sub init {
     # populate $self for each level using the 
     # value in $LEVELS
 
-    my $l = $self->class->hash_vars('LEVELS');
+    my $levels = $self->class->hash_vars('LEVELS');
 
-    while (my ($level, $default) = each %$l) {
+    while (my ($level, $default) = each %$levels) {
+
+        # set defined levels
 
         $self->level($level, $default);
 
-    }
-
-    # autogenerate some methods, saves typing
-
-    foreach my $level (keys %$LEVELS) {
+        # autogenerate some methods, saves typing
 
         $self->class->methods($level => sub {
             my $self = shift;
 
-            return $self->{$level} unless @_;
-
             if ($self->{$level}) {
 
-                my $args = $self->build("$level", join(" ", @_));
+                my $args = $self->build($level, join(" ", @_));
                 $self->logger->output($args);
 
             }
@@ -124,11 +120,9 @@ sub init {
         $self->class->methods($level . '_msg' => sub {
             my $self = shift;
 
-            return $self->{$level} unless @_;
-
             if ($self->{$level}) {
 
-                my $args = $self->build("$level", $self->message(@_));
+                my $args = $self->build($level, $self->message(@_));
                 $self->logger->output($args);
 
             }

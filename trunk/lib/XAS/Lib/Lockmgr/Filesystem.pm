@@ -11,6 +11,7 @@ use XAS::Class
   version    => $VERSION,
   base       => 'XAS::Base',
   utils      => 'dotid',
+  import     => 'class',
   filesystem => 'Dir File',
   vars => {
     PARAMS => {
@@ -19,6 +20,30 @@ use XAS::Class
     }
   }
 ;
+
+#use Data::Dumper;
+
+# note to self: Don't put log->debug() statements in here, it produces
+# a nice race condidtion. Especially when doing json logging.
+
+# ----------------------------------------------------------------------
+# Overrides
+# ----------------------------------------------------------------------
+
+class('Badger::Filesystem')->methods(
+    directory_exists => sub {
+        my $self = shift;
+        my $dir  = shift;
+        my $stats = $self->stat_path($dir) || return; 
+        return -d $dir ? $stats : 0;  # don't use the cached stat
+    },
+    file_exists => sub {
+        my $self = shift;
+        my $file = shift; 
+        my $stats = $self->stat_path($file) || return; 
+        return -f $file ? $stats : 0;  # don't use the cached stat
+    }
+);
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -40,7 +65,7 @@ sub lock {
             unless ($dir->exists) {
 
                 if ($^O ne 'MSWin32') {
-
+    
                     # temporarily change the umask to create the 
                     # directory and files with correct file permissions
 
@@ -61,8 +86,6 @@ sub lock {
 
             }
 
-            $self->log->debug("lock: $dir exists");
-
             sleep $timeout;
 
         }
@@ -71,7 +94,7 @@ sub lock {
 
         my $ex = $_;
         my $msg = (ref($ex) eq 'Badger::Exception') ? $ex->info : $ex;
-
+        
         $self->throw_msg(
             dotid($self->class) . '.lock',
             'lock_error',
@@ -99,12 +122,8 @@ sub unlock {
 
             if ($dir->exists) {
 
-                $self->log->debug("unlock: $dir exists");
-
                 if ($lock->exists) {
 
-                    $self->log->debug("unlock: our lock file - $lock exists");
-                    
                     $lock->delete;
                     $dir->delete;
                     $stat = TRUE;

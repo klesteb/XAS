@@ -15,7 +15,8 @@ use XAS::Class
   constants => 'LOCK_DRIVERS TRUE FALSE HASHREF',
   vars => {
     PARAMS => {
-      deadlocked => { optional => 1, default => 5 }
+      -deadlocked   => { optional => 1, default => 5 },
+      -deadattempts => { optional => 1, default => 5 }
     }
   }
 ;
@@ -78,13 +79,24 @@ sub lock {
     my ($key) = validate_params(\@_, [1]);
 
     my $stat;
+    my $attempts = 1;
 
     if (my $locker = $self->lockers->{$key}) {
 
-        unless($stat = $locker->lock()) {
+        LOCK: {
 
-            $stat = $self->_deadlock($key);
-            
+            unless ($stat = $locker->lock()) {
+
+                unless ($stat = $self->_deadlock($key)) {
+printf("attempts: %s\n", $attempts);
+
+                    $attempts += 1;
+                    redo LOCK if ($attempts <= $self->deadattempts);
+
+                }
+
+            }
+
         }
 
     } else {
@@ -185,7 +197,7 @@ sub _deadlock {
 
                     $locker->break_lock();
                     $self->log->warn_msg('lock_broken', $key);
-                    $stat = $self->lock($key);
+                    $stat = TRUE;
 
                 }
 

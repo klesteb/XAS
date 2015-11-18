@@ -10,7 +10,7 @@ use XAS::Class
   base       => 'XAS::Base',
   utils      => ':validation',
   codec      => 'JSON',
-  accessors  => 'spool',
+  accessors  => 'spooler',
   constants  => 'HASHREF',
   filesystem => 'Dir',
 ;
@@ -50,7 +50,7 @@ sub output {
 
     # write the spool file
 
-    $self->spool->write($json);
+    $self->spooler->write($json);
 
 }
 
@@ -63,9 +63,9 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{spool} = XAS::Factory->module('spool', {
-        -lock      => Dir($self->env->spool, 'logs', 'locked')->path,
+    $self->{'spooler'} = XAS::Factory->module('spool', {
         -directory => Dir($self->env->spool, 'logs'),
+        -lock      => Dir($self->env->spool, 'logs', 'locked')->path,
     });
 
     return $self;

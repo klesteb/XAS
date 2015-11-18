@@ -42,20 +42,8 @@ sub read {
 
     if ($self->lockmgr->lock($self->lock)) {
 
-        try {
-
-            $packet = $self->_read_packet($filename);
-            $self->lockmgr->unlock($self->lock);
-
-        } catch {
-
-            my $ex = $_;
-
-            $self->lockmgr->unlock($self->lock);
-
-            die $ex;
-
-        };
+        $packet = $self->_read_packet($filename);
+        $self->lockmgr->unlock($self->lock);
 
     } else { 
 
@@ -79,22 +67,10 @@ sub write {
 
     if ($self->lockmgr->lock($self->lock)) {
 
-        try {
+        $seqnum = $self->_sequence();
 
-            $seqnum = $self->_sequence();
-
-            $self->_write_packet($packet, $seqnum);
-            $self->lockmgr->unlock($self->lock);
-
-        } catch {
-
-            my $ex = $_;
-
-            $self->lockmgr->unlock($self->lock);
-
-            die $ex;
-
-        }
+        $self->_write_packet($packet, $seqnum);
+        $self->lockmgr->unlock($self->lock);
 
     } else { 
 
@@ -144,20 +120,8 @@ sub delete {
 
     if ($self->lockmgr->lock($self->lock)) {
 
-        try {
-
-            $file->delete;
-            $self->lockmgr->unlock($self->lock);
-
-        } catch {
-
-            my $ex = $_;
-
-            $self->lockmgr->unlock($self->lock);
-
-            die $ex;
-
-        };
+        $file->delete;
+        $self->lockmgr->unlock($self->lock);
 
     } else { 
 
