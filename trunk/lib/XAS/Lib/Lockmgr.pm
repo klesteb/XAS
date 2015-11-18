@@ -88,7 +88,6 @@ sub lock {
             unless ($stat = $locker->lock()) {
 
                 unless ($stat = $self->_deadlock($key)) {
-printf("attempts: %s\n", $attempts);
 
                     $attempts += 1;
                     redo LOCK if ($attempts <= $self->deadattempts);

@@ -23,8 +23,8 @@ use XAS::Class
 
 #use Data::Dumper;
 
-# note to self: Don't put log->debug() statements in here, it produces
-# a nice race condidtion. Especially when doing spooling.
+# note to self: Don't put $self->log->debug() statements in here, it 
+# produces a nice race condidtion.
 
 # ----------------------------------------------------------------------
 # Overrides

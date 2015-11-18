@@ -15,6 +15,9 @@ use XAS::Class
   filesystem => 'Dir',
 ;
 
+# note to self: Don't but $self->log->debug() statements in here
+# it will produce a nice race condition.
+
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
