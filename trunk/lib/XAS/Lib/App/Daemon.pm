@@ -6,7 +6,6 @@ use Try::Tiny;
 use Pod::Usage;
 use Hash::Merge;
 use Getopt::Long;
-use POSIX 'setsid';
 use XAS::Lib::Pidfile;
 
 use XAS::Class

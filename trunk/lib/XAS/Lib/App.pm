@@ -17,9 +17,9 @@ use XAS::Class
   filesystem => 'File',
   vars => {
     PARAMS => {
-      -throws   => { optional => 1, default => 'changeme' },
-      -facility => { optional => 1, default => 'systems' },
-      -priority => { optional => 1, default => 'low' },
+      -throws   => { optional => 1, default => undef },
+      -facility => { optional => 1, default => undef },
+      -priority => { optional => 1, default => undef },
     }
   }
 ;
@@ -108,11 +108,24 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->class->throws($self->throws);
+    if (defined($self->throws)) {
 
-    $self->env->throws($self->throws);
-    $self->env->priority($self->priority);
-    $self->env->facility($self->facility);
+        $self->env->throws($self->throws);
+        $self->class->throws($self->throws);
+
+    }
+
+    if (defined($self->priority)) {
+
+        $self->env->priority($self->priority);
+
+    }
+
+    if (defined($self->facility)) {
+
+        $self->env->facility($self->facility);
+
+    }
 
     my $options = $self->options();
     my $defaults = $self->_default_options();
