@@ -14,10 +14,10 @@ debian/watch
 etc/xas-rotate.ini
 ignore.txt
 lib/XAS.pm
-lib/XAS/Apps/Logger.pm
 lib/XAS/Apps/Rotate.pm
 lib/XAS/Apps/Test/Echo/Client.pm
 lib/XAS/Apps/Test/Echo/Server.pm
+lib/XAS/Apps/Test/Logger.pm
 lib/XAS/Apps/Test/SSH/Server.pm
 lib/XAS/Apps/Test/Service.pm
 lib/XAS/Base.pm

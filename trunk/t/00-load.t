@@ -13,7 +13,7 @@ BEGIN {
     use_ok( 'XAS::Apps::Test::Service' )         || print "Bail out!\n";
     use_ok( 'XAS::Apps::Test::Echo::Client' )    || print "Bail out!\n";
     use_ok( 'XAS::Apps::Test::Echo::Server' )    || print "Bail out!\n";
-    use_ok( 'XAS::Apps::Logger' )                || print "Bail out!\n";
+    use_ok( 'XAS::Apps::Test::Logger' )          || print "Bail out!\n";
     use_ok( 'XAS::Apps::Rotate' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Daemon' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Service' )           || print "Bail out!\n";
