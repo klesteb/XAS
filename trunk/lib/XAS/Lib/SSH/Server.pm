@@ -157,7 +157,7 @@ sub _handle_connection {
     
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: process_errors()");
+    $self->log->debug("$alias: handle_connection()");
     $self->handle_connection($wheel);
 
 }

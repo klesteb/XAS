@@ -12,12 +12,12 @@
 # ENVIRONMENT: The XAS Middleware Environment
 #
 # PARAMETERS:
-#              --logtype toggles the log type
-#              --help    prints out a helpful help message
-#              --manual  prints out the procedures manual
-#              --version prints out the procedures version
-#              --debug   toggles debug output
-#              --alerts  toggles alert notification
+#              --log-type toggles the log type
+#              --help     prints out a helpful help message
+#              --manual   prints out the procedures manual
+#              --version  prints out the procedures version
+#              --debug    toggles debug output
+#              --alerts   toggles alert notification
 #
 # RETURNS:
 #              0 - success
@@ -56,12 +56,12 @@ ssh-echo-server - a simple echo server for SSH channels
 ssh-echo-server [--help] [--debug] [--manual] [--version]
 
  options:
-   --help     outputs simple help text
-   --manual   outputs the procedures manual
-   --version  outputs the apps version
-   --debug    toogles debugging output
-   --logtype  toggles the log type
-   --alerts   toogles alert notifications
+   --help      outputs simple help text
+   --manual    outputs the procedures manual
+   --version   outputs the apps version
+   --debug     toogles debugging output
+   --log-type  toggles the log type
+   --alerts    toogles alert notifications
 
 =head1 DESCRIPTION
 
@@ -83,7 +83,7 @@ Turns on debbuging.
 
 Togggles alert notification.
 
-=item B<--logtype>
+=item B<--log-type>
 
 Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
 'logstash' or 'syslog'.

@@ -8,6 +8,7 @@ my $shell = XAS::Lib::SSH::Client::Subsystem->new(
     -username => 'kevin',
     -priv_key => '/home/kevin/.ssh/id_rsa',
     -pub_key  => '/home/kevin/.ssh/id_rsa.pub',
+    -eol      => "\n",
 );
 
 my $first = 1;

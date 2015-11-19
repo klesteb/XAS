@@ -123,7 +123,7 @@ sub run {
     my ($command) = validate_params(\@_, [1] );
 
     $self->puts($command);    # send the command
-    $self->gets();            # strip the echo back
+    while ($self->gets()){};  # strip the echo back
 
 }
 
@@ -138,7 +138,7 @@ sub call {
 
     # execute a command, retrieve the output and dispatch to a parser.
 
-    $self->run($command);      # send the command
+    $self->puts($command);      # send the command
 
     $self->{'exit_code'}   = $self->chan->exit_status;
     $self->{'exit_signal'} = $self->chan->exit_signal;

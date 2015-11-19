@@ -272,7 +272,6 @@ sub DESTROY {
 sub _lockfile {
     my $self = shift;
 
-    no warnings 'all';
     my $extension = ".$$";
     my $name = $self->env->host;
 
@@ -283,13 +282,12 @@ sub _lockfile {
 sub init {
     my $class = shift;
 
-    my $self  = $class->SUPER::init(@_);
-    my $key   = Dir($self->{'key'});
-    my $locks = $self->env->locks;
+    my $self = $class->SUPER::init(@_);
+    my $key  = Dir($self->{'key'});
 
     if ($key->is_relative) {
 
-        $self->{'key'} = Dir($locks, $self->{'key'});
+        $self->{'key'} = Dir($self->env->locks, $self->{'key'});
 
     }
 
