@@ -151,18 +151,18 @@ sub _default_options {
             $self->env->xdebug(1); 
             $self->log->level('debug', 1);
         },
-        'logfile=s' => sub {
+        'log-file=s' => sub {
             my $logfile = File($_[1]);
-            $self->env->logtype('file');
-            $self->env->logfile($logfile);
+            $self->env->log_type('file');
+            $self->env->log_file($logfile);
             $self->log->activate();
         },
         'log-type=s' => sub { 
-            $self->env->logtype($_[1]);
+            $self->env->log_type($_[1]);
             $self->log->activate();
         },
         'log-facility=s' => sub { 
-            $self->env->logfacility($_[1]); 
+            $self->env->log_facility($_[1]); 
         },
     };
 

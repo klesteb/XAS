@@ -14,6 +14,10 @@ my $process = XAS::Lib::Process->new(
     -environment  => { testing => 'this is a test' },
 );
 
+$SIG{'TERM'} = sub {
+    $process->kill();
+};
+
 $process->log->level('debug', 1);
 $process->run();
 

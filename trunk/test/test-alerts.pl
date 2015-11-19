@@ -12,10 +12,7 @@ package main;
 
 my $test = Test->new();
 
-$test->alert->send(
-    -process => 'testing',
-    -message => 'this is a test'
-);
+$test->alert->send('this is a test');
 
 1;
 

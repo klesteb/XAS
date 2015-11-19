@@ -20,7 +20,7 @@ use XAS::Class
 sub load_config {
     my $self = shift;
     my ($filename, $handle) = validate_params(\@_, [
-        { optional => 1, isa => 'Badger::Filesystem::File', default => $self->env->cfgfile },
+        { optional => 1, isa => 'Badger::Filesystem::File', default => $self->env->cfg_file },
         { optional => 1, default => 'cfg' },
     ]);
 
@@ -29,7 +29,7 @@ sub load_config {
     local $SIG{__WARN__} = sub {
         my $error = shift;
 
-        my ($reason) = $error =~ /(.*)at\s+\.\./;
+        my ($reason) = $error =~ /(.*)at\s+/;
 
         $self->throw_msg(
             dotid($self->class) . '.load_config.badini',

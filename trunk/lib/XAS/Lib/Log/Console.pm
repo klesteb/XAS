@@ -20,8 +20,8 @@ sub output {
     ]);
 
     warn sprintf("%-5s - %s\n", 
-        uc($args->{priority}), 
-        $args->{message}
+        uc($args->{'priority'}), 
+        $args->{'message'}
     );
 
 }

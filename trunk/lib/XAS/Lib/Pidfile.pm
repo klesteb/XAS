@@ -124,7 +124,7 @@ sub init {
 
     unless (defined($self->{'file'})) {
 
-        $self->{'file'} = $self->env->pidfile;
+        $self->{'file'} = $self->env->pid_file;
 
     }
 

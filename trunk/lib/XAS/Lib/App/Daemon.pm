@@ -104,14 +104,14 @@ sub _default_options {
 
     $options->{'daemon'} = \$self->{daemon};
 
-    $options->{'cfgfile=s'} = sub { 
+    $options->{'cfg-file=s'} = sub { 
         my $cfgfile = File($_[1]);
-        $self->env->cfgfile($cfgfile);
+        $self->env->cfg_file($cfgfile);
     };
 
-    $options->{'pidfile=s'} = sub { 
+    $options->{'pid-file=s'} = sub { 
         my $pidfile = File($_[1]);
-        $self->env->pidfile($pidfile);
+        $self->env->pid_file($pidfile);
     };
 
     return $options;
@@ -166,11 +166,11 @@ This method will cause the process to become a daemon.
 
 This module handles these additional options.
 
-=head2 --cfgfile
+=head2 --cfg-file
 
 This defines an optional configuration file.
 
-=head2 --pidfile
+=head2 --pid-file
 
 This defines the pid file for recording the pid.
 

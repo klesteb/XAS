@@ -45,27 +45,27 @@ sub mqlevel {
 
 }
 
-sub logtype {
+sub log_type {
     my $self = shift;
     my ($type) = validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_TYPES }
     ]);
 
-    $self->{'logtype'} = $type if (defined($type));
+    $self->{'log_type'} = $type if (defined($type));
 
-    return $self->{'logtype'};
+    return $self->{'log_type'};
 
 }
 
-sub logfacility {
+sub log_facility {
     my $self = shift;
     my ($type) = validate_params(\@_, [
         { optional => 1, default => undef, regex => LOG_FACILITY }
     ]);
 
-    $self->{'logfacility'} = $type if (defined($type));
+    $self->{'log_facility'} = $type if (defined($type));
 
-    return $self->{'logfacility'};
+    return $self->{'log_facility'};
 
 }
 
@@ -218,7 +218,7 @@ sub init {
         ? $ENV{'XAS_ERR_PRIORITY'} 
         : 'low';
 
-    $self->{'facility'} = defined($ENV{'XAS_MSG_ERR_FACILITY'}) 
+    $self->{'facility'} = defined($ENV{'XAS_ERR_FACILITY'}) 
         ? $ENV{'XAS_ERR_FACILITY'} 
         : 'systems';
 
@@ -342,11 +342,11 @@ sub init {
 
     # define some logging options
 
-    $self->{'logtype'} = defined($ENV{'XAS_LOG_TYPE'})
+    $self->{'log_type'} = defined($ENV{'XAS_LOG_TYPE'})
         ? $ENV{'XAS_LOG_TYPE'}
         : 'console';
 
-    $self->{'logfacility'} = defined($ENV{'XAS_LOG_FACILITY'})
+    $self->{'log_facility'} = defined($ENV{'XAS_LOG_FACILITY'})
         ? $ENV{'XAS_LOG_FACILITY'}
         : 'local6';
 
@@ -354,15 +354,15 @@ sub init {
 
     ($name, $path, $suffix) = fileparse($0, qr{\..*});
 
-    $self->{'logfile'} = File($self->{'log'}, $name . '.log');
-    $self->{'pidfile'} = File($self->{'run'}, $name . '.pid');
-    $self->{'cfgfile'} = File($self->{'etc'}, $name . '.ini');
+    $self->{'log_file'} = File($self->{'log'}, $name . '.log');
+    $self->{'pid_file'} = File($self->{'run'}, $name . '.pid');
+    $self->{'cfg_file'} = File($self->{'etc'}, $name . '.ini');
 
     # build some methods, saves typing
 
-    for my $datum (qw( logfile pidfile cfgfile )) {
+    for my $datum (qw( log_file pid_file cfg_file )) {
 
-        $self->class->method($datum => sub {
+        $self->class->methods($datum => sub {
             my $self = shift;
             my ($p) = validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::File' }
@@ -380,7 +380,7 @@ sub init {
 
     for my $datum (qw( root etc sbin tmp var bin lib log locks run spool )) {
 
-        $self->class->method($datum => sub {
+        $self->class->methods($datum => sub {
             my $self = shift;
             my ($p) = validate_params(\@_, [
                     {optional => 1, default => undef, isa => 'Badger::Filesystem::Directory'}
@@ -419,8 +419,8 @@ Your program can use this module in the following fashion:
    base    => 'XAS::Base',
  ;
 
-  $pidfile = $self->env->pidfile;
-  $logfile = $self->env->logfile;
+  $pidfile = $self->env->pid_file;
+  $logfile = $self->env->log_file;
 
   printf("The XAS root is %s\n", $self->env->root);
 
@@ -579,7 +579,7 @@ Example
     $facility = $xas->log_facility;
     $xas->log_facility('local6');
 
-=head2 logfile
+=head2 log_file
 
 This method will return a pre-generated name for a log file. The name will be 
 based on the programs name with a ".log" extension, along with the path to
@@ -588,10 +588,10 @@ file name.
 
 Example
 
-    $logfile = $xas->logfile;
-    $xas->logfile("/some/path/mylogfile.log");
+    $logfile = $xas->log_file;
+    $xas->log_file("/some/path/mylogfile.log");
 
-=head2 pidfile
+=head2 pid_file
 
 This method will return a pre-generated name for a pid file. The name will be 
 based on the programs name with a ".pid" extension, along with the path to
@@ -600,10 +600,10 @@ file name.
 
 Example
 
-    $pidfile = $xas->pidfile;
-    $xas->pidfile("/some/path/myfile.pid");
+    $pidfile = $xas->pid_file;
+    $xas->pid_file("/some/path/myfile.pid");
 
-=head2 cfgfile
+=head2 cfg_file
 
 This method will return a pre-generated name for a configuration file. The 
 name will be based on the programs name with a ".ini" extension, along with 
@@ -612,8 +612,8 @@ self generated configuration file name.
 
 Example
 
-    $inifile = $xas->cfgfile;
-    $xas->cfgfile("/some/path/myfile.cfg");
+    $inifile = $xas->cfg_file;
+    $xas->cfg_file("/some/path/myfile.cfg");
 
 =head2 mqserver
 

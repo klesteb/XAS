@@ -44,7 +44,7 @@ __END__
  
 =head1 NAME
 
-XAS::Model::Database::XXXX::Result::XXXX - Table for XAS Log entries
+XAS::Model::Database::XXXX::Result::XXXX - Table defination for XAS Model
 
 =head1 DESCRIPTION
 

@@ -20,7 +20,7 @@ sub output {
         { type => HASHREF }
     ]);
 
-    $self->env->logfile->append(
+    $self->env->log_file->append(
         sprintf("[%s] %-5s - %s\n", 
             $args->{'datetime'}->strftime('%Y-%m-%d %H:%M:%S'),
             uc($args->{'priority'}), 
@@ -40,9 +40,9 @@ sub init {
 
     # check to see if the file exists, otherwise create it
 
-    unless ($self->env->logfile->exists) {
+    unless ($self->env->log_file->exists) {
 
-        if (my $fh = $self->env->logfile->open('>')) {
+        if (my $fh = $self->env->log_file->open('>')) {
                                     
             $fh->close;
 
@@ -51,7 +51,7 @@ sub init {
             $self->throw_msg(
                 dotid($self->class) . '.init.creatfile',
                 'file_create', 
-                $self->env->logfile->path
+                $self->env->log_file->path
             );
 
         }
@@ -67,16 +67,16 @@ sub init {
 
         # set file permissions
 
-        $mode = ($self->env->logfile->stat)[2];
+        $mode = ($self->env->log_file->stat)[2];
         $permissions = sprintf("%04o", $mode & 07777);
 
         if ($permissions ne "0664") {
 
-            $cnt = chmod(0664, $self->env->logfile->path);
+            $cnt = chmod(0664, $self->env->log_file->path);
             $self->throw_msg(
                 dotid($self->class) . '.init.invperms',
                 'file_perms', 
-                $self->env->logfile->path) if ($cnt < 1);
+                $self->env->log_file->path) if ($cnt < 1);
 
         }
 

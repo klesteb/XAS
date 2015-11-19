@@ -201,9 +201,20 @@ L<Params::Validate|https://metacpan.org/pod/Params::Validate> as the validation
  engine. If more the two parameters are passed they need to be named and the 
 parameter name must start with a "-". For example:
 
+    package Package;
+
+    our $VERSION = '0.01';
+
+    use XAS::Class
+        debug   => 0,
+        version => $VERSION,
+        base    => 'XAS::Base',
+        utils   => ':validation',
+    ;
+
     sub routine {
         my $self = shift;
-        my ($p1, $p2) = $self->validate_params(\@_, [1,1]);
+        my ($p1, $p2) = validate_params(\@_, [1,1]);
 
     }
 
@@ -211,7 +222,7 @@ or with named parameters
 
     sub routine {
         my $self = shift;
-        my $p = $self->validate_params(\@_, {
+        my $p = validate_params(\@_, {
             -p1 => 1,
             -p2 => 1,
         });
@@ -221,10 +232,16 @@ or with named parameters
         
     }
 
-or as plain package routine
+or as a plain package routine
+
+    package Package;
+
+    our $VERSION = '0.01';
+
+    use XAS::Utils ':validation';
 
     sub routine {
-        my $p = XAS::Base->validate_params(\@_, {
+        my $p = validate_params(\@_, {
             -p1 => 1,
             -p2 => 1,
         });
@@ -250,12 +267,12 @@ creating those names. Example:
       debug   => 0,
       version => $VERSION,
       base    => 'XAS::Base',
-      utils   => 'dotid',
+      utils   => ':validation dotid',
    ;
 
    sub routine {
        my $self = shift;
-       my ($p1, $p2) = $self->validate_params(\@_, [1,1]);
+       my ($p1, $p2) = validate_params(\@_, [1,1]);
 
       try {
 

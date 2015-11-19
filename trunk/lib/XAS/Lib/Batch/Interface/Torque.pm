@@ -7,7 +7,7 @@ use XAS::Class
   debug   => 0,
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => 'trim',
+  utils   => ':validation trim',
   mixins  => 'do_job_sub do_job_stat do_job_del do_job_sig do_job_hold 
               do_job_rls do_job_move do_job_msg do_job_rerun do_queue_stat 
               do_queue_stop do_queue_start do_server_stat do_server_enable 
@@ -38,7 +38,7 @@ use XAS::Class
 
 sub do_job_sub {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
     
@@ -55,7 +55,7 @@ sub do_job_sub {
 
 sub do_job_stat {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -70,7 +70,7 @@ sub do_job_stat {
 
 sub do_job_del {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -90,7 +90,7 @@ sub do_job_del {
 
 sub do_job_sig {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -104,7 +104,7 @@ sub do_job_sig {
 
 sub do_job_hold {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -130,7 +130,7 @@ sub do_job_hold {
 
 sub do_job_rls {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -156,7 +156,7 @@ sub do_job_rls {
 
 sub do_job_move {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -171,7 +171,7 @@ sub do_job_move {
 
 sub do_job_msg {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -185,7 +185,7 @@ sub do_job_msg {
 
 sub do_job_rerun {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -199,7 +199,7 @@ sub do_job_rerun {
 
 sub do_job_alter {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -235,7 +235,7 @@ sub do_job_alter {
 
 sub do_queue_stat {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -250,7 +250,7 @@ sub do_queue_stat {
 
 sub do_queue_stop {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -265,7 +265,7 @@ sub do_queue_stop {
 
 sub do_queue_start {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -280,7 +280,7 @@ sub do_queue_start {
 
 sub do_server_stat {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -294,7 +294,7 @@ sub do_server_stat {
 
 sub do_server_disable {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -309,7 +309,7 @@ sub do_server_disable {
 
 sub do_server_enable {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 
@@ -328,7 +328,7 @@ sub do_server_enable {
 
 sub _create_jobid {
     my $self = shift;
-    my ($id, $host) = $self->validate_params(\@_, [
+    my ($id, $host) = validate_params(\@_, [
         1,
         { optional => 1, default => undef }
     ]);
@@ -351,7 +351,7 @@ sub _create_jobid {
 
 sub _create_queue {
     my $self = shift;
-    my ($queue, $host) = $self->validate_params(\@_, [
+    my ($queue, $host) = validate_params(\@_, [
         { optional => 1, default => undef },
         { optional => 1, default => undef },
     ]);
@@ -413,7 +413,7 @@ sub _create_after {
 
 sub _parse_output {
     my $self = shift;
-    my ($output) = $self->validate_params(\@_, [
+    my ($output) = validate_params(\@_, [
         { type => ARRAYREF }
     ]);
 
@@ -467,7 +467,7 @@ sub _parse_output {
 
 sub _create_jobfile {
     my $self = shift;
-    my ($p) = $self->validate_params(\@_, [
+    my ($p) = validate_params(\@_, [
         { type => HASHREF }
     ]);
 

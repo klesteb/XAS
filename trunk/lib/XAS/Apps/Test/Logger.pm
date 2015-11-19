@@ -1,4 +1,4 @@
-package XAS::Apps::Logger;
+package XAS::Apps::Test::Logger;
 
 use Try::Tiny;
 use XAS::Class

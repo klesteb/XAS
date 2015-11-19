@@ -9,8 +9,8 @@ $log->level('debug', 1);
 printf("debug = %s\n", $log->level('debug'));
 
 $log->warn('switching to file');
-$log->env->logtype('file');
-$log->env->logfile(File('test.log'));
+$log->env->log_type('file');
+$log->env->log_file(File('test.log'));
 $log->activate();
   
 $log->debug('debug works');

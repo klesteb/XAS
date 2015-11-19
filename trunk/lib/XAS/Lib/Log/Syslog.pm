@@ -62,7 +62,7 @@ sub init {
     my $self = $class->SUPER::init(@_);
 
     setlogsock('unix');
-    openlog($self->env->script, 'pid', $self->env->logfacility);
+    openlog($self->env->script, 'pid', $self->env->log_facility);
 
     return $self;
 

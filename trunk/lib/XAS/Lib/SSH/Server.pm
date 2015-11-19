@@ -171,7 +171,7 @@ sub _client_connection {
 
     # Start listening on stdin.
 
-    $self->{client} = POE::Wheel::ReadWrite->new(
+    $self->{'client'} = POE::Wheel::ReadWrite->new(
         InputHandle  => \*STDIN,
         OutputHandle => \*STDOUT,
         Filter       => $self->filter,
@@ -254,7 +254,7 @@ sub init {
 
     unless (defined($self->filter)) {
 
-        $self->{filter} = POE::Filter::Line->new(
+        $self->{'filter'} = POE::Filter::Line->new(
             InputLiteral  => $self->eol,
             OutputLiteral => $self->eol
         );

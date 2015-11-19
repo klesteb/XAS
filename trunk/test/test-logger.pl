@@ -32,11 +32,11 @@
 #
 
 use lib "../lib";
-use XAS::Apps::Logger;
+use XAS::Apps::Test::Logger;
 
 main: {
 
-    my $app = XAS::Apps::Logger->new();
+    my $app = XAS::Apps::Test::Logger->new();
 
     exit $app->run();
 
@@ -53,13 +53,14 @@ test-logger.pl - a procedure to test logging
 test-logger.pl [--help] [--debug] [--manual] [--version]
 
  options:
-   --logfile  the log file to use, default to stderr
-   --logcfg   the log configuration file to use
-   --help     outputs simple help text
-   --manual   outputs the procedures manual
-   --version  outputs the apps version
-   --debug    toogles debugging output
-   --alerts   toogles alert notifications
+   --log-file     the log file to use, defaults to console
+   --log-type     sets the log type
+   --log-facility sets the logging facility
+   --help         outputs simple help text
+   --manual       outputs the procedures manual
+   --version      outputs the apps version
+   --debug        toogles debugging output
+   --alerts       toogles alert notifications
 
 =head1 DESCRIPTION
 

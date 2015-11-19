@@ -23,12 +23,12 @@ sub main {
 
     $self->service->register('testing');
 
-    $self->log->info('starting up');
+    $self->log->info_msg('startup');
 
     $service = XAS::Lib::Service->new(-alias => 'testing');
     $service->run();
 
-    $self->log->info('shutting down');
+    $self->log->info_msg('shutdown');
 
 }
 

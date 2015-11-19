@@ -100,10 +100,8 @@ sub _default_options {
     my $options = $self->SUPER::_default_options();
 
     $self->{'daemon'}  = FALSE;
-    $self->{'cfgfile'} = $self->env->cfgfile;
-    $self->{'pidfile'} = $self->env->pidfile;
 
-    $options->{'daemon'} = \$self->{daemon};
+    $options->{'daemon'} = \$self->{'daemon'};
 
     $options->{'install'} = sub { 
         $self->install_service(); 
@@ -115,14 +113,14 @@ sub _default_options {
         exit 0; 
     };
 
-    $options->{'pidfile=s'} = sub { 
+    $options->{'pid-file=s'} = sub { 
         my $pidfile = File($_[1]);
-        $self->env->pidfile($pidfile);
+        $self->env->pid_file($pidfile);
     };
 
-    $options->{'cfgfile=s'} = sub { 
+    $options->{'cfg-file=s'} = sub { 
         my $cfgfile = File($_[1]);
-        $self->env->cfgfile($cfgfile);
+        $self->env->cfg_file($cfgfile);
     };
 
     return $options;
@@ -160,11 +158,11 @@ that module for additional documentation.
 
 This module handles these additional options.
 
-=head2 B<--cfgfile>
+=head2 B<--cfg-file>
 
 This defines a configuration file.
 
-=head2 B<--pidfile>
+=head2 B<--pid-file>
 
 This defines the pid file to use.
 

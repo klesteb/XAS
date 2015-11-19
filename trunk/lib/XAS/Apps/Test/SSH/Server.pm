@@ -1,12 +1,13 @@
 package XAS::Apps::Test::SSH::Server;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use XAS::Lib::SSH::Server;
 use XAS::Class
-  debug   => 0,
-  version => $VERSION,
-  base    => 'XAS::Lib::App',
+  debug     => 0,
+  version   => $VERSION,
+  base      => 'XAS::Lib::App',
+  accessors => 'server',
 ;
 
 # ----------------------------------------------------------------------
@@ -22,10 +23,7 @@ sub main {
     my $self = shift;
 
     $self->setup();
-
-    my $server = XAS::Lib::SSH::Server->new();
-
-    $server->run();
+    $self->server->run();
 
 }
 
@@ -39,6 +37,17 @@ sub options {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub init {
+    my $class = shift;
+    
+    my $self = $class->SUPER::init(@_);
+    
+    $self->{'$server'} = XAS::Lib::SSH::Server->new();
+    
+    return $self;
+    
+}
 
 1;
 

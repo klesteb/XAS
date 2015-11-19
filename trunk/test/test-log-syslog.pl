@@ -3,7 +3,7 @@ use XAS::Factory;
 
 my $log = XAS::Factory->module('log');
 
-$log->env->logtype('syslog');
+$log->env->log_type('syslog');
 $log->activate();
 
 $log->info('it works');

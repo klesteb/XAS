@@ -12,7 +12,7 @@ package main;
 
 my $test = Test->new();
 
-printf("logfile = %s\n", $test->env->logfile);
+printf("logfile = %s\n", $test->env->log_file);
 printf("alerts = %s\n",  $test->env->alerts);
 printf("xdebug = %s\n",  $test->env->xdebug);
 printf("level = %s\n",   $test->log->level('debug'));

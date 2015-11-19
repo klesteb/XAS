@@ -27,14 +27,14 @@ sub main {
 
     $self->setup();
 
-    $self->log->info('starting up');
+    $self->log->info_msg('startup');
 
 
 
     $self->service->register('');
     $self->service->run();
 
-    $self->log->info('shutting down');
+    $self->log->info_msg('shutdown');
 
 }
 

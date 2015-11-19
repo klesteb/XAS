@@ -3,7 +3,7 @@ use lib '../lib';
 use Data::Dumper;
 use XAS::Lib::SSH::Client::Shell;
 
-my $command = 'dev/XAS/trunk/test/ssh-echo-server.sh';
+my $command = '/home/kevin/dev/XAS/trunk/test/ssh-echo-server.sh';
 my $shell = XAS::Lib::SSH::Client::Shell->new(
     -host   => 'localhost',
     -username => 'kevin',
@@ -17,17 +17,23 @@ $shell->run($command);
 
 $shell->call("this is a test", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    foreach my $line (@$output) {
+        printf("%s\n", $line);
+    }
 });
 
 $shell->call("this is another test", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    foreach my $line (@$output) {
+        printf("%s\n", $line);
+    }
 });
 
 $shell->call("this is another test again", sub {
     my $output = shift;
-    printf("%s\n", $output);
+    foreach my $line (@$output) {
+        printf("%s\n", $line);
+    }
 });
 
 $shell->disconnect();

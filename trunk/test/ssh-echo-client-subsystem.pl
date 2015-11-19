@@ -23,17 +23,23 @@ $shell->run('testing');
 
 $shell->call("this is a test", sub {
     my $output = shift;
-    printf("\"%s\"\n", $output);
+    foreach my $line (@$output) {
+        printf("\"%s\"\n", $line);
+    }
 });
 
 $shell->call("this is another test", sub {
     my $output = shift;
-    printf("\"%s\"\n", $output);
+    foreach my $line (@$output) {
+        printf("\"%s\"\n", $line);
+    }
 });
 
 $shell->call("this is another test again", sub {
     my $output = shift;
-    printf("\"%s\"\n", $output);
+    foreach my $line (@$output) {
+        printf("\"%s\"\n", $line);
+    }
 });
 
 $shell->disconnect();

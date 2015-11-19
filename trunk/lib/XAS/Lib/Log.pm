@@ -64,7 +64,7 @@ sub build {
         process  => $self->env->script,
         pid      => $$,
         msgid    => 0,
-        facility => $self->env->logfacility,
+        facility => $self->env->log_facility,
         priority => $level,
         message  => $message,
     };
@@ -74,7 +74,7 @@ sub build {
 sub activate {
     my $self = shift;
 
-    my $type = $self->env->logtype;
+    my $type = $self->env->log_type;
     my $logger = 'XAS::Lib::Log::' . ucfirst($type);
 
     load_module($logger);

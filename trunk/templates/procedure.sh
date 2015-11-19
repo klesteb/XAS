@@ -14,7 +14,7 @@
 # PARAMETERS:
 #              --log-type     toggles the log type
 #              --log-facility changes the log facility to use
-#              --logfile      name of the log file
+#              --log-file     name of the log file
 #              --help         prints out a helpful help message
 #              --manual       prints out the procedures manual
 #              --version      prints out the procedures version
@@ -32,7 +32,7 @@
 # ============================================================================
 #
 
-use lib "../lib";
+#use lib "../lib";
 use XAS::Apps::xxxx;
 
 main: {
@@ -62,7 +62,7 @@ changeme [--help] [--debug] [--manual] [--version]
    --manual      outputs the procedures manual
    --version     outputs the apps version
    --debug       toogles debugging output
-   --logfile     name of the log file 
+   --log-file    name of the log file 
    --log-type    toggles the log type
    --log-facilty changes the log facility
    --alerts      toogles alert notifications
@@ -97,7 +97,7 @@ Toggles the log type. Defaults to 'console'. Can be 'console', 'file',
 Toggles the log facilty. Defaults to 'local6'. This follows syslog
 convention.
 
-=item B<--logfile>
+=item B<--log-file>
 
 Optional logfile. When specified the logtype is set to 'file'.
 
