@@ -2,15 +2,16 @@ Source: libxas-perl
 Section: perl
 Priority: optional
 Build-Depends: debhelper (>= 7), perl
-Maintainer: kevin l. esteb <kevin@kesteb.us>
+Maintainer: Kevin L. Ssteb <kevin@kesteb.us>
 Standards-Version: 3.9.4
 Homepage: http://scm.kesteb.us/trac
 
 Package: libxas-perl
 Architecture: all
 Depends: ${misc:Depends}, ${perl:Depends}
-Description: Middelware for Datacenter Operations
+Description: Middleware for Datacenter Operations - base modules
  .
  XAS is middleware for datacenter operations. It provides standardized 
  methods, modules and philosophy for constructing large distributed 
- applications.
+ applications. This package has the base modules needed by other 
+ packages.
