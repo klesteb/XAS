@@ -111,7 +111,12 @@ reflect a Unix like system. Equivalent variables are available on Windows.
     XAS_MQLEVEL="1.0"
 
     XAS_MSGS=".*\.msg$"
-    XAS_LOGTYPE="console"
+    XAS_LOG_TYPE="console"
+    XAS_LOG_FACILITY="local6"
+
+    XAS_ERR_THROWS="xas"
+    XAS_ERR_PRIORITY="low"
+    XAS_ERR_FACILITY="systems"
 
     XAS_ROOT="/"
     XAS_SBIN="/usr/sbin"
@@ -120,6 +125,7 @@ reflect a Unix like system. Equivalent variables are available on Windows.
     XAS_VAR="/var'
     XAS_LIB="/var/lib/xas"
     XAS_LOG="/var/log/xas"
+    XAS_LOCKS="/var/lock/xas"
     XAS_RUN="/var/run/xas"
     XAS_SPOOL="/var/spool/xas"
       
@@ -173,4 +179,3 @@ the terms of the Artistic License 2.0. For details, see the full text
 of the license at http://www.perlfoundation.org/artistic_license_2_0.
 
 =cut
-

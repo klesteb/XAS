@@ -22,6 +22,10 @@ rem set XAS_MSGS=".*\.msg$"
 rem set XAS_LOG_TYPE="console"
 rem set XAS_LOG_FACILITY="local6"
 
+rem set XAS_ERR_THROWS="xas"
+rem set XAS_ERR_PRIORITY="low"
+rem set XAS_ERR_FACILITY="systems"
+
 rem set XAS_ROOT="D:\XAS"
 rem set XAS_SBIN="D:\XAS\sbin"
 rem set XAS_BIN="D:\XAS\bin"

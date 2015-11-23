@@ -212,7 +212,7 @@ sub init {
 
     $self->{'throws'} = defined($ENV{'XAS_ERR_THROWS'}) 
         ? $ENV{'XAS_ERR_THROWS'} 
-        : 'changeme';
+        : 'xas';
 
     $self->{'priority'} = defined($ENV{'XAS_ERR_PRIORITY'}) 
         ? $ENV{'XAS_ERR_PRIORITY'} 
@@ -535,7 +535,7 @@ to "console">
 
 =item B<XAS_ERR_THROWS>
 
-The default error message type. Defaults to 'changeme'.
+The default error message type. Defaults to 'xas'.
 
 =item B<XAS_ERR_PRIORITY>
 

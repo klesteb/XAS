@@ -21,6 +21,10 @@
 #export XAS_LOG_TYPE="console"
 #export XAS_LOG_FACILITY="local6"
 #
+#export XAS_ERR_THROWS="xas"
+#export XAS_ERR_PRIORITY="low"
+#export XAS_ERR_FACILITY="systems"
+#
 #export XAS_ROOT="/"
 #export XAS_SBIN="/usr/sbin"
 #export XAS_BIN="/usr/bin"
