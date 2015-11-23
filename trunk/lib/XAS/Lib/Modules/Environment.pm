@@ -531,7 +531,7 @@ conventions.
 =item B<XAS_LOG_TYPE>
 
 The log type. This can be "console", "file", "json" or "syslog". Defaults
-to "console">
+to "console"
 
 =item B<XAS_ERR_THROWS>
 
