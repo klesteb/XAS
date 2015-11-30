@@ -112,7 +112,7 @@ Kevin L. Esteb, <kevin@kesteb.us>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2015 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

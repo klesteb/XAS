@@ -12,13 +12,14 @@
 # ENVIRONMENT: XAS Perl Environment
 #
 # PARAMETERS:  
-#              --logfile the log file to use
-#              --logcfg  the log configuration file to use
-#              --help    prints out a helpful help message
-#              --manual  prints out the procedures manual
-#              --version prints out the procedures version
-#              --debug   toggles debug output
-#              --alerts  toggles alert notification
+#              --log-file     the log file to use
+#              --log-type     the log configuration file to use
+#              --log-facility sets the logging facility
+#              --help         prints out a helpful help message
+#              --manual       prints out the procedures manual
+#              --version      prints out the procedures version
+#              --debug        toggles debug output
+#              --alerts       toggles alert notification
 #
 # RETURNS:     
 #              0 - success
@@ -70,14 +71,19 @@ This procedure is a simple test procedure for logging.
 
 =over 4
 
-=item B<--logfile>
+=item B<--log-type>
 
-The name of the log file to use. Defaults to 'stderr'.
+Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
+'json' or 'syslog'.
 
-=item B<--logcfg>
+=item B<--log-facility>
 
-A log configuration file. It must be in a format that Log::Log4perl
-understands.
+Toggles the log facilty. Defaults to 'local6'. This follows syslog
+convention.
+
+=item B<--log-file>
+
+Optional logfile. When specified the log type is set to 'file'.
 
 =item B<--help>
 

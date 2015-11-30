@@ -62,10 +62,10 @@ changeme [--help] [--debug] [--manual] [--version]
    --manual      outputs the procedures manual
    --version     outputs the apps version
    --debug       toogles debugging output
+   --alerts      toogles alert notifications
    --log-file    name of the log file 
    --log-type    toggles the log type
    --log-facilty changes the log facility
-   --alerts      toogles alert notifications
 
 =head1 DESCRIPTION
 
@@ -99,7 +99,7 @@ convention.
 
 =item B<--log-file>
 
-Optional logfile. When specified the logtype is set to 'file'.
+Optional logfile. When specified the log type is set to 'file'.
 
 =item B<--manual>
 
@@ -130,7 +130,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
