@@ -8,7 +8,7 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  utils     => ':validation',
+  utils     => ':validation level2syslog',
   constants => 'HASHREF',
 ;
 
@@ -22,7 +22,7 @@ sub output {
         { type => HASHREF }
     ]);
 
-    my $priority = _translate($args->{'priority'});
+    my $priority = level2syslog($args->{'priority'});
     my $message = sprintf('%s', $args->{'message'});
 
     syslog($priority, $message);
@@ -39,22 +39,6 @@ sub DESTROY {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub _translate {
-    my $value = shift;
-
-    my $translate = {
-        info  => 'info',
-        error => 'err',
-        warn  => 'warning',
-        fatal => 'alert',
-        trace => 'notice',
-        debug => 'debug'
-    };
-
-    return $translate->{lc($value)};
-
-}
 
 sub init {
     my $class = shift;

@@ -15,7 +15,7 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'Badger::Utils',
-  constants  => 'HASH ARRAY',
+  constants  => 'HASH ARRAY LOG_LEVELS',
   filesystem => 'Dir File',
   exports => {
     all => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
@@ -23,13 +23,13 @@ use XAS::Class
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
-            validate_params validation_exception',
+            validate_params validation_exception level2syslog',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
-            validate_params validation_exception',
+            validate_params validation_exception level2syslog',
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
@@ -565,6 +565,24 @@ sub glob2regex {
     $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;
 
     return '^' . $globstr . '$';
+
+}
+
+sub level2syslog {
+    my ($level) = validate_params(\@_, [
+        { regex => LOG_LEVELS },
+    ]);
+
+    my $translate = {
+        info  => 'info',
+        error => 'err',
+        warn  => 'warning',
+        fatal => 'alert',
+        trace => 'notice',
+        debug => 'debug'
+    };
+
+    return $translate->{lc($level)};
 
 }
 
