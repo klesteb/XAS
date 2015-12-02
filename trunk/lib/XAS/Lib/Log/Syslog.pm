@@ -22,7 +22,7 @@ sub output {
         { type => HASHREF }
     ]);
 
-    my $priority = level2syslog($args->{'priority'});
+    my $priority = level2syslog(lc($args->{'priority'}));
     my $message = sprintf('%s', $args->{'message'});
 
     syslog($priority, $message);
