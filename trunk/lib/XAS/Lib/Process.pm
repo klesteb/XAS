@@ -648,10 +648,6 @@ This method initialized the module and takes the following parameters:
 
 =over 4
 
-=item B<-command>
-
-The command to run.
-
 =item B<-auto_start>
 
 This indicates wither to autostart the process. The default is true.
@@ -660,6 +656,10 @@ This indicates wither to autostart the process. The default is true.
 
 This indicates wither to restart the process if it exits. The default
 is true.
+
+=item B<-command>
+
+The command to run.
 
 =item B<-directory>
 
@@ -728,66 +728,18 @@ The optional filter to use for input. Defaults to POE::Filter::Line.
 
 The optional output filter to use. Defaults to POE::Filter::Line.
 
-=back
+=item B<-output_handler>
 
-=head1 PUBLIC EVENTS
-
-The following public events have been defined. The following arguments
-are provided by POE as offsets into the argument array.
-
-=head2 put_input(OBJECT, ARG0)
-
-This event will write a buffer to stdin.
-
-=over 4
-
-=item B<ARGO> is the buffer to write out.
+This is an optional coderef to handle output from the process. The coderef
+takes on parameter, they output from the command.
 
 =back
 
-=head2 get_output(OBJECT, ARG0, ARG1)
+=head1 METHODS
 
-This event will read a buffer for stdout/stderr.
+=head2 put($data)
 
-=over
-
-=item B<ARG0> is the buffer.
-
-=item B<ARG1> is the wheel ID.
-
-=back
-
-=head2 flush_event(OBJECT, ARG0)
-
-This event is fired when a flush event happens on stdin.
-
-=over 4
-
-=item B<ARG0> is the wheel id that the event happened too.
-
-=back
-
-=head2 error_event(OBJECT, ARG0..ARG4)
-
-This event is fired whenever an error occurs.  
-
-=over 4
-
-=item B<ARG0> - the operation that was being performed i.e. read/write
-
-=item B<ARG1> - the errno that occurred
-
-=item B<ARG2> - the errstr for that errno
-
-=item B<ARG3> - the wheel ID
-
-=item B<ARG4> - the type i.e. INPUT/OUTPUT
-
-=back
-
-=head2 close_event(OBJECT)
-
-This event is fired when a "close" happens on the sockets.
+This method will write a buffer to stdin.
 
 =head1 SEE ALSO
 

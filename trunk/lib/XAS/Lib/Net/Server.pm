@@ -1,6 +1,6 @@
 package XAS::Lib::Net::Server;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use POE;
 use Try::Tiny;
@@ -52,9 +52,6 @@ sub session_initialize {
     $poe_kernel->state('client_connection',        $self, '_client_connection');
     $poe_kernel->state('client_connection_failed', $self, '_client_connection_failed');
 
-    $poe_kernel->state('process_errors',    $self, '_process_errors');
-    $poe_kernel->state('process_request',   $self, '_process_request');
-    $poe_kernel->state('process_response',  $self, '_process_response');
     $poe_kernel->state('handle_connection', $self, '_handle_connection');
 
     # walk the chain
@@ -168,7 +165,7 @@ sub process_request {
     my $self = shift;
     my ($input, $ctx) = validate_params(\@_, [1,1]);
 
-    return $input;
+    $self->process_response($input, $ctx);
 
 }
 
@@ -176,22 +173,24 @@ sub process_response {
     my $self = shift;
     my ($output, $ctx) = validate_params(\@_, [1,1]);
 
-    return $output;
+    my $alias = $self->alias;
+
+    $poe_kernel->post($alias, 'client_output', $output, $ctx);
 
 }
 
 sub process_errors {
     my $self = shift;
-    my ($output, $ctx) = validate_params(\@_, [1,1]);
+    my ($errors, $ctx) = validate_params(\@_, [1,1]);
 
-    return $output;
+    $self->process_response($errors, $ctx);
 
 }
 
 sub handle_connection {
     my $self = shift;
     my ($wheel) = validate_params(\@_, [1]);
-    
+
 }
 
 # ----------------------------------------------------------------------
@@ -229,39 +228,6 @@ sub client {
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
-
-sub _process_request {
-    my ($self, $input, $ctx) = @_[OBJECT,ARG0,ARG1];
-
-    my $alias = $self->alias;
-    my $data  = $self->process_request($input, $ctx);
-
-    $self->log->debug("$alias: _process_request()");
-    $poe_kernel->post($alias, 'process_response', $data, $ctx);
-
-}
-
-sub _process_response {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
-
-    my $alias = $self->alias;
-    my $data  = $self->process_response($output, $ctx);
-
-    $self->log->debug("$alias: _process_response()");
-    $poe_kernel->post($alias, 'client_output', $data, $ctx);
-
-}
-
-sub _process_errors {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
-
-    my $alias = $self->alias;
-    my $data  = $self->process_errors($output, $ctx);
-
-    $self->log->debug("$alias: _process_errors()");
-    $poe_kernel->post($alias, 'client_output', $data, $ctx);
-
-}
 
 sub _handle_connection {
     my ($self, $wheel) = @_[OBJECT, ARG0];
@@ -349,7 +315,7 @@ sub _client_input {
 
     $self->{'clients'}->{$wheel}->{'active'} = time();
 
-    $poe_kernel->post($alias, 'process_request', $input, $ctx);
+    $self->process_request($input, $ctx);
 
 }
 
@@ -556,7 +522,7 @@ field. Others fields may be added as needed.
 
 =head2 process_response($output, $ctx)
 
-This method will process the output from the client. It takes the
+This method will process the output for the client. It takes the
 following parameters:
 
 =over 4
@@ -572,14 +538,14 @@ output to the correct socket. Others fields may have been added as needed.
 
 =back
 
-=head2 process_errors($output, $ctx)
+=head2 process_errors($errors, $ctx)
 
 This method will process the error output from the client. It takes the
 following parameters:
 
 =over 4
 
-=item B<$output>
+=item B<$errors>
 
 The output to be sent to the socket.
 

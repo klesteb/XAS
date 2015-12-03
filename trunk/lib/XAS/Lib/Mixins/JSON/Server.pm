@@ -14,9 +14,10 @@ use XAS::Class
   utils     => ':validation dotid',
   accessors => 'methods',
   codec     => 'JSON',
-  constants => 'HASH ARRAY :jsonrpc ARRAYREF',
+  constants => 'HASH ARRAY :jsonrpc ARRAYREF HASHREF',
   mixins    => 'process_request process_response process_errors 
-                methods init_json_server',
+                methods init_json_server rpc_exception_handler
+                rpc_request rpc_error rpc_result',
 ;
 
 my $errors = {
@@ -50,7 +51,11 @@ sub init_json_server {
 # ----------------------------------------------------------------------
 
 sub process_request {
-    my ($self, $input, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($input, $ctx) = validate_params(\@, [
+        1,
+        { type => HASHREF }
+    ]);
 
     my $request;
     my $alias = $self->alias;
@@ -65,13 +70,13 @@ sub process_request {
 
             foreach my $r (@$request) {
 
-                _rpc_request($self, $r, $ctx);
+                $self->rpc_request($r, $ctx);
 
             }
 
         } else {
 
-            _rpc_request($self, $request, $ctx);
+            $self->rpc_request($request, $ctx);
 
         }
 
@@ -87,39 +92,44 @@ sub process_request {
 }
 
 sub process_response {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($output, $ctx) = validate_params(\@, [
+        1,
+        { type => HASHREF }
+    ]);
 
     my $json;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering process_response");
 
-    $json = _rpc_result($self, $ctx->{id}, $output);
+    $json = $self->rpc_result($ctx->{'id'}, $output);
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
 }
 
 sub process_errors {
-    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+    my $self = shift;
+    my ($error, $ctx) = validate_params(\@, [
+        { type => HASHREF },
+        { type => HASHREF }
+    ]);
 
     my $json;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering process_errors");
 
-    $json = _rpc_error($self, $ctx->{id}, $output->{'code'}, $output->{'message'});
+    $json = $self->rpc_error($ctx->{'id'}, $error->{'code'}, $error->{'message'});
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
 }
 
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
-
-sub _exception_handler {
-    my ($self, $ex, $id) = @_;
+sub rpc_exception_handler {
+    my $self = shift;
+    my ($ex, $id) = validate_params(\@_, [1,1]);
 
     my $packet;
     my $ref = ref($ex);
@@ -133,24 +143,24 @@ sub _exception_handler {
 
             if ($type =~ /server\.rpc_method$/) {
 
-                $packet = _rpc_error($self, $id, RPC_ERR_METHOD, $info);
+                $packet = $self->rpc_error($id, RPC_ERR_METHOD, $info);
 
             } elsif ($type =~ /server\.rpc_version$/) {
 
-                $packet = _rpc_error($self, $id, RPC_ERR_REQ, $info);
+                $packet = $self->rpc_error($id, RPC_ERR_REQ, $info);
 
             } elsif ($type =~ /server\.rpc_format$/) {
 
-                $packet = _rpc_error($self, $id, RPC_ERR_PARSE, $info);
+                $packet = $self->rpc_error($id, RPC_ERR_PARSE, $info);
 
             } elsif ($type =~ /server\.rpc_notify$/) {
 
-                $packet = _rpc_error($self, $id, RPC_ERR_INTERNAL, $info);
+                $packet = $self->rpc_error($id, RPC_ERR_INTERNAL, $info);
 
             } else {
 
                 my $msg = $type . ' - ' . $info;
-                $packet = _rpc_error($self, $id, RPC_ERR_APP, $msg);
+                $packet = $self->rpc_error($id, RPC_ERR_APP, $msg);
 
             }
 
@@ -160,7 +170,7 @@ sub _exception_handler {
 
             my $msg = sprintf("%s", $ex);
 
-            $packet = _rpc_error($self, $id, RPC_ERR_SERVER, $msg);
+            $packet = $self->rpc_error($id, RPC_ERR_SERVER, $msg);
             $self->log->error_msg('unexpected', $msg);
 
         }
@@ -169,7 +179,7 @@ sub _exception_handler {
 
         my $msg = sprintf("%s", $ex);
 
-        $packet = _rpc_error($self, $id, RPC_ERR_APP, $msg);
+        $packet = $self->rpc_error($id, RPC_ERR_APP, $msg);
         $self->log->error_msg('unexpected', $msg);
 
     }
@@ -178,22 +188,17 @@ sub _exception_handler {
 
 }
 
-sub _rpc_request {
-    my ($self, $request, $ctx) = @_;
+sub rpc_request {
+    my $self = shift;
+    my ($request, $ctx) = validate_params(\@_, [
+        { type => HASHREF },
+        { type => HASHREF },
+    ]);
 
     my $method;
     my $alias = $self->alias;
     
     try {
-
-        if (ref($request) ne HASH) {
-
-            $self->throw_msg(
-                dotid($self->class) . '.server.rpc_format', 
-                'json_rpc_format'
-            );
-
-        }
 
         if ($request->{'jsonrpc'} ne RPC_JSON) {
 
@@ -213,7 +218,7 @@ sub _rpc_request {
 
         }
 
-        if ($self->methods->has($request->{method})) {
+        if ($self->methods->has($request->{'method'})) {
 
             $ctx->{'id'} = $request->{'id'};
             $self->log->debug("$alias: performing \"" . $request->{'method'} . '"');
@@ -234,15 +239,16 @@ sub _rpc_request {
 
         my $ex = $_;
 
-        my $output = _exception_handler($self, $ex, $request->{'id'});
+        my $output = $self->rpc_exception_handler($ex, $request->{'id'});
         $poe_kernel->post($alias, 'client_output', encode($output), $ctx);
 
     };
 
 }
 
-sub _rpc_error {
-    my ($self, $id, $code, $message) = @_;
+sub rpc_error {
+    my $self = shift;
+    my ($id, $code, $message) = validate_params(\@_, [1,1,1]);
 
     return {
         jsonrpc => RPC_JSON,
@@ -256,8 +262,9 @@ sub _rpc_error {
 
 }
 
-sub _rpc_result {
-    my ($self, $id, $result) = @_;
+sub rpc_result {
+    my $self = shift;
+    my ($id, $result) = validate_params(\@_, [1,1]);
 
     return {
         jsonrpc => RPC_JSON,
@@ -266,6 +273,10 @@ sub _rpc_result {
     };
 
 }
+
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
 
 1;
 
@@ -362,13 +373,19 @@ An arrayref of methods that this server can process.
 A handle to a L<Set::Light|https://metacpan.org/pod/Set::Light> object that contains the methods 
 that can be evoked.
 
-=head1 EVENTS
+=head2 process_request($input, $ctx)
 
-=head2 process_request(OBJECT, ARG0, ARG1)
+=head2 process_response($output, $ctx)
 
-=head2 process_response(OBJECT, ARG0, ARG1)
+=head2 process_errors($errors, $ctx)
 
-=head2 process_errors(OBJECT, ARG0, ARG1)
+=head2 rpc_exception_handler($ex, $id)
+
+=head2 rpc_request($request, $ctx)
+
+=head2 rpc_result($id, $output)
+
+=head2 rpc_error($id, $code, $message)
 
 =head1 AUTHOR
 
