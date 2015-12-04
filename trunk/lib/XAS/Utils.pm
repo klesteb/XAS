@@ -24,7 +24,7 @@ use XAS::Class
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2test',
+            stat2text',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
