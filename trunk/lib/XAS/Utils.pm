@@ -23,13 +23,15 @@ use XAS::Class
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
-            validate_params validation_exception level2syslog',
+            validate_params validation_exception level2syslog
+            stat2test',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool init_module load_module compress exitcode 
             kill_proc spawn _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
-            validate_params validation_exception level2syslog',
+            validate_params validation_exception level2syslog
+            stat2text',
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
@@ -568,6 +570,22 @@ sub glob2regex {
 
 }
 
+sub stat2text {
+    my ($stat) = validate_params(\@_, [1]);
+    
+    my $status = 'unknown';
+
+    $status = 'suspended ready'   if ($stat == 6);
+    $status = 'suspended blocked' if ($stat == 5);
+    $status = 'blocked'           if ($stat == 4);
+    $status = 'running'           if ($stat == 3);
+    $status = 'ready'             if ($stat == 2);
+    $status = 'other'             if ($stat == 1);
+
+    return $status;
+
+}
+
 sub level2syslog {
     my ($level) = validate_params(\@_, [
         { regex => LOG_LEVELS },
@@ -773,12 +791,12 @@ Decodes Perls version of the exit code from a cli process. Returns two items.
 
 =head2 run_cmd($command)
 
-Run a command and capture the output and exit code, stderr is merged
-with stdout.
+Run a command and capture the output, exit code and exit signal, stderr 
+is merged with stdout.
 
  Example:
  
-     my (@output, $rc) = run_cmd("ls -l");
+     my (@output, $rc, $sig) = run_cmd("ls -l");
 
 =head2 daemonize
 
@@ -882,6 +900,30 @@ This routine will load a module.
 =item B<$module>
 
 The name of the module.
+
+=back
+
+=head2 stat2text($stat)
+
+This will convert the numeric process status to a text string.
+
+=over 4
+
+=item B<$stat>
+
+A number between 1 and 6.
+
+=back
+
+=head2 level2syslog($level)
+
+This will convert a XAS log level to an appropriate syslog priority.
+
+=over 4
+
+=item B<$level>
+
+A XAS log level, it should be lowercased.
 
 =back
 
