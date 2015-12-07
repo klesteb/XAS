@@ -36,16 +36,6 @@ use Data::Dumper;
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub init_json_server {
-    my $self = shift;
-    my ($methods) = validate_params(\@_, [
-        { type => ARRAYREF }
-    ]);
-
-    $self->{'methods'} = Set::Light->new(@$methods);
-
-}
-
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
@@ -278,6 +268,17 @@ sub rpc_result {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub init_json_server {
+    my $self = shift;
+    my ($methods) = validate_params(\@_, [
+        { type => ARRAYREF }
+    ]);
+
+    $self->{'methods'} = Set::Light->new();
+    $self->methods->insert($methods);
+
+}
 
 1;
 
