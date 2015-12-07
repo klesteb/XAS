@@ -245,11 +245,11 @@ sub _session_exception {
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
         $self->log->debug(sprintf('%s: sending execption to: %s', $alias, $ex->{'source_session'}));
-        $poe_kernel->signal($ex->{'source_session'}, 'SIGDIE', $sig, $ex);
+        $poe_kernel->signal($ex->{'source_session'}, 'DIE', $sig, $ex);
 
     } else {
 
-        $self->log->debug(sprintf('%s: handling execption', $alias);
+        $self->log->debug(sprintf('%s: handling execption', $alias));
         $self->session_exception($ex);
 
     }
