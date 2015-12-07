@@ -249,7 +249,7 @@ sub _session_exception {
 
     } else {
 
-        $self->log->debug(sprintf('%s: handling execption', $alias);
+        $self->log->debug(sprintf('%s: handling execption', $alias));
         $self->session_exception($ex);
 
     }
