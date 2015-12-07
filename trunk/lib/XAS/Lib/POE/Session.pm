@@ -83,10 +83,9 @@ sub session_stop {
 
 sub session_exception {
     my $self = shift;
-    my $hash = shift;
+    my $ex   = shift;
 
     my $alias = $self->alias;
-    my $ex    = $hash->{'error_str'};
 
     $self->log->debug("$alias: session_exception() - session");
     $self->error_handler($ex);
@@ -239,6 +238,8 @@ sub _session_exception {
 
     $self->log->debug("$alias: _session_exception()");
 
+    $poe_kernel->sig_handled();
+
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
         $self->log->debug(sprintf('%s: sending execption to: %s', $alias, $ex->{'source_session'}));
@@ -246,9 +247,8 @@ sub _session_exception {
 
     } else {
 
-        $poe_kernel->sig_handled();
         $self->log->debug(sprintf('%s: handling execption', $alias));
-        $self->session_exception($ex);
+        $self->session_exception($ex->{'error_str'});
 
     }
 
