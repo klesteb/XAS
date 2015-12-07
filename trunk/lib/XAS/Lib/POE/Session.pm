@@ -238,23 +238,18 @@ sub _session_exception {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_exception()");
-
-    $self->log->debug(sprintf("%s: file:  %s", $alias, $ex->{'file'}));
-    $self->log->debug(sprintf("%s: line:  %s", $alias, $ex->{'line'}));
-    $self->log->debug(sprintf("%s: state: %s", $alias, $ex->{'from_state'} || ''));
-    $self->log->debug(sprintf("%s: source: %s", $alias, $ex->{'source_session'} || ''));
-    $self->log->debug(sprintf("%s: destinaion: %s", $alias, $ex->{'dest_session'} || ''));
+    $self->log->debug(Dumper($ex));
 
     $poe_kernel->sig_handled();
 
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
         $self->log->debug(sprintf('%s: sending execption to: %s', $alias, $ex->{'source_session'}));
-        $poe_kernel->signal($ex->{'source_session'}, 'DIE', $sig, $ex);
+        $poe_kernel->signal($ex->{'source_session'}, 'SIGDIE', $sig, $ex);
 
     } else {
 
-        $self->log->debug(sprintf('%s: handling execption: %s', $alias, Dumper($ex)));
+        $self->log->debug(sprintf('%s: handling execption', $alias);
         $self->session_exception($ex);
 
     }
