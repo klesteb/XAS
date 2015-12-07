@@ -276,7 +276,7 @@ sub init_json_server {
     ]);
 
     $self->{'methods'} = Set::Light->new();
-    $self->methods->insert($methods);
+    $self->methods->insert(@$methods);
 
 }
 
