@@ -61,6 +61,7 @@ sub process_request {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering process_request");
+    $self->log->debug(Dumper($input));
 
     try {
 
@@ -84,8 +85,8 @@ sub process_request {
 
         my $ex = $_;
 
-        $self->exception_handler($ex);
         $self->log->error(Dumper($input));
+        $self->exception_handler($ex);
 
     };
 

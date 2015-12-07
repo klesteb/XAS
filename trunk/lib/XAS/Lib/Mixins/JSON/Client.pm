@@ -12,7 +12,7 @@ use XAS::Class
   mixins    => 'call',
 ;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -47,6 +47,8 @@ sub call {
     $response = $self->gets();
 
     $response = decode($response);
+
+    $self->log->debug(Dumper($response));
 
     if ($response->{'id'} eq $p->{'id'}) {
 
