@@ -238,9 +238,6 @@ sub _session_exception {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _session_exception()");
-    $self->log->debug(Dumper($ex));
-
-    $poe_kernel->sig_handled();
 
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
@@ -249,6 +246,7 @@ sub _session_exception {
 
     } else {
 
+        $poe_kernel->sig_handled();
         $self->log->debug(sprintf('%s: handling execption', $alias));
         $self->session_exception($ex);
 
