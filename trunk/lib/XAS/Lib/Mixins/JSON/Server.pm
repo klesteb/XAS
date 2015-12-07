@@ -52,7 +52,7 @@ sub init_json_server {
 
 sub process_request {
     my $self = shift;
-    my ($input, $ctx) = validate_params(\@, [
+    my ($input, $ctx) = validate_params(\@_, [
         1,
         { type => HASHREF }
     ]);
@@ -93,7 +93,7 @@ sub process_request {
 
 sub process_response {
     my $self = shift;
-    my ($output, $ctx) = validate_params(\@, [
+    my ($output, $ctx) = validate_params(\@_, [
         1,
         { type => HASHREF }
     ]);
@@ -111,7 +111,7 @@ sub process_response {
 
 sub process_errors {
     my $self = shift;
-    my ($error, $ctx) = validate_params(\@, [
+    my ($error, $ctx) = validate_params(\@_, [
         { type => HASHREF },
         { type => HASHREF }
     ]);
