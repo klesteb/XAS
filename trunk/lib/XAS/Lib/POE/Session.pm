@@ -18,6 +18,8 @@ use XAS::Class
   }
 ;
 
+use Data::Dumper;
+
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
@@ -252,7 +254,7 @@ sub _session_exception {
 
     } else {
 
-        $self->log->debug(sprintf('%s: handling execption: %s', $alias, $ex));
+        $self->log->debug(sprintf('%s: handling execption: %s', $alias, Dumper($ex)));
         $self->session_exception($ex);
 
     }
