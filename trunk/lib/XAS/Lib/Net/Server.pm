@@ -83,11 +83,11 @@ sub session_shutdown {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{'clients'};
+    my $clients = $self->clients;
 
     $self->log->debug("$alias: entering session_shutdown()");
 
-    foreach my $client (keys %$clients) {
+    foreach my $client (keys $clients) {
 
         if (defined($client->{'watchdog'})) {
 
@@ -113,11 +113,11 @@ sub session_pause {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{'clients'};
+    my $clients = $self->clients;
 
     $self->log->debug("$alias: entering session_pause()");
 
-    foreach my $client (keys %$clients) {
+    foreach my $client (keys $clients) {
 
         $client->pause_input();
 
