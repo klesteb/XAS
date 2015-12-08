@@ -15,7 +15,7 @@ use XAS::Class
   base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Handlers',
   utils     => ':validation weaken params',
-  accessors => 'session',
+  accessors => 'session clients',
   constants => 'ARRAY',
   vars => {
     PARAMS => {
@@ -141,15 +141,15 @@ sub session_resume {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->{'clients'};
+    my $clients = $self->clients;
     my $inactivity = $self->inactivity_timer;
 
     $self->log->debug("$alias: entering session_resume()");
 
-    while (my $wheel = keys %$clients) {
+    foreach my $client (keys $clients) {
 
-        $wheel->resume_input();
-        $poe_kernel->alarm_set('client_reaper', $inactivity, $wheel);
+        $client->resume_input();
+        $poe_kernel->alarm_set('client_reaper', $inactivity, $client);
 
     }
 
@@ -211,7 +211,7 @@ sub peerport {
     my $self = shift;
     my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{'clients'}->{$wheel}->{'port'};
+    return $self->clients->{$wheel}->{'port'};
 
 }
 
@@ -219,7 +219,7 @@ sub peerhost {
     my $self = shift;
     my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{'clients'}->{$wheel}->{'host'};
+    return $self->clients->{$wheel}->{'host'};
 
 }
 
@@ -227,7 +227,7 @@ sub client {
     my $self = shift;
     my ($wheel) = validate_params(\@_, [1]);
 
-    return $self->{'clients'}->{$wheel}->{'client'};
+    return $self->clients->{$wheel}->{'client'};
 
 }
 
@@ -346,10 +346,10 @@ sub _client_output {
             # calls getpeername(). getpeername() returns undef when
             # the network stack can't validate the socket. 
 
-            if (getpeername($self->{'clients'}->{$wheel}->{'socket'})) {
+            if (getpeername($self->clients->{$wheel}->{'socket'})) {
 
                 push(@buffer, $data);
-                $self->{'clients'}->{$wheel}->{'client'}->put(@buffer);
+                $self->clients->{$wheel}->{'client'}->put(@buffer);
 
             } else {
 
@@ -359,7 +359,7 @@ sub _client_output {
                     $self->peerhist($wheel), 
                     $self->peerport($wheel)
                 );
-                delete $self->{'clients'}->{$wheel};
+                delete $self->clients->{$wheel};
 
             }
 
@@ -375,7 +375,7 @@ sub _client_output {
 
         $self->exception_handler($ex);
 
-        delete $self->{'clients'}->{$wheel};
+        delete $self->clients->{$wheel};
 
     };
 
@@ -398,7 +398,7 @@ sub _client_error {
 
     }
 
-    delete $self->{'clients'}->{$wheel};
+    delete $self->clients->{$wheel};
 
 }
 
@@ -407,7 +407,7 @@ sub _client_reaper {
 
     my $timeout = time() - $self->inactivity_timer;
 
-    if ($self->{'clients'}->{$wheel}->{'active'} < $timeout) {
+    if ($self->clients->{$wheel}->{'active'} < $timeout) {
 
         $self->reaper($wheel);
 
