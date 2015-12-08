@@ -83,11 +83,11 @@ sub session_shutdown {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->clients;
+    my @clients = keys %{$self->{'clients'}};
 
     $self->log->debug("$alias: entering session_shutdown()");
 
-    foreach my $client (keys $clients) {
+    foreach my $client (@clients) {
 
         $poe_kernel->alarm_remove($self->clients->{$client}->{'watchdog'});
         $client = undef;
@@ -108,11 +108,11 @@ sub session_pause {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->clients;
+    my @clients = keys %{$self->{'clients'}};
 
     $self->log->debug("$alias: entering session_pause()");
 
-    foreach my $client (keys $clients) {
+    foreach my $client (@clients) {
 
         $client->pause_input();
         $poe_kernel->alarm_remove($self->clients->{$client}->{'watchdog'});
@@ -131,15 +131,15 @@ sub session_resume {
     my $self = shift;
 
     my $alias = $self->alias;
-    my $clients = $self->clients;
+    my @clients = keys %{$self->{'clients'}};
     my $inactivity = $self->inactivity_timer;
 
     $self->log->debug("$alias: entering session_resume()");
 
-    foreach my $client (keys $clients) {
+    foreach my $client (@clients) {
 
         $client->resume_input();
-        $poe_kernel->alarm_set('client_reaper', $inactivity, $client);
+        $self->clients->{$client}->{'watchdog'} = $poe_kernel->alarm_set('client_reaper', $inactivity, $client);
 
     }
 
