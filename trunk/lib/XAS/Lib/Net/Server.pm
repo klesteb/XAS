@@ -117,9 +117,9 @@ sub session_pause {
 
     $self->log->debug("$alias: entering session_pause()");
 
-    foreach my $wheel (keys %$clients) {
+    foreach my $client (keys %$clients) {
 
-        $wheel->pause_input();
+        $client->pause_input();
 
         if (defined($client->{'watchdog'})) {
 
