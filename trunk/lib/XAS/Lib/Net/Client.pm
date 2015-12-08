@@ -267,6 +267,8 @@ sub _fill_buffer {
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
 
+    $self->handle->blocking(0);
+
     while ($working) {
 
         my $buf;
@@ -318,6 +320,8 @@ sub _fill_buffer {
         }
 
     }
+
+    $self->handle->blocking(1);
 
     return $read;
 
