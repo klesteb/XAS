@@ -40,7 +40,7 @@ sub connect {
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
 
-    $self->{handle} = IO::Socket::INET->new(
+    $self->{'handle'} = IO::Socket::INET->new(
         Proto    => 'tcp',
         PeerPort => $self->port,
         PeerAddr => $self->host,
@@ -64,7 +64,7 @@ sub connect {
     };
 
     $self->handle->blocking(0);
-    $self->{select} = IO::Select->new($self->handle);
+    $self->{'select'} = IO::Select->new($self->handle);
 
 }
 
@@ -262,7 +262,7 @@ sub _fill_buffer {
     my $counter = 0;
     my $working = 1;
     my $read    = 0;
-    my $timeout = $self->handle->timeout;
+    my $timeout = $self->timeout;
 
     $self->class->var('ERRNO', 0);
     $self->class->var('ERRSTR', '');
