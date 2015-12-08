@@ -89,12 +89,7 @@ sub session_shutdown {
 
     foreach my $client (keys $clients) {
 
-        if (defined($client->{'watchdog'})) {
-
-            $poe_kernel->alarm_remove($client->{'watchdog'});
-
-        }
-
+        $poe_kernel->alarm_remove($client->{'watchdog'});
         $client = undef;
 
     }
@@ -120,12 +115,7 @@ sub session_pause {
     foreach my $client (keys $clients) {
 
         $client->pause_input();
-
-        if (defined($client->{'watchdog'})) {
-
-            $poe_kernel->alarm_remove($client->{'watchdog'});
-
-        }
+        $poe_kernel->alarm_remove($client->{'watchdog'});
 
     }
 
