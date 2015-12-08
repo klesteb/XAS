@@ -41,7 +41,7 @@ BEGIN {
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Process' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::RPC::JSON::Client' )      || print "Bail out!\n";
-    use_ok( 'XAS::Lib::EPC::JSON::Server' )      || print "Bail out!\n";
+    use_ok( 'XAS::Lib::RPC::JSON::Server' )      || print "Bail out!\n";
     use_ok( 'XAS::Lib::Service' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::Set::Light' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client' )            || print "Bail out!\n";
