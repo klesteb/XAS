@@ -1,15 +1,14 @@
-package XAS::Lib::Mixins::JSON::Client;
+package XAS::Lib::RPC::JSON::Client;
 
 our $VERSION = '0.02';
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Base',
+  base      => 'XAS::Lib::Net::Client',
   utils     => ':validation dotid',
   codec     => 'JSON',
   constants => ':jsonrpc HASHREF',
-  mixins    => 'call',
 ;
 
 use Data::Dumper;
@@ -101,7 +100,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Mixins::JSON::Client - A mixin for a JSON RPC interface
+XAS::Lib::RPC::JSON::Client - A mixin for a JSON RPC interface
 
 =head1 SYNOPSIS
  
@@ -110,8 +109,7 @@ XAS::Lib::Mixins::JSON::Client - A mixin for a JSON RPC interface
  use XAS::Class
      debug   => 0,
      version => '0.01',
-     base    => 'XAS::Lib::Net::Client',
-     mixin   => 'XAS::Lib::Mixins::JSON::Client',
+     base    => 'XAS::Lib::RPC::JSON::Client',
  ;
 
  package main
@@ -137,6 +135,10 @@ This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specific
 doesn't support "Notification" calls.
 
 =head1 METHODS
+
+=head2 new
+
+This module inherits from L<XAS::Lib::Net::Client|XAS::Lib::Net::Client>.
 
 =head2 call
 

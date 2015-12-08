@@ -1,4 +1,4 @@
-package XAS::Lib::Mixins::JSON::Server;
+package XAS::Lib::RPC::JSON::Server;
 
 our $VERSION = '0.04';
 
@@ -9,18 +9,14 @@ use Set::Light;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
-  base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixins::Handlers',
+  base      => 'XAS::Lib::Net::Server',
   utils     => ':validation dotid',
   accessors => 'methods',
   codec     => 'JSON',
   constants => 'HASH ARRAY :jsonrpc ARRAYREF HASHREF',
-  mixins    => 'process_request process_response process_errors 
-                methods init_json_server rpc_exception_handler
-                rpc_request rpc_error rpc_result',
 ;
 
-my $errors = {
+my $ERRORS = {
     '-32700' => 'Parse Error',
     '-32600' => 'Invalid Request',
     '-32601' => 'Method not Found',
@@ -30,14 +26,10 @@ my $errors = {
     '-32001' => 'App Error',
 };
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
-# ----------------------------------------------------------------------
-
-# ----------------------------------------------------------------------
-# Public Events
 # ----------------------------------------------------------------------
 
 sub process_request {
@@ -61,13 +53,13 @@ sub process_request {
 
             foreach my $r (@$request) {
 
-                $self->rpc_request($r, $ctx);
+                $self->_rpc_request($r, $ctx);
 
             }
 
         } else {
 
-            $self->rpc_request($request, $ctx);
+            $self->_rpc_request($request, $ctx);
 
         }
 
@@ -94,7 +86,7 @@ sub process_response {
 
     $self->log->debug("$alias: entering process_response");
 
-    $json = $self->rpc_result($ctx->{'id'}, $output);
+    $json = $self->_rpc_result($ctx->{'id'}, $output);
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
@@ -112,13 +104,17 @@ sub process_errors {
 
     $self->log->debug("$alias: entering process_errors");
 
-    $json = $self->rpc_error($ctx->{'id'}, $error->{'code'}, $error->{'message'});
+    $json = $self->_rpc_error($ctx->{'id'}, $error->{'code'}, $error->{'message'});
 
     $poe_kernel->post($alias, 'client_output', encode($json), $ctx);
 
 }
 
-sub rpc_exception_handler {
+# ----------------------------------------------------------------------
+# Private Methods
+# ----------------------------------------------------------------------
+
+sub _rpc_exception_handler {
     my $self = shift;
     my ($ex, $id) = validate_params(\@_, [1,1]);
 
@@ -179,7 +175,7 @@ sub rpc_exception_handler {
 
 }
 
-sub rpc_request {
+sub _rpc_request {
     my $self = shift;
     my ($request, $ctx) = validate_params(\@_, [
         { type => HASHREF },
@@ -237,7 +233,7 @@ sub rpc_request {
 
 }
 
-sub rpc_error {
+sub _rpc_error {
     my $self = shift;
     my ($id, $code, $message) = validate_params(\@_, [1,1,1]);
 
@@ -246,14 +242,14 @@ sub rpc_error {
         id      => $id,
         error   => {
             code    => $code,
-            message => $errors->{$code},
+            message => $ERRORS->{$code},
             data    => $message
         }
     };
 
 }
 
-sub rpc_result {
+sub _rpc_result {
     my $self = shift;
     my ($id, $result) = validate_params(\@_, [1,1]);
 
@@ -265,24 +261,14 @@ sub rpc_result {
 
 }
 
-# ----------------------------------------------------------------------
-# Private Methods
-# ----------------------------------------------------------------------
+sub init {
+    my $class = shift;
 
-sub init_json_server {
-    my $self = shift;
-    my ($methods) = validate_params(\@_, [
-        { type => ARRAYREF }
-    ]);
+    my $self = $class->SUPER::init(@_);
 
     $self->{'methods'} = Set::Light->new();
 
-    foreach my $method (@$methods) {
-
-        $self->log->debug("method = $method");
-        $self->methods->insert($method);
-
-    }
+    return $self;
 
 }
 
@@ -292,7 +278,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Mixins::JSON::Server - A mixin for a simple JSON RPC server
+XAS::Lib::RPC::JSON::Server - A mixin for a simple JSON RPC server
 
 =head1 SYNOPSIS
 

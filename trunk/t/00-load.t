@@ -28,8 +28,6 @@ BEGIN {
     use_ok( 'XAS::Lib::Mixins::Configs' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Handlers' )       || print "Bail out!\n";
     use_ok( 'XAS::Lib::Mixins::Keepalive' )      || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Mixins::JSON::Client' )   || print "Bail out!\n";
-    use_ok( 'XAS::Lib::Mixins::JSON::Server' )   || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Alerts' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Email' )         || print "Bail out!\n";
     use_ok( 'XAS::Lib::Modules::Environment' )   || print "Bail out!\n";
@@ -42,6 +40,8 @@ BEGIN {
     use_ok( 'XAS::Lib::POE::Service' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::POE::Session' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Process' )                || print "Bail out!\n";
+    use_ok( 'XAS::Lib::RPC::JSON::Client' )      || print "Bail out!\n";
+    use_ok( 'XAS::Lib::EPC::JSON::Server' )      || print "Bail out!\n";
     use_ok( 'XAS::Lib::Service' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::Set::Light' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::SSH::Client' )            || print "Bail out!\n";

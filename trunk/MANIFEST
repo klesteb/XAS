@@ -48,8 +48,6 @@ lib/XAS/Lib/Mixins/Bufops.pm
 lib/XAS/Lib/Mixins/Configs.pm
 lib/XAS/Lib/Mixins/Handlers.pm
 lib/XAS/Lib/Mixins/Keepalive.pm
-lib/XAS/Lib/Mixins/JSON/Client.pm
-lib/XAS/Lib/Mixins/JSON/Server.pm
 lib/XAS/Lib/Modules/Alerts.pm
 lib/XAS/Lib/Modules/Email.pm
 lib/XAS/Lib/Modules/Environment.pm
@@ -66,6 +64,8 @@ lib/XAS/Lib/POE/Session.pm
 lib/XAS/Lib/Process.pm
 lib/XAS/Lib/Process/Unix.pm
 lib/XAS/Lib/Process/Win32.pm
+lib/XAS/Lib/RPC/JSON/Client.pm
+lib/XAS/Lib/RPC/JSON/Server.pm
 lib/XAS/Lib/Set/Light.pm
 lib/XAS/Lib/Service.pm
 lib/XAS/Lib/Service/Unix.pm

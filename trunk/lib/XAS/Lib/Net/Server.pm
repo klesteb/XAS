@@ -87,7 +87,7 @@ sub session_shutdown {
 
     $self->log->debug("$alias: entering session_shutdown()");
 
-    while (my $client = keys %$clients) {
+    foreach my $client (keys %$clients) {
 
         $poe_kernel->alarm_remove($client->{'watchdog'});
         $client = undef;
@@ -112,7 +112,7 @@ sub session_pause {
 
     $self->log->debug("$alias: entering session_pause()");
 
-    while (my $wheel = keys %$clients) {
+    foreach my $wheel (keys %$clients) {
 
         $wheel->pause_input();
         $poe_kernel->alarm_remove($wheel->{'watchdog'});
