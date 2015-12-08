@@ -26,7 +26,7 @@ my $ERRORS = {
     '-32001' => 'App Error',
 };
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
