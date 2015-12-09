@@ -45,58 +45,73 @@ sub call {
     $self->log->debug(Dumper($packet));
 
     $self->puts(encode($packet));
-    $response = $self->gets();
-    
-    $self->log->debug(Dumper($response));
 
-    $response = decode($response);
+    if ($response = $self->gets()) {
 
-    $self->log->debug(Dumper($response));
+        $response = decode($response);
+        $self->log->debug(Dumper($response));
 
-    if ($response->{'id'} eq $p->{'id'}) {
+        if ($response->{'id'} eq $p->{'id'}) {
 
-        if ($response->{'error'}) {
+            $self->_check_for_errors($response);
+            return $response->{'result'};
 
-            if ($response->{'error'}->{'code'} eq RPC_ERR_APP) {
+        } else {
 
-                my ($type, $info) = split(' - ', $response->{'error'}->{'data'});
-
-                $self->throw_msg(
-                    $type,
-                    'json_rpc_errorapp',
-                    $info
-                );
-
-            } else {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.client.rpc_error',
-                    'json_rpc_error',
-                    $response->{error}->{code},
-                    $response->{error}->{message},
-                    $response->{error}->{data}
-                );
-
-            }
+            $self->throw_msg(
+                dotid($self->class) . '.client.invalid_id',
+                'rpc_invalid_id',
+            );
 
         }
-
+        
     } else {
-
+        
         $self->throw_msg(
-            dotid($self->class) . '.client.invalid_id',
-            'rpc_invalid_id',
+            dotid($self->class) . '.client.invalid_response',
+            'rpc_invalid_response',
+            $p->{'method'}
         );
 
     }
-
-    return $response->{'result'};
 
 }
 
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
+
+sub _check_for_errors {
+    my $self = shift;
+    my $response = shift;
+    
+    if ($response->{'error'}) {
+
+        if ($response->{'error'}->{'code'} eq RPC_ERR_APP) {
+
+            my ($type, $info) = split(' - ', $response->{'error'}->{'data'});
+
+            $self->throw_msg(
+                $type,
+                'json_rpc_errorapp',
+                $info
+            );
+
+        } else {
+
+            $self->throw_msg(
+                dotid($self->class) . '.client.rpc_error',
+                'json_rpc_error',
+                $response->{'error'}->{'code'},
+                $response->{'error'}->{'message'},
+                $response->{'error'}->{'data'}
+            );
+
+        }
+
+    }
+
+}
 
 1;
 

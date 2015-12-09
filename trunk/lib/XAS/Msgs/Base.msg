@@ -37,6 +37,7 @@ json_rpc_batch               = the usage of json-rpc batch mode is not supported
 json_rpc_notify              = the usage of json-rpc notifications is not supported
 json_rpc_error               = error code: %s, reason: %s, extended: %s
 json_rpc_invalid_id          = the returned id doesn't match the supplied id
+json_rpc_invalid_response    = no response for the method call: %s
 json_rpc_errorapp            = %s
 lock_dir_error               = unable to acquire a lock on %s
 lock_broken                  = lock "%s" has been broken
