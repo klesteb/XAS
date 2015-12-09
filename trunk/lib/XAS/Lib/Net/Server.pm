@@ -330,7 +330,7 @@ sub _client_output {
 
     try {
 
-        if (defined($wheel)) {
+        if (defined($wheel) and defined($self->clients->{$wheel})) {
 
             # emulate IO::Socket connected() method. this method
             # calls getpeername(). getpeername() returns undef when
