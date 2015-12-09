@@ -60,7 +60,7 @@ sub call {
 
             $self->throw_msg(
                 dotid($self->class) . '.client.invalid_id',
-                'rpc_invalid_id',
+                'json_rpc_invalid_id',
             );
 
         }
@@ -69,7 +69,7 @@ sub call {
         
         $self->throw_msg(
             dotid($self->class) . '.client.invalid_response',
-            'rpc_invalid_response',
+            'json_rpc_invalid_response',
             $p->{'method'}
         );
 
@@ -87,7 +87,9 @@ sub _check_for_errors {
     
     if ($response->{'error'}) {
 
-        if ($response->{'error'}->{'code'} eq RPC_ERR_APP) {
+        my $errno = $response->{'error'}->{'code'} + 0;
+
+        if ($errno eq RPC_ERR_APP) {
 
             my ($type, $info) = split(' - ', $response->{'error'}->{'data'});
 
@@ -102,9 +104,9 @@ sub _check_for_errors {
             $self->throw_msg(
                 dotid($self->class) . '.client.rpc_error',
                 'json_rpc_error',
-                $response->{'error'}->{'code'},
-                $response->{'error'}->{'message'},
-                $response->{'error'}->{'data'}
+                $response->{'error'}->{'code'} || '',
+                $response->{'error'}->{'message'} || '',
+                $response->{'error'}->{'data'} || '',
             );
 
         }
