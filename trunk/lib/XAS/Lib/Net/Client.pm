@@ -289,7 +289,7 @@ sub _fill_buffer {
                     my $errno  = $! + 0;
                     my $errstr = $!;
 
-                    $self->log->debug("get: errno = $errno");
+                    $self->log->debug("fill_buffer: errno = $errno");
 
                     if ($errno == EAGAIN) {
 
@@ -302,7 +302,7 @@ sub _fill_buffer {
                         $self->class->var('ERRSTR', $errstr);
 
                         $self->throw_msg(
-                            dotid($self->class) . '.get',
+                            dotid($self->class) . '.fill_buffer',
                             'net_client_network',
                             $errstr
                         );

@@ -59,7 +59,7 @@ sub call {
         } else {
 
             $self->throw_msg(
-                dotid($self->class) . '.client.invalid_id',
+                dotid($self->class) . '.call.invalid_id',
                 'json_rpc_invalid_id',
             );
 
@@ -68,7 +68,7 @@ sub call {
     } else {
         
         $self->throw_msg(
-            dotid($self->class) . '.client.invalid_response',
+            dotid($self->class) . '.call.invalid_response',
             'json_rpc_invalid_response',
             $p->{'method'}
         );
@@ -84,32 +84,16 @@ sub call {
 sub _check_for_errors {
     my $self = shift;
     my $response = shift;
-    
+
     if ($response->{'error'}) {
 
-        my $errno = $response->{'error'}->{'code'} + 0;
-
-        if ($errno eq RPC_ERR_APP) {
-
-            my ($type, $info) = split(' - ', $response->{'error'}->{'data'});
-
-            $self->throw_msg(
-                $type,
-                'json_rpc_errorapp',
-                $info
-            );
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.client.rpc_error',
-                'json_rpc_error',
-                $response->{'error'}->{'code'} || '',
-                $response->{'error'}->{'message'} || '',
-                $response->{'error'}->{'data'} || '',
-            );
-
-        }
+        $self->throw_msg(
+            dotid($self->class) . '.call.rpc_error',
+            'json_rpc_error',
+            $response->{'error'}->{'code'} || '',
+            $response->{'error'}->{'message'} || '',
+            $response->{'error'}->{'data'} || '',
+        );
 
     }
 
@@ -152,8 +136,8 @@ XAS::Lib::RPC::JSON::Client - A mixin for a JSON RPC interface
  
 =head1 DESCRIPTION
 
-This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> client as a mixin. It 
-doesn't support "Notification" calls.
+This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> client. 
+It doesn't support "Notification" calls.
 
 =head1 METHODS
 

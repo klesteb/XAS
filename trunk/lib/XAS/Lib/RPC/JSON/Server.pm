@@ -130,24 +130,24 @@ sub _rpc_exception_handler {
 
             if ($type =~ /server\.rpc_method$/) {
 
-                $packet = $self->rpc_error($id, RPC_ERR_METHOD, $info);
+                $packet = $self->_rpc_error($id, RPC_ERR_METHOD, $info);
 
             } elsif ($type =~ /server\.rpc_version$/) {
 
-                $packet = $self->rpc_error($id, RPC_ERR_REQ, $info);
+                $packet = $self->_rpc_error($id, RPC_ERR_REQ, $info);
 
             } elsif ($type =~ /server\.rpc_format$/) {
 
-                $packet = $self->rpc_error($id, RPC_ERR_PARSE, $info);
+                $packet = $self->_rpc_error($id, RPC_ERR_PARSE, $info);
 
             } elsif ($type =~ /server\.rpc_notify$/) {
 
-                $packet = $self->rpc_error($id, RPC_ERR_INTERNAL, $info);
+                $packet = $self->_rpc_error($id, RPC_ERR_INTERNAL, $info);
 
             } else {
 
                 my $msg = $type . ' - ' . $info;
-                $packet = $self->rpc_error($id, RPC_ERR_APP, $msg);
+                $packet = $self->_rpc_error($id, RPC_ERR_APP, $msg);
 
             }
 
@@ -157,7 +157,7 @@ sub _rpc_exception_handler {
 
             my $msg = sprintf("%s", $ex);
 
-            $packet = $self->rpc_error($id, RPC_ERR_SERVER, $msg);
+            $packet = $self->_rpc_error($id, RPC_ERR_SERVER, $msg);
             $self->log->error_msg('unexpected', $msg);
 
         }
@@ -166,7 +166,7 @@ sub _rpc_exception_handler {
 
         my $msg = sprintf("%s", $ex);
 
-        $packet = $self->rpc_error($id, RPC_ERR_APP, $msg);
+        $packet = $self->_rpc_error($id, RPC_ERR_APP, $msg);
         $self->log->error_msg('unexpected', $msg);
 
     }
@@ -226,7 +226,7 @@ sub _rpc_request {
 
         my $ex = $_;
 
-        my $output = $self->rpc_exception_handler($ex, $request->{'id'});
+        my $output = $self->_rpc_exception_handler($ex, $request->{'id'});
         $poe_kernel->post($alias, 'client_output', encode($output), $ctx);
 
     };
