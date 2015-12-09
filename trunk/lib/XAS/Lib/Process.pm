@@ -72,6 +72,13 @@ sub session_initialize {
     $poe_kernel->state('poll_child',   $self, '_poll_child');
     $poe_kernel->state('child_exit',   $self, '_child_exit');
 
+    $poe_kernel->state('start_process',  $self, '_start_process');
+    $poe_kernel->state('stop_process',   $self, '_stop_process');
+    $poe_kernel->state('pause_process',  $self, '_pause_process');
+    $poe_kernel->state('resume_process', $self, '_resume_process');
+    $poe_kernel->state('kill_process',   $self, '_kill_process');
+
+
     # walk the chain
 
     $self->SUPER::session_initialize();
@@ -85,20 +92,14 @@ sub session_initialize {
 sub session_startup {
     my $self = shift;
 
-    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_startup()");
 
     if ($self->auto_start) {
 
-        if ($self->status == PROC_STOPPED) {
-
-            $self->start_process();
-            $poe_kernel->post($alias, 'check_status', $count);
-
-        }
-
+        $poe_kernel->call($alias, 'start_process');
+        
     }
 
     # walk the chain
@@ -112,14 +113,12 @@ sub session_startup {
 sub session_pause {
     my $self = shift;
 
-    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_pause()");
 
-    $self->pause_process();
-    $poe_kernel->post($alias, 'check_status', $count);
-
+    $poe_kernel->call($alias, 'pause_process');
+    
     # walk the chain
 
     $self->SUPER::session_pause();
@@ -136,8 +135,7 @@ sub session_resume {
 
     $self->log->debug("$alias: entering session_resume()");
 
-    $self->resume_process();
-    $poe_kernel->post($alias, 'check_status', $count);
+    $poe_kernel->call($alias, 'resume_process');
 
     # walk the chain
 
@@ -249,6 +247,65 @@ sub DESTROY {
 # ----------------------------------------------------------------------
 # Private Events
 # ----------------------------------------------------------------------
+
+sub _start_process {
+    my $self = $_[OBJECT];
+
+    my $count = 1;
+    my $alias = $self->alias;
+
+    if ($self->status == PROC_STOPPED) {
+
+        $self->start_process();
+        $poe_kernel->post($alias, 'check_status', $count);
+
+    }
+
+}
+
+sub _resume_process {
+    my $self = $_[OBJECT];
+
+    my $count = 1;
+    my $alias = $self->alias;
+
+    $self->resume_process();
+    $poe_kernel->post($alias, 'check_status', $count);
+
+}
+
+sub _pause_process {
+    my $self = $_[OBJECT];
+
+    my $count = 1;
+    my $alias = $self->alias;
+
+    $self->pause_process();
+    $poe_kernel->post($alias, 'check_status', $count);
+
+}
+
+sub _stop_process {
+    my $self = $_[OBJECT];
+
+    my $count = 1;
+    my $alias = $self->alias;
+
+    $self->stop_process();
+    $poe_kernel->post($alias, 'check_status', $count);
+
+}
+
+sub _kill_process {
+    my $self = $_[OBJECT];
+
+    my $count = 1;
+    my $alias = $self->alias;
+
+    $self->kill_process();
+    $poe_kernel->post($alias, 'check_status', $count);
+
+}
 
 sub _get_event {
     my ($self, $output, $wheel) = @_[OBJECT,ARG0,ARG1];
