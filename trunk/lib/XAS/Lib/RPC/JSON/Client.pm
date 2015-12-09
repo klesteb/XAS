@@ -42,8 +42,12 @@ sub call {
         params  => $params
     };
 
+    $self->log->debug(Dumper($packet));
+
     $self->puts(encode($packet));
     $response = $self->gets();
+    
+    $self->log->debug(Dumper($response));
 
     $response = decode($response);
 
