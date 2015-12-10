@@ -130,7 +130,6 @@ sub session_pause {
 sub session_resume {
     my $self = shift;
 
-    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_resume()");
@@ -166,16 +165,14 @@ sub session_stop {
 sub session_shutdown {
     my $self = shift;
 
-    my $count = 1;
     my $alias = $self->alias;
 
     $self->log->debug("$alias: entering session_shutdown()");
 
     $self->status(PROC_SHUTDOWN);
-    $self->stop_process();
 
+    $poe_kernel->call($alias, 'stop_process');
     $poe_kernel->sig_handled();
-    $poe_kernel->post($alias, 'check_status', $count);
   
     # walk the chain
 
