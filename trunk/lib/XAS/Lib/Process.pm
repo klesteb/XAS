@@ -413,7 +413,6 @@ sub _close_event {
 sub _child_exit {
     my ($self, $signal, $pid, $exitcode) = @_[OBJECT,ARG0...ARG2];
 
-    my $count   = 1;
     my $alias   = $self->alias;
     my $status  = $self->status;
     my $retries = $self->retries;
@@ -435,8 +434,7 @@ sub _child_exit {
 
                 if ($self->exit_codes->has($self->exit_code)) {
 
-                    $self->start_process();
-                    $poe_kernel->post($alias, 'check_status', $count);
+                    $poe_kernel->call($alias, 'start_process');
 
                 } else {
 
