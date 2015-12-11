@@ -19,15 +19,13 @@ use XAS::Class
   filesystem => 'Dir File',
   exports => {
     all => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
-            load_module bool init_module load_module compress exitcode 
-            kill_proc spawn _do_fork glob2regex dir_walk
+            load_module bool compress exitcode _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
             stat2text',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
-            load_module bool init_module load_module compress exitcode 
-            kill_proc spawn _do_fork glob2regex dir_walk
+            load_module bool compress exitcode _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
@@ -35,9 +33,9 @@ use XAS::Class
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
-      modules    => 'init_module load_module',
+      modules    => 'load_module',
       strings    => 'trim ltrim rtrim compress left right mid instr',
-      process    => 'daemonize spawn kill_proc exitcode _do_fork',
+      process    => 'daemonize exitcode run_cmd _do_fork',
       boolean    => 'is_truthy is_falsey bool',
       validation => 'validate_params validation_exception',
     }
@@ -288,121 +286,6 @@ sub bool {
 
 }
 
-sub spawn {
-    my $p = validate_params(\@_, {
-        -command => 1,
-        -timeout => { optional => 1, default => 0 },
-    });
-
-    local $SIG{ALRM} = sub {
-        my $sig_name = shift;
-        die "$sig_name";
-    };
-
-    my $kid;
-    my @output;
-
-    defined( my $pid = open($kid, "-|" ) ) or do {
-
-        my $ex = XAS::Exception->new(
-            info => "unable to fork, reason: $!",
-            type => 'xas.utils.spawn'
-        );
-
-        $ex->throw;
-
-    };
-
-    if ($pid) {
-
-        # parent
-
-        try {
-
-            alarm( $p->{'timeout'} );
-
-            while (<$kid>) {
-
-                chomp;
-                push(@output, $_);
-
-            }
-
-            alarm(0);
-
-        } catch {
-
-            my $ex = $_;
-
-            alarm(0);
-
-            if ($ex =~ /alrm/i) {
-
-                unless (kill_proc(-signal => 'TERM', -pid => $pid)) {
-
-                    unless (kill_proc(-signal => 'KILL', -pid => $pid)) {
-
-                        my $ex = XAS::Exception->new(
-                            type => 'xas.utils.spawn',
-                            info => 'unable to kill ' . $pid
-                        );
-
-                        $ex->throw;
-
-                    }
-
-                }
-
-            } else {
-
-                die $ex;
-
-            }
-
-        };
-
-    } else {
-
-        # child
-
-        # set the child process to be a group leader, so that
-        # kill -9 will kill it and all its descendents
-
-        setpgrp(0, 0);
-        exec $p->{'command'};
-        exit;
-
-    }
-
-    wantarray ? @output : join( "\n", @output );
-
-}
-
-sub kill_proc {
-    my $p = validate_params(\@_, {
-        -signal => 1,
-        -pid    => 1,
-    });
-
-    my $time = 10;
-    my $status = 0;
-    my $pid = $p->{'pid'};
-    my $signal = $p->{'signal'};
-
-    kill($signal, $pid);
-
-    do {
-
-        sleep 1;
-        $status = waitpid($pid, WNOHANG);
-        $time--;
-
-    } while ($time && not $status);
-
-    return $status;
-
-}
-
 sub exitcode {
 
     my $rc  = $? >> 8;      # return code of command
@@ -452,7 +335,7 @@ sub daemonize {
 
 sub db2dt {
     my ($p) = validate_params(\@_, [
-        { regex => qr/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ }
+        { regex => qr/\d{4}-\d{2}-\d{2}.\d{2}:\d{2}:\d{2}/ }
     ]);
 
     my $parser = DateTime::Format::Strptime->new(
@@ -488,41 +371,6 @@ sub run_cmd {
     my ($rc, $sig) = exitcode();
 
     return \@output, $rc, $sig;
-
-}
-
-sub init_module {
-    my ($module, $params) = validate_params(@_, [ 
-        1, 
-        { optional => 1, type => HASHREF, default => {} }
-    ]);
-
-    my $obj;
-    my @parts;
-    my $filename;
-
-    @parts = split("::", $module);
-    $filename = File(@parts);
-
-    try {
-
-        require $filename . '.pm';
-        $module->import();
-        $obj = $module->new($params);
-
-    } catch {
-
-        my $x = $_;
-        my $ex = XAS::Exception->new(
-            type => 'xas.utils.init_module',
-            info => $x
-        );
-
-        $ex->throw;
-
-    };
-
-    return $obj;
 
 }
 
@@ -764,29 +612,13 @@ Return the position in $string of $compare. You may offset within the
 string with $start. Useful for porting VBS code. Makes allowances that
 VBS strings are one based while Perls are zero based.
 
-=head2 spawn
-
-Run a cli command with timeout. Returns output from that command.
-
-=over 4
-
-=item B<-command>
-
-The command string to run.
-
-=item B<-timeout>
-
-An optional timeout in seconds. Default is none.
-
-=back
-
 =head2 exitcode
 
 Decodes Perls version of the exit code from a cli process. Returns two items.
 
  Example:
 
-     my @output = spawn(-command => "ls -l");
+     my @output = `ls -l`;
      my ($rc, $sig) = exitcode();
 
 =head2 run_cmd($command)
@@ -796,7 +628,16 @@ is merged with stdout.
 
  Example:
  
-     my (@output, $rc, $sig) = run_cmd("ls -l");
+     my ($output, $rc, $sig) = run_cmd("ls -l");
+     if ($rc == 0) {
+
+         foreach my $line (@$output) {
+
+             print $line;
+
+         }
+
+     }
 
 =head2 daemonize
 
@@ -874,23 +715,6 @@ The callback to execute when matching files are found.
 
 =back
 
-=head2 init_module($module, $options)
-
-This routine will load and initialize a module. It takes one required parameter
-and one optinal parameter.
-
-=over 4
-
-=item B<$module>
-
-The name of the module.
-
-=item B<$options>
-
-A hashref of optional options to use with the module.
-
-=back
-
 =head2 load_module($module)
 
 This routine will load a module. 
@@ -911,7 +735,15 @@ This will convert the numeric process status to a text string.
 
 =item B<$stat>
 
-A number between 1 and 6.
+A number between 0 and 6.
+
+ 0 = 'unknown'
+ 1 = 'other'
+ 2 = 'ready'
+ 3 = 'running'
+ 4 = 'blocked'
+ 5 = 'suspended blocked'
+ 6 = 'suspended ready'
 
 =back
 
@@ -924,6 +756,13 @@ This will convert a XAS log level to an appropriate syslog priority.
 =item B<$level>
 
 A XAS log level, it should be lowercased.
+
+ info  = 'info',
+ error = 'err',
+ warn  = 'warning',
+ fatal = 'alert',
+ trace = 'notice',
+ debug = 'debug'
 
 =back
 

@@ -70,6 +70,9 @@ lib/XAS/Lib/Set/Light.pm
 lib/XAS/Lib/Service.pm
 lib/XAS/Lib/Service/Unix.pm
 lib/XAS/Lib/Service/Win32.pm
+lib/XAS/Lib/Spawn.pm
+lib/XAS/Lib/Spawn/Unix.pm
+lib/XAS/Lib/Spawn/Win32.pm
 lib/XAS/Lib/SSH/Client.pm
 lib/XAS/Lib/SSH/Client/Exec.pm
 lib/XAS/Lib/SSH/Client/Shell.pm
