@@ -58,14 +58,14 @@ changeme - the great new changeme procedure
 changeme [--help] [--debug] [--manual] [--version]
 
  options:
-   --help        outputs simple help text
-   --manual      outputs the procedures manual
-   --version     outputs the apps version
-   --debug       toogles debugging output
-   --alerts      toogles alert notifications
-   --log-file    name of the log file 
-   --log-type    toggles the log type
-   --log-facilty changes the log facility
+   --help         outputs simple help text
+   --manual       outputs the procedures manual
+   --version      outputs the apps version
+   --debug        toogles debugging output
+   --alerts       toogles alert notifications
+   --log-file     name of the log file 
+   --log-type     toggles the log type
+   --log-facility changes the log facility
 
 =head1 DESCRIPTION
 
