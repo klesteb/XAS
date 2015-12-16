@@ -548,6 +548,16 @@ error occurs. The default is 5 times.
 
 =over 4
 
+=item L<XAS::Lib::SSH::Server|XAS::Lib::SSH::Server>
+
+=item L<XAS::Lib::SSH::Client::Exec|XAS::Lib::SSH::Client::Exec>
+
+=item L<XAS::Lib::SSH::Client::Shell|XAS::Lib::SSH::Client::Shell>
+
+=item L<XAS::Lib::SSH::Client::Subsystem|XAS::Lib::SSH::Client::Subsystem>
+
+=item L<Net::SSH2|https://metacpan.org/pod/Net::SSH2>
+
 =item L<XAS|XAS>
 
 =back
@@ -558,11 +568,10 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
 of the license at http://www.perlfoundation.org/artistic_license_2_0.
 
 =cut
-
