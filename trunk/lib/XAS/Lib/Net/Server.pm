@@ -611,6 +611,10 @@ The POE wheel to use.
 
 =over 4
 
+=item L<XAS::Lib::Net::Client|XAS::Lib::Net::Client>
+
+=item L<XAS::Lib::Net::POE::Client|XAS::Lib::Net::POE::Client>
+
 =item L<POE::Filter::Line|https://metacpan.org/pod/POE::Filter::Line>
 
 =item L<XAS|XAS>
@@ -623,7 +627,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

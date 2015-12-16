@@ -565,12 +565,12 @@ namespace.
 =head2 db2dt($datestring)
 
 This routine will take a date format of YYYY-MM-DD HH:MM:SS and convert it
-into a DateTime object.
+into a L<DateTime|https://metacpan.org/pod/DateTime> object.
 
 =head2 dt2db($datetime)
 
-This routine will take a DateTime object and convert it into the following
-string: YYYY-MM-DD HH:MM:SS
+This routine will take a L<DateTime|https://metacpan.org/pod/DateTime>
+object and convert it into the following string: YYYY-MM-DD HH:MM:SS
 
 =head2 trim($string)
 
@@ -755,7 +755,7 @@ This will convert a XAS log level to an appropriate syslog priority.
 
 =item B<$level>
 
-A XAS log level, it should be lowercased.
+A XAS log level, it should be lower cased.
 
  info  = 'info',
  error = 'err',
@@ -789,7 +789,7 @@ Store all the items from a hash variable into the $ENV varable.
 
 =head2 env_parse
 
-Take a formated string and parse it into a hash variable. The string must have
+Take a formatted string and parse it into a hash variable. The string must have
 this format: "item=value;;item2=value2";
 
   Example:
@@ -799,7 +799,7 @@ this format: "item=value;;item2=value2";
 
 =head2 env_dump
 
-Take the items from the current $ENV variable and create a formated string.
+Take the items from the current $ENV variable and create a formatted string.
 
   Example:
     my $string = env_dump();
@@ -821,7 +821,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

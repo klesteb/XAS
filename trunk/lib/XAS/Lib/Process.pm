@@ -702,11 +702,11 @@ This method initialized the module and takes the following parameters:
 
 =item B<-auto_start>
 
-This indicates wither to autostart the process. The default is true.
+This indicates wither to auto start the process. The default is true.
 
 =item B<-auto_restart>
 
-This indicates wither to restart the process if it exits. The default
+This indicates wither to auto restart the process if it exits. The default
 is true.
 
 =item B<-command>
@@ -720,7 +720,7 @@ directory of the parent process.
 
 =item B<-environment>
 
-Optional, addtitional environment variables to provide to the process.
+Optional, additional environment variables to provide to the process.
 The default is none.
 
 =item B<-exit_codes>
@@ -783,7 +783,7 @@ The optional output filter to use. Defaults to POE::Filter::Line.
 =item B<-output_handler>
 
 This is an optional coderef to handle output from the process. The coderef
-takes on parameter, they output from the command.
+takes one parameter, the output from the process.
 
 =back
 
@@ -797,6 +797,10 @@ This method will write a buffer to stdin.
 
 =over 4
 
+=item L<XAS::Lib::Process::Unix|XAS::Lib::Process::Unix>
+
+=item L<XAS::Lib::Process::Win32|XAS::Lib::Process::Win32>
+
 =item L<XAS|XAS>
 
 =back
@@ -807,7 +811,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

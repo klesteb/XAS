@@ -110,10 +110,6 @@ The following section describes how this environment works.
 
 =item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
 
-=item L<XAS::Lib::Mixins::JSON::Client|XAS::Lib::Mixins::JSON::Client>
-
-=item L<XAS::Lib::Mixins::JSON::Server|XAS::Lib::Mixins::JSON::Server>
-
 =item L<XAS::Lib::Mixins::Keepalive|XAS::Lib::Mixins::Keepalive>
 
 =item L<XAS::Lib::Modules::Alerts|XAS::Lib::Modules::Alerts>
@@ -148,11 +144,21 @@ The following section describes how this environment works.
 
 =item L<XAS::Lib::Process::Win32|XAS::Lib::Process::Win32>
 
+=item L<XAS::Lib::RPC::JSON::Client|XAS::Lib::RPC::JSON::Client>
+
+=item L<XAS::Lib::RPC::JSON::Server|XAS::Lib::RPC::JSON::Server>
+
 =item L<XAS::Lib::Service|XAS::Lib::Service>
 
 =item L<XAS::Lib::Service::Unix|XAS::Lib::Service::Unix>
 
 =item L<XAS::Lib::Service::Win32|XAS::Lib::Service::Win32>
+
+=item L<XAS::Lib::Spawn|XAS::Lib::Spawn>
+
+=item L<XAS::Lib::Spawn::Unix|XAS::Lib::Spawn::Unix>
+
+=item L<XAS::Lib::Spawn::Win32|XAS::Lib::Spawn::Win32>
 
 =item L<XAS::Lib::SSH::Client|XAS::Lib::SSH::Client>
 
@@ -188,7 +194,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

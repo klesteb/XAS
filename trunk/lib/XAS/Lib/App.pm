@@ -359,7 +359,7 @@ types can be one of the following "console", "file", "json" or "syslog".
 What log facility class to use. This follows syslog convention. By default 
 the facility is "local6".
 
-=head2 --logfile
+=head2 --log-file
 
 The name of the log file. When --logfile is specified, it implies a log type 
 of "file".
@@ -367,6 +367,14 @@ of "file".
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::App::Daemon|XAS::Lib::App::Daemon>
+
+=item L<XAS::Lib::App::Service|XAS::Lib::App::Service>
+
+=item L<XAS::Lib::App::Service::Unix|XAS::Lib::App::Service::Unix>
+
+=item L<XAS::Lib::App::Service::Win32|XAS::Lib::App::Service::Win32>
 
 =item L<XAS|XAS>
 
@@ -378,7 +386,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

@@ -151,7 +151,7 @@ documentation.
 =head2 define_pidfile
 
 This method sets up the pid file for the process. By default, this file
-is named $XAS_RUN/<$0>.pid. This can be overridden by the --pidfile option.
+is named $XAS_RUN/<$0>.pid. This can be overridden by the --pid-file option.
 
 =head2 define_signals
 
@@ -182,6 +182,8 @@ Become a daemon.
 
 =over 4
 
+=item L<XAS::Lib::App|XAS::Lib::App>
+
 =item L<XAS|XAS>
 
 =back
@@ -192,7 +194,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

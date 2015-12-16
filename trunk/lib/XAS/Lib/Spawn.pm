@@ -208,6 +208,10 @@ Start the process. It returns the pid of that process.
 
 =over 4
 
+=item L<XAS::Lib::Spawn::Unix|XAS::Lib::Spawn::Unix>
+
+=item L<XAS::Lib::Spawn::Win32|XAS::Lib::Spawn::Win32>
+
 =item L<XAS::Lib::Process|XAS::Lib::Process>
 
 =item L<XAS|XAS>

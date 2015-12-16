@@ -383,6 +383,14 @@ The line to write out. This can be an array which will be joined with a
 
 =over 4
 
+=item L<XAS::Lib::Log::Console|XAS::Lib::Log::Console>
+
+=item L<XAS::Lib::Log::File|XAS::Lib::Log::File>
+
+=item L<XAS::Lib::Log::Json|XAS::Lib::Log::Json>
+
+=item L<XAS::Lib::Log::Syslog|XAS::Lib::Log::Syslog>
+
 =item L<XAS|XAS>
 
 =back
@@ -393,7 +401,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

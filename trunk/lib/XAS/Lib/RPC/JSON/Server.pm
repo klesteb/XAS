@@ -288,52 +288,39 @@ XAS::Lib::RPC::JSON::Server - A mixin for a simple JSON RPC server
  use XAS::Class
    debug   => 0,
    version => '0.01',
-   base    => 'XAS::Lib::Net::Server'
-   mixin   => 'XAS::Lib::Mixins::JSON::Server XAS::Lib::Mixins::Keepalive',
-   vars => {
-     PARAMS => {
-       -port          => { optional => 1, default => 9500 },
-       -tcp_keepalive => { optional => 1, default => 0 }
-     }
-   }
+   base    => 'XAS::Lib::RPC::JSON::Server'
  ;
 
- sub handle_connection {
-     my ($self, $wheel) = @_[OBJECT, ARG0];
+ sub session_initialize {
+     my $self = shift;
 
-     if (my $socket = $self->{clients}->{$wheel}->{socket}) {
+     my $alias = $self->alias;
 
-         if ($self->tcp_keepalive) {
+     $self->log->debug("$alias: entering session_initialize()");
 
-             $self->log->info("keepalive enabled");
-             $self->init_keepalive();
-             $self->enable_keepalive($socket);
+     # define our events.
 
-         }
+     $poe_kernel->state('echo', $self, '_echo');
 
-     }
+     # define the RPC methods, these are linked to the above events
+
+     $self->methods->insert('echo');
+
+     # walk the chain
+
+     $self->SUPER::session_initialize();
+
+     $self->log->debug("$alias: leaving session_initialize()");
 
  }
 
- sub echo {
+ sub _echo {
      my ($self, $params, $ctx) = @_[OBJECT, ARGO, ARG1];
 
      my $alias = $self->alias;
-     my $line  = $params->{line};
+     my $line  = $params->{'line'};
 
-     $poe_kernel->post($alias, 'process_response', $line, $ctx);
-
- }
-
- sub init {
-     my $class = shift;
-
-     my $self = $class->SUPER::init(@_);
-     my @methods = ['echo'];
-
-     $self->init_json_server(\@methods);
-
-     return $self;
+     $self->process_response($line, $ctx);
 
  }
 
@@ -345,41 +332,80 @@ XAS::Lib::RPC::JSON::Server - A mixin for a simple JSON RPC server
 
 =head1 DESCRIPTION
 
-This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> server as a mixin. It 
-doesn't support "Notification" calls. 
+This modules implements a simple L<JSON RPC v2.0|http://www.jsonrpc.org/specification> 
+server. It doesn't support "Notification" calls. 
 
 =head1 METHODS
 
-=head2 init_json_server($methods)
+=head2 new
 
-This initializes the module.
-
-=over 4
-
-=item B<$methods>
-
-An arrayref of methods that this server can process.
-
-=back
+This module inherits from L<XAS::Lib::Net::Server|XAS::Lib::Net::Server> 
+and accepts the same parameters.
 
 =head2 methods
 
-A handle to a L<Set::Light|https://metacpan.org/pod/Set::Light> object that contains the methods 
-that can be evoked.
+A handle to a L<Set::Light|https://metacpan.org/pod/Set::Light> object 
+that contains the methods that can be evoked.
 
 =head2 process_request($input, $ctx)
 
+This method accepts a JSON RPC packet and dispatches to the appropiate handler.
+If a handler is not present, it signals an error and returns that to the client.
+
+=over 4
+
+=item B<$input>
+
+The JSON RPC packet.
+
+=item B<$ctx>
+
+Network context for the request.
+
+=back
+
 =head2 process_response($output, $ctx)
 
-=head2 process_errors($errors, $ctx)
+This method will process output and convert it into a JSON RPC response. 
 
-=head2 rpc_exception_handler($ex, $id)
+=over 4
 
-=head2 rpc_request($request, $ctx)
+=item B<$input>
 
-=head2 rpc_result($id, $output)
+The output from the called handler.
 
-=head2 rpc_error($id, $code, $message)
+=item B<$ctx>
+
+Network context for the response.
+
+=back
+
+=head2 process_error($error, $ctx)
+
+This method will process errors, it will be converted into a JSON RPC error
+response.
+
+=over 4
+
+=item B<$errors>
+
+The errors that were generated. 
+
+=item B<$ctx>
+
+Network context for the response.
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<XAS::Lib::RPC::JSON::Client|XAS::Lib::RPC::JSON::Client>
+
+=item L<XAS|XAS>
+
+=back
 
 =head1 AUTHOR
 
@@ -387,7 +413,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
