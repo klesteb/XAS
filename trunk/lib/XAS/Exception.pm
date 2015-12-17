@@ -57,6 +57,14 @@ The only differences is that it turns stack tracing on by default.
 
 =head1 METHODS
 
+=head2 type
+
+This provides the missing type() method from L<Badger::Exception|https://metacpan.org/pod/Badger::Exception>.
+
+=head2 type_info
+
+This provides the missing type_info() method from L<Badger::Exception|https://metacpan.org/pod/Badger::Exception>.
+
 =head2 stack_trace
 
 Removes any reference to L<Try::Tiny|https://metacpan.org/pod/Try::Tiny> in the stack trace.

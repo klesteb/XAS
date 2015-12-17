@@ -8,7 +8,7 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Base',
-  utils      => ':validation',
+  utils      => ':validation level2syslog',
   codec      => 'JSON',
   accessors  => 'spooler',
   constants  => 'HASHREF',
@@ -43,7 +43,7 @@ sub output {
         type         => 'xas-logs',
         message      => $args->{'message'},
         hostname     => $args->{'hostname'},
-        priority     => $args->{'priority'},
+        priority     => level2syslog($args->{'priority'}),
         facility     => $args->{'facility'},
         process      => $args->{'process'},
         pid          => $args->{'pid'}
@@ -105,12 +105,12 @@ structure has the following fields:
     @message       - the line that would have gone to a log file
     type           - 'xas-logs',
     message        - the log line
-    hostname       - the hostname
+    hostname       - from the environment host name
     pid            - the pid of the process
-    msgid          - message id
-    priority       - the priority from -priority
-    facility       - the facility from -facility
-    process        - the process  from -process
+    msgid          - 0
+    priority       - converted from XAS log level to syslog priority
+    facility       - from the environment log_facility
+    process        - from the environment script name
 
 =head1 SEE ALSO
 
@@ -128,7 +128,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

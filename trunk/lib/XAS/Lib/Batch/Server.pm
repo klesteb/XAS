@@ -95,7 +95,7 @@ L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>.
 =head2 qstat(...)
 
 This method returns that status of a server. This status will be a hash 
-reference of the parsed output on stdout. It takes the following paramters:
+reference of the parsed output on stdout. It takes the following parameters:
 
 =over 4
 
@@ -108,7 +108,7 @@ The optional host that the server may be on. Defaults to 'localhost'.
 =head2 qdisable(...)
 
 This method will disable a queue or if the queue is not given, batch processing
-at the server. It takes the following paramters:
+at the server. It takes the following parameters:
 
 =over 4
 
@@ -125,7 +125,7 @@ The optional host that the queue may be on. Defaults to 'localhost'.
 =head2 qenable(...)
 
 This method will enable a queue or if the queue is not given, batch processing
-at the server. It takes the following paramters:
+at the server. It takes the following parameters:
 
 =over 4
 
@@ -155,7 +155,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2015 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

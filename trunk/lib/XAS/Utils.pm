@@ -562,6 +562,54 @@ namespace.
 
 =head1 METHODS
 
+=head2 validate_params($params, $spec, $class)
+
+This method is used to validate parameters. Internally this uses 
+Params::Validate::validate_with() for the parameter validation. 
+
+By convention, all named parameters have a leading dash. This method will 
+strip off that dash and lower case the parameters name.
+
+If an validation exception is thrown, the parameter name will have the dash 
+stripped.
+
+Based on the $spec, this can return an array or a hashref of validated
+parameters and values. 
+
+=over 4
+
+=item B<$params>
+
+An array ref to a set of parameters. 
+
+=item B<$spec>
+
+A validation spec as defined by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
+
+=item B<$class>
+
+An optional class that is calling this method. If one is not provided then
+caller() is used to determine the calling method.
+
+=back
+
+=head2 validation_exception($param, $class)
+
+This is a package level sub routine. It exists to provide a uniform exception
+error message. It takes these parameters:
+
+=over 4
+
+=item B<$param>
+
+The error message returned by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
+
+=item B<$class>
+
+The routine that the error occurred in.
+
+=back
+
 =head2 db2dt($datestring)
 
 This routine will take a date format of YYYY-MM-DD HH:MM:SS and convert it

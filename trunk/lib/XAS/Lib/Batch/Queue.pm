@@ -91,14 +91,14 @@ This method initializes the module and takes these parameters:
 
 =item B<-interface>
 
-The command line interface to use. This defaults to L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Inerface::Torque>.
+The command line interface to use. This defaults to L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>.
 
 =back
 
 =head2 qstat(...)
 
 This method returns that status of a queue. This status will be a hash reference
-of the parsed output on stdout. It takes the following paramters:
+of the parsed output on stdout. It takes the following parameters:
 
 =over 4
 
@@ -114,7 +114,7 @@ The optional host that the queue may be on.
 
 =head2 qstart(...)
 
-This method start a queue. It takes the following paramters:
+This method start a queue. It takes the following parameters:
 
 =over 4
 
@@ -130,7 +130,7 @@ The optional host that the queue may be on.
 
 =head2 qstop(...)
 
-This method will stop a queue. It takes the following paramters:
+This method will stop a queue. It takes the following parameters:
 
 =over 4
 
@@ -161,7 +161,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2015 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

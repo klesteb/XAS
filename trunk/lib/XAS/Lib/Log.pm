@@ -271,7 +271,7 @@ The line to write out. This can be an array which will be joined with a
 
 =back
 
-=head2 info_msg($message, $line)
+=head2 info_msg($message, ...)
 
 This method will log an entry with an level of "info". 
 
@@ -279,17 +279,15 @@ This method will log an entry with an level of "info".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 
-=head2 warn_msg($message, $line)
+=head2 warn_msg($message, ...)
 
 This method will log an entry with an level of "warn". 
 
@@ -297,17 +295,15 @@ This method will log an entry with an level of "warn".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 
-=head2 error_msg($message, $line)
+=head2 error_msg($message, ...)
 
 This method will log an entry with an level of "error". 
 
@@ -315,17 +311,15 @@ This method will log an entry with an level of "error".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 
-=head2 fatal_msg($message, $line)
+=head2 fatal_msg($message, ...)
 
 This method will log an entry with an level of "fatal". 
 
@@ -333,17 +327,15 @@ This method will log an entry with an level of "fatal".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 
-=head2 debug_msg($message, $line)
+=head2 debug_msg($message, ...)
 
 This method will log an entry with an level of "debug". 
 
@@ -351,17 +343,15 @@ This method will log an entry with an level of "debug".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 
-=head2 trace_msg($message, $line)
+=head2 trace_msg($message, ...)
 
 This method will log an entry with an level of "trace". 
 
@@ -369,13 +359,11 @@ This method will log an entry with an level of "trace".
 
 =item B<$message>
 
-The message to apply line against. This should be defined in the package
-variable $MESSAGE or in the message stanza in XAS::Class.
+The pre-defined message string. Usually in a message file. 
 
-=item B<$line>
+=item B<...>
 
-The line to write out. This can be an array which will be joined with a
-"space" separator.
+The items to be used in the pre-defined message.
 
 =back
 

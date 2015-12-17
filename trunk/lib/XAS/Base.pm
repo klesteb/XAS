@@ -120,7 +120,7 @@ sub init {
 
     # build our object
 
-    $self->{config} = $p;
+    $self->{'config'} = $p;
     $self->_create_methods($p);
 
     return $self;
@@ -137,8 +137,11 @@ XAS::Base - The base class for the XAS environment
 
 =head1 SYNOPSIS
 
+ our $VERSION = '0.01';
+
  use XAS::Class
-   version => '0.01',
+   debug   => 0,
+   version => $VERSION,
    base    => 'XAS::Base',
    vars => {
        PARAMS => {}
@@ -162,57 +165,6 @@ auto-magically become accessors toward their values.
 This is used to initialized the class. These parameters are validated using 
 the validate_params() method. 
 
-By default the parameter -xdebug is set to 0. This parameter is used to
-turn on debugging output.
-
-=head2 validate_params($params, $spec, $class)
-
-This method is used to validate parameters. Internally this uses 
-Params::Validate::validate_with() for the parameter validation. 
-
-By convention, all named parameters have a leading dash. This method will 
-strip off that dash and lower case the parameters name.
-
-If an validation exception is thrown, the parameter name will have the dash 
-stripped.
-
-Based on the $spec, this can return an array or a hashref of validated
-parameters and values. 
-
-=over 4
-
-=item B<$params>
-
-An array ref to a set of parameters. 
-
-=item B<$spec>
-
-A validation spec as defined by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
-
-=item B<$class>
-
-An optional class that is calling this method. If one is not provided then
-caller() is used to determine the calling method.
-
-=back
-
-=head2 validation_exception($param, $class)
-
-This is a package level sub routine. It exists to provide a uniform exception
-error message. It takes these parameters:
-
-=over 4
-
-=item B<$param>
-
-The error message returned by L<Params::Validate|https://metacpan.org/pod/Params::Validate>.
-
-=item B<$class>
-
-The routine that the error occurred in.
-
-=back
-
 =head1 AUTOLOADING
 
 Specific modules can be auto-loaded when a method name is invoked. The 
@@ -235,7 +187,7 @@ Please see that module for more details.
 
 =head2 log
 
-This will auto load L<XAS::Lib::Modules::Log|XAS::Lib::Modules::Log>.
+This will auto load L<XAS::Lib::Log|XAS::Lib::Log>.
 Please see that module for more details.
 
 =head1 SEE ALSO
@@ -252,9 +204,9 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
-TThis is free software; you can redistribute it and/or modify it under
+This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
 of the license at http://www.perlfoundation.org/artistic_license_2_0.
 
