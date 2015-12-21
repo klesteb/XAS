@@ -25,12 +25,6 @@ sub options {
     my $self = shift;
 
     return {
-        'priority=s' => sub {
-            $self->env->priority($_[1]);
-        },
-        'facility=s' => sub {
-            $self->env->facility($_[1]);
-        },
         'script=s' => sub {
             $self->env->script($_[1]);
         }

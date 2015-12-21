@@ -107,8 +107,10 @@ sub facility {
 
 sub script {
     my $self = shift;
-    my ($script) = validate_params(\@_, [1]);
-
+    my ($script) = validate_params(\@_, [
+        { optional => 1, default => undef }
+    ]);
+    
     $self->{'script'} = $script if (defined($script));
 
     return $self->{'script'};

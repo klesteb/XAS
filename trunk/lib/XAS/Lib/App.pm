@@ -1,6 +1,6 @@
 package XAS::Lib::App;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Try::Tiny;
 use Pod::Usage;
@@ -150,6 +150,12 @@ sub _default_options {
         'debug'    => sub { 
             $self->env->xdebug(1); 
             $self->log->level('debug', 1);
+        },
+        'priority=s' => sub {
+            $self->env->priority($_[1]);
+        },
+        'facility=s' => sub {
+            $self->env->facility($_[1]);
         },
         'log-file=s' => sub {
             my $logfile = File($_[1]);
@@ -328,6 +334,14 @@ The signal that was captured.
 =head1 OPTIONS
 
 This module handles the following command line options.
+
+=head2 --facility
+
+Defines the facility to used. Defaults to 'systems',
+
+=head2 --priority
+
+Defines the priority to be uses. Defaults to 'low'.
 
 =head2 --debug
 
