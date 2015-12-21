@@ -13,7 +13,7 @@ use XAS::Class
   utils      => ':validation dir_walk',
   constants  => ':logging :alerts STOMP_LEVELS',
   filesystem => 'File Dir Path Cwd',
-  accessors  => 'path host domain username script commandline',
+  accessors  => 'path host domain username commandline',
   mutators   => 'mqserver mqport mxserver mxport mxtimeout msgs alerts xdebug',
 ;
 
@@ -102,6 +102,16 @@ sub facility {
     $self->{'facility'} = $level if (defined($level));
 
     return $self->{'facility'};
+
+}
+
+sub script {
+    my $self = shift;
+    my ($script) = validate_params(\@_, [1]);
+
+    $self->{'script'} = $script if (defined($script));
+
+    return $self->{'script'};
 
 }
 
