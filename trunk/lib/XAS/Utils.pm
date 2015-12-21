@@ -288,10 +288,12 @@ sub bool {
 
 sub exitcode {
 
-    my $rc  = $? >> 8;      # return code of command
-    my $sig = $? & 127;     # signal it was killed with
+    my $ex    = $?;
+    my $rc    = $ex >> 8;    # return code of process
+    my $sig   = $ex & 127;   # signal it was killed with
+    my $cored = $ex & 128;   # wither the process cored
 
-    return $rc, $sig;
+    return $rc, $sig, $cored;
 
 }
 
@@ -368,7 +370,7 @@ sub run_cmd {
     my ($command) = validate_params(\@_, [1]);
 
     my @output = `$command 2>&1`;
-    my ($rc, $sig) = exitcode();
+    my ($rc, $sig, $cored) = exitcode();
 
     return \@output, $rc, $sig;
 
@@ -662,12 +664,12 @@ VBS strings are one based while Perls are zero based.
 
 =head2 exitcode
 
-Decodes Perls version of the exit code from a cli process. Returns two items.
+Decodes Perls version of the exit code from a cli process. Returns three items.
 
  Example:
 
      my @output = `ls -l`;
-     my ($rc, $sig) = exitcode();
+     my ($rc, $sig, $cored) = exitcode();
 
 =head2 run_cmd($command)
 
