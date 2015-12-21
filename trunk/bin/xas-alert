@@ -73,7 +73,8 @@ xas-alert "huston, there is a problem"
 
 =head1 DESCRIPTION
 
-This procedure is a simple template to help write standardized procedures.
+This procedure will send an XAS alert from the command line. Useful when you
+want to send alerts from scripts.
 
 =head1 OPTIONS AND ARGUMENTS
 
