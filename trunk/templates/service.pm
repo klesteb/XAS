@@ -1,4 +1,4 @@
-package XAS::Apps:: ;
+package XAS::Apps::xxxx ;
 
 our $VERSION = '0.01';
 
@@ -55,14 +55,16 @@ __END__
 
 =head1 NAME
 
-XAS::Apps:: - A class for the XAS environment
+XAS::Apps::xxxx - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::Apps:: ;
+ use XAS::Apps::xxxx ;
 
- my $app = XAS::Apps:: ->new(
-     -throws => 'changeme',
+ my $app = XAS::Apps::xxxx->new(
+     -throws   => 'changeme',
+     -priority => 'low',
+     -facility => 'systems',
  );
 
  exit $app->run();
@@ -73,15 +75,25 @@ XAS::Apps:: - A class for the XAS environment
 
 =head2 setup
 
+This method will configure the process.
+
 =head2 main
 
+This method will start the processing. 
+
 =head2 options
+
+This method provides these additonal cli options. 
+
+=over 4
+
+=back
 
 =head1 SEE ALSO
 
 =over 4
 
-=item L<XAS>
+=item L<XAS|XAS>
 
 =back
 
