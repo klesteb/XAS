@@ -65,6 +65,22 @@ This will display the utilities man page.
 
 =back
 
+=head2 xas-alert
+
+A will send a XAS alert from the command line. This is useful when you
+want to send an alert from a script.
+
+=over 4
+
+=item xas-alert --help
+
+This will display a brief help screen on command options.
+
+=item xas-alert --manual
+
+This will display the utilities man page.
+
+=back
 
 =head1 SEE ALSO
 
