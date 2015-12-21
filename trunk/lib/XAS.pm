@@ -44,7 +44,27 @@ XAS does this by providing a consistent framework to write your operations
 procedures. It is layered environment that allows you to follow accepted 
 practices for continuous integration and delivery of software.  
 
-The following section describes how this environment works.
+=head1 UTILITIES
+
+These utilities are provided with this package. 
+
+=head2 xas-rotate
+
+A simple file rotation program. Primiarly used on platforms that don't provide
+a file rotation utility.
+
+=over 4
+
+=item xas-rotate --help
+
+This will display a brief help screen on command options.
+
+=item xas-rotate --manual
+
+This will display the utilities man page.
+
+=back
+
 
 =head1 SEE ALSO
 

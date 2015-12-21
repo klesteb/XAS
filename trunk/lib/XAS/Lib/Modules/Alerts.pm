@@ -1,6 +1,6 @@
 package XAS::Lib::Modules::Alerts;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use DateTime;
 use Try::Tiny;
@@ -10,10 +10,9 @@ use XAS::Class
   debug      => 0,
   version    => $VERSION,
   base       => 'XAS::Singleton',
-  constants  => ':alerts',
   accessors  => 'spooler',
   codec      => 'JSON',
-  utils      => 'dt2db :validation',
+  utils      => ':validation',
   filesystem => 'Dir'
 ;
 
@@ -29,7 +28,7 @@ sub send {
 
     my $data = {
         hostname => $self->env->host,
-        datetime => dt2db($dt),
+        datetime => $dt->strftime('%Y-%m-%dT%H:%M:%S.%3N%z'),
         process  => $self->env->script,
         pid      => $$,
         tid      => 0,
@@ -80,11 +79,7 @@ Your program can use this module in the following fashion:
 
  my $alert = XAS::Lib::Modules::Alerts->new();
 
- $alert->send(
-     -priority => 'high',
-     -facility => 'huston',
-     -message  => 'There is a problem'
- );
+ $alert->send('There is a problem');
 
 =head1 DESCRIPTION
 
@@ -98,23 +93,15 @@ and will auto-load when invoked.
 
 This method initializes the module.
 
-=head2 send
+=head2 send($message)
 
 This method will send an alert. It takes the following named parameters:
 
 =over 4
 
-=item B<-priority>
+=item B<$message>
 
-The notification level, 'high','medium','low'. Default 'low'.
-
-=item B<-facility>
-
-The notification facility, 'systems', 'dba', etc.  Default 'systems'.
-
-=item B<-message>
-
-The message text for the message
+The message to send.
 
 =back
 
@@ -132,7 +119,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

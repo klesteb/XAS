@@ -15,6 +15,7 @@ exception                    = %s: %s
 invparams                    = invalid parameters passed, reason: %s
 invmethod                    = invalid method "%s" in %s at line %s
 unexpected                   = unexpected error: %s
+nomessage                    = no message supplied
 config_badini                = unable to load config file: %s, reason: %s
 curl                         = curl error: %s, reason: %s
 db_duplicates                = %s: duplicate key found for: %s
