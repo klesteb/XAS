@@ -41,7 +41,7 @@ XAS is that framework, and it will help you to refactor those old Perl scripts
 into a modern code base.
 
 XAS does this by providing a consistent framework to write your operations 
-procedures. It is layered environment that allows you to follow accepted 
+procedures. It is a layered environment that allows you to follow accepted 
 practices for continuous integration and delivery of software.  
 
 =head1 UTILITIES
@@ -50,16 +50,16 @@ These utilities are provided with this package.
 
 =head2 xas-rotate
 
-A simple file rotation program. Primiarly used on platforms that don't provide
+A simple file rotation program. Primarily used on platforms that don't provide
 a file rotation utility.
 
 =over 4
 
-=item xas-rotate --help
+=item B<xas-rotate --help>
 
 This will display a brief help screen on command options.
 
-=item xas-rotate --manual
+=item B<xas-rotate --manual>
 
 This will display the utilities man page.
 
@@ -72,11 +72,11 @@ want to send an alert from a script.
 
 =over 4
 
-=item xas-alert --help
+=item B<xas-alert --help>
 
 This will display a brief help screen on command options.
 
-=item xas-alert --manual
+=item B<xas-alert --manual>
 
 This will display the utilities man page.
 
@@ -98,7 +98,7 @@ This will display the utilities man page.
 
 =item L<XAS::Utils|XAS::Utils>
 
-=item L<XAS::Apps::Logger|XAS::Apps::Logger>
+=item L<XAS::Apps::Aler|XAS::Apps::Aler>
 
 =item L<XAS::Apps::Rotate|XAS::Apps::Rotate>
 

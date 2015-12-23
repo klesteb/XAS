@@ -209,8 +209,8 @@ signal handling, options processing, along with a exit handler.
 
 =head2 new
 
-This method initilaizes the module. It inherits from XAS::Base and takes 
-these additional parameters:
+This method initializes the module. It inherits from L<XAS::Base|XAS::Base>
+and takes these additional parameters:
 
 =over 4
 
@@ -231,7 +231,7 @@ This will change the priority of the alert. The default is 'low'.
 =head2 run
 
 This method sets up a global exception handler and calls main(). The main() 
-method will be passed one parameter: an initialised handle to this class.
+method will be passed one parameter: an initialized handle to this class.
 
 Example
 
@@ -337,11 +337,13 @@ This module handles the following command line options.
 
 =head2 --facility
 
-Defines the facility to used. Defaults to 'systems',
+Defines the facility to use. Defaults to 'systems'. This will override the
+class parameter.
 
 =head2 --priority
 
-Defines the priority to be uses. Defaults to 'low'.
+Defines the priority to use. Defaults to 'low'. This will override the
+class parameter.
 
 =head2 --debug
 

@@ -94,14 +94,6 @@ This module provides these additonal cli options.
 
 This provides a name for the script. Default is 'xas-alert'.
 
-=item B<--facility>
-
-This provides a facility. Default is 'systems'.
-
-=item B<--priority>
-
-This provides a priority. Default is 'low'.
-
 =back
 
 =head1 SEE ALSO
