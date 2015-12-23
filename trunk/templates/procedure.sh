@@ -12,14 +12,16 @@
 # ENVIRONMENT: The XAS Middleware Environment
 #
 # PARAMETERS:
-#              --log-type     toggles the log type
-#              --log-facility changes the log facility to use
-#              --log-file     name of the log file
 #              --help         prints out a helpful help message
-#              --manual       prints out the procedures manual
-#              --version      prints out the procedures version
 #              --debug        toggles debug output
 #              --alerts       toggles alert notification
+#              --manual       prints out the procedures manual
+#              --version      prints out the procedures version
+#              --priority     change the alerts priority
+#              --facility     change the alerts facility
+#              --log-file     name of the log file
+#              --log-type     toggles the log type
+#              --log-facility changes the log facility to use
 #
 # RETURNS:
 #              0 - success
@@ -59,10 +61,12 @@ changeme [--help] [--debug] [--manual] [--version]
 
  options:
    --help         outputs simple help text
-   --manual       outputs the procedures manual
-   --version      outputs the apps version
    --debug        toogles debugging output
    --alerts       toogles alert notifications
+   --manual       outputs the procedures manual
+   --version      outputs the apps version
+   --facility     change the alerts facility
+   --priority     change the alerts priority
    --log-file     name of the log file 
    --log-type     toggles the log type
    --log-facility changes the log facility
@@ -87,20 +91,6 @@ Turns on debbuging.
 
 Togggles alert notification.
 
-=item B<--log-type>
-
-Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
-'json' or 'syslog'.
-
-=item B<--log-facility>
-
-Toggles the log facilty. Defaults to 'local6'. This follows syslog
-convention.
-
-=item B<--log-file>
-
-Optional logfile. When specified the log type is set to 'file'.
-
 =item B<--manual>
 
 The complete documentation.
@@ -108,6 +98,28 @@ The complete documentation.
 =item B<--version>
 
 Prints out the apps version
+
+=item B<--facility>
+
+This changs the alerts facility, It overrides the defaults.
+
+=item B<--priority>
+
+This changes the alerts priority. It overrides the defaults.
+
+=item B<--log-type>
+
+Toggles the log type. Defaults to 'console'. Can be 'console', 'file', 
+'json' or 'syslog'. 
+
+=item B<--log-file>
+
+Optional logfile. When specified the log type is set to 'file'.
+
+=item B<--log-facility>
+
+Toggles the log facilty. Defaults to 'local6'. This follows syslog
+convention.
 
 =back
 
