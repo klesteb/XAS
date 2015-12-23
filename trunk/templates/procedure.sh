@@ -75,6 +75,11 @@ changeme [--help] [--debug] [--manual] [--version]
 
 This procedure is a simple template to help write standardized procedures.
 
+=head1 CONFIGURATION
+
+Please refer to L<XAS::Apps::xxxx|XAS::Apps::xxxx> for configuration file 
+information.
+
 =head1 OPTIONS AND ARGUMENTS
 
 =over 4
