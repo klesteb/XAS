@@ -227,8 +227,8 @@ or with named parameters
             -p2 => 1,
         });
 
-        my $p1 = $p->{p1};
-        my $p2 = $p->{p2};
+        my $p1 = $p->{'p1'};
+        my $p2 = $p->{'p2'};
         
     }
 
@@ -246,8 +246,8 @@ or as a plain package routine
             -p2 => 1,
         });
 
-        my $p1 = $p->{p1};
-        my $p2 = $p->{p2};
+        my $p1 = $p->{'p1'};
+        my $p2 = $p->{'p2'};
         
     }
   
@@ -267,6 +267,7 @@ creating those names. Example:
       debug   => 0,
       version => $VERSION,
       base    => 'XAS::Base',
+      mixin   => 'XAS::Lib::Mixins::Handler',
       utils   => ':validation dotid',
    ;
 
@@ -331,7 +332,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2015 Kevin L. Esteb
+Copyright (c) 2012-2015 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
