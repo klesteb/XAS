@@ -71,6 +71,25 @@ XAS::Apps::xxxx - A class for the XAS environment
 
 =head1 DESCRIPTION
 
+=head1 CONFIGURATION
+
+The configuration file uses the familiar Windows .ini format. It has the 
+following stanza.
+
+ [xxxx: xxxx]
+ property = value
+
+Where the section header "xxxx:" may have addtional qualifiers and repeated
+as many times as needed. These qualifiers must be unique.
+
+The following properties may be used.
+
+=over 4
+
+=item B<property>
+
+=back
+
 =head1 METHODS
 
 =head2 setup
