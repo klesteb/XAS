@@ -12,7 +12,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   mixin     => 'XAS::Lib::Mixins::Process',
-  utils     => ':env dotid compress trim',
+  utils     => ':env dotid compress trim bash_escape',
   mixins    => 'start_process stop_process pause_process resume_process
                stat_process kill_process init_process _parse_command
                _poll_child destroy',
@@ -37,6 +37,7 @@ sub start_process {
     my $uid       = getpwnam($self->user);
     my $gid       = getgrnam($self->group);
     my $directory = $self->directory->path;
+    my $command   = join(' ', map { bash_escape($_); } @args);
 
     $self->log->debug("$alias: command @args");
 
@@ -61,7 +62,7 @@ sub start_process {
 
         chdir($directory);   # change directory
         umask($umask);       # set protection mask
-        exec(@args);         # become a new process
+        exec($command);      # become a new process
 
         exit 0;
 

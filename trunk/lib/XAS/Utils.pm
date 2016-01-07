@@ -23,19 +23,19 @@ use XAS::Class
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text',
+            stat2text bash_escape',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool compress exitcode _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text',
+            stat2text bash_escape',
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
       modules    => 'load_module',
       strings    => 'trim ltrim rtrim compress left right mid instr',
-      process    => 'daemonize exitcode run_cmd _do_fork',
+      process    => 'daemonize exitcode run_cmd _do_fork bash_escape',
       boolean    => 'is_truthy is_falsey bool',
       validation => 'validate_params validation_exception',
     }
@@ -451,6 +451,25 @@ sub level2syslog {
     };
 
     return $translate->{lc($level)};
+
+}
+
+# ********************************************************************** 
+# The Bourne shell treats some characters in a command's argument list as
+# having a special meaning.  This could result in the shell executing    
+# unwanted commands. This code escapes the special characters by         
+# prefixing them with the \ character.                                   
+#
+# taken from: https://www.slac.stanford.edu/slac/www/resource/how-to-use/cgi-rexx/cgi-esc.html
+#
+# **********************************************************************
+
+sub bash_escape {
+    my $arg = shift;
+
+    $arg =~ s/([;<>\*\|&\$!#\(\)\[\]\{\}:'"])/\\$1/g;
+
+    return $arg;
 
 }
 
