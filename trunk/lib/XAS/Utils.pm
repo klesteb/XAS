@@ -23,19 +23,19 @@ use XAS::Class
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text bash_escape',
+            stat2text bash_escape create_argv',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool compress exitcode _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text bash_escape',
+            stat2text bash_escape create_argv',
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
       modules    => 'load_module',
       strings    => 'trim ltrim rtrim compress left right mid instr',
-      process    => 'daemonize exitcode run_cmd _do_fork bash_escape',
+      process    => 'daemonize exitcode run_cmd _do_fork bash_escape create_argv',
       boolean    => 'is_truthy is_falsey bool',
       validation => 'validate_params validation_exception',
     }
@@ -470,6 +470,112 @@ sub bash_escape {
     $arg =~ s/([;<>\*\|&\$!#\(\)\[\]\{\}:'"])/\\$1/g;
 
     return $arg;
+
+}
+
+#
+# Extracted form Parse::CommandLine.
+#
+
+sub create_argv {
+    my ($str) = validate_params(\@_, [1]);
+
+    $str =~ s/\A\s+//ms;
+    $str =~ s/\s+\z//ms;
+
+    my @argv;
+    my $buf;
+    my $escaped;
+    my $double_quoted;
+    my $single_quoted;
+
+    for my $char (split //, $str) {
+
+        if ($escaped) {
+
+            $buf .= $char;
+            $escaped = undef;
+            next;
+
+        }
+
+        if ($char eq '\\') {
+
+            if ($single_quoted) {
+
+                $buf .= $char;
+
+            } else {
+
+                $escaped = 1;
+
+            }
+            next;
+
+        }
+
+        if ($char =~ /\s/) {
+
+            if ($single_quoted || $double_quoted) {
+
+                $buf .= $char;
+
+            } else {
+
+                push @argv, $buf if defined $buf;
+                undef $buf;
+
+            }
+            next;
+
+        }
+
+        if ($char eq '"') {
+
+            if ($single_quoted) {
+
+                $buf .= $char;
+                next;
+
+            }
+
+            $double_quoted = !$double_quoted;
+            next;
+
+        }
+
+        if ($char eq "'") {
+
+            if ($double_quoted) {
+
+                $buf .= $char;
+                next;
+
+            }
+
+            $single_quoted = !$single_quoted;
+            next;
+
+        }
+
+        $buf .= $char;
+
+    }
+
+    push @argv, $buf if defined $buf;
+
+    if ($escaped || $single_quoted || $double_quoted) {
+
+        my $ex = XAS::Exception->new(
+            type => 'xas.utils.create_argv',
+            info => 'invalid command line string',
+        );
+
+        $ex->throw;
+
+    }
+
+    return @argv;
 
 }
 
