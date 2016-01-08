@@ -37,9 +37,6 @@ sub start_process {
     my $uid       = getpwnam($self->user);
     my $gid       = getgrnam($self->group);
     my $directory = $self->directory->path;
-    my $cmd       = shift @args;
-
-    $self->log->debug("$alias: command @args");
 
     # save the current environment
 
@@ -62,7 +59,7 @@ sub start_process {
 
         chdir($directory);   # change directory
         umask($umask);       # set protection mask
-        exec @argv;          # become a new process
+        exec { $argv[1] } @argv;  # become a new process
 
         exit 0;
 
