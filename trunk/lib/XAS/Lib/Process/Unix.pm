@@ -59,7 +59,7 @@ sub start_process {
 
         chdir($directory);   # change directory
         umask($umask);       # set protection mask
-        exec { $argv[1] } @argv;  # become a new process
+        exec { $argv[0] } @argv;  # become a new process
 
         exit 0;
 

@@ -421,7 +421,7 @@ sub _child_exit {
     $self->{'exit_code'}   = $exitcode >> 8;
     $self->{'exit_signal'} = $exitcode & 127;
 
-    $self->log->warn_msg('process_exited', $alias, $pid, $self->exit_code);
+    $self->log->warn_msg('process_exited', $alias, $pid, $self->exit_code, $self->exit_signal);
 
     if ($status == PROC_STOPPED) {
 
