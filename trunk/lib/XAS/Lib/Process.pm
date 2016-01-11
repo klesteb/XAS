@@ -37,6 +37,7 @@ use XAS::Class
       -umask          => { optional => 1, default => '0022' },
       -user           => { optional => 1, default => 'nobody' },
       -redirect       => { optional => 1, default => 0 },
+      -retry_delay    => { optional => 1, default => 0 },
       -input_driver   => { optional => 1, default => POE::Driver::SysRW->new() },
       -output_driver  => { optional => 1, default => POE::Driver::SysRW->new() },
       -input_filter   => { optional => 1, default => POE::Filter::Line->new(Literal => "\n") },
@@ -434,7 +435,15 @@ sub _child_exit {
 
                 if ($self->exit_codes->has($self->exit_code)) {
 
-                    $poe_kernel->call($alias, 'start_process');
+                    if ($self->retry_delay) {
+
+                        $poe_kernel->delay('start_process', $self->retry_delay);
+
+                    } else {
+
+                        $poe_kernel->call($alias, 'start_process');
+
+                    }
 
                 } else {
 
@@ -763,6 +772,11 @@ is implemented using sockets. This may cause buffering problems with the
 child process.
 
 The default is no.
+
+=item B<-retry_delay>
+
+The optional number of seconds to delay a retry on an auto restart process.
+The default is 0, or no delay in restarting the process.
 
 =item B<-input_driver>
 
