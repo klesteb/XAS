@@ -265,13 +265,13 @@ sub de_camel_case {
 
         if ($a[$x] =~ /[A-Z]/) {
 
-            if ($x > 0) {
-
-                $o .= '_' . lc($a[$x]);
-
-            } if ($x == 0) {
+            if ($x == 0) {
 
                 $o .= lc($a[$x]);
+
+            } else {
+
+                $o .= '_' . lc($a[$x]);
 
             }
 
