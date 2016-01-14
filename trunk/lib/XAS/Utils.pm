@@ -23,13 +23,13 @@ use XAS::Class
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text bash_escape create_argv',
+            stat2text bash_escape create_argv de_camel_case',
     any => 'db2dt dt2db trim ltrim rtrim daemonize hash_walk  
             load_module bool compress exitcode _do_fork glob2regex dir_walk
             env_store env_restore env_create env_parse env_dump env_clear
             left right mid instr is_truthy is_falsey run_cmd
             validate_params validation_exception level2syslog
-            stat2text bash_escape create_argv',
+            stat2text bash_escape create_argv de_camel_case',
     tags => {
       dates      => 'db2dt dt2db',
       env        => 'env_store env_restore env_create env_parse env_dump env_clear',
@@ -254,7 +254,40 @@ sub instr {
 
 }
 
-# Checks to see if the parameter is the string 't', 'true', 'yes', '0E0' 
+sub de_camel_case {
+    my ($s) = validate_params(\@_, [1]);
+
+    my $o;
+    my @a = split('', $s);
+    my $z = scalar(@a);
+
+    for (my $x = 0; $x < $z; $x++) {
+
+        if ($a[$x] =~ /[A-Z]/) {
+
+            if ($x > 0) {
+
+                $o .= '_' . lc($a[$x]);
+
+            } if ($x == 0) {
+
+                $o .= lc($a[$x]);
+
+            }
+
+        } else {
+
+            $o .= $a[$x];
+
+        }
+
+    }
+
+    return $o;
+
+}
+
+# Checks to see if the parameter is the string 't', 'true', 'yes', '0E0'
 # or the number 1.
 #
 sub is_truthy {
@@ -786,6 +819,11 @@ based while Perls are zero based.
 Return the position in $string of $compare. You may offset within the
 string with $start. Useful for porting VBS code. Makes allowances that
 VBS strings are one based while Perls are zero based.
+
+=head2 de_camel_case($string)
+
+Break up a "CamelCase" string into a "camel_case" string. The opposit of
+camel_case() from L<Badger::Utils|https://metacpan.org/pod/Badger::Utils>.
 
 =head2 exitcode
 
