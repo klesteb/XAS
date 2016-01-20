@@ -11,7 +11,7 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'trim dotid',
-  mixins  => '_pipe_connection _pipe_input _pipe_output _pipe_error'
+  mixins  => '_pipe_connect _pipe_input _pipe_output _pipe_error'
 ;
 
 #use Data::Dumper;
@@ -28,14 +28,14 @@ use XAS::Class
 # Private Events
 # ----------------------------------------------------------------------
 
-sub _pipe_connection {
+sub _pipe_connect {
     my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: _pipe_connection()");
+    $self->log->debug("$alias: _pipe_connect()");
 
-    # Start listening on stdin.
+    # Start listening on the pipe.
 
     $self->{'pipe'} = POE::Wheel::ReadWrite->new(
         Handle     => $self->fifo->open('r+'),
@@ -47,13 +47,13 @@ sub _pipe_connection {
 }
 
 sub _pipe_input {
-    my ($self, $input, $wheel) = @_[OBJECT,ARG0,ARG1];
+    my ($self, $input) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
 
     $self->log->debug("$alias: _pipe_input()");
 
-    $poe_kernel->post($alias, 'process_request', $input);
+    $poe_kernel->post($alias, 'process_input', $input);
 
 }
 
@@ -79,7 +79,7 @@ sub _pipe_output {
 }
 
 sub _pipe_error {
-    my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0 .. ARG3];
+    my ($self, $syscall, $errnum, $errstr) = @_[OBJECT,ARG0 .. ARG2];
 
     my $alias = $self->alias;
 
@@ -96,7 +96,7 @@ sub _pipe_error {
 
     } else {
 
-        $self->log->error_msg('net_client_error', $alias, $errnum, $errstr);
+        $poe_kernel->post($alias, 'process_error', $syscall, $errnum, $errstr);
 
     }
 

@@ -43,15 +43,13 @@ sub session_initialize {
 
     # private events
 
-    $poe_kernel->state('pipe_error',      $self, '_pipe_error');
-    $poe_kernel->state('pipe_input',      $self, '_pipe_input');
-    $poe_kernel->state('pipe_output',     $self, '_pipe_output');
-    $poe_kernel->state('pipe_connection', $self, '_pipe_connection');
-
-    $poe_kernel->state('process_errors',   $self, '_process_errors');
-    $poe_kernel->state('process_request',  $self, '_process_request');
-    $poe_kernel->state('process_response', $self, '_process_response');
-
+    $poe_kernel->state('pipe_error',    $self, '_pipe_error');
+    $poe_kernel->state('pipe_input',    $self, '_pipe_input');
+    $poe_kernel->state('pipe_output',   $self, '_pipe_output');
+    $poe_kernel->state('pipe_connect',  $self, '_pipe_connect');
+    $poe_kernel->state('process_error', $self, '_process_error');
+    $poe_kernel->state('process_input', $self, '_process_input');
+    
     # walk the chain
 
     $self->SUPER::session_initialize();
@@ -69,7 +67,7 @@ sub session_startup {
 
     $self->log->debug("$alias: entering session_startup()");
 
-    $poe_kernel->post($alias, 'pipe_connection');
+    $poe_kernel->post($alias, 'pipe_connect');
 
     # walk the chain
 
@@ -79,27 +77,38 @@ sub session_startup {
 
 }
 
-sub process_request {
+sub process_input {
     my $self = shift;
     my ($input) = validate_params(\@_, [1]);
 
-    return $input;
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: process_input()");
+
+    $self->process_output($input);
 
 }
 
-sub process_response {
+sub process_error {
     my $self = shift;
-    my ($output) = validate_params(\@_, [1]);
+    my ($syscall, $errnum, $errstr) = validate_params(\@_, [1,1,1]);
 
-    return $output;
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: process_error()");
+
+    $self->log->error_msg('net_client_error', $alias, $errnum, $errstr);
 
 }
 
-sub process_errors {
+sub process_output {
     my $self = shift;
     my ($output) = validate_params(\@_, [1]);
 
-    return $output;
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: process_output()");
+    $poe_kernel->post($alias, 'pipe_output', $output);
 
 }
 
@@ -111,36 +120,25 @@ sub process_errors {
 # Private Events
 # ----------------------------------------------------------------------
 
-sub _process_request {
+sub _process_input {
     my ($self, $input) = @_[OBJECT,ARG0];
 
     my $alias = $self->alias;
-    my $data  = $self->process_request($input);
 
-    $self->log->debug("$alias: process_request()");
-    $poe_kernel->post($alias, 'process_response', $data);
+    $self->log->debug("$alias: _process_input()");
 
-}
-
-sub _process_response {
-    my ($self, $output) = @_[OBJECT,ARG0];
-
-    my $alias = $self->alias;
-    my $data  = $self->process_response($output);
-
-    $self->log->debug("$alias: process_response()");
-    $poe_kernel->post($alias, 'pipe_output', $data);
+    $self->process_input($input);
 
 }
 
-sub _process_errors {
-    my ($self, $output) = @_[OBJECT,ARG0,ARG1];
+sub _process_error {
+    my ($self, $syscall, $errnum, $errstr) = @_[OBJECT,ARG0..ARG2];
 
     my $alias = $self->alias;
-    my $data  = $self->process_errors($output);
 
-    $self->log->debug("$alias: process_errors()");
-    $poe_kernel->post($alias, 'pipe_output', $data);
+    $self->log->debug("$alias: _process_error()");
+
+    $self->process_error($syscall, $errnum, $errstr);
 
 }
 
@@ -177,7 +175,7 @@ XAS::Lib::Pipe - Interact with named pipes
      -eol    => "\n",
  );
 
- $server->run();
+ $client->run();
 
 =head1 DESCRIPTION
 
@@ -211,42 +209,50 @@ An optional EOL, defaults to "\n";
 
 =back
 
-=head2 process_request($input)
+=head2 process_input($input)
 
-This method will process the input from the client. It takes the
+This method will process the input from the pipe. It takes the
 following parameters:
 
 =over 4
 
 =item B<$input>
 
-The input received from the socket.
+The input received from the pipe.
 
 =back
 
-=head2 process_response($output)
+=head2 process_output($output)
 
-This method will process the output from the client. It takes the
+This method will process the output for the pipe. It takes the
 following parameters:
 
 =over 4
 
 =item B<$output>
 
-The output to be sent to the socket.
+The output to be sent to the pipe.
 
 =back
 
-=head2 process_errors($error)
+=head2 process_error($syscall, $errnum, $errstr)
 
-This method will process the error output from the client. It takes the
+This method will process any errors from the pipe. It takes the
 following parameters:
 
 =over 4
 
-=item B<$error>
+=item B<$syscall>
 
-The output to be sent to the socket.
+The function that caused the error.
+
+=item B<$errnum>
+
+The OS error number.
+
+=item B<$errstr>
+
+The OS error string.
 
 =back
 
