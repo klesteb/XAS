@@ -49,7 +49,7 @@ sub session_initialize {
 
     # Find the remote host and port.
 
-    my ($rhost, $rport, $lhost, $lport) = split(' ', $ENV{SSH_CONNECTION});
+    my ($rhost, $rport, $lhost, $lport) = split(' ', $ENV{'SSH_CONNECTION'});
 
     $self->{'peerhost'} = $rhost;
     $self->{'peerport'} = $rport;

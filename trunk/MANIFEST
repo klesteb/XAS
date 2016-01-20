@@ -60,6 +60,8 @@ lib/XAS/Lib/Net/Server.pm
 lib/XAS/Lib/Pidfile.pm
 lib/XAS/Lib/Pidfile/Unix.pm
 lib/XAS/Lib/Pidfile/Win32.pm
+lib/XAS/Lib/Pipe.pm
+lib/XAS/Lib/Pipe/Unix.pm
 lib/XAS/Lib/POE/PubSub.pm
 lib/XAS/Lib/POE/Service.pm
 lib/XAS/Lib/POE/Session.pm
