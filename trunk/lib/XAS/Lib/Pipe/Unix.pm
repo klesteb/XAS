@@ -114,8 +114,6 @@ sub init_pipe {
 
     unless (-p $self->fifo->path) {
 
-        $self->fifo->delete;
-
         system($mkfifo . $self->fifo) && $self->throw_msg(
             dotid($self->class) . '.nofifo',
             'net_client_nocreate_fifo',
