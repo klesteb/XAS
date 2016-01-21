@@ -11,7 +11,7 @@ use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => 'trim dotid',
-  mixins  => '_pipe_connect _pipe_input _pipe_output _pipe_error'
+  mixins  => 'init_pipe _pipe_connect _pipe_input _pipe_output _pipe_error'
 ;
 
 #use Data::Dumper;
