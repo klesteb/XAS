@@ -9,13 +9,14 @@ BEGIN {
 };
 
 use POE;
-
+use XAS::Lib::POE::PubSub;
+  
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Session',
   mixin     => $mixin,
-  accessors => 'pipe',
+  accessors => 'pipe event',
   utils     => ':validation trim dotid',
   vars => {
     PARAMS => {
@@ -49,7 +50,7 @@ sub session_initialize {
     $poe_kernel->state('pipe_connect',  $self, '_pipe_connect');
     $poe_kernel->state('process_error', $self, '_process_error');
     $poe_kernel->state('process_input', $self, '_process_input');
-    
+
     # walk the chain
 
     $self->SUPER::session_initialize();
@@ -149,7 +150,11 @@ sub _process_error {
 sub init {
     my $class = shift;
 
-    my $self = $class->SUPER::init(@_);
+    my $self  = $class->SUPER::init(@_);
+    my $alias = $self->alias;
+
+    $self->{'event'} = XAS::Lib::POE::PubSub->new();
+    $self->event->subscribe($alias);
 
     $self->init_pipe();
 
