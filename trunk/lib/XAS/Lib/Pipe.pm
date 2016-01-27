@@ -59,25 +59,6 @@ sub session_initialize {
 
 }
 
-sub session_startup {
-    my $self = shift;
-
-    my $alias = $self->alias;
-
-    # start listening for connections
-
-    $self->log->debug("$alias: entering session_startup()");
-
-    $poe_kernel->post($alias, 'pipe_connect');
-
-    # walk the chain
-
-    $self->SUPER::session_startup();
-
-    $self->log->debug("$alias: leaving session_startup()");
-
-}
-
 sub process_input {
     my $self = shift;
     my ($input) = validate_params(\@_, [1]);
