@@ -103,7 +103,7 @@ sub load {
 
         # load and parse the document
 
-        $self->{doc} = $self->parser->load_xml(string => $xml);
+        $self->{'doc'} = $self->parser->load_xml(string => $xml, {no_blanks => 1});
 
         # find and register all namespaces
 
@@ -116,6 +116,7 @@ sub load {
         $self->throw_msg(
             dotid($self->class). '.parser',
             'xml_parser',
+            $ex
         );
 
     };

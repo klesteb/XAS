@@ -68,6 +68,8 @@ lib/XAS/Lib/POE/Session.pm
 lib/XAS/Lib/Process.pm
 lib/XAS/Lib/Process/Unix.pm
 lib/XAS/Lib/Process/Win32.pm
+lib/XAS/Lib/WS/Base.pm
+lib/XAS/Lib/WS/RemoteShell.pm
 lib/XAS/Lib/RPC/JSON/Client.pm
 lib/XAS/Lib/RPC/JSON/Server.pm
 lib/XAS/Lib/Set/Light.pm

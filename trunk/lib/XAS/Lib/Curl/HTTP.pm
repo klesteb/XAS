@@ -12,13 +12,17 @@ use XAS::Class
   accessors => 'curl',
   mutators  => 'retcode',
   utils     => ':validation dotid',
+  constant => {
+    CURLAUTH_ONLY => (1 << 31),    # not provided with perl code
+  },
   vars => {
     PARAMS => {
+      -fail_on_error   => { optional => 1, default => 0 },
       -keep_alive      => { optional => 1, default => 1 },
       -followlocation  => { optional => 1, default => 1 },
-      -max_redirects   => { optional => 1, default => 3 },
       -ssl_verify_peer => { optional => 1, default => 1 },
       -ssl_verify_host => { optional => 1, default => 1 },
+      -max_redirects   => { optional => 1, default => 3 },
       -timeout         => { optional => 1, default => 60 },
       -connect_timeout => { optional => 1, default => 300 },
       -ssl_cacert      => { optional => 1, default => undef },
@@ -46,8 +50,8 @@ sub request {
         { isa => 'HTTP::Request' }
     ]);
 
-    my @body;
     my @head;
+    my @buffer;
     my $response = undef;
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
@@ -57,11 +61,10 @@ sub request {
 
     # I/O for the request
 
-    $self->curl->setopt(CURLOPT_WRITEDATA,      \@body);
+    $self->curl->setopt(CURLOPT_WRITEDATA,      \@buffer);
     $self->curl->setopt(CURLOPT_HEADERDATA,     \@head);
     $self->curl->setopt(CURLOPT_READFUNCTION,   \&_read_callback);
     $self->curl->setopt(CURLOPT_WRITEFUNCTION,  \&_write_callback);
-    $self->curl->setopt(CURLOPT_HEADERFUNCTION, \&_write_callback);
 
     # other options depending on request type
 
@@ -111,14 +114,14 @@ sub request {
         # want the last one. so search backwards until a HTTP header
         # is found.
 
-        while (my $line = pop(@head)) {
+        while (my $line = pop(@buffer)) {
 
             push(@temp, $line);
             last if ($line =~ /^HTTP\//);
 
         }
 
-        $content = join('', reverse(@temp), @body);
+        $content = join('', reverse(@temp));
 
         # now let HTTP::Response figure it all out...
 
@@ -191,17 +194,18 @@ sub init {
     $self->curl->setopt(CURLOPT_PROTOCOLS,         $protocols);
     $self->curl->setopt(CURLOPT_NOPROGRESS,        1);
     $self->curl->setopt(CURLOPT_TIMEOUT_MS,        $timeout);
+    $self->curl->setopt(CURLOPT_FAILONERROR,       $self->fail_on_error);
     $self->curl->setopt(CURLOPT_FORBID_REUSE,      $self->keep_alive);
     $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->followlocation);
     $self->curl->setopt(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout);
 
     # setup authentication
 
-    $authen = CURLAUTH_ANY          if ($self->auth_method eq 'any');
-    $authen = CURLAUTH_NTLM         if ($self->auth_method eq 'ntlm');
-    $authen = CURLAUTH_BASIC        if ($self->auth_method eq 'basic');
-    $authen = CURLAUTH_DIGEST       if ($self->auth_method eq 'digest');
-    $authen = CURLAUTH_GSSNEGOTIATE if ($self->auth_method eq 'negotitate');
+    $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
+    $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
+    $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
+    $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
+    $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
 
     $self->curl->setopt(CURLOPT_HTTPAUTH, $authen);
 
@@ -218,11 +222,11 @@ sub init {
 
         $authen = 0;
 
-        $authen = CURLAUTH_ANY          if ($self->proxy_auth eq 'any');
-        $authen = CURLAUTH_NTLM         if ($self->proxy_auth eq 'ntlm');
-        $authen = CURLAUTH_BASIC        if ($self->proxy_auth eq 'basic');
-        $authen = CURLAUTH_DIGEST       if ($self->proxy_auth eq 'digest');
-        $authen = CURLAUTH_GSSNEGOTIATE if ($self->proxy_auth eq 'negotitate');
+        $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
+        $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
+        $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
+        $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
+        $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
 
         $self->curl->setopt(CURLOPT_PROXY,         $self->proxy_url);
         $self->curl->setopt(CURLOPT_PROXYAUTH,     $authen);

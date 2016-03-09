@@ -103,7 +103,13 @@ stomp_badval                 = invalid header value
 stomp_badkey                 = invalid header key
 tcp_keepalive_enabled        = %s: tcp_keepalive enabled
 unknownerror                 = unknown error: %s
+ws_badrequest                = http status: %s
+ws_wronguuid                 = the uuid of the response dosen't match the uuid of the request
+ws_noshellid                 = unable to retrieve the shell id
+ws_nocmdid                   = unable to retrieve the command id
+ws_wrongid                   = the command uuid's do not match
+ws_noresource                = resource was not created
 xml_error                    = %s
-xml_parser                   = unable to parse the document
+xml_parser                   = unable to parse the document, reason: %s
 xml_validate                 = unable to validate the document
 
