@@ -2,6 +2,20 @@ package XAS::Lib::Curl::HTTP;
 
 our $VERSION = '0.01';
 
+BEGIN {
+    no warnings;
+
+    # this constant is not defined in WWW::Curl on RHEL 5,6,7.
+    # but is, if you compile libcurl on Windows
+
+    unless (CURLAUTH_ONLY) {
+
+        sub CURLAUTH_ONLY { (1 << 31); } # defined in curl.h
+
+    }
+
+}
+
 use HTTP::Response;
 use WWW::Curl::Easy;
 
@@ -12,30 +26,27 @@ use XAS::Class
   accessors => 'curl',
   mutators  => 'retcode',
   utils     => ':validation dotid',
-  constant => {
-    CURLAUTH_ONLY => (1 << 31),    # not provided with perl code
-  },
   vars => {
     PARAMS => {
-      -fail_on_error   => { optional => 1, default => 0 },
-      -keep_alive      => { optional => 1, default => 1 },
-      -followlocation  => { optional => 1, default => 1 },
-      -ssl_verify_peer => { optional => 1, default => 1 },
-      -ssl_verify_host => { optional => 1, default => 1 },
-      -max_redirects   => { optional => 1, default => 3 },
-      -timeout         => { optional => 1, default => 60 },
-      -connect_timeout => { optional => 1, default => 300 },
-      -ssl_cacert      => { optional => 1, default => undef },
-      -ssl_keypasswd   => { optional => 1, default => undef },
-      -proxy_url       => { optional => 1, default => undef },
-      -ssl_cert        => { optional => 1, default => undef, depends => [ 'ssl_key' ] },
-      -ssl_key         => { optional => 1, default => undef, depends => [ 'ssl_cert' ] },
-      -password        => { optional => 1, default => undef, depends => [ 'username' ] },
-      -username        => { optional => 1, default => undef, depends => [ 'password' ] },
-      -proxy_password  => { optional => 1, default => undef, depends => [ 'proxy_username' ] },
-      -proxy_username  => { optional => 1, default => undef, depends => [ 'proxy_password' ] },
-      -auth_method     => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
-      -proxy_auth      => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
+      -fail_on_error    => { optional => 1, default => 0 },
+      -keep_alive       => { optional => 1, default => 1 },
+      -follow_location  => { optional => 1, default => 1 },
+      -ssl_verify_peer  => { optional => 1, default => 1 },
+      -ssl_verify_host  => { optional => 1, default => 1 },
+      -max_redirects    => { optional => 1, default => 3 },
+      -timeout          => { optional => 1, default => 60 },
+      -connect_timeout  => { optional => 1, default => 300 },
+      -ssl_cacert       => { optional => 1, default => undef },
+      -ssl_keypasswd    => { optional => 1, default => undef },
+      -proxy_url        => { optional => 1, default => undef },
+      -ssl_cert         => { optional => 1, default => undef, depends => [ 'ssl_key' ] },
+      -ssl_key          => { optional => 1, default => undef, depends => [ 'ssl_cert' ] },
+      -password         => { optional => 1, default => undef, depends => [ 'username' ] },
+      -username         => { optional => 1, default => undef, depends => [ 'password' ] },
+      -proxy_password   => { optional => 1, default => undef, depends => [ 'proxy_username' ] },
+      -proxy_username   => { optional => 1, default => undef, depends => [ 'proxy_password' ] },
+      -auth_method      => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
+      -proxy_auth       => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
     }
   },
 ;
@@ -61,10 +72,10 @@ sub request {
 
     # I/O for the request
 
-    $self->curl->setopt(CURLOPT_WRITEDATA,      \@buffer);
-    $self->curl->setopt(CURLOPT_HEADERDATA,     \@head);
-    $self->curl->setopt(CURLOPT_READFUNCTION,   \&_read_callback);
-    $self->curl->setopt(CURLOPT_WRITEFUNCTION,  \&_write_callback);
+    $self->curl->setopt(CURLOPT_WRITEDATA,     \@buffer);
+    $self->curl->setopt(CURLOPT_HEADERDATA,    \@head);
+    $self->curl->setopt(CURLOPT_READFUNCTION,  \&_read_callback);
+    $self->curl->setopt(CURLOPT_WRITEFUNCTION, \&_write_callback);
 
     # other options depending on request type
 
@@ -174,6 +185,23 @@ sub _write_callback {
 
 }
 
+sub _authentication {
+    my $self = shift;
+
+    my $authen = 0;
+
+    # setup authentication
+
+    $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
+    $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
+    $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
+    $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
+    $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
+
+    return $authen;
+
+}
+
 sub init {
     my $class = shift;
 
@@ -196,17 +224,12 @@ sub init {
     $self->curl->setopt(CURLOPT_TIMEOUT_MS,        $timeout);
     $self->curl->setopt(CURLOPT_FAILONERROR,       $self->fail_on_error);
     $self->curl->setopt(CURLOPT_FORBID_REUSE,      $self->keep_alive);
-    $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->followlocation);
+    $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->follow_location);
     $self->curl->setopt(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout);
 
     # setup authentication
 
-    $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
-    $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
-    $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
-    $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
-    $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
-
+    $authen = $self->_authentication();
     $self->curl->setopt(CURLOPT_HTTPAUTH, $authen);
 
     if ($self->username) {
@@ -220,13 +243,7 @@ sub init {
 
     if ($self->proxy_url) {
 
-        $authen = 0;
-
-        $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
-        $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
-        $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
-        $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
-        $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
+        $authen = $self->_authentication();
 
         $self->curl->setopt(CURLOPT_PROXY,         $self->proxy_url);
         $self->curl->setopt(CURLOPT_PROXYAUTH,     $authen);
@@ -302,7 +319,7 @@ This method initializes the module and takes the following parameters:
 
 A toggle to tell curl to forbid the reuse of sockets, defaults to true.
 
-=item B<-followlocation>
+=item B<-follow_location>
 
 A toggle to tell curl to follow redirects, defaults to true.
 

@@ -13,6 +13,11 @@ use XAS::Class
   utils    => ':validation xprintf dotid',
   import   => 'class',
   auto_can => '_auto_load',
+  vars => {
+    PARAMS => {
+      -xdebug => { optional => 1, default => 0 }
+    }
+  }
 ;
 
 #use Data::Dumper;

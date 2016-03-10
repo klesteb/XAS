@@ -11,7 +11,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::Curl::HTTP',
   accessors => 'xml uuid',
-  utils     => 'dotid',
+  utils     => ':validation dotid',
   constants => 'TRUE FALSE',
   vars => {
     PARAMS => {
@@ -85,7 +85,7 @@ sub connected {
 
 sub _make_call {
     my $self = shift;
-    my ($xml) = $self->validate_params(\@_, [1]);
+    my ($xml) = validate_params(\@_, [1]);
 
     my $response;
     my $count = 0;
