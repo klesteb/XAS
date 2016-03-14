@@ -123,6 +123,29 @@ sub _make_call {
 
 }
 
+sub _check_relates_to {
+    my $self = shift;
+    my ($uuid) = validate_params(\@_, [1]);
+
+    my $temp;
+    my $xpath = '//a:RelatesTo';
+
+    $temp = $self->xml->get_item($xpath);
+    ($temp) = $temp =~ /uuid:(.*)/;
+
+    $self->log->debug(sprintf('check_relates_to: %s = %s', $uuid, $temp));
+
+    unless ($temp eq $uuid) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.check_relates_to.wronguuid',
+            'ws_wronguuid'
+        );
+
+    }
+
+}
+
 sub init {
     my $class = shift;
 
@@ -141,7 +164,7 @@ sub init {
 1;
 
 __END__
-
+  
 =head1 NAME
 
 XAS::Lib::WS::Base - A class for the XAS environment
@@ -151,11 +174,11 @@ XAS::Lib::WS::Base - A class for the XAS environment
  use XAS::Lib::WS::Base;
 
  my $wsman = XAS::Lib::WS::Base->new(
-    -username    => 'username',
-    -password    => 'password',
-    -url         => 'http://windows-box:5985/wsman',
-    -auth_method => 'any',
- );
+         -username    => 'username',
+         -password    => 'password',
+         -url         => 'http://windows-box:5985/wsman',
+         -auth_method => 'any',
+      );
 
  my ($protocol, $vendor, $version) = $wsman->identify();
 

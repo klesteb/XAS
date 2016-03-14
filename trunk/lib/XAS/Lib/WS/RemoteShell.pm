@@ -5,14 +5,9 @@ our $VERSION = '0.02';
 use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::WS::Base',
+  utils     => ':validation dotid',
   codec     => 'base64',
   accessors => 'created command_id shell_id stderr stdout exitcode',
-  vars => {
-    PARAMS => {
-      -keep_alive  => { optional => 1, default => 1 },
-      -auth_method => { optional => 1, default => 'basic', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
-    }
-  }
 ;
 
 # ----------------------------------------------------------------------
@@ -89,7 +84,7 @@ XML
 
 sub command {
     my $self = shift;
-    my ($command) = $self->validate_params(\@_, [1]);
+    my ($command) = validate_params(\@_, [1]);
 
     my $url      = $self->url;
     my $timeout  = $self->timeout;
@@ -158,7 +153,7 @@ XML
 
 sub send {
     my $self = shift;
-    my ($buffer) = $self->validate_params(\@_, [1]);
+    my ($buffer) = validate_params(\@_, [1]);
 
     my $url        = $self->url;
     my $timeout    = $self->timeout;
@@ -430,29 +425,6 @@ sub DESTROY {
 # Private Methods
 # ----------------------------------------------------------------------
 
-sub _check_relates_to {
-    my $self = shift;
-    my $uuid = shift;
-
-    my $temp;
-    my $xpath = '//a:RelatesTo';
-
-    $temp = $self->xml->get_item($xpath);
-    ($temp) = $temp =~ /uuid:(.*)/;
-
-    $self->log->debug(sprintf('check_relates_to: %s = %s', $uuid, $temp));
-
-    unless ($temp eq $uuid) {
-
-        $self->throw_msg(
-            dotid($self->class) . '.check_relates_to.wronguuid',
-            'ws_wronguuid'
-        );
-
-    }
-
-}
-
 sub _check_command_id {
     my $self = shift;
     my $uuid = shift;
@@ -500,7 +472,7 @@ sub _create_response {
     } else {
 
         $self->throw_msg(
-            dotid($self->class) . '._create_response.resourcecreated',
+            dotid($self->class) . '._create_response.shell_id',
             'ws_noresource',
         );
 
@@ -659,30 +631,30 @@ sub init {
 1;
 
 __END__
-
+  
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::WS::RemoteShell - A class for the XAS environment
 
 =head1 SYNOPSIS
 
  use XAS::Lib::WS::RemoteShell;
 
  my $wsman = XAS::Lib::WS::RemoteShell->new(
-    -username => 'Administrator',
-    -password => 'password',
-    -url      => 'http://localhost:5985/wsman',
+     -username => 'Administrator',
+     -password => 'password',
+     -url      => 'http://localhost:5985/wsman',
  );
 
  # this appears to be the sequence that winrs uses.
 
  if ($wsman->create()) {
-
+     
      $wsman->command('dir');
      $wsman->receive();
      $wsman->signal();
      $wsman->delete();
-
+  
  }
 
  printf("%s", $wsman->stdout);
