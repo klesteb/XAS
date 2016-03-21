@@ -10,10 +10,6 @@ use XAS::Class
   base    => 'XAS::Lib::WS::RemoteShell',
   codecs  => 'base64 unicode',
   utils   => 'dotid',
-  messages => {
-    badfile => 'unable to open: %s, reason: %s',
-    badrc   => 'exit code: %s, reason: %s',
-  }
 ;
 
 # ----------------------------------------------------------------------

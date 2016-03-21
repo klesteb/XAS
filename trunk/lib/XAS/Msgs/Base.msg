@@ -111,6 +111,7 @@ ws_noresource                = resource was not created
 ws_badrequest                = http status: %s
 ws_noresponse                = unable to find a response
 ws_noxpath                   = unable to find this xpath: %s
+ws_badrc                     = exit code: %s, reason: %s
 xml_error                    = %s
 xml_parser                   = unable to parse the document, reason: %s
 xml_validate                 = unable to validate the document
