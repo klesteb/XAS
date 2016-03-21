@@ -137,7 +137,7 @@ sub _check_command_id {
 
         $self->throw_msg(
             dotid($self->class) . '.check_command_id.wrongid',
-            'wrongid'
+            'ws_wrongid'
         );
 
     }
@@ -168,7 +168,7 @@ sub _create_response {
 
             $self->throw_msg(
                 dotid($self->class) . '._create_response.shell_id',
-                'noshellid',
+                'ws_noshellid',
             );
 
         }
@@ -177,7 +177,7 @@ sub _create_response {
 
         $self->throw_msg(
             dotid($self->class) . '._create_response.shell_id',
-            'noresource',
+            'ws_noresource',
         );
 
     }
@@ -202,7 +202,7 @@ sub _command_response {
 
         $self->throw_msg(
             dotid($self->class) . '._command_reponse.command_id',
-            'nocmdid',
+            'ws_nocmdid',
         );
 
     }

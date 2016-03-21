@@ -54,7 +54,7 @@ sub get {
 
                     $self->throw_msg(
                         dotid($self->class) . '.put.badfile',
-                        'badfile',
+                        'file_create',
                         $local, $!
                     );
 
@@ -64,7 +64,7 @@ sub get {
 
                 $self->throw_msg(
                     dotid($self->class) . '.put.badrc',
-                    'badrc',
+                    'ws_badrc',
                     $self->exitcode,
                     $self->stdout
                 );
@@ -77,7 +77,7 @@ sub get {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }
@@ -127,7 +127,7 @@ sub put {
 
                         $self->throw_msg(
                             dotid($self->class) . '.put.badrc',
-                            'badrc',
+                            'ws_badrc',
                             $self->exitcode,
                             $self->stdout
                         );
@@ -142,7 +142,7 @@ sub put {
 
                 $self->throw_msg(
                     dotid($self->class) . '.put.badfile',
-                    'badfile',
+                    'file_create',
                     $local, $!
                 );
 
@@ -154,7 +154,7 @@ sub put {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }
@@ -188,7 +188,7 @@ sub exists {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }
@@ -224,7 +224,7 @@ sub mkdir {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }
@@ -260,7 +260,7 @@ sub rmdir {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }
@@ -296,7 +296,7 @@ sub delete {
 
             $self->throw_msg(
                 dotid($self->class) . '.get.noshell',
-                'noshell',
+                'ws_noshell',
             );
 
         }

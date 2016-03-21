@@ -274,7 +274,7 @@ sub _error_msg {
 
     $self->throw_msg(
         dotid($self->class) . '.request.protocol',
-        'protocol',
+        'ws_protocol',
         $value, $subcode, $reason, $extended
     );
 

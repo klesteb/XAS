@@ -292,7 +292,7 @@ sub _get_response {
 
         $self->throw_msg(
             dotid($self->class) . '.get_response.noxpath',
-            'noxpath',
+            'ws_noxpath',
             $xpath
         );
 
@@ -331,7 +331,7 @@ sub _invoke_response {
 
         $self->throw_msg(
             dotid($self->class) . '.get_response.noxpath',
-            'noxpath',
+            'ws_noxpath',
             $xpath
         );
 
@@ -383,7 +383,7 @@ sub _put_response {
 
         $self->throw_msg(
             dotid($self->class) . '.put_response.noxpath',
-            'noxpath',
+            'ws_noxpath',
             $xpath
         );
 
@@ -412,7 +412,7 @@ sub _get_enum_items {
 
         $self->throw_msg(
             dotid($self->class) . '.get_enum_items.noxpath',
-            'noxpath',
+            'ws_noxpath',
             $xpath
         );
 
