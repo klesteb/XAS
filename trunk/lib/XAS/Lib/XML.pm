@@ -67,6 +67,17 @@ sub get_item {
 
 }
 
+sub get_node {
+    my $self = shift;
+    my ($xpath) = validate_params(\@_, [1]);
+    
+    my $xpc   = $self->xpc;
+    my $node  = $self->doc->documentElement();
+    
+    return $xpc->findnodes($xpath, $node);
+    
+}
+
 sub is_valid {
     my $self = shift;
 
@@ -267,6 +278,18 @@ The Xpath string.
 =head2 get_items($xpath)
 
 This method will return an array of nodes for the given Xpath.
+
+=over 4
+
+=item B<$xpath>
+
+The Xpath string.
+
+=back
+
+=head2 get_node($xpath)
+
+This method will return the node associated with the xpath.
 
 =over 4
 

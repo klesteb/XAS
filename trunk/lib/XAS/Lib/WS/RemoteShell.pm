@@ -14,67 +14,13 @@ use XAS::Class
 # Public Methods
 # ----------------------------------------------------------------------
 
-# XML for ws-manage RemoteShell was taken from
-# http://msdn.microsoft.com/en-us/library/cc251731.aspx
-#
-# Some may think it is cheesy to use heredoc for the raw xml, but this
-# stuff is boilerplate and it is easier then using SOAP::Lite or
-# manually creating a SOAP XML document with XML::LibXML.
-#
-
 sub create {
     my $self = shift;
 
-    my $url     = $self->url;
-    my $timeout = $self->timeout;
-    my $uuid    = $self->uuid->create_str;
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_create_xml($uuid);
 
     $self->log->debug(sprintf('create: uuid - %s', $uuid));
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsman:ResourceURI s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.xmlsoap.org/ws/2004/09/transfer/Create
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">
-      512000
-    </wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false" />
-    <wsman:OptionSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <wsman:Option Name="WINRS_NOPROFILE">TRUE</wsman:Option>
-      <wsman:Option Name="WINRS_CODEPAGE">437</wsman:Option>
-    </wsman:OptionSet>
-    <wsman:OperationTimeout>
-      PT$timeout.000S
-    </wsman:OperationTimeout>
-  </s:Header>
-  <s:Body>
-    <rsp:Shell xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
-      <rsp:InputStreams>stdin</rsp:InputStreams>
-      <rsp:OutputStreams>stdout stderr</rsp:OutputStreams>
-    </rsp:Shell>
-  </s:Body>
-</s:Envelope>
-XML
 
     $self->_make_call($xml);
 
@@ -86,315 +32,25 @@ sub command {
     my $self = shift;
     my ($command) = validate_params(\@_, [1]);
 
-    my $url      = $self->url;
-    my $timeout  = $self->timeout;
-    my $shell_id = $self->shell_id;
-    my $uuid     = $self->uuid->create_str;
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_command_xml($uuid, $command);
 
     $self->{'stdout'} = '';
     $self->{'stderr'} = '';
     $self->{'exitcode'} = 0;
 
     $self->log->debug(sprintf('command: uuid - %s', $uuid));
-    $self->log->debug(sprintf('command: shell_id - %s', $shell_id));
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsman:ResourceURI s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Command
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">
-      512000
-    </wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false" />
-    <wsman:SelectorSet>
-      <wsman:Selector Name="ShellId">
-        $shell_id
-      </wsman:Selector>
-    </wsman:SelectorSet>
-    <wsman:OptionSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <wsman:Option Name="WINRS_CONSOLEMODE_STDIN">TRUE</wsman:Option>
-    </wsman:OptionSet>
-    <wsman:OperationTimeout>PT$timeout.000S</wsman:OperationTimeout>
-  </s:Header>
-  <s:Body>
-    <rsp:CommandLine xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
-      <rsp:Command>
-        &quot;$command&quot;
-      </rsp:Command>
-    </rsp:CommandLine>
-  </s:Body>
-</s:Envelope>
-XML
 
     $self->_make_call($xml);
     $self->_command_response($uuid);
 
 }
 
-sub send {
-    my $self = shift;
-    my ($buffer) = validate_params(\@_, [1]);
-
-    my $url        = $self->url;
-    my $timeout    = $self->timeout;
-    my $shell_id   = $self->shell_id;
-    my $command_id = $self->command_id;
-    my $uuid       = $self->uuid->create_str;
-
-    $buffer = encode($buffer);
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Send
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">153600</wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false" />
-    <wsman:ResourceURI xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsman:SelectorSet
-      xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-      xmlns="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      <wsman:Selector Name="ShellId">
-        $shell_id
-      </wsman:Selector>
-    </wsman:SelectorSet>
-      <wsman:OperationTimeout>PT$timeout.000S</wsman:OperationTimeout>
-  </s:Header>
-  <s:Body>
-    <rsp:Send xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
-      <rsp:Stream
-        xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
-        Name="stdin" CommandId="$command_id">
-        $buffer
-      </rsp:Stream>
-    </rsp:Send>
-  </s:Body>
-</s:Envelope>
-XML
-
-    $self->_make_call($xml);
-
-    return $self->_send_response($uuid);
-
-}
-
-sub receive {
-    my $self = shift;
-
-    my $running    = 1;
-    my $url        = $self->url;
-    my $timeout    = $self->timeout;
-    my $shell_id   = $self->shell_id;
-    my $command_id = $self->command_id;
-    my $uuid       = $self->uuid->create_str;
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Receive
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">
-      512000
-    </wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false" />
-    <wsman:ResourceURI xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsman:SelectorSet
-      xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-      xmlns="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      <wsman:Selector Name="ShellId">
-        $shell_id
-      </wsman:Selector>
-    </wsman:SelectorSet>
-    <wsman:OperationTimeout>PT$timeout.000S</wsman:OperationTimeout>
-  </s:Header>
-  <s:Body>
-    <rsp:Receive
-      xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
-      SequenceId="0">
-      <rsp:DesiredStream CommandId="$command_id">
-        stdout stderr
-      </rsp:DesiredStream>
-    </rsp:Receive>
-    </s:Body>
-</s:Envelope>
-XML
-
-    while ($running) {
-
-        $self->_make_call($xml);
-        $running = $self->_receive_response($uuid);
-
-    }
-
-}
-
-sub signal {
-    my $self = shift;
-
-    my $url        = $self->url;
-    my $timeout    = $self->timeout;
-    my $shell_id   = $self->shell_id;
-    my $command_id = $self->command_id;
-    my $uuid       = $self->uuid->create_str;
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Signal
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">
-      512000
-    </wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-    <wsman:ResourceURI xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsman:SelectorSet xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-      xmlns="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      <wsman:Selector Name="ShellId">
-        $shell_id
-      </wsman:Selector>
-    </wsman:SelectorSet>
-    <wsman:OperationTimeout>PT$timeout.000S</wsman:OperationTimeout>
-  </s:Header>
-  <s:Body>
-    <rsp:Signal
-      xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
-      CommandId="$command_id">
-      <rsp:Code>
-        http://schemas.microsoft.com/wbem/wsman/1/windows/shell/signal/terminate
-      </rsp:Code>
-    </rsp:Signal>
-  </s:Body>
-</s:Envelope>
-XML
-
-    $self->_make_call($xml);
-
-    return $self->_signal_response($uuid);
-
-}
-
 sub delete {
     my $self = shift;
 
-    my $url      = $self->url;
-    my $timeout  = $self->timeout;
-    my $shell_id = $self->shell_id;
-    my $uuid     = $self->uuid->create_str;
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope
-  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-  xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-  <s:Header>
-    <wsa:To>
-      $url
-    </wsa:To>
-    <wsa:ReplyTo>
-      <wsa:Address s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-      </wsa:Address>
-    </wsa:ReplyTo>
-    <wsa:Action s:mustUnderstand="true">
-      http://schemas.xmlsoap.org/ws/2004/09/transfer/Delete
-    </wsa:Action>
-    <wsman:MaxEnvelopeSize s:mustUnderstand="true">
-      512000
-    </wsman:MaxEnvelopeSize>
-    <wsa:MessageID>
-      uuid:$uuid
-    </wsa:MessageID>
-    <wsman:Locale xml:lang="en-US" s:mustUnderstand="false" />
-    <wsman:ResourceURI xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
-    </wsman:ResourceURI>
-    <wsman:SelectorSet
-      xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-      xmlns="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
-        <wsman:Selector Name="ShellId">
-          $shell_id
-        </wsman:Selector>
-    </wsman:SelectorSet>
-    <wsman:OperationTimeout>PT$timeout.000S</wsman:OperationTimeout>
-  </s:Header>
-  <s:Body></s:Body>
-</s:Envelope>
-XML
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_delete_xml($uuid);
 
     $self->_make_call($xml);
 
@@ -410,7 +66,53 @@ sub destroy {
         $self->signal();
         $self->delete();
 
+        $self->{'created'} = 0;
+
     }
+
+}
+
+sub receive {
+    my $self = shift;
+
+    my $running = 1;
+    my $uuid    = $self->uuid->create_str;
+    my $xml     = $self->_receive_xml($uuid);
+
+    while ($running) {
+
+        $self->_make_call($xml);
+        $running = $self->_receive_response($uuid);
+
+    }
+
+}
+
+sub send {
+    my $self = shift;
+    my ($buffer, $eot) = validate_params(\@_, [
+        1,
+        { optional => 1, default => 0 },
+    ]);
+
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_send_xml($uuid, $buffer, $eot);
+
+    $self->_make_call($xml);
+
+    return $self->_send_response($uuid);
+
+}
+
+sub signal {
+    my $self = shift;
+
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_signal_xml($uuid);
+
+    $self->_make_call($xml);
+
+    return $self->_signal_response($uuid);
 
 }
 
@@ -435,7 +137,7 @@ sub _check_command_id {
 
         $self->throw_msg(
             dotid($self->class) . '.check_command_id.wrongid',
-            'ws_wrongid'
+            'wrongid'
         );
 
     }
@@ -456,6 +158,8 @@ sub _create_response {
         if (my $item = $self->xml->get_item('//rsp:ShellId')) {
 
             $self->{'shell_id'} = $item;
+            $self->{'created'} = 1;
+
             $self->log->debug(sprintf('create_response: shell_id = %s', $self->shell_id));
 
             $stat = 1;
@@ -464,7 +168,7 @@ sub _create_response {
 
             $self->throw_msg(
                 dotid($self->class) . '._create_response.shell_id',
-                'ws_noshellid',
+                'noshellid',
             );
 
         }
@@ -473,7 +177,7 @@ sub _create_response {
 
         $self->throw_msg(
             dotid($self->class) . '._create_response.shell_id',
-            'ws_noresource',
+            'noresource',
         );
 
     }
@@ -498,7 +202,7 @@ sub _command_response {
 
         $self->throw_msg(
             dotid($self->class) . '._command_reponse.command_id',
-            'ws_nocmdid',
+            'nocmdid',
         );
 
     }
@@ -614,6 +318,366 @@ sub _delete_response {
     $self->_check_relates_to($uuid);
 
     $stat = 1 if ($self->xml->get_item($xpath));
+
+}
+
+# ----------------------------------------------------------------------
+# XML boilerplate - we're using heredoc for simplcity
+#
+# XML for ws-manage RemoteShell was taken from
+# http://msdn.microsoft.com/en-us/library/cc251731.aspx
+# ----------------------------------------------------------------------
+
+sub _command_xml {
+    my $self = shift;
+    my $uuid = shift;
+    my $command = shift;
+
+    my $url      = $self->url;
+    my $timeout  = $self->timeout;
+    my $shell_id = $self->shell_id;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Command
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false" />
+    <w:SelectorSet>
+      <w:Selector Name="ShellId">
+        $shell_id
+      </w:Selector>
+    </w:SelectorSet>
+    <w:OptionSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <w:Option Name="WINRS_CONSOLEMODE_STDIN">TRUE</w:Option>
+      <w:Option Name="WINRS_SKIP_CMD_SHELL">FALSE</w:Option>
+    </w:OptionSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <rsp:CommandLine xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
+      <rsp:Command>
+        &quot;$command&quot;
+      </rsp:Command>
+    </rsp:CommandLine>
+  </s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
+
+}
+
+sub _create_xml {
+    my $self = shift;
+    my $uuid = shift;
+
+    my $url     = $self->url;
+    my $timeout = $self->timeout;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/transfer/Create
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false" />
+    <w:OptionSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <w:Option Name="WINRS_NOPROFILE">TRUE</w:Option>
+      <w:Option Name="WINRS_CODEPAGE">437</w:Option>
+    </w:OptionSet>
+    <w:OperationTimeout>
+      PT$timeout.000S
+    </w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <rsp:Shell xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
+      <rsp:InputStreams>stdin</rsp:InputStreams>
+      <rsp:OutputStreams>stdout stderr</rsp:OutputStreams>
+    </rsp:Shell>
+  </s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
+
+}
+
+sub _delete_xml {
+    my $self = shift;
+    my $uuid = shift;
+
+    my $url      = $self->url;
+    my $timeout  = $self->timeout;
+    my $shell_id = $self->shell_id;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/transfer/Delete
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false" />
+    <w:ResourceURI s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI>
+    <w:SelectorSet>
+      <w:Selector Name="ShellId">
+        $shell_id
+      </w:Selector>
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body></s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
+
+}
+
+sub _receive_xml {
+    my $self = shift;
+    my $uuid = shift;
+
+    my $url        = $self->url;
+    my $timeout    = $self->timeout;
+    my $shell_id   = $self->shell_id;
+    my $command_id = $self->command_id;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Receive
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false" />
+    <w:ResourceURI s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI>
+    <w:SelectorSet>
+      <w:Selector Name="ShellId">
+        $shell_id
+      </w:Selector>
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <rsp:Receive
+      xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
+      SequenceId="0">
+      <rsp:DesiredStream CommandId="$command_id">
+        stdout stderr
+      </rsp:DesiredStream>
+    </rsp:Receive>
+    </s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
+
+}
+
+sub _send_xml {
+    my $self   = shift;
+    my $uuid   = shift;
+    my $buffer = shift;
+    my $eot    = shift;
+
+    my $url        = $self->url;
+    my $timeout    = $self->timeout;
+    my $shell_id   = $self->shell_id;
+    my $command_id = $self->command_id;
+
+    $buffer = encode($buffer);
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Send
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      153600
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false" />
+    <w:ResourceURI>
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI s:mustUnderstand="true">
+    <w:SelectorSet>
+      <w:Selector Name="ShellId">
+        $shell_id
+      </w:Selector>
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <rsp:Send xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell">
+      <rsp:Stream
+        xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
+        Name="stdin" CommandId="$command_id">
+        $buffer
+      </rsp:Stream>
+    </rsp:Send>
+  </s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
+
+}
+
+sub _signal_xml {
+    my $self = shift;
+    my $uuid = shift;
+
+    my $url        = $self->url;
+    my $timeout    = $self->timeout;
+    my $shell_id   = $self->shell_id;
+    my $command_id = $self->command_id;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+  xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Signal
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:ResourceURI s:mustUnderstand="true">
+      http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd
+    </w:ResourceURI>
+    <w:SelectorSet>
+      <w:Selector Name="ShellId">
+        $shell_id
+      </w:Selector>
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <rsp:Signal
+      xmlns:rsp="http://schemas.microsoft.com/wbem/wsman/1/windows/shell"
+      CommandId="$command_id">
+      <rsp:Code>
+        http://schemas.microsoft.com/wbem/wsman/1/windows/shell/signal/terminate
+      </rsp:Code>
+    </rsp:Signal>
+  </s:Body>
+</s:Envelope>
+XML
+
+    return $xml;
 
 }
 

@@ -10,36 +10,109 @@ use XAS::Class
   utils   => ':validation dotid',
 ;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------
 
-sub enumerate {
+sub create {
     my $self = shift;
-    my ($class) = validate_params(\@_, [
-        { type => SCALAR },
-    ]);
-    
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -class    => { type => SCALAR },
+        -selector => { type => SCALAR },
+        -xml      => { type => SCALAR },
+    });
+
+    my $data     = $p->{'-xml'};
+    my $class    = $p->{'-class'};
+    my $resource = $p->{'-resource'};
+    my $selector = $p->{'-selector'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
+
     my $uuid = $self->uuid->create_str;
-    my $xml  = $self->_enumerate_xml($uuid, $class);
+    my $xml  = $self->_create_xml($uuid, $object, $selector, $data);
 
     $self->_make_call($xml);
 
-    return $self->_enumerate_response($uuid, $class);
+    return $self->_create_response($uuid);
+
+}
+
+sub delete {
+    my $self = shift;
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -class    => { type => SCALAR },
+        -selector => { type => SCALAR },
+    });
+
+    my $class    = $p->{'-class'};
+    my $resource = $p->{'-resource'};
+    my $selector = $p->{'-selector'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
+
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_delete_xml($uuid, $object, $selector);
+
+    $self->_make_call($xml);
+
+    return $self->_delete_response($uuid);
+
+}
+
+sub enumerate {
+    my $self = shift;
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -selector => { optional => 1, type => HASHREF, default => undef },
+        -class    => { type => SCALAR },
+    });
+
+    my $class    = $p->{'-class'};
+    my $resource = $p->{'-resource'};
+    my $selector = $p->{'-selector'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
+
+    my $xml;
+    my $uuid = $self->uuid->create_str;
+
+    if (defined($selector)) {
+
+        $xml  = $self->_enumerate_filter_xml($uuid, $object, $selector)
+
+    } else {
+
+        $xml  = $self->_enumerate_xml($uuid, $object)
+
+    }
+
+    $self->_make_call($xml);
+
+    return $self->_enumerate_response($uuid, $resource, $class);
 
 }
 
 sub get {
     my $self = shift;
-    my ($class, $params) = validate_params(\@_, [
-        { type => SCALAR },
-        { type => HASHREF},
-    ]);
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -class    => { type => SCALAR },
+        -selector => { type => HASHREF }
+    });
+
+    my $class    = $p->{'-class'};
+    my $resource = $p->{'-resource'};
+    my $selector = $p->{'-selector'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
 
     my $uuid = $self->uuid->create_str;
-    my $xml  = $self->_get_xml($uuid, $class, $params);
+    my $xml  = $self->_get_xml($uuid, $object, $selector);
 
     $self->_make_call($xml);
 
@@ -49,14 +122,23 @@ sub get {
 
 sub invoke {
     my $self = shift;
-    my ($action, $class, $params) = validate_params(\@_, [
-        { type => SCALAR },
-        { type => SCALAR },
-        { type => HASHREF },
-    ]);
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -action   => { type => SCALAR },
+        -class    => { type => SCALAR },
+        -selector => { type => HASHREF },
+    });
+
+    my $class    = $p->{'-class'};
+    my $action   = $p->{'-action'};
+    my $resource = $p->{'-resource'};
+    my $selector = $p->{'-selector'};
+
+    my $object  = sprintf('%s/%s', $resource, $class);
+    my $oaction = sprintf('%s/%s', $object, $action);
 
     my $uuid = $self->uuid->create_str;
-    my $xml  = $self->_invoke_xml($uuid, $class, $action, $params);
+    my $xml  = $self->_invoke_xml($uuid, $object, $oaction, $action, $selector);
 
     $self->_make_call($xml);
 
@@ -66,11 +148,19 @@ sub invoke {
 
 sub pull {
     my $self = shift;
-    my ($class, $context, $items) = validate_params(\@_, [
-        { type => SCALAR },
-        { type => SCALAR },
-        { type => ARRAYREF },
-    ]);
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -class    => { type => SCALAR },
+        -context  => { type => SCALAR },
+        -items    => { type => ARRAYREF },
+    });
+
+    my $items    = $p->{'-items'};
+    my $class    = $p->{'-class'};
+    my $context  = $p->{'-context'};
+    my $resource = $p->{'-resource'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
 
     my $xml;
     my $uuid;
@@ -79,7 +169,7 @@ sub pull {
     do {
 
         $uuid = $self->uuid->create_str;
-        $xml  = $self->_pull_xml($uuid, $class, $context);
+        $xml  = $self->_pull_xml($uuid, $object, $context);
 
         $self->_make_call($xml);
 
@@ -91,15 +181,24 @@ sub pull {
 
 sub put {
     my $self = shift;
-    my ($class, $key, $value, $params) = validate_params(\@_, [
-        { type => SCALAR },
-        { type => SCALAR },
-        { type => SCALAR },
-        { type => HASHREF },
-    ]);
+    my $p = validate_params(\@_, {
+        -resource => { optional => 1, default => 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2' },
+        -class    => { type => SCALAR },
+        -key      => { type => SCALAR },
+        -value    => { type => SCALAR },
+        -data     => { type => HASHREF },
+    });
+
+    my $key      = $p->{'-key'};
+    my $data     = $p->{'-data'};
+    my $value    = $p->{'-value'};
+    my $class    = $p->{'-class'};
+    my $resource = $p->{'-resource'};
+
+    my $object = sprintf('%s/%s', $resource, $class);
 
     my $uuid = $self->uuid->create_str;
-    my $xml  = $self->_put_xml($uuid, $class, $key, $value, $params);
+    my $xml  = $self->_put_xml($uuid, $object, $class, $key, $value, $data);
 
     $self->_make_call($xml);
 
@@ -107,28 +206,46 @@ sub put {
 
 }
 
-sub release {
-    my $self = shift;
-    my ($class, $context) = validate_params(\@_, [
-        { type => SCALAR },
-        { type => SCALAR },
-    ]);
-
-    my $uuid = $self->uuid->create_str;
-    my $xml  = $self->_release_xml($uuid, $class, $context);
-
-    $self->_make_call($xml);
-
-}
-
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
 
+sub _create_response {
+    my $self = shift;
+    my $uuid = shift;
+
+    my $stat = 0;
+    my $xpath = '//t:ResourceCreated';
+
+    $self->log->debug('entering - _create_response()');
+
+    $self->_check_relates_to($uuid);
+    $self->_check_action('CreateResponse');
+
+    $stat = 1 if ($self->xml->get_item($xpath));
+
+    return $stat;
+
+}
+
+sub _delete_response {
+    my $self = shift;
+    my $uuid = shift;
+
+    $self->log->debug('entering - _delete_response()');
+
+    $self->_check_relates_to($uuid);
+    $self->_check_action('DeleteResponse');
+
+    return 1;
+
+}
+
 sub _enumerate_response {
-    my $self  = shift;
-    my $uuid  = shift;
-    my $class = shift;
+    my $self     = shift;
+    my $uuid     = shift;
+    my $resource = shift;
+    my $class    = shift;
 
     my @items;
     my $context;
@@ -137,12 +254,18 @@ sub _enumerate_response {
     $self->log->debug('entering - _enumerate_response()');
 
     $self->_check_relates_to($uuid);
+    $self->_check_action('EnumerateResponse');
 
     if (my $value = $self->xml->get_item($xpath)) {
 
         ($context) = $value =~ /uuid:(.*)/;
 
-        $self->pull($class, $context, \@items);
+        $self->pull(
+            -resource => $resource,
+            -class    => $class,
+            -context  => $context,
+            -items    => \@items
+        );
 
     }
 
@@ -159,6 +282,7 @@ sub _get_response {
     my $xpath = "//p:$class";
 
     $self->_check_relates_to($uuid);
+    $self->_check_action('GetResponse');
 
     if (my $elements = $self->xml->get_items($xpath)) {
 
@@ -168,7 +292,7 @@ sub _get_response {
 
         $self->throw_msg(
             dotid($self->class) . '.get_response.noxpath',
-            'ws_noxpath',
+            'noxpath',
             $xpath
         );
 
@@ -185,9 +309,11 @@ sub _invoke_response {
     my $action = shift;
 
     my $rc = -1;
+    my $response = sprintf('%sResponse', $action);
     my $xpath = sprintf('//p:%s_OUTPUT', $action);
 
     $self->_check_relates_to($uuid);
+    $self->_check_action($response);
 
     if (my $elements = $self->xml->get_items($xpath)) {
 
@@ -205,7 +331,7 @@ sub _invoke_response {
 
         $self->throw_msg(
             dotid($self->class) . '.get_response.noxpath',
-            'ws_noxpath',
+            'noxpath',
             $xpath
         );
 
@@ -224,12 +350,13 @@ sub _pull_response {
     my $context = undef;
 
     $self->_check_relates_to($uuid);
+    $self->_check_action('PullResponse');
 
     if (my $value = $self->xml->get_item('//n:EnumerationContext')) {
 
         ($context) = $value =~ /uuid:(.*)/;
 
-    } 
+    }
 
     $self->_get_enum_items($class, $items);
 
@@ -246,6 +373,7 @@ sub _put_response {
     my $xpath = "//p:$class";
 
     $self->_check_relates_to($uuid);
+    $self->_check_action('PutResponse');
 
     if (my $elements = $self->xml->get_items($xpath)) {
 
@@ -255,7 +383,7 @@ sub _put_response {
 
         $self->throw_msg(
             dotid($self->class) . '.put_response.noxpath',
-            'ws_noxpath',
+            'noxpath',
             $xpath
         );
 
@@ -284,7 +412,7 @@ sub _get_enum_items {
 
         $self->throw_msg(
             dotid($self->class) . '.get_enum_items.noxpath',
-            'ws_noxpath',
+            'noxpath',
             $xpath
         );
 
@@ -313,53 +441,180 @@ sub _get_items {
 
 # ----------------------------------------------------------------------
 # XML boilerplate - we're using heredoc for simplcity
+#
+# XML for ws-manage Manage was taken from
+# https://msdn.microsoft.com/en-us/library/cc251705.aspx
 # ----------------------------------------------------------------------
 
-sub _enumerate_xml {
-    my $self = shift;
-    my $uuid = shift;
-    my $class = shift;
-    
+sub _create_xml {
+    my $self     = shift;
+    my $uuid     = shift;
+    my $resource = shift;
+    my $params   = shift;
+    my $xml_data = shift;
+
     my $url     = $self->url;
     my $timeout = $self->timeout;
 
     my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                                                                                    
+<?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
-  xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd" 
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
+  xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      $resource
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/transfer/Create
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:SelectorSet>
+      __SELECTOR__
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    $xml_data
+  </s:Body>
+</s:Envelope>
+XML
+
+    my $selector = '';
+
+    while (my ($key, $value) = each(%$params)) {
+
+        $selector .= sprintf("<w:Selector Name=\"%s\">%s</w:Selector>\n", $key, $value);
+
+    }
+
+    chomp $selector;
+
+    $xml =~ s/__SELECTOR__/$selector/;
+
+    return $xml;
+
+}
+
+sub _delete_xml {
+    my $self = shift;
+    my $uuid = shift;
+    my $resource = shift;
+    my $params = shift;
+
+    my $url     = $self->url;
+    my $timeout = $self->timeout;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      $resource
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/transfer/Delete
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:SelectorSet>
+      __SELECTOR__
+    </w:SelectorSet>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body/>
+</s:Envelope>
+XML
+
+    my $selector = '';
+
+    while (my ($key, $value) = each(%$params)) {
+
+        $selector .= sprintf("<w:Selector Name=\"%s\">%s</w:Selector>\n", $key, $value);
+
+    }
+
+    chomp $selector;
+
+    $xml =~ s/__SELECTOR__/$selector/;
+
+    return $xml;
+
+}
+
+sub _enumerate_xml {
+    my $self = shift;
+    my $uuid = shift;
+    my $resource = shift;
+
+    my $url     = $self->url;
+    my $timeout = $self->timeout;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                          
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
   xmlns:b="http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd">
-	<s:Header>
-	  <a:To>
-        $url
-      </a:To>
-	  <w:ResourceURI s:mustUnderstand="true">
-        http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
-      </w:ResourceURI>
-	  <a:ReplyTo>
-		<a:Address s:mustUnderstand="true">
-          http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-        </a:Address>
-	  </a:ReplyTo>
-	  <a:Action s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate
-      </a:Action>
-	  <w:MaxEnvelopeSize s:mustUnderstand="true">
-        512000
-      </w:MaxEnvelopeSize>
-	  <a:MessageID>
-        uuid:$uuid
-      </a:MessageID>
-	  <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-	  <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>
-      <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
-	</s:Header>
-	<s:Body>
-	  <n:Enumerate>
-	  </n:Enumerate>
-	</s:Body>
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      $resource
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <n:Enumerate/>
+  </s:Body>
 </s:Envelope>
 XML
 
@@ -367,28 +622,94 @@ XML
 
 }
 
-sub get_xml {
+sub _enumerate_filter_xml {
     my $self = shift;
     my $uuid = shift;
-    my $class = shift;
+    my $resource = shift;
     my $params = shift;
-    
-    my $selector;
+
+    my $url     = $self->url;
+    my $timeout = $self->timeout;
+
+    my $xml = <<"XML";
+<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                          
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
+  xmlns:b="http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd">
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      $resource
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <n:Enumerate>
+      <w:Filter Dialect="http://schemas.dmtf.org/wbem/wsman/1/wsman/SelectorFilter">
+        <w:SelectorSet>
+          __SELECTOR__
+        </w:SelectorSet>
+      </w:Filter>
+    </n:Enumerate>
+  </s:Body>
+</s:Envelope>
+XML
+
+    my $selector = '';
+
+    while (my ($key, $value) = each(%$params)) {
+
+        $selector .= sprintf("<w:Selector Name=\"%s\">%s</w:Selector>\n", $key, $value);
+
+    }
+
+    chomp $selector;
+
+    $xml =~ s/__SELECTOR__/$selector/;
+
+    return $xml;
+
+}
+
+sub _get_xml {
+    my $self     = shift;
+    my $uuid     = shift;
+    my $resource = shift;
+    my $params   = shift;
+
     my $url     = $self->url;
     my $timeout = $self->timeout;
 
     my $xml = <<"XML";
 <?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" 
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
-  xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd">
-  <s:Header>  
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd">
+  <s:Header>
     <a:To>
       $url
-    </a:To>                       
+    </a:To>
     <w:ResourceURI s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
+      $resource
     </w:ResourceURI>
     <a:ReplyTo>
       <a:Address s:mustUnderstand="true">
@@ -405,7 +726,6 @@ sub get_xml {
       uuid:$uuid
     </a:MessageID>
     <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-    <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>
     <w:SelectorSet>
       __SELECTOR__
     </w:SelectorSet>
@@ -414,6 +734,8 @@ sub get_xml {
   <s:Body/>
 </s:Envelope>
 XML
+
+    my $selector = '';
 
     while (my ($key, $value) = each(%$params)) {
 
@@ -429,14 +751,14 @@ XML
 
 }
 
-sub invoke_xml {
+sub _invoke_xml {
     my $self = shift;
     my $uuid = shift;
-    my $class = shift;
+    my $resource = shift;
+    my $oaction = shift;
     my $action = shift;
     my $params = shift;
 
-    my $selector;
     my $url     = $self->url;
     my $timeout = $self->timeout;
     my $input   = sprintf('%s_INPUT', $action);
@@ -444,15 +766,15 @@ sub invoke_xml {
     my $xml = <<"XML";
 <?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
   xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd">
   <s:Header>
     <a:To>
       $url
     </a:To>
     <w:ResourceURI s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
+      $resource
     </w:ResourceURI>
     <a:ReplyTo>
       <a:Address s:mustUnderstand="true">
@@ -460,7 +782,7 @@ sub invoke_xml {
       </a:Address>
     </a:ReplyTo>
     <a:Action s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class/$action
+      $oaction
     </a:Action>
     <w:MaxEnvelopeSize s:mustUnderstand="true">
       512000
@@ -469,21 +791,22 @@ sub invoke_xml {
       uuid:$uuid
     </a:MessageID>
     <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-    <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>                   
     <w:SelectorSet>
       __SELECTOR__
     </w:SelectorSet>
     <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
-  </s:Header>                                                                                       
+  </s:Header>                                                                   
   <s:Body>
-    <p:__INPUT__ xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class"/>
-  </s:Body>                                                                                          
+    <p:__INPUT__ xmlns:p="$resource"/>
+  </s:Body>                                                                     
 </s:Envelope>
 XML
 
+    my $selector = '';
+
     while (my ($key, $value) = each(%$params)) {
 
-        $selector .= sprintf("<w:Selector Name=\"$key\">$value</w:Selector>\n", $key, $value);
+        $selector .= sprintf("<w:Selector Name=\"%s\">%s</w:Selector>\n", $key, $value);
 
     }
 
@@ -499,55 +822,52 @@ XML
 sub _pull_xml {
     my $self = shift;
     my $uuid = shift;
-    my $class = shift;
+    my $resource = shift;
     my $context = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
 
     my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                                                                                    
+<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                          
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
-  xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd" 
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
   xmlns:b="http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd">
-	<s:Header>
-	  <a:To>
-        $url
-      </a:To>
-	  <w:ResourceURI s:mustUnderstand="true">
-        http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
-      </w:ResourceURI>
-	  <a:ReplyTo>
-		<a:Address s:mustUnderstand="true">
-          http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-        </a:Address>
-	  </a:ReplyTo>
-	  <a:Action s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/09/enumeration/Pull        
-      </a:Action>
-	  <w:MaxEnvelopeSize s:mustUnderstand="true">
-        512000
-      </w:MaxEnvelopeSize>
-	  <a:MessageID>
-        uuid:$uuid
-      </a:MessageID>
-	  <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-	  <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>
-      <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
-	</s:Header>
-	<s:Body>
-	  <n:Pull>
-        <n:EnumerationContext>uuid:$context</n:EnumerationContext>
-	  </n:Pull>
-	  <n:Enumerate>
-	  </n:Enumerate>
-	</s:Body>
+  <s:Header>
+    <a:To>
+      $url
+    </a:To>
+    <w:ResourceURI s:mustUnderstand="true">
+      $resource
+    </w:ResourceURI>
+    <a:ReplyTo>
+      <a:Address s:mustUnderstand="true">
+        http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+      </a:Address>
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand="true">
+      http://schemas.xmlsoap.org/ws/2004/09/enumeration/Pull
+    </a:Action>
+    <w:MaxEnvelopeSize s:mustUnderstand="true">
+      512000
+    </w:MaxEnvelopeSize>
+    <a:MessageID>
+      uuid:$uuid
+    </a:MessageID>
+    <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
+    <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
+  </s:Header>
+  <s:Body>
+    <n:Pull>
+      <n:EnumerationContext>uuid:$context</n:EnumerationContext>
+    </n:Pull>
+    <n:Enumerate/>
+  </s:Body>
 </s:Envelope>
 XML
-    
+
     return $xml;
 
 }
@@ -555,27 +875,27 @@ XML
 sub _put_xml {
     my $self  = shift;
     my $uuid  = shift;
+    my $resource = shift;
     my $class = shift;
     my $key   = shift;
     my $value = shift;
     my $params = shift;
 
-    my $modify;
     my $url     = $self->url;
     my $timeout = $self->timeout;
 
     my $xml = <<"XML";
 <?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
+  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
   xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd">
   <s:Header>
     <a:To>
       $url
     </a:To>
     <w:ResourceURI s:mustUnderstand="true">
-      http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
+      $resource
     </w:ResourceURI>
     <a:ReplyTo>
       <a:Address s:mustUnderstand="true">
@@ -592,18 +912,20 @@ sub _put_xml {
       uuid:$uuid
     </a:MessageID>
     <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-    <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>                   
     <w:SelectorSet>
       <w:Selector Name="$key">$value</w:Selector>
     </w:SelectorSet>
     <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
-  </s:Header>                                                                                       
+  </s:Header>                                                                   
   <s:Body>
-    <p:$class http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class>
+    <p:$class $resource>
     __MODIFY__
-  </s:Body>                                                                                          
+    </p:$class>
+  </s:Body>                                                                     
 </s:Envelope>
 XML
+
+    my $modify = '';
 
     while (my ($name, $data) = each(%$params)) {
 
@@ -614,62 +936,6 @@ XML
     chomp $modify;
 
     $xml =~ s/__MODIFY__/$modify/;
-
-    return $xml;
-
-}
-
-sub _release_xml {
-    my $self = shift;
-    my $uuid = shift;
-    my $class = shift;
-    my $context = shift;
-
-    my $url     = $self->url;
-    my $timeout = $self->timeout;
-
-    my $xml = <<"XML";
-<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                                                                                                                    
-<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-  xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
-  xmlns:n="http://schemas.xmlsoap.org/ws/2004/09/enumeration" 
-  xmlns:w="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" 
-  xmlns:p="http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd" 
-  xmlns:b="http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd">
-	<s:Header>
-	  <a:To>
-        $url
-      </a:To>
-	  <w:ResourceURI s:mustUnderstand="true">
-        http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/$class
-      </w:ResourceURI>
-	  <a:ReplyTo>
-		<a:Address s:mustUnderstand="true">
-          http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
-        </a:Address>
-	  </a:ReplyTo>
-	  <a:Action s:mustUnderstand="true">
-        http://schemas.xmlsoap.org/ws/2004/09/enumeration/Release
-      </a:Action>
-	  <w:MaxEnvelopeSize s:mustUnderstand="true">
-        512000
-      </w:MaxEnvelopeSize>
-	  <a:MessageID>
-        uuid:$uuid
-      </a:MessageID>
-	  <w:Locale xml:lang="en-US" s:mustUnderstand="false"/>
-	  <p:DataLocale xml:lang="en-US" s:mustUnderstand="false"/>
-      <w:OperationTimeout>PT$timeout.000S</w:OperationTimeout>
-	</s:Header>
-	<s:Body>
-	  <n:Release
-        <n:EnumerationContext>uuid:$context</n:EnumerationContext>
-	  </n:Release
-	  <n:Enumerate>
-	  </n:Enumerate>
-	</s:Body>
-</s:Envelope>
-XML
 
     return $xml;
 

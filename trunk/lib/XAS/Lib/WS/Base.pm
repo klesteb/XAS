@@ -113,11 +113,23 @@ sub _make_call {
 
     } else {
 
-        $self->throw_msg(
-            dotid($self->class) . '._make_call.request',
-            'ws_badrequest',
-            $response->status_line
-        );
+        if ($response->code eq '500') {
+            
+            my $stuff = $response->content;
+            $self->xml->load($stuff);
+            $self->log->debug(sprintf("make_call - reponse:\n%s", $self->xml->doc->toString(1)));
+            
+            $self->_error_msg;
+            
+        } else {
+
+            $self->throw_msg(
+                dotid($self->class) . '._make_call.request',
+                'ws_badrequest',
+                $response->status_line
+            );
+
+        }
 
     }
 
@@ -143,6 +155,128 @@ sub _check_relates_to {
         );
 
     }
+
+}
+
+sub _check_action {
+    my $self = shift;
+    my $action = shift;
+
+    my $xpath = '//a:Action';
+    my $item = $self->xml->get_item($xpath);
+
+    $self->log->debug(sprintf('check_action: %s =~ %s', $action, $item));
+
+    unless ($item =~ /$action/) {
+
+        $self->throw_msg(
+            dotid($self->class) . '.check_action.wrongaction',
+            'ws_wrongaction',
+            $action
+        );
+
+    }
+
+}
+
+sub _error_msg {
+    my $self = shift;
+
+    my $message = '';
+    my $extended = '';
+    my $wsmanfault = '';
+    my $faultdetail = '';
+    my $extendederror = '';
+    my $providerfault = '';
+
+    my $value   = $self->xml->get_item('/s:Envelope/s:Body/s:Fault/s:Code/s:Value');
+    my $subcode = $self->xml->get_item('/s:Envelope/s:Body/s:Fault/s:Code/s:Subcode/s:Value');
+    my $reason  = $self->xml->get_item('/s:Envelope/s:Body/s:Fault/s:Reason/s:Text');
+
+    if (my $text = $self->xml->get_item('/s:Envelope/s:Body/s:Fault/s:Detail/w:FaultDetail')) {
+
+        $faultdetail = sprintf(', error type: %s', $text);
+
+    }
+
+    if (my $nodes = $self->xml->get_node('/s:Envelope/s:Body/s:Fault/s:Detail/f:WSManFault')) {
+
+        foreach my $node (@$nodes) {
+
+            if ($node->localname eq 'WSManFault') {
+
+                $wsmanfault = sprintf(', machine: %s, code: %s',
+                    $node->getAttribute('Machine'),
+                    $node->getAttribute('Code')
+                );
+
+                last;
+
+            }
+
+        }
+
+    }
+
+    if (my $node = $self->xml->get_node('/s:Envelope/s:Body/s:Fault/s:Detail/f:WSManFault/f:Message')) {
+
+        unless (ref($node) eq 'XML::LibXML::NodeList') {
+
+            $message = sprintf(', message: %s', $node->textContent);
+
+        }
+
+    }
+
+    if (my $nodes = $self->xml->get_node('/s:Envelope/s:Body/s:Fault/s:Detail/f:WSManFault/f:Message/f:ProviderFault')) {
+
+        if (ref($nodes) eq 'XML::LibXML::NodeList') {
+
+            foreach my $node (@$nodes) {
+
+                if ($node->localname eq 'ProviderFault') {
+
+                    $providerfault = sprintf(', path: %s, provider: %s',
+                        $node->getAttribute('path'),
+                        $node->getAttribute('provider')
+                    );
+
+                    last;
+
+                }
+
+            }
+
+        } else {
+
+            $providerfault = sprintf(', path: %s, provider: %s',
+                $nodes->getAttribute('path'),
+                $nodes->getAttribute('provider')
+            );
+
+        }
+
+    }
+
+    if (my $nodes = $self->xml->get_items('/s:Envelope/s:Body/s:Fault/s:Detail/f:WSManFault/f:Message/f:ProviderFault/f:ExtendedError')) {
+
+        foreach my $child (@$nodes)  {
+
+            next if ($child->localname eq '_ExtendedStatus');
+
+            $extendederror .= sprintf(', %s: %s', $child->localname, $child->textContent);
+
+        }
+
+    }
+
+    $extended = $faultdetail . $message . $wsmanfault . $providerfault . $extendederror;
+
+    $self->throw_msg(
+        dotid($self->class) . '.request.protocol',
+        'protocol',
+        $value, $subcode, $reason, $extended
+    );
 
 }
 
