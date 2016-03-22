@@ -2,12 +2,13 @@ package XAS::Lib::WS::RemoteShell;
 
 our $VERSION = '0.02';
 
+use XAS::Lib::XML;
 use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Lib::WS::Base',
   utils     => ':validation dotid',
   codec     => 'base64',
-  accessors => 'created command_id shell_id stderr stdout exitcode',
+  accessors => 'created command_id shell_id stderr stdout exitcode clixml',
 ;
 
 # ----------------------------------------------------------------------
@@ -37,7 +38,7 @@ sub command {
 
     $self->{'stdout'} = '';
     $self->{'stderr'} = '';
-    $self->{'exitcode'} = 0;
+    $self->{'exitcode'} = -1;
 
     $self->log->debug(sprintf('command: uuid - %s', $uuid));
 
@@ -63,7 +64,6 @@ sub destroy {
 
     if ($self->created) {
 
-        $self->signal();
         $self->delete();
 
         $self->{'created'} = 0;
@@ -75,16 +75,16 @@ sub destroy {
 sub receive {
     my $self = shift;
 
-    my $running = 1;
-    my $uuid    = $self->uuid->create_str;
-    my $xml     = $self->_receive_xml($uuid);
+    my $running;
+    my $uuid = $self->uuid->create_str;
+    my $xml  = $self->_receive_xml($uuid);
 
-    while ($running) {
+    do {
 
         $self->_make_call($xml);
         $running = $self->_receive_response($uuid);
 
-    }
+    } while ($running);
 
 }
 
@@ -92,7 +92,7 @@ sub send {
     my $self = shift;
     my ($buffer, $eot) = validate_params(\@_, [
         1,
-        { optional => 1, default => 0 },
+        { optional => 1, default => 1 },
     ]);
 
     my $uuid = $self->uuid->create_str;
@@ -116,10 +116,33 @@ sub signal {
 
 }
 
-sub DESTROY {
+sub check_exitcode {
     my $self = shift;
 
-    $self->destroy();
+    my $caller = (caller(1))[3];
+    my $errmsg = $self->stdout;
+
+    if ($self->exitcode > 0) {
+
+        if ($self->stderr =~ /CLIXML/) { # Powershell error response
+
+            $self->_parse_clixml();
+            $errmsg = $self->clixml->doc->toString();
+
+        } else {
+
+            $errmsg = $self->stderr;
+
+        }
+
+        $self->throw_msg(
+            dotid($self->class) . sprintf('.%s.badrc', $caller),
+            'ws_badrc',
+            $self->exitcode,
+            $errmsg
+        );
+
+    }
 
 }
 
@@ -141,6 +164,19 @@ sub _check_command_id {
         );
 
     }
+
+}
+
+sub _parse_clixml {
+    my $self = shift;
+
+    my $xml = $self->stderr;
+
+    $xml =~ s/\#< CLIXML//g;
+    $xml =~ s/_x000D_//g;
+    $xml =~ s/_x000A_//g;
+
+    $self->clixml->load($xml);
 
 }
 
@@ -318,6 +354,18 @@ sub _delete_response {
     $self->_check_relates_to($uuid);
 
     $stat = 1 if ($self->xml->get_item($xpath));
+
+}
+
+sub init {
+    my $class = shift;
+
+    my $self = $class->SUPER::init(@_);
+
+    $self->{'created'} = 0;
+    $self->{'clixml'}  = XAS::Lib::XML->new();
+
+    return $self;
 
 }
 
@@ -681,16 +729,6 @@ XML
 
 }
 
-sub init {
-    my $class = shift;
-
-    my $self = $class->SUPER::init(@_);
-
-    $self->{'created'} = 0;
-
-    return $self;
-
-}
 
 1;
 
@@ -828,6 +866,12 @@ This method returns the output from STDERR.
 =head2 exitcode
 
 This method returns the exit code.
+
+=head2 check_exitcode
+
+This method will check the exit code. If the code is greater then 0 it will
+try to parse the stderr stream looking for a reason. This method throws
+an exception with the exit code and the parsed stderr.
 
 =head1 SEE ALSO
 

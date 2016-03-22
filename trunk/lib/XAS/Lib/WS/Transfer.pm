@@ -2,14 +2,13 @@ package XAS::Lib::WS::Transfer;
 
 our $VERSION = '0.01';
 
-use Try::Tiny;
 use Params::Validate qw ( SCALAR );
 
 use XAS::Class
   version => $VERSION,
   base    => 'XAS::Lib::WS::RemoteShell',
   codecs  => 'base64 unicode',
-  utils   => 'dotid',
+  utils   => ':validation dotid',
 ;
 
 # ----------------------------------------------------------------------
@@ -27,64 +26,32 @@ sub get {
     my $remote = $p->{'-remote'};
 
     # this assumes that the remote WS-Manage server is Microsoft based
+    # otherwise you would use something sensible like scp
 
     my $fh;
     my $code   = $self->_code_get_powershell($remote);
     my $invoke = "powershell -noprofile -encodedcommand $code";
 
-    try {
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
+    
+    if (open($fh, '>', $local)) {
 
-        if ($self->create) {
+        print $fh decode_base64($self->stdout);
+        close $fh;
 
-            $self->command($invoke);
-            $self->receive();
+    } else {
 
-            if (($self->exitcode == 0) && ($self->stderr eq '')) {
+        $self->throw_msg(
+            dotid($self->class) . '.put.badfile',
+            'file_create',
+            $local, $!
+        );
 
-                if (open($fh, '>', $local)) {
+    }
 
-                    print $fh decode_base64($self->stdout);
-                    close $fh;
-
-                } else {
-
-                    $self->throw_msg(
-                        dotid($self->class) . '.put.badfile',
-                        'file_create',
-                        $local, $!
-                    );
-
-                }
-
-            } else {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.put.badrc',
-                    'ws_badrc',
-                    $self->exitcode,
-                    $self->stdout
-                );
-
-            }
-
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
-
-    };
+    return $self->exitcode;
 
 }
 
@@ -99,139 +66,67 @@ sub put {
     my $remote = $p->{'-remote'};
 
     # this assumes that the remote WS-Manage server is Microsoft based
+    # otherwise you would use something sensible like scp
 
     my $fh;
     my $size   = 30 * 57;
     my $invoke = 'powershell -noprofile -encodedcommand %s';
 
-    try {
+    if (open($fh, '<', $local)) {
 
-        if ($self->create) {
+        while (read($fh, my $buf, $size)) {
 
-            if (open($fh, '<', $local)) {
+            my $data = encode_base64($buf, '');
+            my $code = $self->_code_put_powershell($remote, $data);
+            my $cmd  = sprintf($invoke, $code);
 
-                while (read($fh, my $buf, $size)) {
-
-                    my $data = encode_base64($buf, '');
-                    my $code = $self->_code_put_powershell($remote, $data);
-                    my $cmd  = sprintf($invoke, $code);
-
-                    $self->command($cmd);
-                    $self->receive();
-
-                    if ($self->exitcode != 0) {
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.put.badrc',
-                            'ws_badrc',
-                            $self->exitcode,
-                            $self->stdout
-                        );
-
-                    }
-
-                }
-
-                close $fh;
-
-            } else {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.put.badfile',
-                    'file_create',
-                    $local, $!
-                );
-
-            }
-
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
-
-    };
-
-}
-
-sub exists {
-    my $self = shift;
-    my $path = validate_params(\@_, [1]);
-
-    my $code   = $self->_code_exists_powershell($path);
-    my $invoke = "powershell -noprofile -encodedcommand $code";
-
-    try {
-
-        if ($self->create) {
-
-            $self->command($invoke);
+            $self->command($cmd);
             $self->receive();
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
+            $self->check_exitcode();
 
         }
 
-    } catch {
+        close $fh;
 
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
+    } else {
 
-    };
+        $self->throw_msg(
+            dotid($self->class) . '.put.badfile',
+            'file_create',
+            $local, $!
+        );
+
+    }
 
     return $self->exitcode;
 
 }
 
+sub exists {
+    my $self = shift;
+    my ($path) = validate_params(\@_, [1]);
+
+    my $code   = $self->_code_exists_powershell($path);
+    my $invoke = "powershell -noprofile -encodedcommand $code";
+
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
+
+    return $self->exitcode ? 0 : 1;
+
+}
+
 sub mkdir {
     my $self = shift;
-    my $path = validate_params(\@_, [1]);
+    my ($path) = validate_params(\@_, [1]);
 
     my $code   = $self->_code_mkdir_powershell($path);
     my $invoke = "powershell -noprofile -encodedcommand $code";
 
-    try {
-
-        if ($self->create) {
-
-            $self->command($invoke);
-            $self->receive();
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
-
-    };
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
 
     return $self->exitcode;
 
@@ -239,73 +134,46 @@ sub mkdir {
 
 sub rmdir {
     my $self = shift;
-    my $path = validate_params(\@_, [1]);
+    my ($path) = validate_params(\@_, [1]);
 
     my $code   = $self->_code_rmdir_powershell($path);
     my $invoke = "powershell -noprofile -encodedcommand $code";
 
-    try {
-
-        if ($self->create) {
-
-            $self->command($invoke);
-            $self->receive();
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
-
-    };
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
 
     return $self->exitcode;
 
 }
 
-sub delete {
+sub del {
     my $self = shift;
-    my $path = validate_params(\@_, [1]);
+    my ($path) = validate_params(\@_, [1]);
 
     my $code   = $self->_code_del_powershell($path);
     my $invoke = "powershell -noprofile -encodedcommand $code";
 
-    try {
-
-        if ($self->create) {
-
-            $self->command($invoke);
-            $self->receive();
-            $self->destroy();
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.get.noshell',
-                'ws_noshell',
-            );
-
-        }
-
-    } catch {
-
-        my $ex = $_;
-        $self->destroy();
-        die $ex;
-
-    };
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
 
     return $self->exitcode;
+
+}
+
+sub dir {
+    my $self = shift;
+    my ($path) = validate_params(\@_, [1]);
+
+    my $code   = $self->_code_dir_powershell($path);
+    my $invoke = "powershell -noprofile -encodedcommand $code";
+
+    $self->command($invoke);
+    $self->receive();
+    $self->check_exitcode();
+
+    return $self->stdout;
 
 }
 
@@ -335,7 +203,7 @@ try {
     $file.Close()
     exit 0
 } catch {
-    Write-Output $_.Exception.Message
+    Write-Error -Message $_.Exception.Message
     exit 1
 }
 CODE
@@ -354,13 +222,13 @@ sub _code_get_powershell {
 my $code = <<'CODE';
 $ProgressPreference='SilentlyContinue'
 $p = $ExecutionContext.SessionState.Path
-$path = $p.GetUnresolvedProviderPathFromPSPath("__FILENAME__")
+$path = $p.GetUnresolvedProviderPathFromPSPath('__FILENAME__')
 if (Test-Path $path -PathType Leaf) {
     $bytes = [System.convert]::ToBase64String([System.IO.File]::ReadAllBytes($path))
     Write-Host $bytes
     exit 0
 }
-Write-Host 'File not found'
+Write-Error -Message 'File not found'
 exit 1
 CODE
 
@@ -379,13 +247,14 @@ $ProgressPreference='SilentlyContinue'
 $p = $ExecutionContext.SessionState.Path
 $path = $p.GetUnresolvedProviderPathFromPSPath('__PATH__')
 if (Test-Path $path) {
-    exit 0
+   exit 0
 } else {
-    exit 1
+   Write-Error -Message '__PATH__ not found'
+   exit 1
 }
 CODE
 
-    $code =~ s/__PATH__/$path/;
+    $code =~ s/__PATH__/$path/g;
 
     return encode_base64(encode_unicode('UTF-16LE', $code), '');
 
@@ -403,7 +272,7 @@ if (!(Test-Path $path)) {
     New-Item -ItemType Directory -Force -Path $path | Out-Null
     exit 0
 }
-Write-Host "__PATH__ not found"
+Write-Error -Message '__PATH__ not found'
 exit 1
 CODE
 
@@ -425,7 +294,7 @@ if (Test-Path $path) {
     Remove-Item $path -Force
     exit 0
 }
-Write-Host "__PATH__ not found"
+Write-Error -Message '__PATH__ not found'
 exit 1
 CODE
 
@@ -447,7 +316,29 @@ if (Test-Path $path) {
     Remove-Item $path -Force
     exit 0
 }
-Write-Host "__PATH__ not found"
+Write-Error -Message '__PATH__ not found'
+exit 1
+CODE
+
+    $code =~ s/__PATH__/$path/g;
+
+    return encode_base64(encode_unicode('UTF-16LE', $code), '');
+
+}
+
+sub _code_dir_powershell {
+    my $self = shift;
+    my $path = shift;
+
+my $code = <<'CODE';
+$ProgressPreference='SilentlyContinue'
+$p = $ExecutionContext.SessionState.Path
+$path = $p.GetUnresolvedProviderPathFromPSPath('__PATH__')
+if (Test-Path $path) {
+    Get-ChildItem -Path __PATH__
+    exit 0
+}
+Write-Error -Message '__PATH__ not found'
 exit 1
 CODE
 
@@ -467,6 +358,7 @@ XAS::Lib::WS::Transfer - A class for the XAS environment
 
 =head1 SYNOPSIS
 
+ use Try::Tiny;
  use XAS::Lib::WS::Transfer;
 
  my $trans = XAs::Lib::WS::Transfer->new(
@@ -477,20 +369,37 @@ XAS::Lib::WS::Transfer - A class for the XAS environment
    -keep_alive  => 1,
  );
 
- unless ($trans->exists('test.txt')) {
+ try {
 
-    $trans->put(-local => 'junk.txt', -remote => 'test.txt');
+     if ($trans->create) {
 
- }
+         if ($trans->exists('test.txt')) {
+
+             $trans->del('test.txt');
+
+         }
+
+         $trans->put(-local => 'junk.txt', -remote => 'test.txt');
+
+         my $output = $trans->dir('.');
+         printf("%s\n", $output);
+
+         $trans->destroy;
+
+     }
+
+ } catch {
+
+     my $ex = $_;
+     $trans->destroy;
+     die $ex;
+
+ };
 
 =head1 DESCRIPTION
 
-This package implements a crude method of interacting with a Windows based
-WS-Manage server, at the file system level. The only way to interact is thru 
-issuing commands. You can not interact with those commands. Even thou there 
-are hints within the Microsoft documentation about duplex communications, they 
-don't seem to work for this purpose. It would be nice, to be able to interact,
-with that newly created command shell. Somethings would be so much easier.
+This package implements a crude method of performing file operations
+with a Windows based WS-Manage server. 
 
 =head1 METHODS
 
