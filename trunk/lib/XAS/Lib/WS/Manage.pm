@@ -25,10 +25,10 @@ sub create {
         -xml      => { type => SCALAR },
     });
 
-    my $data     = $p->{'-xml'};
-    my $class    = $p->{'-class'};
-    my $resource = $p->{'-resource'};
-    my $selector = $p->{'-selector'};
+    my $data     = $p->{'xml'};
+    my $class    = $p->{'class'};
+    my $resource = $p->{'resource'};
+    my $selector = $p->{'selector'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -49,9 +49,9 @@ sub delete {
         -selector => { type => SCALAR },
     });
 
-    my $class    = $p->{'-class'};
-    my $resource = $p->{'-resource'};
-    my $selector = $p->{'-selector'};
+    my $class    = $p->{'class'};
+    my $resource = $p->{'resource'};
+    my $selector = $p->{'selector'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -72,9 +72,9 @@ sub enumerate {
         -class    => { type => SCALAR },
     });
 
-    my $class    = $p->{'-class'};
-    my $resource = $p->{'-resource'};
-    my $selector = $p->{'-selector'};
+    my $class    = $p->{'class'};
+    my $resource = $p->{'resource'};
+    my $selector = $p->{'selector'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -105,9 +105,9 @@ sub get {
         -selector => { type => HASHREF }
     });
 
-    my $class    = $p->{'-class'};
-    my $resource = $p->{'-resource'};
-    my $selector = $p->{'-selector'};
+    my $class    = $p->{'class'};
+    my $resource = $p->{'resource'};
+    my $selector = $p->{'selector'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -129,10 +129,10 @@ sub invoke {
         -selector => { type => HASHREF },
     });
 
-    my $class    = $p->{'-class'};
-    my $action   = $p->{'-action'};
-    my $resource = $p->{'-resource'};
-    my $selector = $p->{'-selector'};
+    my $class    = $p->{'class'};
+    my $action   = $p->{'action'};
+    my $resource = $p->{'resource'};
+    my $selector = $p->{'selector'};
 
     my $object  = sprintf('%s/%s', $resource, $class);
     my $oaction = sprintf('%s/%s', $object, $action);
@@ -155,10 +155,10 @@ sub pull {
         -items    => { type => ARRAYREF },
     });
 
-    my $items    = $p->{'-items'};
-    my $class    = $p->{'-class'};
-    my $context  = $p->{'-context'};
-    my $resource = $p->{'-resource'};
+    my $items    = $p->{'items'};
+    my $class    = $p->{'class'};
+    my $context  = $p->{'context'};
+    my $resource = $p->{'resource'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -189,11 +189,11 @@ sub put {
         -data     => { type => HASHREF },
     });
 
-    my $key      = $p->{'-key'};
-    my $data     = $p->{'-data'};
-    my $value    = $p->{'-value'};
-    my $class    = $p->{'-class'};
-    my $resource = $p->{'-resource'};
+    my $key      = $p->{'key'};
+    my $data     = $p->{'data'};
+    my $value    = $p->{'value'};
+    my $class    = $p->{'class'};
+    my $resource = $p->{'resource'};
 
     my $object = sprintf('%s/%s', $resource, $class);
 
@@ -303,8 +303,8 @@ sub _get_response {
 }
 
 sub _invoke_response {
-    my $self  = shift;
-    my $uuid  = shift;
+    my $self   = shift;
+    my $uuid   = shift;
     my $class  = shift;
     my $action = shift;
 
@@ -342,8 +342,8 @@ sub _invoke_response {
 }
 
 sub _pull_response {
-    my $self = shift;
-    my $uuid = shift;
+    my $self  = shift;
+    my $uuid  = shift;
     my $class = shift;
     my $items = shift;
 
@@ -365,8 +365,8 @@ sub _pull_response {
 }
 
 sub _put_response {
-    my $self = shift;
-    my $uuid = shift;
+    my $self  = shift;
+    my $uuid  = shift;
     my $class = shift;
 
     my $hash;
@@ -394,7 +394,7 @@ sub _put_response {
 }
 
 sub _get_enum_items {
-    my $self = shift;
+    my $self  = shift;
     my $class = shift;
     my $items = shift;
 
@@ -421,7 +421,7 @@ sub _get_enum_items {
 }
 
 sub _get_items {
-    my $self = shift;
+    my $self     = shift;
     my $elements = shift;
 
     my $hash = {};
@@ -513,10 +513,10 @@ XML
 }
 
 sub _delete_xml {
-    my $self = shift;
-    my $uuid = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
-    my $params = shift;
+    my $params   = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
@@ -574,8 +574,8 @@ XML
 }
 
 sub _enumerate_xml {
-    my $self = shift;
-    my $uuid = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
 
     my $url     = $self->url;
@@ -623,10 +623,10 @@ XML
 }
 
 sub _enumerate_filter_xml {
-    my $self = shift;
-    my $uuid = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
-    my $params = shift;
+    my $params   = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
@@ -752,12 +752,12 @@ XML
 }
 
 sub _invoke_xml {
-    my $self = shift;
-    my $uuid = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
-    my $oaction = shift;
-    my $action = shift;
-    my $params = shift;
+    my $oaction  = shift;
+    my $action   = shift;
+    my $params   = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
@@ -820,10 +820,10 @@ XML
 }
 
 sub _pull_xml {
-    my $self = shift;
-    my $uuid = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
-    my $context = shift;
+    my $context  = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
@@ -873,13 +873,13 @@ XML
 }
 
 sub _put_xml {
-    my $self  = shift;
-    my $uuid  = shift;
+    my $self     = shift;
+    my $uuid     = shift;
     my $resource = shift;
-    my $class = shift;
-    my $key   = shift;
-    my $value = shift;
-    my $params = shift;
+    my $class    = shift;
+    my $key      = shift;
+    my $value    = shift;
+    my $params   = shift;
 
     my $url     = $self->url;
     my $timeout = $self->timeout;
@@ -947,21 +947,232 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::WS::Manage - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use Data::Dumper;
+ use XAS::Lib::WS::Manage;
+
+ my $results;
+ my $wsman = XAS::Lib::WS::Manage->new(
+     -username    => 'Administrator',
+     -password    => 'secret',
+     -url         => 'http://windowserver:5985/wsman',
+     -auth_method => 'basic',
+ );
+
+ $results = $wsman->invoke(
+     -action   => 'stopservice', 
+     -class    => 'Win32_Service', 
+     -selector => {Name => 'spooler'}
+ );
+ warn Dumper($results);
+
+ $results = $wsman->get(
+     -class    => 'Win32_Service', 
+     -selector => {Name => 'spooler'}
+ );
+ warn Dumper($results);
+
+ $results = $wsman->invoke(
+     -action   => 'startservice', 
+     -class    => 'Win32_Service', 
+     -selector => {Name => 'spooler'}
+ );
+ warn Dumper($results);
+
+ $results = $wsman->get(
+     -class    => 'Win32_Service', 
+     -selector => {Name => 'spooler'}
+ );
+ warn Dumper($results);
 
 =head1 DESCRIPTION
 
+This package implements an interface to manage a server thru WS-Manage.
+This is primiarily geared toward Microsoft based servers. But other servers
+can be accommodated when using the proper resources and classes.
+
 =head1 METHODS
 
-=head2 method1
+=head2 new
+
+This package inherits from L<XAS::Lib::WS::Base|XAS::Lib::WS::Base> and
+takes the same parameters.
+
+=head2 create(...)
+
+This method will create an object within the resource class, depending on
+the selector. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-selector>
+
+A hashref of name value pairs to select an object within the class.
+
+=item B<-xml>
+
+Raw XML to be used as the data source for the created object.
+
+=back
+
+=head2 delete(...)
+
+This method will delete an object within the resource class, depending on
+the selector. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-selector>
+
+A hashref of name value pairs to select an object within the class.
+
+=back
+
+=head2 enumerate(...)
+
+This method will return all objects within the resource class, depending on
+the selector. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-selector>
+
+A hashref of name value pairs to select an object within the class.
+
+=back
+
+=head2 get(...)
+
+This method will retrieve a single object from the resource class, depending
+on the selector. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-selector>
+
+A hashref of name value pairs used to select an object within the resource class.
+
+=back
+
+=head2 invoke(...)
+
+This method will initiate an action on an object within the resource class,
+depending on the selector. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-selector>
+
+A hashref of name value pairs to select an object within the class.
+
+=item B<-action>
+
+A object specific action to be performed.
+
+=back
+
+=head2 pull(...)
+
+This method is used during an enumeration to collect all of the pending items.
+This method is usually not called directly. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-context> 
+
+The context of the enumeration.
+
+=item B<-items>
+
+A arraryref of items collected during the enumeration.
+
+=back
+
+=head2 put(...)
+
+This method will update an object within the resource class, depending on 
+the name of the key. It takes the following parameters:
+
+=over 4
+
+=item B<-resource>
+
+The resource of the class. Defaults to 'http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2'
+
+=item B<-class>
+
+A class that exists within the resource.
+
+=item B<-key>
+
+The name of a key within the object.
+
+=item B<-value>
+
+The value of that key.
+
+=item B<-data>
+
+A hashref of name value pairs to be used for the update action.
+
+=back
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::WS::Base|XAS::Lib::WS::Base>
 
 =item L<XAS|XAS>
 

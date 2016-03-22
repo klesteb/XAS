@@ -22,8 +22,8 @@ sub get {
         -remote => { type => SCALAR },
     });
 
-    my $local  = $p->{'-local'};
-    my $remote = $p->{'-remote'};
+    my $local  = $p->{'local'};
+    my $remote = $p->{'remote'};
 
     # this assumes that the remote WS-Manage server is Microsoft based
     # otherwise you would use something sensible like scp
@@ -62,8 +62,8 @@ sub put {
         -remote => { type => SCALAR },
     });
 
-    my $local  = $p->{'-local'};
-    my $remote = $p->{'-remote'};
+    my $local  = $p->{'local'};
+    my $remote = $p->{'remote'};
 
     # this assumes that the remote WS-Manage server is Microsoft based
     # otherwise you would use something sensible like scp
@@ -399,7 +399,9 @@ XAS::Lib::WS::Transfer - A class for the XAS environment
 =head1 DESCRIPTION
 
 This package implements a crude method of performing file operations
-with a Windows based WS-Manage server. 
+with a Windows based WS-Manage server. These methods should be wrapped 
+in an exception handling block to trap errors. If not, resources will not
+be freed on the remote server. You have been warned.
 
 =head1 METHODS
 
@@ -463,7 +465,7 @@ The name of the path.
 
 =back
 
-=head2 delete($filename)
+=head2 del($filename)
 
 This method will delete a remote file. Returns true if successfull.
 
@@ -501,9 +503,26 @@ The name of the directory to remove.
 
 =back
 
+=head2 dir($path)
+
+This method will return a listing of a directory on the remote server.
+No effort to format the listing is made. This is the raw output.
+
+=over 4
+
+=item B<$path>
+
+The name of the directory to perform the listing on.
+
+=back
+
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::WS::Base|XAS::Lib::WS::Base>
+
+=item L<XAS::Lib::WS::RemoteShell|XAS::Lib::WS::RemoteShell>
 
 =item L<XAS|XAS>
 

@@ -308,11 +308,11 @@ XAS::Lib::WS::Base - A class for the XAS environment
  use XAS::Lib::WS::Base;
 
  my $wsman = XAS::Lib::WS::Base->new(
-         -username    => 'username',
-         -password    => 'password',
-         -url         => 'http://windows-box:5985/wsman',
-         -auth_method => 'any',
-      );
+     -username    => 'username',
+     -password    => 'password',
+     -url         => 'http://windowserver5985/wsman',
+     -auth_method => 'any',
+ );
 
  my ($protocol, $vendor, $version) = $wsman->identify();
 
