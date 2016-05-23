@@ -2,14 +2,13 @@ package XAS::Lib::Spawn::Win32;
 
 our $VERSION = '0.01';
 
-use Win32;
 use Win32::Process;
 
 use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
   utils   => ':env dotid compress',
-  mixins  => 'run _parse_command',
+  mixins  => 'run stop status pause resume wait _parse_command',
 ;
 
 #use Data::Dumper;
@@ -79,6 +78,127 @@ sub run {
     env_restore($oldenv);
 
     return $process->GetProcessID();
+
+}
+
+sub status {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if ($self->pid) {
+
+        my $pid = $self->pid;
+
+        $stat = $self->proc_status($pid);
+
+    }
+
+    return $stat;
+
+}
+
+sub pause {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if ($self->pid) {
+
+        my $code = $self->status();
+
+        if (($code == 3) || ($code == 2)) {   # process is running or ready
+
+            $self->process->Suspend();
+            $stat = 1;
+
+        }
+
+    }
+
+    return $stat;
+
+}
+
+sub resume {
+    my $self = shift;
+    
+    my $stat = 0;
+
+    if ($self->pid) {
+
+        my $code = $self->status();
+
+        if ($code == 6) {
+
+            $self->process->Resume();
+            $stat = 1;
+
+        }
+
+    }
+
+    return $stat;
+
+}
+
+sub stop {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if ($self->pid) {
+
+        my $exitcode;
+        my $pid = $self->pid;
+
+        Win32::Process::KillProcess($pid, $exitcode);
+
+    }
+
+    return $stat;
+
+}
+
+sub kill {
+    my $self = shift;
+
+    return $self->stop();
+
+}
+
+sub wait {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if (my $pid = $self->pid) {
+
+        # Try to wait on the process.
+
+        my $result = $self->process->Wait(1000);
+
+        if ($result == 1) {
+
+            # Process finished.  Grab the exit value.
+
+            my $exitcode;
+            $self->process->GetExitCode($exitcode);
+
+            $self->{'errorlevel'} = ($exitcode * 256) >> 8;
+            $self->{'pid'} = 0;
+
+        } elsif ($result == 0) {
+
+            # Process still running.
+
+            $stat = 1;
+
+        }
+
+    }
+
+    return $stat;
 
 }
 
@@ -173,7 +293,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2012-2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

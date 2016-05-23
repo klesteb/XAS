@@ -15,7 +15,7 @@ use Badger::Filesystem 'Cwd File';
 use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixin     => $mixin,
+  mixin     => "WPM::Lib::Mixin::Process $mixin",
   utils     => 'dotid trim',
   accessors => 'merger',
   vars => {
@@ -204,6 +204,55 @@ may not be defined on your system. This option is not implemented on Windows.
 
 Start the process. It returns the pid of that process.
 
+=head2 status
+
+Returns the status of the process. The status could be one of the follow:
+
+=over 4
+
+=item 6 - suspended ready
+
+=item 5 - suspended blocked
+
+=item 4 - blocked
+
+=item 3 - running
+
+=item 2 - ready
+
+=item 1 - other
+
+=item 0 - unknown
+
+=back
+
+=head2 pause
+
+Pause the process, returns 1 on success.
+
+=head2 resume
+
+Resume the process, returns 1 on success.
+
+=head2 stop
+
+Stop the process, returns 1 on success.
+
+=head2 kill
+
+Kill the process, returns 1 on success.
+
+=head2 wait
+
+Waits for the process to finish, returns 0 when the process is done.
+This method may return a -1 if the processes was reaped before the
+wait is called.
+
+=head2 errorlevel
+
+Returns the exit code of the process, or a -1 if the exit code is not
+available.
+
 =head1 SEE ALSO
 
 =over 4
@@ -224,7 +273,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2012-2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

@@ -2,13 +2,13 @@ package XAS::Lib::Spawn::Unix;
 
 our $VERSION = '0.01';
 
-use POSIX qw(setsid);
+use POSIX qw(:errno_h :sys_wait_h);
 
 use XAS::Class
   version => $VERSION,
   base    => 'XAS::Base',
-  utils   => ':env dotid compress trim',
-  mixins  => 'run _parse_command',
+  utils   => ':env dotid compress trim exitcode',
+  mixins  => 'run stop status pause resume wait _parse_command',
 ;
 
 # ----------------------------------------------------------------------
@@ -83,6 +83,161 @@ sub run {
 
 }
 
+sub status {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if ($self->pid) {
+
+		my $pid = $self->pid;
+
+        $stat = $self->proc_status($pid);
+
+    }
+
+    return $stat;
+
+}
+
+sub pause {
+    my $self = shift;
+
+	my $stat = 0;
+    my $alias = $self->alias;
+
+    if ($self->pid) {
+
+        my $pid = ($self->pid * -1);
+        my $code = $self->status();
+
+        if (($code == 3) || ($code == 2)) {   # process is running or ready
+
+            if (kill('STOP', $pid)) {
+
+				$stat = 1;
+
+            }
+
+        }
+
+    }
+
+	return $stat;
+
+}
+
+sub resume {
+    my $self = shift;
+
+	my $stat = 0;
+
+    if ($self->pid) {
+
+        my $pid = ($self->pid * -1);
+        my $code = $self->status();
+
+        if ($code == 6) {   # process is suspended ready
+
+            if (kill('CONT', $pid)) {
+
+				$stat = 1;
+
+            }
+
+        }
+
+    }
+
+	return $stat;
+
+}
+
+sub stop {
+    my $self = shift;
+
+	my $stat = 0;
+
+    if ($self->pid) {
+
+        my $pid = ($self->pid * -1);
+
+        if (kill('TERM', $pid)) {
+
+			$stat = 1;
+
+        }
+
+    }
+
+	return $stat;
+
+}
+
+sub kill {
+    my $self = shift;
+
+    my $stat = 0;
+
+    if ($self->pid) {
+
+        my $pid = ($self->pid * -1);
+
+        if (kill('KILL', $pid)) {
+
+			$stat = 1;
+
+        }
+
+    }
+
+	return $stat;
+
+}
+
+sub wait {
+	my $self = shift;
+
+	my $stat = 0;
+
+	if (my $pid = $self->pid) {
+
+		sleep(1);    # emulate the 1000ms wait in the Win32 mixin
+
+		# Try to wait on the process.
+
+		my $result = waitpid($pid, WNOHANG);
+
+		if ($result == $pid) {
+
+			# Process finished.  Grab the exit value.
+
+			my ($rc, $sig) = exitcode();
+
+			$self->{'errorlevel'} = $rc;
+			$self->{'pid'} = 0;
+
+		} elsif ($result == -1 and $! == ECHILD) {
+
+			# Process already reaped.  We don't know the exist status.
+
+			$self->{'errorlevel'} = -1;
+			$self->{'pid'} = 0;
+	
+		} else {
+
+			# Process still running
+
+			$stat = 1;
+
+		}
+
+	}
+
+	return $stat;
+
+}
+
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
@@ -144,7 +299,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2012-2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

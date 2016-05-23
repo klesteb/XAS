@@ -154,7 +154,7 @@ sub _session_start {
 
     }
 
-#    $poe_kernel->sig('DIE', 'session_exception');
+    $poe_kernel->sig('DIE', 'session_exception');
     $poe_kernel->post($alias, 'session_init');
 
 }
@@ -243,11 +243,11 @@ sub _session_exception {
     if ($ex->{'source_session'} ne $_[SESSION]) {
 
         $self->log->debug(sprintf('%s: sending execption to: %s', $alias, $ex->{'source_session'}));
-        $poe_kernel->signal($ex->{'source_session'}, 'DIE', $sig, $ex);
+        $poe_kernel->post($ex->{'source_session'}, 'session_exception', $sig, $ex);
 
     } else {
 
-        $self->log->debug(sprintf('%s: handling execption', $alias));
+        $self->log->debug(sprintf('%s: handling execption: %s', $alias, $ex->{'error_str'}));
         $self->session_exception($ex->{'error_str'});
 
     }
