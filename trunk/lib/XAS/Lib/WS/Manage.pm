@@ -2,12 +2,11 @@ package XAS::Lib::WS::Manage;
 
 our $VERSION = '0.01';
 
-use Params::Validate qw( SCALAR HASHREF ARRAYREF );
-
 use XAS::Class
-  version => $VERSION,
-  base    => 'XAS::Lib::WS::Base',
-  utils   => ':validation dotid',
+  version  => $VERSION,
+  base     => 'XAS::Lib::WS::Base',
+  utils    => ':validation dotid',
+  constant => 'SCALAR HASHREF ARRAYREF',
 ;
 
 #use Data::Dumper;
