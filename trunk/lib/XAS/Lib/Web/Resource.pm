@@ -1,9 +1,8 @@
-package XAS::Lib::Web::Resource;
+package XAS::Web::Resource;
 
 use strict;
 use warnings;
 
-use Net::LDAP;
 use XAS::Factory;
 use Data::Dumper;
 use Hash::MultiValue;
@@ -11,23 +10,19 @@ use parent 'Web::Machine::Resource';
 use Web::Machine::Util 'create_header';
 
 # -------------------------------------------------------------------------
-# Web::Machine::Resource methods
+# Web::Machine::Resource overrides
 # ------------------------------------------------------------------------
 
 sub init {
     my $self = shift;
     my $args = shift;
 
-    $self->{'template'} = exists $args->{'template'}
+    $self->{'tt'} = exists $args->{'template'}
       ? $args->{'template'}
       : undef;
 
     $self->{'json'} = exists $args->{'json'}
       ? $args->{'json'}
-      : undef;
-
-    $self->{'schema'} = exists $args->{'schema'}
-      ? $args->{'schema'}
       : undef;
 
     $self->{'app_name'} = exists $args->{'app_name'}
@@ -38,11 +33,15 @@ sub init {
       ? $args->{'app_description'}
       : 'Testing Testing 1 2 3';
 
-    $self->{'log'} = XAS::Factory->module('logger');
-    $self->{'env'} = XAS::Factory->module('environment');
+    $self->{'alias'} = exists $args->{'alias'}
+      ? $args->{'alias'}
+      : 'resource';
 
     $self->errcode(0);
     $self->errstr('');
+
+    $self->{'env'} = XAS::Factory->module('environment');
+    $self->{'log'} = XAS::Factory->module('logger');
 
 }
 
@@ -50,30 +49,17 @@ sub is_authorized {
     my $self = shift;
     my $auth = shift;
 
-    my $stat      = 0;
-    my $domain    = '';
-    my $dc_server = '';
-
-    # a simple algorithm, connect to AD and provide a username
-    # and password. if there is no error, they are authenticated.
+    my $stat = 0;
 
     if ($auth) {
 
-        my $username = $auth->username;
-        my $password = $auth->password;
-        my $aduser   = sprintf("%s\@%s", $username, $domain);
-
-        my $ad = Net::LDAP->new($dc_server) or die $@;
-        my $rc = $ad->bind($aduser, password => $password);
-
-        $stat = 1 unless ($rc->is_error);
-        $ad->unbind();
+        warn "override this!!!!\n";
 
         return $stat;
 
     }
 
-    return create_header('WWWAuthenticate' => [ 'Basic' => ( realm => 'XAS Rest' ) ] );
+    return create_header('WWWAuthenticate' => [ 'Basic' => ( realm => 'XAS REST' ) ] );
 
 }
 
@@ -109,6 +95,23 @@ sub options {
 
 sub allowed_methods { [qw[ OPTIONS GET HEAD ]] }
 
+sub post_is_create {
+
+    # uses "content_types_accepted" methods for procssing
+
+    return 1;
+
+}
+
+sub content_types_accepted {
+
+    return [
+        { 'application/json'                  => 'from_json' },
+        { 'application/x-www-form-urlencoded' => 'from_html' },
+    ];
+
+}
+
 sub content_types_provided {
 
     return [
@@ -124,17 +127,56 @@ sub finish_request {
     my $self     = shift;
     my $metadata = shift;
 
-    my $data;
-    my $output;
+    my $alias  = $self->alias;
+    my $user   = $self->request->user || 'unknown';
     my $uri    = $self->request->uri;
-    my $status = $self->errcode || 403;
-    my $type   = $metadata->{'Content-Type'};
+    my $method = $self->request->method;
+    my $code   = $self->response->code;
+    my $path   = $uri->path;
+
+    my $fixup = sub {
+        my $status = shift;
+        my $format = shift;
+        my $data   = shift;
+
+        my $output;
+
+        if ($format eq 'json') {
+
+            $output = $self->format_json($data);
+            $self->response->content_type('application/hal+json');
+
+        } else {
+
+            $output = $self->format_html($data);
+            $self->response->content_type('text/html');
+
+        }
+
+        $self->response->body($output);
+        $self->response->header('Location' => $uri->path);
+        $self->response->status($status);
+
+        {
+            use bytes;
+            $self->response->header('Content-Length' => length($output));
+        }
+
+    };
+
+    $self->log->info(
+        sprintf('%s: %s requested a %s for %s with a status of %s',
+            $alias, $user, $method, $path, $code)
+    );
 
     if (defined($metadata->{'exception'})) {
 
-        my $ref    = ref($metadata->{'exception'});
+        my $data;
         my $ex     = $metadata->{'exception'};
-        my $format = ($type->subject =~ /json/) ? 'json' : 'html';
+        my $ref    = ref($metadata->{'exception'});
+        my $status = $self->errcode || 403;
+        my $type   = $self->request->header('accept');
+        my $format = ($type =~ /json/) ? 'json' : 'html';
 
         $data->{'_links'}     = $self->get_links();
         $data->{'navigation'} = $self->get_navigation();
@@ -159,33 +201,36 @@ sub finish_request {
 
         }
 
-        if ($format eq 'json') {
+        $fixup->($status, $format, $data);
 
-            $output = $self->format_json($data);
-            $self->response->content_type('application/hal+json');
+    } elsif ($self->response->status >= 400) {
 
-        } else {
+        my $data;
+        my $body   = join('<br>', @{$self->response->body});
+        my $code   = ($self->response->status >= 500) ? 'http internal server error' : 'http client error';
+        my $status = $self->response->status;
+        my $type   = $self->request->header('accept');
+        my $format = ($type =~ /json/) ? 'json' : 'html';
 
-            $output = $self->format_html($data);
+        $data->{'_links'}     = $self->get_links();
+        $data->{'navigation'} = $self->get_navigation();
 
-        }
+        $data->{'_embedded'}->{'errors'} = [{
+            title  => sprintf('HTTP Error: %s', $self->response->status),
+            status => $self->response->status,
+            code   => $code,
+            detail => $body,
+        }];
 
-        $self->response->body($output);
-        $self->response->header('Location' => $uri->path);
-        $self->response->status($status);
-
-        {
-            use bytes;
-            $self->response->header('Content-Length' => length($output));
-        }
+        $fixup->($status, $format, $data);
 
     }
 
 }
 
 # -------------------------------------------------------------------------
-# Our methods
-# ------------------------------------------------------------------------
+# methods
+# -------------------------------------------------------------------------
 
 sub process_exception {
     my $self   = shift;
@@ -197,89 +242,12 @@ sub process_exception {
 
 }
 
-# -------------------------------------------------------------------------
-# accessors
-# -------------------------------------------------------------------------
-
-sub env {
-    my $self = shift;
-
-    return $self->{'env'};
-
-}
-
-sub log {
-    my $self = shift;
-
-    return $self->{'log'};
-
-}
-      
-sub schema {
-    my $self = shift;
-
-    return $self->{'schema'};
-
-}
-
-sub app_name {
-    my $self = shift;
-
-    return $self->{'app_name'};
-
-}
-
-sub app_description {
-    my $self = shift;
-
-    return $self->{'app_description'};
-
-}
-
-sub json {
-    my $self = shift;
-
-    return $self->{'json'};
-
-}
-
-sub errcode {
-    my $self = shift;
-    my $code = shift;
-
-    $self->{'errcode'} = $code if (defined($code));
-
-    return $self->{'errcode'};
-
-}
-
-sub errstr {
-    my $self   = shift;
-    my $string = shift;
-
-    $self->{'errstr'} = $string if (defined($string));
-
-    return $self->{'errstr'};
-
-}
-
-sub template {
-    my $self = shift;
-
-    return $self->{'template'};
-
-}
-
-# -------------------------------------------------------------------------
-# methods
-# -------------------------------------------------------------------------
-
 sub get_navigation {
     my $self = shift;
 
     return [{
         link => '/',
-        text => 'Root'
+        text => 'Root',
     }];
 
 }
@@ -369,9 +337,86 @@ sub format_html {
         }
     };
 
-    $self->template->process('wrapper.tt', $view, \$html);
+    $self->tt->process('wrapper.tt', $view, \$html);
 
     return $html;
+
+}
+
+# -------------------------------------------------------------------------
+# accessors
+# -------------------------------------------------------------------------
+
+sub app_name {
+    my $self = shift;
+
+    return $self->{'app_name'};
+
+}
+
+sub app_description {
+    my $self = shift;
+
+    return $self->{'app_description'};
+
+}
+
+sub json {
+    my $self = shift;
+
+    return $self->{'json'};
+
+}
+
+sub tt {
+    my $self = shift;
+
+    return $self->{'tt'};
+
+}
+
+sub env {
+    my $self = shift;
+
+    return $self->{'env'};
+
+}
+
+sub log {
+    my $self = shift;
+
+    return $self->{'log'};
+
+}
+
+sub alias {
+    my $self = shift;
+
+    return $self->{'alias'};
+
+}
+
+# -------------------------------------------------------------------------
+# mutators
+# -------------------------------------------------------------------------
+
+sub errcode {
+    my $self = shift;
+    my $code = shift;
+
+    $self->{'errcode'} = $code if (defined($code));
+
+    return $self->{'errcode'};
+
+}
+
+sub errstr {
+    my $self   = shift;
+    my $string = shift;
+
+    $self->{'errstr'} = $string if (defined($string));
+
+    return $self->{'errstr'};
 
 }
 
@@ -381,138 +426,244 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Web::Resource - A class to provide a Web Machine resource
+XAS::Web::Resource - Perl extension for the XAS environment
 
 =head1 SYNOPSIS
 
- package WebService;
-
+ use Plack;
  use Template;
  use JSON::XS;
+ use Plack::App;
  use Web::Machine;
- use Plack::Builder;
- use Plack::App::File;
- use XAS::Lib::Web::Server
- use XAS::Lib::Web::Resource;
+ use XAS::Web::Server;
+ use XAS::Web::Resource;
+ use Badger::Filesystem 'File';
 
- use WPM::Class
-   version   => '0.01',
-   base      => 'WPM::Lib::App::Service',
-   mixin     => 'WPM::Lib::Mixin::Configs',
-   accessors => 'cfg',
-   vars => {
-     SERVICE_NAME         => 'WEB_SERVICE',
-     SERVICE_DISPLAY_NAME => 'Basic Web Service',
-     SERVICE_DESCRIPTION  => 'A basic web service',
-   }
- ;
+ my $base = 'web';
+ my $name = 'testing',
+ my $description = 'test web service';
 
  sub build_app {
-     my $self = shift;
- 
-     my $base = '/home/kevin/dev/web';
 
-     my $config = {
-         INCLUDE_PATH => $base . '/root',   # or list ref
-         INTERPOLATE  => 1,          # expand "$var" in plain text
-         POST_CHOMP   => 1,          # cleanup whitespace
-     };
+    my $config = {
+        INCLUDE_PATH => File($base, 'root')->path,   # or list ref
+        INTERPOLATE  => 1,  # expand "$var" in plain text
+    };
 
-     # define app name and description
+    # create various objects
 
-     my $name = 'WEB Services';
-     my $description = 'A test api using RESTFUL HAL';
+    my $template = Template->new($config);
+    my $json     = JSON::XS->new->pretty->utf8();
 
-     # create our various objects
+    # allow variables with preceeding _
 
-     my $template = Template->new($config);
-     my $json     = JSON::XS->new->pretty->utf8();
+    $Template::Stash::PRIVATE = undef;
 
-     # allow underlines "_" to preceed variable names.
+    # handlers, using URLMap for routing
 
-     $Template::Stash::PRIVATE = undef;
+    my $builder = Plack::Builder->new();
 
-     # fire up the builder
-
-     my $builder = Plack::Builder->new();
-
-     # handlers, using Plack's default URLMap for routing
-
-     $builder->mount('/' => Web::Machine->new(
-         resource => 'XAS::Lib::Web::Resource',
-         resource_args => [
-             template        => $template,
-             json            => $json,
-             app_name        => $name,
-             app_description => $description
-         ] )->to_app
-     );
-
-     # static files
-
-     $builder->mount('/js' => Plack::App::File->new(
-         root => $base . '/root/js' )->to_app
-     );
-
-     $builder->mount('/css' => Plack::App::File->new(
-         root => $base . '/root/css')->to_app
-     );
-
-     $builder->mount('/yaml' => Plack::App::File->new(
-         root => $base . '/root/yaml/yaml')->to_app
-     );
-
-     return $builder->to_app;
-
- }
-
- sub setup {
-    my $self = shift;
-
-    my $alias = 'rexecd';
-
-    $self->load_config();
-
-    my $controller = XAS::Lib::Web::Server->new(
-        -alias    => $alias,
-        -port     => $self->cfg->val('system', 'port', 9507),
-        -address  => $self->cfg->val('system', 'address', 'localhost'),
-        -app      => $self->build_app(),
+    $builder->mount('/' => Web::Machine->new(
+        resource => 'XAS::Web::Resource',
+        resource_args => [
+            alias           => 'root',
+            template        => $template,
+            json            => $json,
+            app_name        => $name,
+            app_description => $description
+        ] )->to_app
     );
 
-    $self->service->register($alias);
+    # static files
+
+    $builder->mount('/js' => Plack::App::File->new(
+        root => $base . '/root/js' )->to_app
+    );
+
+    $builder->mount('/css' => Plack::App::File->new(
+        root => $base . '/root/css')->to_app
+    );
+
+    $builder->mount('/yaml' => Plack::App::File->new(
+        root => $base . '/root/yaml/yaml')->to_app
+    );
+
+    return $builder->to_app;
 
  }
 
- sub main {
-     my $self = shift;
+ my $interface = XAS::Web::Server->new(
+     -alias   => 'server',
+     -port    => 9507,
+     -address => 'localhost,
+     -app     => $self->build_app(),
+ );
 
-     $self->log->info_msg('startup');
-
-     $self->setup();
-     $self->service->run();
-
-     $self->log->info_msg('shutdown');
-
- }
-
- package main;
-
- my $ws = WebService->new();
- $ws->run;
+ $interface->run();
 
 =head1 DESCRIPTION
 
-This class uses L<Web::Machine|https://> as a base class to provide a REST
-based web service. 
+This module is a wrapper around L<Web::Machine::Resource|https://metacpan.org/pod/Web::Machine::Resource>.
+It provides the defaults that I have found useful when developing a REST based
+web service.
 
-=head1 METHODS
+=head1 METHODS - Web::Machine
 
-=head2 method1
+Web::Machine provides callbacks for processing the request. This are the ones
+that I have found useful to override.
+
+=head2 init
+
+This method interfaces the passed resource_args to accessors. It also pulls
+in the XAS environment and log handling.
+
+=head2 is_authorized
+
+This method needs to be overridden.
+
+=head2 options
+
+Returns the allowed options for the service. This basically takes what
+is provided by allowed_methods(), content_types_provided(),
+content_types_accepted() and creates the proper headers for the response.
+
+=head2 allowed_methods
+
+This returns the allowed methods for the handler. The defaults are
+OPTIONS GET HEAD.
+
+=head2 post_is_create
+
+This method returns TRUE. This allows for processing based on
+content_types_provided() and content_types_accepted().
+
+=head2 content_types_accepted
+
+This method returns the accepted content types for this handler. This also
+allows processing based on those types. The defaults are:
+
+ 'application/json'                  which will call 'from_json'
+ 'application/x-www-form-urlencoded' which will call 'from_html'
+
+=head2 content_types_provided
+
+This method returns the content types that this handler will provided. This
+allows for processing based on those types. They defaults are:
+
+ 'text/html'            which will call 'to_html'
+ 'application/hal+json' which will call 'to_json'
+
+=head2 charset_provided
+
+This will return the accepted charset. The default is UTF-8.
+
+=head2 finish_request
+
+This method is called last and allows us to fix up error messages.
+
+=head1 METHODS - Ours
+
+These methods are used to make writting services easier.
+
+=head2 get_navigation
+
+This method returns a data structure used for navigation within the
+html interface. This needs to be overridden for any useful to happen.
+
+=head2 get_links
+
+This method returns the links associated with this handler. Used in the html
+interface and json responses. This needs to be overridden for any useful to
+happen.
+
+=head2 get_response
+
+This method is called to help create a response. It calls get_navigation() and
+get_links() as helpers. It returns a data structure that will be converted to
+a html page or json depending on how the request was made. This needs to be
+overridden for any useful to happen.
+
+=head2 json_to_multivalue
+
+This method will convert json parameters into a L<Hash::MultiValue|https://metacpan.org/pod/Hash::MultiValue> object.
+This is to normalize the handling of posted data.
+
+=head2 to_json
+
+This method is called when a json response is required.
+
+=head2 to_html
+
+This method is called when a html response is required.
+
+=head2 from_json
+
+This method is called when request is using json.
+
+=head2 from_html
+
+This method is called when a request is html.
+
+=head2 format_json
+
+Formats the response as json.
+
+=head2 format_html
+
+Formats the response as html.
+
+=head1 ACCESSORS
+
+These accessors are used to interface the arguments passed into the Web
+Machine Resource.
+
+=head2 app_name
+
+Returns the name of the service. Primarily used for the html interface.
+
+=head2 app_description
+
+Return the description of the service. Primarily used for the html interface.
+
+=head2 json
+
+Returns the handle for JSON::XS.
+
+=head2 tt
+
+Returns the handle for Template.
+
+=head2 env
+
+Returns the handle for the XAS environment.
+
+=head2 log
+
+Returns the handle for the XAS logging.
+
+=head2 alias
+
+Returns the alias for this handler. Used for logging purposes.
+
+=head1 MUTATORS
+
+=head2 errcode
+
+Allows you to set an HTTP error code. Used for error handling.
+
+=head2 errstr
+
+Allows you to set an error string. Used for error handling.
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<Hash::MultiValue|https://metacpan.org/pod/Hash::MultiValue>
+
+=item L<Web::Machine::Resource|https://metacpan.org/pod/Web::Machine::Resource>
+
+=item L<Web::Machine|https://metacpan.org/pod/Web::Machine>
 
 =item L<XAS|XAS>
 

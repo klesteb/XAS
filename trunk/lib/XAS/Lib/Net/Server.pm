@@ -48,6 +48,7 @@ sub session_initialize {
     $poe_kernel->state('client_input',             $self, '_client_input');
     $poe_kernel->state('client_reaper',            $self, '_client_reaper');
     $poe_kernel->state('client_output',            $self, '_client_output');
+    $poe_kernel->state('client_flushed',           $self, '_client_flushed');
     $poe_kernel->state('client_connected',         $self, '_client_connected');
     $poe_kernel->state('client_connection',        $self, '_client_connection');
     $poe_kernel->state('client_connection_failed', $self, '_client_connection_failed');
@@ -270,10 +271,11 @@ sub _client_connected {
     $self->log->debug("$alias: _client_connected()");
 
     my $client = POE::Wheel::ReadWrite->new(
-        Handle     => $socket,
-        Filter     => $self->filter,
-        InputEvent => 'client_input',
-        ErrorEvent => 'client_error'
+        Handle       => $socket,
+        Filter       => $self->filter,
+        InputEvent   => 'client_input',
+        ErrorEvent   => 'client_error',
+        FlushedEvent => 'client_flushed',
     );
 
     my $wheel = $client->ID;
@@ -335,6 +337,8 @@ sub _client_output {
             # emulate IO::Socket connected() method. this method
             # calls getpeername(). getpeername() returns undef when
             # the network stack can't validate the socket. 
+
+            no warnings;
 
             if (getpeername($self->clients->{$wheel}->{'socket'})) {
 
@@ -403,6 +407,17 @@ sub _client_reaper {
 
     }
 
+}
+
+sub _client_flushed {
+    my ($self, $wheel) = @_[OBJECT,ARG0]; 
+
+    my $alias = $self->alias; 
+    my $host  = $self->peerhost($wheel); 
+    my $port  = $self->peerport($wheel); 
+
+    $self->log->debug(sprintf('%s: _client_flushed(), wheel: %s, host: %s, port: %s', $alias, $wheel, $host, $port)); 
+    
 }
 
 # ----------------------------------------------------------------------

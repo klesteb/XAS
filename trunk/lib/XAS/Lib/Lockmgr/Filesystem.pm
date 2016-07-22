@@ -58,37 +58,34 @@ sub lock {
     my $timeout = $self->args->{'timeout'};
     my $dir = Dir($lock->volume, $lock->directory);
 
-    try {
+    retry {
 
-        for (my $x = 1; $x < $limit; $x++) {
+        if ($^O ne 'MSWin32') {
 
-            unless ($dir->exists) {
+            # temporarily change the umask to create the 
+            # directory and files with correct file permissions
 
-                if ($^O ne 'MSWin32') {
-    
-                    # temporarily change the umask to create the 
-                    # directory and files with correct file permissions
+            my $omode = umask(0012);
+            $dir->create;
+            $lock->create;
+            umask($omode);
 
-                    my $omode = umask(0012);
-                    $dir->create;
-                    $lock->create;
-                    umask($omode);
+        } else {
 
-                } else {
-
-                    $dir->create;
-                    $lock->create;
-
-                }
-
-                $stat = TRUE;
-                last;
-
-            }
-
-            sleep $timeout;
+            $dir->create;
+            $lock->create;
 
         }
+
+        $stat = TRUE;
+
+    } retry_if {
+
+        1;  # always retry
+
+    } delay_exp {
+
+        $limit, $timeout * 1000
 
     } catch {
 
@@ -116,26 +113,32 @@ sub unlock {
     my $timeout = $self->args->{'timeout'};
     my $dir = Dir($lock->volume, $lock->directory);
 
-    try {
+    retry {
 
-        for (my $x = 1; $x < $limit; $x++) {
+        if ($dir->exists) {
 
-            if ($dir->exists) {
+            if ($lock->exists) {
 
-                if ($lock->exists) {
+                $lock->delete if ($lock->exists);
+                $dir->delete  if ($dir->exists);
+                $stat = TRUE;
 
-                    $lock->delete;
-                    $dir->delete;
-                    $stat = TRUE;
-                    last;
+            } else {
 
-                }
+                $dir->delete if($dir->exists);
+                $stat = TRUE;
 
             }
 
-            sleep $timeout;
-
         }
+
+    } retry_if {
+
+        1;  # always retry
+
+    } delay_exp {
+
+        $limit, $timeout * 1000
 
     } catch {
 
@@ -175,11 +178,11 @@ sub break_lock {
 
             foreach my $file (@{$dir->files}) {
 
-                $file->delete;
+                $file->delete if ($file->exists);
 
             }
 
-            $dir->delete;
+            $dir->delete if ($dir->exists);
 
         }
 
@@ -201,9 +204,9 @@ sub break_lock {
 sub whose_lock {
     my $self = shift;
 
-    my $pid  = '';
-    my $host = '';
-    my $time = undef;
+    my $pid  = $$;
+    my $host = $self->env->host;
+    my $time = DateTime->now(time_zoned => 'local');
     my $lock = $self->_lockfile();
     my $dir = Dir($lock->volume, $lock->directory);
 
@@ -215,12 +218,16 @@ sub whose_lock {
 
                 # should only be one file in the directory
 
-                $host = $files[0]->basename;
-                $pid  = $files[0]->extension;
-                $time = DateTime->from_epoch(
-                    epoch     => ($files[0]->stat)[9], 
-                    time_zone => 'local'
-                );
+                if ($files[0]->exists) {
+
+                    $host = $files[0]->basename;
+                    $pid  = $files[0]->extension;
+                    $time = DateTime->from_epoch(
+                        epoch     => ($files[0]->stat)[9], 
+                        time_zone => 'local'
+                    );
+
+                }
 
             }
 
@@ -248,11 +255,12 @@ sub destroy {
 
     my $lock = $self->_lockfile();
     my $dir = Dir($lock->volume, $lock->directory);
+    my ($host, $pid, $time) = $self->whose_lock();
 
-    if ($lock->exists) {
+    if (($host eq $self->env->host) && ($pid = $$)) {
 
-        $lock->delete;
-        $dir->delete;
+        $lock->delete if ($lock->exists);
+        $dir->delete  if ($dir->exists);
 
     }
 

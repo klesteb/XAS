@@ -1,24 +1,30 @@
-package XAS::Lib::Web::Server;
+package XAS::Web::Server;
 
 our $VERSION = '0.01';
 
 use POE;
+use Try::Tiny;
 use Plack::Util;
-use POE::Filter::HTTPD;
+use Data::Dumper;
+use Socket ':all';
 use HTTP::Message::PSGI;
 use XAS::Constants 'CODEREF';
+use POE::Filter::HTTP::Parser;
 
 use XAS::Class
+  debug   => 0,
   version => $VERSION,
   base    => 'XAS::Lib::Net::Server',
+  messages => {
+    'web_requested' => '%s: %s has requested a %s on %s with a resulting status of %s',
+    'client_flushed' => '%s: flushed the connection for %s on port %s, using wheel %s',
+  },
   vars => {
     PARAMS => {
-      -app => { type => CODEREF }
+      -app => { type => CODEREF },
     }
   }
 ;
-
-#use Data::Dumper;
 
 # ---------------------------------------------------------------------
 # Public Events
@@ -27,6 +33,7 @@ use XAS::Class
 sub process_request {
     my ($self, $request, $ctx) = @_[OBJECT,ARG0,ARG1];
 
+    my $app      = $self->app;
     my $alias    = $self->alias;
     my $version  = $request->header('X-HTTP-Verstion') || '0.9';
     my $protocol = "HTTP/$version";
@@ -40,10 +47,23 @@ sub process_request {
        'psgi.runonce'     => Plack::Util::FALSE,
     );
 
-    my $r = Plack::Util::run_app($self->app, $env);
+    $self->log->debug(Dumper($env));
+
+    my $r        = Plack::Util::run_app($app, $env);
     my $response = res_from_psgi($r);
 
-    $poe_kernel->post($alias, 'process_response', $response, $ctx);
+    $self->log->debug(Dumper($response));
+
+    $poe_kernel->call($alias, 'process_response', $response, $ctx);
+
+}
+
+sub process_response {
+    my ($self, $output, $ctx) = @_[OBJECT,ARG0,ARG1];
+
+    my $alias = $self->alias;
+
+    $poe_kernel->call($alias, 'client_output', $output, $ctx->{wheel});
 
 }
 
@@ -55,6 +75,20 @@ sub process_request {
 # Private Events
 # ---------------------------------------------------------------------
 
+sub _client_flushed {
+    my ($self, $wheel) = @_[OBJECT, ARG0];
+
+    my $alias = $self->alias;
+    my $host  = $self->peerhost($wheel);
+    my $port  = $self->peerport($wheel);
+
+    $self->log->debug(sprintf('%s: _client_flushed() - wheel: %s, host: %s, port: %s', $alias, $wheel, $host, $port));
+    $self->log->info_msg('client_flushed', $alias, $host, $port, $wheel);
+
+    delete $self->{clients}->{$wheel};
+
+}
+
 # ---------------------------------------------------------------------
 # Private Methods
 # ---------------------------------------------------------------------
@@ -64,7 +98,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{'filter'} = POE::Filter::HTTPD->new();
+    $self->{'filter'} = POE::Filter::HTTP::Parser->new(type => 'server');
 
     return $self;
 
@@ -76,151 +110,111 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Web::Server - A simple web server for micro services.
+XAS::Web::Server - Perl extension for the XAS environment
 
 =head1 SYNOPSIS
 
- package WebService;
+ use XAS::Web::Server;
 
- use Template;
- use JSON::XS;
- use Web::Machine;
- use Plack::Builder;
- use Plack::App::File;
- use XAS::Lib::Web::Server
- use XAS::Lib::Web::Resource;
+ my $interface = XAS::Web::Server->new(
+     -alias   => 'server',
+     -port    => 9507,
+     -address => 'localhost,
+     -app     => $self->build_app($schema),
+ );
 
- use WPM::Class
-   version   => '0.01',
-   base      => 'WPM::Lib::App::Service',
-   mixin     => 'WPM::Lib::Mixin::Configs',
-   accessors => 'cfg',
-   vars => {
-     SERVICE_NAME         => 'WEB_SERVICE',
-     SERVICE_DISPLAY_NAME => 'Basic Web Service',
-     SERVICE_DESCRIPTION  => 'A basic web service',
-   }
- ;
-
- sub build_app {
-     my $self = shift;
- 
-     my $base = '/home/kevin/dev/web';
-
-     my $config = {
-         INCLUDE_PATH => $base . '/root',   # or list ref
-         INTERPOLATE  => 1,          # expand "$var" in plain text
-         POST_CHOMP   => 1,          # cleanup whitespace
-     };
-
-     # define app name and description
-
-     my $name = 'WEB Services';
-     my $description = 'A test api using RESTFUL HAL';
-
-     # create our various objects
-
-     my $template = Template->new($config);
-     my $json     = JSON::XS->new->pretty->utf8();
-
-     # allow underlines "_" to preceed variable names.
-
-     $Template::Stash::PRIVATE = undef;
-
-     # fire up the builder
-
-     my $builder = Plack::Builder->new();
-
-     # handlers, using Plack's default URLMap for routing
-
-     $builder->mount('/' => Web::Machine->new(
-         resource => 'XAS::Lib::Web::Resource',
-         resource_args => [
-             template        => $template,
-             json            => $json,
-             app_name        => $name,
-             app_description => $description
-         ] )->to_app
-     );
-
-     # static files
-
-     $builder->mount('/js' => Plack::App::File->new(
-         root => $base . '/root/js' )->to_app
-     );
-
-     $builder->mount('/css' => Plack::App::File->new(
-         root => $base . '/root/css')->to_app
-     );
-
-     $builder->mount('/yaml' => Plack::App::File->new(
-         root => $base . '/root/yaml/yaml')->to_app
-     );
-
-     return $builder->to_app;
-
- }
-
- sub setup {
-    my $self = shift;
-
-    my $alias = 'rexecd';
-
-    $self->load_config();
-
-    my $controller = XAS::Lib::Web::Server->new(
-        -alias    => $alias,
-        -port     => $self->cfg->val('system', 'port', 9507),
-        -address  => $self->cfg->val('system', 'address', 'localhost'),
-        -app      => $self->build_app(),
-    );
-
-    $self->service->register($alias);
-
- }
-
- sub main {
-     my $self = shift;
-
-     $self->log->info_msg('startup');
-
-     $self->setup();
-     $self->service->run();
-
-     $self->log->info_msg('shutdown');
-
- }
-
- package main;
-
- my $ws = WebService->new();
- $ws->run;
+ $interface->run();
 
 =head1 DESCRIPTION
 
-This class provides a simple web server that is suitable for embedding into a 
-micro service application. It inherits from L<XAS::Lib::Net::Server|XAS::Lib::Net::Server>.
-This was written to allow L<Web::Machine|https://metacpan.org/pod/Web::Machine> 
-to interact with a POE based environent. 
+This module provides basic web server based on POE. It binds the POE
+environment to the Plack environment. It's primary mission is to run
+L<Web::Machine|https://metacpan.org/pod/Web::Machine>. This allows for the
+building of REST based web services quickly and easily. Which also allows the
+same code base to run as a daemon on UNIX/Linux and a service on Windows.
 
 =head1 METHODS
 
 =head2 new
 
-An additional parameter was added to define the PSGI based application to run.
+This module inherits from L<XAS::Lib::Net::Server|XAS::Lib::Net::Server> and
+takes these additional parameters:
 
 =over 4
 
 =item B<-app>
 
-This should be a complied PSGI based application. Please refer to the above
-example.
+This should be a complied Plack application.
+
+=back
+
+=head2 process_request($kernel, $self, $input, $ctx)
+
+This event will process the input from the client. This method will
+take the L<HTTP::Request|https://metacpan.org/pod/HTTP::Request> and
+format it so the L<Plack|https://metacpan.org/pod/Plack> application can use
+the request. The response from the application is then reformated into a
+L<HTTP::Response|https://metacpan.org/pod/HTTP::Response> which is sent back
+to the client. It also sets up a synchronous pipeline to handle this response.
+
+It takes the following parameters:
+
+=over 4
+
+=item B<$kernel>
+
+A handle to the POE kernel.
+
+=item B<$self>
+
+A handle to the current object.
+
+=item B<$input>
+
+The input received from the socket.
+
+=item B<$ctx>
+
+A hash variable to maintain context. This will be initialized with a "wheel"
+field. Others fields may be added as needed.
+
+=back
+
+=head2 process_response($kernel, $self, $output, $ctx)
+
+This event will process the output for the client. It continues the
+synchronous pipeline to handle this response.
+
+It takes the following parameters:
+
+=over 4
+
+=item B<$kernel>
+
+A handle to the POE kernel.
+
+=item B<$self>
+
+A handle to the current object.
+
+=item B<$output>
+
+The output to be sent to the socket.
+
+=item B<$ctx>
+
+A hash variable to maintain context. This uses the "wheel" field to direct output
+to the correct socket. Others fields may have been added as needed.
 
 =back
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<Web::Machine|https://metacpan.org/pod/Web::Machine>
+
+=item L<XAS::Lib::Net::Server|XAS::Lib::Net::Server>
 
 =item L<XAS|XAS>
 
