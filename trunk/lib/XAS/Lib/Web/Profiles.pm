@@ -177,15 +177,12 @@ XAS::Web::Profiles - A class for creating standard validation profiles.
  my $params = {
      start => 0,
      limit => 25,
-     sort => [
-         property  => 'server',
-         direction => 'DESC'
-     ]
+     sort => qq/[{"field":"server',"direction":"DESC"}]/
  };
 
- my $fields = qw(id server queue requestor typeofrequest status startdatetime);
+ my @fields = [qw(id server queue requestor typeofrequest status startdatetime)];
 
- my $search  = XAS::Web::Profiles::Search->new($fields);
+ my $search  = XAS::Web::Profiles::Search->new(\@fields);
  my $profile = XAS::Web::Profiles->new($search);
 
  my $results = $profile->check($params, 'pager');

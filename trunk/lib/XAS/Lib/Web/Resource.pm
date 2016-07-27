@@ -3,7 +3,8 @@ package XAS::Web::Resource;
 use strict;
 use warnings;
 
-use XAS::Factory;
+use Net::LDAP;
+use XAS::System;
 use Data::Dumper;
 use Hash::MultiValue;
 use parent 'Web::Machine::Resource';
@@ -40,8 +41,12 @@ sub init {
     $self->errcode(0);
     $self->errstr('');
 
-    $self->{'env'} = XAS::Factory->module('environment');
-    $self->{'log'} = XAS::Factory->module('logger');
+    $self->{'env'} = XAS::System->module('environment');
+    $self->{'log'} = XAS::System->module('logger', {
+        -type     => $self->env->logtype,
+        -filename => $self->env->logfile,
+        -process  => $self->env->script,
+    });
 
 }
 
@@ -53,13 +58,15 @@ sub is_authorized {
 
     if ($auth) {
 
-        warn "override this!!!!\n";
+        warn "override this please\n";
+
+        $stat = 1;
 
         return $stat;
 
     }
 
-    return create_header('WWWAuthenticate' => [ 'Basic' => ( realm => 'XAS REST' ) ] );
+    return create_header('WWWAuthenticate' => [ 'Basic' => ( realm => 'XAS Rest' ) ] );
 
 }
 
@@ -242,6 +249,14 @@ sub process_exception {
 
 }
 
+sub process_params {
+    my $self   = shift;
+    my $params = shift;
+
+    return 1;
+
+}
+
 sub get_navigation {
     my $self = shift;
 
@@ -293,6 +308,29 @@ sub json_to_multivalue {
 
 }
 
+sub from_json {
+    my $self = shift;
+
+    # get the post parameters
+
+    my $content = $self->request->content;
+    my $params  = $self->json_to_multivalue($content);
+
+    return $self->process_params($params);
+
+}
+
+sub from_html {
+    my $self = shift;
+
+    # get the post parameters
+
+    my $params = $self->request->parameters;
+
+    return $self->process_params($params);
+
+}
+
 sub to_json {
     my $self = shift;
 
@@ -340,6 +378,28 @@ sub format_html {
     $self->tt->process('wrapper.tt', $view, \$html);
 
     return $html;
+
+}
+
+sub format_body {
+    my $self = shift;
+    my $data = shift;
+
+    my $body;
+    my $type   = $self->request->header('accept');
+    my $format = ($type =~ /json/) ? 'json' : 'html';;
+
+    if ($format eq 'json') {
+
+        $body = $self->format_json($data);
+
+    } else {
+
+        $body = $self->format_html($data);
+
+    }
+
+    return $body;
 
 }
 
@@ -436,7 +496,7 @@ XAS::Web::Resource - Perl extension for the XAS environment
  use Plack::App;
  use Web::Machine;
  use XAS::Web::Server;
- use XAS::Web::Resource;
+ use XAS::Web::Resource::Root;
  use Badger::Filesystem 'File';
 
  my $base = 'web';
@@ -464,7 +524,7 @@ XAS::Web::Resource - Perl extension for the XAS environment
     my $builder = Plack::Builder->new();
 
     $builder->mount('/' => Web::Machine->new(
-        resource => 'XAS::Web::Resource',
+        resource => 'XAS::Web::Resource::Root',
         resource_args => [
             alias           => 'root',
             template        => $template,
@@ -519,7 +579,8 @@ in the XAS environment and log handling.
 
 =head2 is_authorized
 
-This method needs to be overridden.
+This method uses basic authenication and checks wither the user is valid
+by accesing WSIPC's AD with the passed username and password.
 
 =head2 options
 
@@ -588,9 +649,18 @@ overridden for any useful to happen.
 This method will convert json parameters into a L<Hash::MultiValue|https://metacpan.org/pod/Hash::MultiValue> object.
 This is to normalize the handling of posted data.
 
+=head2 from_json
+
+This methods converts the JSON post data into a L<Hash::MultiValue|https://metacpan.org/pod/Hash::MultiValue> object
+and calls process_params().
+
 =head2 to_json
 
 This method is called when a json response is required.
+
+=head2 from_html
+
+This methods retrieves the post parameters and calls process_params().
 
 =head2 to_html
 
@@ -611,6 +681,18 @@ Formats the response as json.
 =head2 format_html
 
 Formats the response as html.
+
+=head2 process_params($params)
+
+This method processes the post parameters. This needs to be overriden.
+
+=over 4
+
+=item B<$params>
+
+The parameters that need to be processed.
+
+=back
 
 =head1 ACCESSORS
 

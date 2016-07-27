@@ -43,13 +43,13 @@ sub new {
         optional => ['comparison'],
         constraint_methods => {
             type       => FV_set(1, qw( string date list boolean deleted )),
-            comparison => FV_set(1, qw( lt gt eq )),
+            comparison => FV_set(1, qw( lt le gt ge eq lk be)),
             field      => FV_set(1, @$fields),
         },
         msgs => {
             constraints => {
                 type       => 'must be either "boolean", "string", "date" or "list"',
-                comparison => 'must be either "lt", "gt" or "eq"',
+                comparison => 'must be either "lt", "le", "gt", "ge", "eq", "lk" or "be"',
                 field      => 'must be a single word',
             }
         }
@@ -57,14 +57,14 @@ sub new {
 
     my $sort = {
         filters => ['trim'],
-        required => ['property', 'direction'],
+        required => ['field', 'direction'],
         constraint_methods => {
-            property  => FV_set(1, @$fields ),
+            field  => FV_set(1, @$fields ),
             direction => FV_set(1, qw( ASC DESC )),
         },
         msgs => {
             constraints => {
-                property  => 'sort properties are invalid',
+                field     => 'sort fields are invalid',
                 direction => 'sort directions must be either ASC or DESC'
             }
         }
@@ -72,15 +72,15 @@ sub new {
 
     my $group = {
         filters => ['trim'],
-        required => ['property'],
+        required => ['field'],
         optional => ['direction'],
         constraint_methods => {
-            property  => FV_set(1, @$fields ),
+            field  => FV_set(1, @$fields ),
             direction => FV_set(1, qw( ASC DESC )),
         },
         msgs => {
             constraints => {
-                property => 'group properties are invalid',
+                field     => 'group fields are invalid',
                 direction => 'group directions must be either ASC or DESC'
             }
         }

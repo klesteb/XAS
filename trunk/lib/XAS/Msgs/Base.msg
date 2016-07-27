@@ -24,6 +24,7 @@ db_badsyntax                 = %s: invalid input syntax for: %s
 db_nullcolumn                = %s: null value in column for: %s
 db_toolong                   = %s: value to long for type: %s
 db_open                      = %s: unable to access database: %s; reason: %s
+errors                       = %s
 email_undeliverable          = unable to send mail to %s; reason: %s
 environment_unknownos        = unknown OS: %s
 file_create                  = unable to create file %s, reason: %s

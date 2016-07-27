@@ -401,9 +401,13 @@ sub _client_reaper {
 
     my $timeout = time() - $self->inactivity_timer;
 
-    if ($self->clients->{$wheel}->{'active'} < $timeout) {
+    if (defined($self->clients->{$wheel})) {
 
-        $self->reaper($wheel);
+        if ($self->clients->{$wheel}->{'active'} < $timeout) {
+
+            $self->reaper($wheel);
+
+        }
 
     }
 
