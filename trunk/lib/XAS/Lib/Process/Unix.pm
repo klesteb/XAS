@@ -34,8 +34,8 @@ sub start_process {
     my $env       = $self->environment;
     my @argv      = $self->_parse_command;
     my $priority  = $self->priority;
-    my $uid       = getpwnam($self->user);
-    my $gid       = getgrnam($self->group);
+    my $uid       = ($self->user eq 'root')  ? 0 : getpwnam($self->user);
+    my $gid       = ($self->group eq 'root') ? 0 : getgrnam($self->group);
     my $directory = $self->directory->path;
 
     # save the current environment

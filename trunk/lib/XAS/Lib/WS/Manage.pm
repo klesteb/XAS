@@ -3,10 +3,10 @@ package XAS::Lib::WS::Manage;
 our $VERSION = '0.01';
 
 use XAS::Class
-  version  => $VERSION,
-  base     => 'XAS::Lib::WS::Base',
-  utils    => ':validation dotid',
-  constant => 'SCALAR HASHREF ARRAYREF',
+  version   => $VERSION,
+  base      => 'XAS::Lib::WS::Base',
+  utils     => ':validation dotid',
+  constants => 'SCALAR HASHREF ARRAYREF',
 ;
 
 #use Data::Dumper;

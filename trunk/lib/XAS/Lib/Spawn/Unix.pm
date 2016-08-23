@@ -23,8 +23,8 @@ sub run {
     my $env       = $self->environment;
     my @args      = $self->_parse_command;
     my $priority  = $self->priority;
-    my $uid       = getpwnam($self->user);
-    my $gid       = getgrnam($self->group);
+    my $uid       = ($self->user eq 'root')  ? 0 : getpwnam($self->user);
+    my $gid       = ($self->group eq 'root') ? 0 : getgrnam($self->group);
     my $directory = $self->directory->path;
     my $oldenv    = env_store();
     my $newenv    = $self->merger->merge($oldenv, $env);

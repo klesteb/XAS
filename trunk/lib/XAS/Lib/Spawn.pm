@@ -13,9 +13,10 @@ use Hash::Merge;
 use Badger::Filesystem 'Cwd File';
 
 use XAS::Class
+  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixin     => "WPM::Lib::Mixin::Process $mixin",
+  mixin     => "XAS::Lib::Mixins::Process $mixin",
   utils     => 'dotid trim',
   accessors => 'merger',
   vars => {
