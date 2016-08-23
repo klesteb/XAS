@@ -1,9 +1,9 @@
 package XAS::Lib::Lockmgr::Filesystem;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use DateTime;
-use Try::Tiny;
+use Try::Tiny::Retry ':all';
 use XAS::Constants 'TRUE FALSE HASHREF';
 
 use XAS::Class
