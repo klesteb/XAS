@@ -19,8 +19,7 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 %define _profiled   %{_sysconfdir}/profile.d
 %define _xasconf    %{_sysconfdir}/xas
 
-%if 0%{?rhel} == 6
-%define _mandir /usr/local/share/man
+%if 0%{?rhel} >= 6
 %{?filter_setup: %{?perl_default_filter} }
 %filter_from_requires /Win32/d
 %filter_from_provides /Win32/d
