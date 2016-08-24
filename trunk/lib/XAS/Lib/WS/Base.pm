@@ -357,6 +357,14 @@ This method returns TRUE or FALSE on wither it can connect to the remote server.
 
 =over 4
 
+=item L<XAS::Lib::WS::Transfer|XAS::Lib::WS::Transfer>
+
+=item L<XAS::Lib::WS::RemoteShell|XAS::Lib::WS::RemoteShell>
+
+=item L<XAS::Lib::WS::Manage|XAS::Lib::WS::Manage>
+
+=item L<XAS::Lib::WS::Exec|XAS::Lib::WS::Exec>
+
 =item L<XAS|XAS>
 
 =back
