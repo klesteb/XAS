@@ -98,21 +98,40 @@ __END__
 
 =head1 NAME
 
-XAS::xxx - A class for the XAS environment
+XAS::Lib::WS::Exec - A class to execute commands over WS-Manage
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use XAS::Lib::WS::Exec;
+
+ my $client = XAS::Lib::WS::Exec->new(
+     -username => 'Administrator',
+     -password => 'password',
+     -url      => 'http://localhost:5985/wsman',
+ );
+
+ $client->connect();
+
+ my $output = $client->call('dir c:\\', sub {
+     my $output = shift;
+     ...
+ });
+
+ $client->disconnect();
 
 =head1 DESCRIPTION
 
-=head1 METHODS
-
-=head2 method1
+This class inherits from L<XAS::Lib::WS::RemoteShell|XAS::Lib::WS::RemoteShell>
+and uses the same parameters. It also implements an interface similar to 
+L<XAS::Lib::SSH::Client::Exec|XAS::Lib::SSH::Client::Exec>. This is to allow 
+code to operate in a similar manner. Thus, the same code base can interact with
+SSH or WS-Manage. 
 
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XAS::Lib::SSH::Client::Exec|XAS::Lib::SSH::Client::Exec>
 
 =item L<XAS|XAS>
 

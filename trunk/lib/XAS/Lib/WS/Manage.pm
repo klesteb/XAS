@@ -946,7 +946,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::WS::Manage - A class for the XAS environment
+XAS::Lib::WS::Manage - A class to manage Servers over WS-Manage
 
 =head1 SYNOPSIS
 

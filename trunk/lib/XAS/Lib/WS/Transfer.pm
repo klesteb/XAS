@@ -353,7 +353,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::WS::Transfer - A class for the XAS environment
+XAS::Lib::WS::Transfer - A class to transfer files with WS-Manage
 
 =head1 SYNOPSIS
 
