@@ -1,6 +1,6 @@
 package XAS;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 1;
 

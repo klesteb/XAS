@@ -1,5 +1,5 @@
 Name:           perl-XAS
-Version:        0.13
+Version:        0.14
 Release:        1%{?dist}
 Summary:        XAS - Middleware for Datacener Operations
 License:        GPL+ or Artistic
@@ -29,6 +29,9 @@ Requires:       perl(Net::SSH2) >= 0.44
 Requires:       perl(WWW::Curl) >= 4.15
 Requires:       perl(XML::LibXML) => 0.0
 Requires:       perl(IPC::Semaphore)
+Requires:       perl(Sys::Syslog)
+Requires:       perl(Data::UUID)
+Requires:       perl(Data::Hexdumper)
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %define _initrddir  %{_sysconfdir}/init.d
@@ -36,15 +39,11 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 %define _logrotated %{_sysconfdir}/logrotate.d
 %define _profiled   %{_sysconfdir}/profile.d
 
-%if 0%{?rhel} == 6
-%define _mandir /usr/local/share/man
+%if 0%{?rhel} >= 6
 %{?filter_setup: %{?perl_default_filter} }
 %filter_from_requires /Win32/d
 %filter_from_provides /Win32/d
 %filter_setup
-Requires:       perl(Pod::Usage) >= 1.51
-Requires:       perl(Sys::Syslog) >= 0.27
-Requires:       perl(JSON::XS) >= 2.27
 %endif
 
 %description

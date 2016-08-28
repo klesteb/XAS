@@ -24,7 +24,7 @@ use XAS::Class
       -tcp_keepalive   => { optional => 1, default => 0 },
       -filter          => { optional => 1, default => undef },
       -alias           => { optional => 1, default => 'client' },
-      -eol             => { optional => 1, default => "\012\015" },
+      -eol             => { optional => 1, default => "\015\012" },
       -host            => { optional => 1, default => 'localhost'},
     }
   }
