@@ -148,6 +148,10 @@ This will display the utilities man page.
 
 =item L<XAS::Lib::Mixins::Keepalive|XAS::Lib::Mixins::Keepalive>
 
+=item L<XAS::Lib::Mixins::Process::Unix|XAS::Lib::Mixins::Process::Unix>
+
+=item L<XAS::Lib::Mixins::Process::Win32|XAS::Lib::Mixins::Process::Win32>
+
 =item L<XAS::Lib::Modules::Alerts|XAS::Lib::Modules::Alerts>
 
 =item L<XAS::Lib::Modules::Email|XAS::Lib::Modules::Email>
@@ -216,6 +220,16 @@ This will display the utilities man page.
 
 =item L<XAS::Lib::Stomp::Utils|XAS::Lib::Stomp::Utils>
 
+=item L<XAS::Lib::WS::Base|XAS::Lib::WS::Base>
+
+=item L<XAS::Lib::WS::Exec|XAS::Lib::WS::Exec>
+
+=item L<XAS::Lib::WS::Manage|XAS::Lib::WS::Manage>
+
+=item L<XAS::Lib::WS::RemoteShell|XAS::Lib::WS::RemoteShell>
+
+=item L<XAS::Lib::WS::Transfer|XAS::Lib::WS::Transfer>
+
 =back
 
 =head1 SUPPORT
@@ -230,7 +244,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2012-2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
