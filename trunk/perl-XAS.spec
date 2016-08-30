@@ -1,5 +1,5 @@
 Name:           perl-XAS
-Version:        0.14
+Version:        0.15
 Release:        1%{?dist}
 Summary:        XAS - Middleware for Datacener Operations
 License:        GPL+ or Artistic

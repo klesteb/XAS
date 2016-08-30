@@ -13,7 +13,19 @@ This code is based on a production system that has been running for over
 10 years. It incorporates the accumulated knowledge of running a
 distributed system, written in Perl5.
 
-Installation instructions can be found here:
+Using standard Perl5 tools, this software can installed as follows:
+
+ # perl Build.PL
+ # ./Build
+ # ./Build test
+ # ./Build install
+ # ./Build post_install
+ 
+You may have to install additonal dependences. You can do this step.
+
+ # ./Build installdeps
+ 
+Additional installation instructions can be found here:
 
     http://scm.kesteb.us/trac/wiki/XasDocsInstallation
 

@@ -100,6 +100,7 @@ sub _default_options {
 
     my $options = $self->SUPER::_default_options();
 
+    $self->env->log_type('file');
     $self->{'daemon'} = FALSE;
 
     $options->{'daemon'} = \$self->{daemon};
