@@ -10,7 +10,7 @@ use Module::Build;
 
 my $requires = {
     'perl' => 5.008_08,
-    'XAS'  => 0.09,
+    'XAS'  => 0.14,
 };
     
 my $sysconfig = ( -e '/etc/default' ) ? '/etc/default' : '/etc/sysconfig';
@@ -43,8 +43,136 @@ my $class = Module::Build->subclass(code => <<'EOC');
 
     use IO::File;
     use File::Find;
+    use File::Copy;
     use File::Basename;
     use File::Spec::Functions qw( catfile catdir rel2abs );
+
+    # override and add a few things
+
+    sub new {
+        my $class = shift;
+
+        my $self = $class->SUPER::new(@_);
+
+        my $blib = $self->{properties}{blib};
+        my $sbin = catfile($blib, 'sbin');
+        $self->{properties}{sbindoc_dirs} = [ $sbin ];
+
+        return $self;
+
+    }
+
+    # create man pages for files within sbin
+
+    sub manify_sbin_pods {
+        my $self    = shift;
+
+        my $files  = $self->_find_pods( 
+            $self->{properties}{sbindoc_dirs},
+            exclude => [ $self->file_qr('\.bat$') ] 
+        );
+
+        return unless keys %$files;
+
+        my $mandir = File::Spec->catdir( $self->blib, 'bindoc' );
+        File::Path::mkpath( $mandir, 0, oct(777) );
+
+        require Pod::Man;
+
+        foreach my $file (keys %$files) {
+
+            # Pod::Simple based parsers only support one document per instance.
+            # This is expected to change in a future version 
+            # (Pod::Simple > 3.03).
+
+            # binaries go in section 1p
+
+            my $parser  = Pod::Man->new( section => '1p' ); 
+            my $manpage = $self->man1page_name( $file ) . '.' .
+                $self->config( 'man1ext' );
+
+            my $outfile = File::Spec->catfile($mandir, $manpage);
+
+            next if $self->up_to_date( $file, $outfile );
+
+            $self->log_verbose("Manifying $file -> $outfile\n");
+
+            eval { $parser->parse_from_file( $file, $outfile ); 1 }
+                 or $self->log_warn("Error creating '$outfile': $@\n");
+
+            $files->{$file} = $outfile;
+
+        }
+
+    }
+
+    # remove redhat stuff when installing to debian
+
+    sub ACTION_debian {
+        my $self = shift;
+
+        # cleanup the init.d directory
+
+        my $destdir = $self->destdir || '/';
+        my @files = ('xas-logmon'); 
+        my @names = map { catfile($destdir, 'etc', 'init.d', $_ . '.rhel') } @files;
+
+        foreach my $file (@names) {
+
+            unlink $file if (-e $file);
+
+        }
+
+        @names = map { catfile($destdir, 'etc', 'init.d', $_ . '.debian') } @files;
+
+        foreach my $file (@names) {
+
+            if ( -e $file) {
+
+                my ($name, $path, $ext) = fileparse($file, qr/\.[^.]*/);
+                my $new = catfile($path, $name);
+
+                move($file, $new);
+
+            }
+
+        }
+
+    }
+
+    # remove debian stuff when installing to redhat
+
+    sub ACTION_redhat {
+        my $self = shift;
+
+        # cleanup the init.d directory
+
+        my $destdir = $self->destdir || '/';
+        my @files = ('xas-logmon'); 
+        my @names = map { catfile($destdir, 'etc',  'init.d', $_ . '.debian') } @files;
+
+        foreach my $file (@names) {
+
+            unlink $file if (-e $file);
+
+        }
+
+        @names = map { catfile($destdir, 'etc', 'init.d', $_ . '.rhel') } @files;
+
+        foreach my $file (@names) {
+
+            if ( -e $file) {
+
+                my ($name, $path, $ext) = fileparse($file, qr/\.[^.]*/);
+                my $new = catfile($path, $name);
+
+                move($file, $new);
+
+            }
+
+        }
+
+    }
 
     sub process_etc_files {
         my $self = shift;
@@ -209,10 +337,10 @@ my $class = Module::Build->subclass(code => <<'EOC');
 EOC
 
 my $builder = $class->new(
-    module_name         => 'XXX',
-    license             => 'artistic2',
+    module_name         => 'XAS::XXXX',
+    license             => 'artistic_2',
     dist_author         => q{Kevin L. Esteb <kevin@kesteb.us>},
-    dist_version_from   => 'lib/XXX.pm',
+    dist_version_from   => 'lib/XAS/XXXX.pm',
     release_status      => 'stable',
     configure_requires => {
         'Module::Build' => 0,
