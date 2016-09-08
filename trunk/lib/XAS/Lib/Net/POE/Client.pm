@@ -16,6 +16,7 @@ use XAS::Class
   base      => 'XAS::Lib::POE::Service',
   mixin     => 'XAS::Lib::Mixins::Keepalive',
   accessors => 'wheel host port listener socket',
+  mutators  => 'input_paused',
   utils     => 'dotid',
   vars => {
     PARAMS => {
@@ -57,6 +58,8 @@ sub session_initialize {
     # private events
 
     $poe_kernel->state('server_error',     $self, '_server_error');
+    $poe_kernel->state('server_pause',     $self, '_server_pause');
+    $poe_kernel->state('server_resume',    $self, '_server_resume');
     $poe_kernel->state('server_message',   $self, '_server_message');
     $poe_kernel->state('server_connect',   $self, '_server_connect');
     $poe_kernel->state('server_connected', $self, '_server_connected');
@@ -351,6 +354,46 @@ sub _server_reconnect {
 
 }
 
+sub _server_pause {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _server_pause()");
+
+    if (my $wheel = $self->wheel) {
+
+        $wheel->pause_input();
+        $self->input_paused(1);
+
+        $self->log->debug("$alias: _server_resume() - input paused");
+
+    }
+
+}
+
+sub _server_resume {
+    my ($self) = $_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: _server_resume()");
+
+    if ($self->input_paused) {
+
+        if (my $wheel = $self->wheel) {
+
+            $wheel->resume_input();
+            $self->input_paused(0);
+
+            $self->log->debug("$alias: _server_resume() - input resumed");
+   
+        }
+
+    }
+
+}
+
 # ---------------------------------------------------------------------
 # Private Methods
 # ---------------------------------------------------------------------
@@ -361,6 +404,7 @@ sub init {
     my $self = $class->SUPER::init(@_);
 
     $self->{'attempts'} = 0;
+    $self->{'input_paused'} = 0;
     $self->{'count'} = scalar(@RECONNECTIONS);
 
     unless (defined($self->{'filter'})) {
