@@ -3,7 +3,7 @@ package XAS::Lib::Lockmgr::Filesystem;
 our $VERSION = '0.02';
 
 use DateTime;
-use Try::Tiny::Retry ':all';
+use Try::Tiny;
 use XAS::Constants 'TRUE FALSE HASHREF';
 
 use XAS::Class
@@ -23,24 +23,24 @@ use XAS::Class
 
 #use Data::Dumper;
 
-# note to self: Don't put $self->log->debug() statements in here, it 
+# note to self: Don't put $self->log->debug() statements in here, it
 # produces a nice race condidtion.
 
 # ----------------------------------------------------------------------
-# Overrides
+# Overrides 
 # ----------------------------------------------------------------------
 
 class('Badger::Filesystem')->methods(
     directory_exists => sub {
         my $self = shift;
         my $dir  = shift;
-        my $stats = $self->stat_path($dir) || return; 
+        my $stats = $self->stat_path($dir) || return;
         return -d $dir ? $stats : 0;  # don't use the cached stat
     },
     file_exists => sub {
         my $self = shift;
-        my $file = shift; 
-        my $stats = $self->stat_path($file) || return; 
+        my $file = shift;
+        my $stats = $self->stat_path($file) || return;
         return -f $file ? $stats : 0;  # don't use the cached stat
     }
 );
@@ -54,15 +54,13 @@ sub lock {
 
     my $stat = FALSE;
     my $lock = $self->_lockfile();
-    my $limit = $self->args->{'limit'};
-    my $timeout = $self->args->{'timeout'};
-    my $dir = Dir($lock->volume, $lock->directory);
+    my $dir  = Dir($lock->volume, $lock->directory);
 
-    retry {
+    my $make_lock = sub {
 
         if ($^O ne 'MSWin32') {
 
-            # temporarily change the umask to create the 
+            # temporarily change the umask to create the
             # directory and files with correct file permissions
 
             my $omode = umask(0012);
@@ -77,28 +75,41 @@ sub lock {
 
         }
 
+    };
+
+    if (($dir->exists) && ($lock->exists)) {
+
         $stat = TRUE;
 
-    } retry_if {
+    } elsif ($dir->exists) {
 
-        1;  # always retry
-
-    } delay_exp {
-
-        $limit, $timeout * 1000
-
-    } catch {
-
-        my $ex = $_;
-        my $msg = (ref($ex) eq 'Badger::Exception') ? $ex->info : $ex;
-        
         $self->throw_msg(
-            dotid($self->class) . '.lock',
-            'lock_error',
-            $msg
+            dotid($self->class) . '.lock.notmine',
+            'lock_dir_error',
+            $lock
         );
 
-    };
+    } else {
+
+        try {
+
+            $make_lock->();
+            $stat = TRUE;
+
+        } catch {
+
+            my $ex = $_;
+            my $msg = (ref($ex) eq 'Badger::Exception') ? $ex->info : $ex;
+
+            $self->throw_msg(
+                dotid($self->class) . '.lock',
+                'lock_error',
+                $lock, $msg
+            );
+
+        };
+
+    }
 
     return $stat;
 
@@ -109,36 +120,13 @@ sub unlock {
 
     my $stat = FALSE;
     my $lock = $self->_lockfile();
-    my $limit = $self->args->{'limit'};
-    my $timeout = $self->args->{'timeout'};
-    my $dir = Dir($lock->volume, $lock->directory);
+    my $dir  = Dir($lock->volume, $lock->directory);
 
-    retry {
+    try {
 
-        if ($dir->exists) {
-
-            if ($lock->exists) {
-
-                $lock->delete if ($lock->exists);
-                $dir->delete  if ($dir->exists);
-                $stat = TRUE;
-
-            } else {
-
-                $dir->delete if($dir->exists);
-                $stat = TRUE;
-
-            }
-
-        }
-
-    } retry_if {
-
-        1;  # always retry
-
-    } delay_exp {
-
-        $limit, $timeout * 1000
+        $lock->delete if ($lock->exists);
+        $dir->delete  if ($dir->exists);
+        $stat = TRUE;
 
     } catch {
 
@@ -148,7 +136,7 @@ sub unlock {
         $self->throw_msg(
             dotid($self->class) . '.unlock',
             'lock_error',
-            $msg
+            $lock, $msg
         );
 
     };
@@ -170,7 +158,7 @@ sub break_lock {
     my $self = shift;
 
     my $lock = $self->_lockfile();
-    my $dir = Dir($lock->volume, $lock->directory);
+    my $dir  = Dir($lock->volume, $lock->directory);
 
     try {
 
@@ -194,7 +182,7 @@ sub break_lock {
         $self->throw_msg(
             dotid($self->class) . '.break_lock',
             'lock_error',
-            $msg
+            $lock, $msg
         );
 
     };
@@ -204,11 +192,11 @@ sub break_lock {
 sub whose_lock {
     my $self = shift;
 
-    my $pid  = $$;
-    my $host = $self->env->host;
-    my $time = DateTime->now(time_zoned => 'local');
+    my $pid  = undef;
+    my $host = undef;
+    my $time = undef;
     my $lock = $self->_lockfile();
-    my $dir = Dir($lock->volume, $lock->directory);
+    my $dir  = Dir($lock->volume, $lock->directory);
 
     try {
 
@@ -216,14 +204,16 @@ sub whose_lock {
 
             if (my @files = $dir->files) {
 
-                # should only be one file in the directory
+                # should only be one file in the directory,
+                # but that file may disappear before this
+                # check.
 
                 if ($files[0]->exists) {
 
                     $host = $files[0]->basename;
                     $pid  = $files[0]->extension;
                     $time = DateTime->from_epoch(
-                        epoch     => ($files[0]->stat)[9], 
+                        epoch     => ($files[0]->stat)[9],
                         time_zone => 'local'
                     );
 
@@ -241,7 +231,7 @@ sub whose_lock {
         $self->throw_msg(
             dotid($self->class) . '.whose_lock',
             'lock_error',
-            $msg
+            $lock, $msg
         );
 
     };
@@ -254,15 +244,10 @@ sub destroy {
     my $self = shift;
 
     my $lock = $self->_lockfile();
-    my $dir = Dir($lock->volume, $lock->directory);
-    my ($host, $pid, $time) = $self->whose_lock();
+    my $dir  = Dir($lock->volume, $lock->directory);
 
-    if (($host eq $self->env->host) && ($pid = $$)) {
-
-        $lock->delete if ($lock->exists);
-        $dir->delete  if ($dir->exists);
-
-    }
+    $lock->delete if ($lock->exists);
+    $dir->delete  if ($dir->exists);
 
 }
 
@@ -291,13 +276,6 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
-    my $key  = Dir($self->{'key'});
-
-    if ($key->is_relative) {
-
-        $self->{'key'} = Dir($self->env->locks, $self->{'key'});
-
-    }
 
     $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
     $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
@@ -338,8 +316,8 @@ XAS::Lib::Lockmgr::Filsystem - Use the file system for locking.
 
 =head1 DESCRIPTION
 
-This class uses the manipulation of directories within the file system as a 
-mutex. This leverages the atomicity of creating directories and allows for 
+This class uses the manipulation of directories within the file system as a
+mutex. This leverages the atomicity of creating directories and allows for
 discretionary locking of resources.
 
 =head1 CONFIGURATION
@@ -367,7 +345,7 @@ a status file into that directory. Returns TRUE for success, FALSE otherwise.
 
 =head2 unlock
 
-Remove the lock. This is done by removing the status file and then the 
+Remove the lock. This is done by removing the status file and then the
 directory. Returns TRUE for success, FALSE otherwise.
 
 =head2 try_lock
@@ -377,7 +355,7 @@ TRUE otherwise.
 
 =head2 break_lock
 
-Unconditionally remove the contains of the directory and than remove the 
+Unconditionally remove the contains of the directory and than remove the
 directory.
 
 =head2 whose_lock
@@ -413,7 +391,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

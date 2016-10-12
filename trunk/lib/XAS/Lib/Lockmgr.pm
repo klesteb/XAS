@@ -1,22 +1,25 @@
 package XAS::Lib::Lockmgr;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use DateTime;
 use DateTime::Span;
+use Try::Tiny::Retry ':all';
+use Params::Validate 'HASHREF';
 
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Singleton',
-  mixin     => 'XAS::Lib::Mixins::Process',
+  mixin     => 'XAS::Lib::Mixin::Process XAS::Lib::Mixin::Handlers',
   utils     => ':validation dotid load_module',
   accessors => 'lockers',
-  constants => 'LOCK_DRIVERS TRUE FALSE HASHREF',
+  constants => 'LOCK_DRIVERS TRUE FALSE',
   vars => {
     PARAMS => {
-      -deadlocked   => { optional => 1, default => 5 },
-      -deadattempts => { optional => 1, default => 5 }
+      -deadlocked => { optional => 1, default => 30 },
+      -breaklock  => { optional => 1, default => 0 },
+      -timeout    => { optional => 1, default => 30 },
     }
   }
 ;
@@ -35,9 +38,9 @@ sub add {
         -driver => { optional => 1, default => 'Filesystem', regex => LOCK_DRIVERS },
     });
 
-    my $key    = $p->{'key'};
-    my $args   = $p->{'args'};
-    my $module = 'XAS::Lib::Lockmgr::' . $p->{'driver'};
+    my $key    = $p->{'-key'};
+    my $args   = $p->{'-args'};
+    my $module = 'XAS::Lib::Lockmgr::' . $p->{'-driver'};
 
     unless (defined($self->lockers->{$key})) {
 
@@ -53,7 +56,7 @@ sub remove {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
-    my $stat;
+    my $stat = FALSE;
 
     if (my $locker = $self->lockers->{$key}) {
 
@@ -78,25 +81,44 @@ sub lock {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
-    my $stat;
-    my $attempts = 1;
+    my $stat    = FALSE;
+    my $timeout = $self->timeout;
+    my $limit   = $self->deadlocked;
 
     if (my $locker = $self->lockers->{$key}) {
 
-        LOCK: {
+        retry {
 
-            unless ($stat = $locker->lock()) {
+            $stat = $locker->lock();
 
-                unless ($stat = $self->_deadlock($key)) {
+        } retry_if {
 
-                    $attempts += 1;
-                    redo LOCK if ($attempts <= $self->deadattempts);
+            my $ex = $_;
+            my $msg;
 
-                }
+            if (ref($ex) && $ex->isa('XAS::Exception')) {
+
+                $msg = sprintf('%s: %s', $ex->type, $ex->info);
+
+            } else {
+
+                $msg = sprintf('%s', $ex);
 
             }
 
-        }
+            $self->log->debug($msg);
+            1;  # always retry
+
+        } delay_exp {
+
+            $limit, $timeout * 1000
+
+        } catch {
+
+            $self->log->debug(sprintf('lock: %s', $key));
+            $stat = $self->_deadlock($key);
+
+        };
 
     } else {
 
@@ -116,7 +138,7 @@ sub unlock {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
-    my $stat;
+    my $stat = FALSE;
 
     if (my $locker = $self->lockers->{$key}) {
 
@@ -140,11 +162,17 @@ sub try_lock {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
-    my $stat;
+    my $stat = FALSE;
 
     if (my $locker = $self->lockers->{$key}) {
 
-        $stat = $locker->try_lock();
+        unless ($stat = $locker->try_lock()) {
+
+            $self->log->warn_msg('lock_dir_error', $key);
+            $self->log->debug(sprintf('try_lock: %s', $key));
+            $stat = $self->_deadlock($key);
+
+        }
 
     } else {
 
@@ -168,48 +196,78 @@ sub _deadlock {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
+    my $locker;
     my $stat = FALSE;
 
-    if (my $locker = $self->lockers->{$key}) {
+    if ($locker = $self->lockers->{$key}) {
 
         my $now = DateTime->now(time_zone => 'local');
         my ($host, $pid, $time) = $locker->whose_lock();
 
-        $time->set_time_zone('local');
+        if (defined($host) && defined($pid) && defined($time)) {
 
-        my $span = DateTime::Span->from_datetimes(
-            start => $now->clone->subtract(minutes => $self->deadlocked),
-            end   => $now
-        );
+            $time->set_time_zone('local');
 
-        $self->log->debug(sprintf('deadlock: start - %s', $span->start));
-        $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
-        $self->log->debug(sprintf('deadlock: lock  - %s', $time));
+            my $span = DateTime::Span->from_datetimes(
+                start => $now->clone->subtract(minutes => $self->deadlocked),
+                end   => $now
+            );
 
-        unless ($span->contains($time)) {
+            $self->log->debug(sprintf('deadlock: host  - %s', $host));
+            $self->log->debug(sprintf('deadlock: pid   - %s', $pid));
+            $self->log->debug(sprintf('deadlock: start - %s', $span->start));
+            $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
+            $self->log->debug(sprintf('deadlock: lock  - %s', $time));
 
-            if ($host eq $self->env->host) {
+            unless ($span->contains($time)) {
 
-                my $status = $self->proc_status($pid);
+                $self->log->debug('deadlock: within time spane');
 
-                unless (($status == 3) || ($status == 2)) {
+                if ($host eq $self->env->host) {
 
-                    $locker->break_lock();
-                    $self->log->warn_msg('lock_broken', $key);
-                    $stat = TRUE;
+                    my $status = $self->proc_status($pid);
+
+                    unless (($status == 3) || ($status == 2)) {
+
+                        $locker->break_lock();
+                        $self->log->warn_msg('lock_broken', $key);
+                        $stat = TRUE;
+
+                    }
+
+                } else {
+
+                    if ($self->breaklock) {
+
+                        # break the deadlock, irregardless of who owns the lock
+
+                        $locker->break_lock();
+                        $self->log->warn_msg('lock_broken', $key);
+                        $stat = TRUE;
+
+                    } else {
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.deadlock.remote',
+                            'lock_remote',
+                            $key
+
+                        );
+
+                    }
 
                 }
 
-            } else {
-
-                $self->throw_msg(
-                    dotid($self->class) . '.deadlock.remote',
-                    'lock_remote',
-                    $key
-
-                );
-
             }
+
+        } else {
+
+            # unable to retrieve lock information, break the deadlock,
+            # irregardless of who owns the lock
+
+            $locker->break_lock();
+            $self->log->warn_msg('lock_broken', $key);
+            $stat = TRUE;
 
         }
 
@@ -232,6 +290,7 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
+    $self->{'lock_attempts'} = 0;
     $self->{'lockers'} = {};
 
     return $self;
@@ -267,10 +326,10 @@ XAS::Lib::Lockmgr - The base class for locking within XAS
 
 =head1 DESCRIPTION
 
-This module provides a general purpose locking mechanism to protect shared 
-resources. It is rather interesting to ask a developer how they protect 
-global shared data. They usually answer, "what do you mean by "global shared 
-data" ?". Well, for those who understand the need, this module provides it 
+This module provides a general purpose locking mechanism to protect shared
+resources. It is rather interesting to ask a developer how they protect
+global shared data. They usually answer, "what do you mean by "global shared
+data" ?". Well, for those who understand the need, this module provides it
 for XAS.
 
 =head1 METHODS
@@ -283,8 +342,18 @@ This method initializes the module. It takes the following parameters:
 
 =item B<-deadlock>
 
-The number of minutes before a lock is considered deadlocked. At which point 
-an attempt will be made to remove the lock.
+The number of minutes before a lock is considered deadlocked. At which point
+an attempt will be made to remove the lock. Defaults to 5.
+
+=item B<-breaklock>
+
+After a deadlock has been detected, break the lock, irregardless of who
+owns the lock. Defaults to false. The default will also throw an exception
+instead of breaking the lock.
+
+=item B<-timeout>
+
+The amount of time to wait between locking attempts. The default is 30 seconds.
 
 =back
 
@@ -301,7 +370,7 @@ The name of the key. This parameter is required.
 
 =item B<-driver>
 
-The module that will manage the lock. The default is 'Filesystem'. Which will 
+The module that will manage the lock. The default is 'Filesystem'. Which will
 load L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Filesystem>.
 
 =item B<-args>
@@ -312,7 +381,7 @@ An optional hash reference of arguments to pass to the driver.
 
 =head2 remove($key)
 
-This method will remove the key from management. This will call the destroy 
+This method will remove the key from management. This will call the destroy
 method of the managing module.
 
 =over 4
@@ -375,7 +444,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2012-2015 Kevin L. Esteb
+Copyright (c) 2012-2016 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
