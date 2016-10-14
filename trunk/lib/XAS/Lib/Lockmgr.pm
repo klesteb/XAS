@@ -1,6 +1,6 @@
 package XAS::Lib::Lockmgr;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use DateTime;
 use DateTime::Span;
@@ -11,13 +11,14 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Singleton',
-  mixin     => 'XAS::Lib::Mixin::Process XAS::Lib::Mixin::Handlers',
+  mixin     => 'XAS::Lib::Mixins::Process XAS::Lib::Mixins::Handlers',
   utils     => ':validation dotid load_module',
   accessors => 'lockers',
   constants => 'LOCK_DRIVERS TRUE FALSE',
   vars => {
     PARAMS => {
       -deadlocked => { optional => 1, default => 30 },
+      -attempts   => { optional => 1, default => 30 },
       -breaklock  => { optional => 1, default => 0 },
       -timeout    => { optional => 1, default => 30 },
     }
@@ -83,7 +84,7 @@ sub lock {
 
     my $stat    = FALSE;
     my $timeout = $self->timeout;
-    my $limit   = $self->deadlocked;
+    my $limit   = $self->attempts;
 
     if (my $locker = $self->lockers->{$key}) {
 
@@ -95,10 +96,17 @@ sub lock {
 
             my $ex = $_;
             my $msg;
+            my $retry = 1;
 
             if (ref($ex) && $ex->isa('XAS::Exception')) {
 
                 $msg = sprintf('%s: %s', $ex->type, $ex->info);
+
+                if ($ex->info =~ /path is invalid/) {
+
+                    $retry = 0;
+
+                }
 
             } else {
 
@@ -107,7 +115,7 @@ sub lock {
             }
 
             $self->log->debug($msg);
-            1;  # always retry
+            $retry;  # always retry
 
         } delay_exp {
 
@@ -199,6 +207,29 @@ sub _deadlock {
     my $locker;
     my $stat = FALSE;
 
+    my $break_lock = sub {
+
+        if ($self->breaklock) {
+
+            # break the deadlock, irregardless of who owns the lock
+
+            $locker->break_lock();
+            $self->log->warn_msg('lock_broken', $key);
+            $stat = TRUE;
+
+        } else {
+
+            $self->throw_msg(
+                dotid($self->class) . '.deadlock.remote',
+                'lock_remote',
+                $key
+
+            );
+
+        }
+
+    };
+
     if ($locker = $self->lockers->{$key}) {
 
         my $now = DateTime->now(time_zone => 'local');
@@ -210,53 +241,49 @@ sub _deadlock {
 
             my $span = DateTime::Span->from_datetimes(
                 start => $now->clone->subtract(minutes => $self->deadlocked),
-                end   => $now
+                end   => $now->clone->add(minutes => 5),
             );
 
             $self->log->debug(sprintf('deadlock: host  - %s', $host));
             $self->log->debug(sprintf('deadlock: pid   - %s', $pid));
             $self->log->debug(sprintf('deadlock: start - %s', $span->start));
-            $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
             $self->log->debug(sprintf('deadlock: lock  - %s', $time));
+            $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
 
-            unless ($span->contains($time)) {
+            if ($span->contains($time)) {
 
-                $self->log->debug('deadlock: within time spane');
+                $self->log->debug('deadlock: within time span');
 
                 if ($host eq $self->env->host) {
 
-                    my $status = $self->proc_status($pid);
+                    if ($pid == $$) {
 
-                    unless (($status == 3) || ($status == 2)) {
-
-                        $locker->break_lock();
-                        $self->log->warn_msg('lock_broken', $key);
+                        $self->log->debug('deadlock: our lock');
                         $stat = TRUE;
+
+                    } else {
+
+                        my $status = $self->proc_status($pid, 'deadlock');
+
+                        unless (($status == 3) || ($status == 2)) {
+
+                            $locker->break_lock();
+                            $self->log->warn_msg('lock_broken', $key);
+                            $stat = TRUE;
+
+                        }
 
                     }
 
                 } else {
 
-                    if ($self->breaklock) {
-
-                        # break the deadlock, irregardless of who owns the lock
-
-                        $locker->break_lock();
-                        $self->log->warn_msg('lock_broken', $key);
-                        $stat = TRUE;
-
-                    } else {
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.deadlock.remote',
-                            'lock_remote',
-                            $key
-
-                        );
-
-                    }
+                    $break_lock->();
 
                 }
+
+            } else {
+
+                $break_lock->();
 
             }
 
@@ -340,10 +367,10 @@ This method initializes the module. It takes the following parameters:
 
 =over 4
 
-=item B<-deadlock>
+=item B<-deadlocked>
 
 The number of minutes before a lock is considered deadlocked. At which point
-an attempt will be made to remove the lock. Defaults to 5.
+an attempt will be made to remove the lock. Defaults to 30.
 
 =item B<-breaklock>
 
@@ -351,9 +378,13 @@ After a deadlock has been detected, break the lock, irregardless of who
 owns the lock. Defaults to false. The default will also throw an exception
 instead of breaking the lock.
 
+=item B<-attempts>
+
+The number of attempts to aquire the lock. Default to 30.
+
 =item B<-timeout>
 
-The amount of time to wait between locking attempts. The default is 30 seconds.
+The number of seconds to wait between each lock attempt. Defaults to 30.
 
 =back
 
