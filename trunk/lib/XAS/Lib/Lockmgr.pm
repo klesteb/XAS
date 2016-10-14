@@ -41,7 +41,7 @@ sub add {
 
     my $key    = $p->{'-key'};
     my $args   = $p->{'-args'};
-    my $module = 'XAS::Lib::Lockmgr::' . $p->{'-driver'};
+    my $module = 'XAS::Lib::Lockmgr::' . $p->{'driver'};
 
     unless (defined($self->lockers->{$key})) {
 
