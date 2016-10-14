@@ -39,8 +39,8 @@ sub add {
         -driver => { optional => 1, default => 'Filesystem', regex => LOCK_DRIVERS },
     });
 
-    my $key    = $p->{'-key'};
-    my $args   = $p->{'-args'};
+    my $key    = $p->{'key'};
+    my $args   = $p->{'args'};
     my $module = 'XAS::Lib::Lockmgr::' . $p->{'driver'};
 
     unless (defined($self->lockers->{$key})) {
