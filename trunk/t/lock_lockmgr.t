@@ -3,7 +3,17 @@
 use strict;
 use warnings;
 
-use Test::Simple tests => 57;
+use Test::More;
+
+unless ( $ENV{RELEASE_TESTING} ) {
+
+    plan( skip_all => "Author tests not required for installation" );
+
+} else {
+
+    plan tests => 57;
+
+}
 
 use Data::Dumper;
 use XAS::Lib::Lockmgr;

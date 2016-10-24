@@ -4,7 +4,18 @@
 use strict;
 use warnings;
 
-use Test::Simple tests => 32;
+use Test::More;
+
+unless ( $ENV{RELEASE_TESTING} ) {
+
+    plan( skip_all => "Author tests not required for installation" );
+
+} else {
+
+    plan tests => 32;
+
+}
+
 use XAS::Lib::Lockmgr::Filesystem;
 use Badger::Filesystem 'cwd Dir File';
 
