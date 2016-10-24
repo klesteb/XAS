@@ -27,7 +27,7 @@ use XAS::Class
 # produces a nice race condidtion.
 
 # ----------------------------------------------------------------------
-# Overrides 
+# Overrides
 # ----------------------------------------------------------------------
 
 class('Badger::Filesystem')->methods(
@@ -86,7 +86,7 @@ sub lock {
         $self->throw_msg(
             dotid($self->class) . '.lock.notmine',
             'lock_dir_error',
-            $lock
+            $dir
         );
 
     } else {
@@ -104,7 +104,7 @@ sub lock {
             $self->throw_msg(
                 dotid($self->class) . '.lock',
                 'lock_error',
-                $lock, $msg
+                $dir, $msg
             );
 
         };
@@ -136,7 +136,7 @@ sub unlock {
         $self->throw_msg(
             dotid($self->class) . '.unlock',
             'lock_error',
-            $lock, $msg
+            $dir, $msg
         );
 
     };
@@ -149,8 +149,9 @@ sub try_lock {
     my $self = shift;
 
     my $lock = $self->_lockfile();
+    my $dir  = Dir($lock->volume, $lock->directory);
 
-    return $lock->exists ? FALSE : TRUE;
+    return $dir->exists ? FALSE : TRUE;
 
 }
 
@@ -182,7 +183,7 @@ sub break_lock {
         $self->throw_msg(
             dotid($self->class) . '.break_lock',
             'lock_error',
-            $lock, $msg
+            $dir, $msg
         );
 
     };
@@ -231,7 +232,7 @@ sub whose_lock {
         $self->throw_msg(
             dotid($self->class) . '.whose_lock',
             'lock_error',
-            $lock, $msg
+            $dir, $msg
         );
 
     };
@@ -248,6 +249,8 @@ sub destroy {
 
     $lock->delete if ($lock->exists);
     $dir->delete  if ($dir->exists);
+
+    return TRUE;
 
 }
 
@@ -266,7 +269,7 @@ sub _lockfile {
     my $self = shift;
 
     my $extension = ".$$";
-    my $name = $self->env->host;
+    my $name = $self->{'_host'};
 
     return File($self->key, $name . $extension);
 
@@ -276,6 +279,8 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
+
+    $self->{'_host'} = $self->env->host;
 
     $self->args->{'limit'}   = 10 unless defined($self->args->{'limit'});
     $self->args->{'timeout'} = 10 unless defined($self->args->{'timeout'});
@@ -296,12 +301,16 @@ XAS::Lib::Lockmgr::Filsystem - Use the file system for locking.
 
  use XAS::Lib::Lockmgr;
 
- my $key = '/var/lock/xas/alerts';
+ my $key = '/var/lock/wpm/alerts';
  my $lockmgr = XAS::Lib::Lockmgr->new();
 
  $lockmgr->add(
      -key    => $key,
      -driver => 'Filesystem',
+     -args => {
+        timeout => 10,
+        limit   => 10
+     }
  );
 
  if ($lockmgr->try_lock($key)) {

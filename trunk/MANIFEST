@@ -140,7 +140,8 @@ t/10_stomp_frame.t
 t/10_stomp_utils.t
 t/11_stomp_frame.t
 t/boilerplate.t
-t/lockmgr_basic.t
+t/lock_filesystem.t
+t/lock_lockmgr.t
 t/manifest.t
 t/pod.t
 t/spool_basic.t

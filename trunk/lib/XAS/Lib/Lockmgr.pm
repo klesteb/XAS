@@ -1,11 +1,10 @@
 package XAS::Lib::Lockmgr;
 
-our $VERSION = '0.03';
+our $VERSION = '0.02';
 
 use DateTime;
 use DateTime::Span;
 use Try::Tiny::Retry ':all';
-use Params::Validate 'HASHREF';
 
 use XAS::Class
   debug     => 0,
@@ -14,13 +13,13 @@ use XAS::Class
   mixin     => 'XAS::Lib::Mixins::Process XAS::Lib::Mixins::Handlers',
   utils     => ':validation dotid load_module',
   accessors => 'lockers',
-  constants => 'LOCK_DRIVERS TRUE FALSE',
+  constants => 'LOCK_DRIVERS TRUE FALSE HASHREF',
   vars => {
     PARAMS => {
       -deadlocked => { optional => 1, default => 30 },
-      -attempts   => { optional => 1, default => 30 },
       -breaklock  => { optional => 1, default => 0 },
       -timeout    => { optional => 1, default => 30 },
+      -attempts   => { optional => 1, default => 30 },
     }
   }
 ;
@@ -39,6 +38,7 @@ sub add {
         -driver => { optional => 1, default => 'Filesystem', regex => LOCK_DRIVERS },
     });
 
+    my $stat   = FALSE;
     my $key    = $p->{'key'};
     my $args   = $p->{'args'};
     my $module = 'XAS::Lib::Lockmgr::' . $p->{'driver'};
@@ -48,8 +48,11 @@ sub add {
         load_module($module);
 
         $self->lockers->{$key} = $module->new(-key => $key, -args => $args);
+        $stat = TRUE;
 
     }
+
+    return $stat;
 
 }
 
@@ -124,7 +127,12 @@ sub lock {
         } catch {
 
             $self->log->debug(sprintf('lock: %s', $key));
-            $stat = $self->_deadlock($key);
+
+            if ($stat = $self->_deadlock($key)) {
+
+                $stat = $locker->lock();
+
+            }
 
         };
 
@@ -209,24 +217,11 @@ sub _deadlock {
 
     my $break_lock = sub {
 
-        if ($self->breaklock) {
+        # break the deadlock, irregardless of who owns the lock
 
-            # break the deadlock, irregardless of who owns the lock
-
-            $locker->break_lock();
-            $self->log->warn_msg('lock_broken', $key);
-            $stat = TRUE;
-
-        } else {
-
-            $self->throw_msg(
-                dotid($self->class) . '.deadlock.remote',
-                'lock_remote',
-                $key
-
-            );
-
-        }
+        $locker->break_lock();
+        $self->log->warn_msg('lock_broken', $key);
+        $stat = TRUE;
 
     };
 
@@ -241,7 +236,7 @@ sub _deadlock {
 
             my $span = DateTime::Span->from_datetimes(
                 start => $now->clone->subtract(minutes => $self->deadlocked),
-                end   => $now->clone->add(minutes => 5),
+                end   => $now->clone,
             );
 
             $self->log->debug(sprintf('deadlock: host  - %s', $host));
@@ -267,9 +262,7 @@ sub _deadlock {
 
                         unless (($status == 3) || ($status == 2)) {
 
-                            $locker->break_lock();
-                            $self->log->warn_msg('lock_broken', $key);
-                            $stat = TRUE;
+                            $break_lock->();
 
                         }
 
@@ -277,7 +270,20 @@ sub _deadlock {
 
                 } else {
 
-                    $break_lock->();
+                    if ($self->breaklock) {
+
+                        $break_lock->();
+
+                    } else {
+
+                        $self->throw_msg(
+                            dotid($self->class) . '.deadlock.remote',
+                            'lock_remote',
+                            $key
+
+                        );
+
+                    }
 
                 }
 
@@ -292,9 +298,7 @@ sub _deadlock {
             # unable to retrieve lock information, break the deadlock,
             # irregardless of who owns the lock
 
-            $locker->break_lock();
-            $self->log->warn_msg('lock_broken', $key);
-            $stat = TRUE;
+            $break_lock->();
 
         }
 
@@ -367,10 +371,10 @@ This method initializes the module. It takes the following parameters:
 
 =over 4
 
-=item B<-deadlocked>
+=item B<-deadlock>
 
 The number of minutes before a lock is considered deadlocked. At which point
-an attempt will be made to remove the lock. Defaults to 30.
+an attempt will be made to remove the lock. Defaults to 5.
 
 =item B<-breaklock>
 
