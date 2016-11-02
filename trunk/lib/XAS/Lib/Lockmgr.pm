@@ -16,7 +16,7 @@ use XAS::Class
   constants => 'LOCK_DRIVERS TRUE FALSE HASHREF',
   vars => {
     PARAMS => {
-      -deadlocked => { optional => 1, default => 30 },
+      -deadlocked => { optional => 1, default => 1800 },
       -breaklock  => { optional => 1, default => 0 },
       -timeout    => { optional => 1, default => 30 },
       -attempts   => { optional => 1, default => 30 },
@@ -118,11 +118,13 @@ sub lock {
             }
 
             $self->log->debug($msg);
-            $retry;  # always retry
+            return $retry;  # always retry?
 
-        } delay_exp {
+        } delay {
+            my $attempts = shift;
 
-            $limit, $timeout * 1000
+            return if ($attempts > $self->attempts);
+            sleep $self->timeout;
 
         } catch {
 
@@ -235,7 +237,7 @@ sub _deadlock {
             $time->set_time_zone('local');
 
             my $span = DateTime::Span->from_datetimes(
-                start => $now->clone->subtract(minutes => $self->deadlocked),
+                start => $now->clone->subtract(seconds => $self->deadlocked),
                 end   => $now->clone,
             );
 
@@ -321,7 +323,6 @@ sub init {
 
     my $self = $class->SUPER::init(@_);
 
-    $self->{'lock_attempts'} = 0;
     $self->{'lockers'} = {};
 
     return $self;
