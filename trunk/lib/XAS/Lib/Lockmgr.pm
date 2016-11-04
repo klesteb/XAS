@@ -104,10 +104,16 @@ sub lock {
             if (ref($ex) && $ex->isa('XAS::Exception')) {
 
                 $msg = sprintf('%s: %s', $ex->type, $ex->info);
+                my $exceptions = $locker->exceptions();
 
-                if ($ex->info =~ /path is invalid/) {
+                foreach my $exception (@$exceptions) {
 
-                    $retry = 0;
+                    if ($ex->match_type($exception)) {
+
+                        $retry = 0;
+                        last;
+
+                    }
 
                 }
 

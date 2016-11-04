@@ -52,19 +52,21 @@ Revision history for XAS
         Added handling for Batch Systems
         Added a general purpose iterator
         Documentation fixes
-        
+
 0.12    23-Aug-2016 Kevin L. Esteb
         Added routines for WS-Manage
         Added routines for spawning background processes
         Fixed several bugs
-        
+
 0.13    24-Aug-2016 Kevin L. Esteb
         Added some missing files to the MANIFEST
         Thank you cpantesters
-        
+
 0.14    28-Aug-2016 Kevin L. Esteb
         Added some missing dependencies.
         Thank you cpantesters.
 
-0.15
+0.15    02-Nov-2016 Kevin L. Esteb
+        Working with locking.
+        Added tests for locking.
 

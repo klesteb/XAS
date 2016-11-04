@@ -241,6 +241,19 @@ sub whose_lock {
 
 }
 
+sub exceptions {
+    my $self = shift;
+
+    my $class = dotid($self->class);
+    my @exceptions = [
+        'filesystem',
+        $class . '.lock.notmine',
+    ];
+
+    return \@exceptions;
+
+}
+
 sub destroy {
     my $self = shift;
 
@@ -370,6 +383,14 @@ directory.
 =head2 whose_lock
 
 Query the status file. This file provides the following information:
+
+    hostname
+    pid of locking process
+    time the lock was taken
+
+=head2 exceptions
+
+This method returns a list of exceptions that the lockmgr should not retry on.
 
 =over 4
 
