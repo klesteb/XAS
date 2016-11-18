@@ -1,6 +1,6 @@
 package XAS::Lib::Lockmgr;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use DateTime;
 use DateTime::Span;
@@ -85,64 +85,11 @@ sub lock {
     my $self = shift;
     my ($key) = validate_params(\@_, [1]);
 
-    my $stat    = FALSE;
-    my $timeout = $self->timeout;
-    my $limit   = $self->attempts;
+    my $stat = FALSE;
 
     if (my $locker = $self->lockers->{$key}) {
 
-        retry {
-
-            $stat = $locker->lock();
-
-        } retry_if {
-
-            my $ex = $_;
-            my $msg;
-            my $retry = 1;
-
-            if (ref($ex) && $ex->isa('XAS::Exception')) {
-
-                $msg = sprintf('%s: %s', $ex->type, $ex->info);
-                my $exceptions = $locker->exceptions();
-
-                foreach my $exception (@$exceptions) {
-
-                    if ($ex->match_type($exception)) {
-
-                        $retry = 0;
-                        last;
-
-                    }
-
-                }
-
-            } else {
-
-                $msg = sprintf('%s', $ex);
-
-            }
-
-            $self->log->debug($msg);
-            return $retry;  # always retry?
-
-        } delay {
-            my $attempts = shift;
-
-            return if ($attempts > $self->attempts);
-            sleep $self->timeout;
-
-        } catch {
-
-            $self->log->debug(sprintf('lock: %s', $key));
-
-            if ($stat = $self->_deadlock($key)) {
-
-                $stat = $locker->lock();
-
-            }
-
-        };
+        $stat = $locker->lock();
 
     } else {
 
@@ -190,13 +137,7 @@ sub try_lock {
 
     if (my $locker = $self->lockers->{$key}) {
 
-        unless ($stat = $locker->try_lock()) {
-
-            $self->log->warn_msg('lock_dir_error', $key);
-            $self->log->debug(sprintf('try_lock: %s', $key));
-            $stat = $self->_deadlock($key);
-
-        }
+        $stat = $locker->try_lock();
 
     } else {
 
@@ -215,114 +156,6 @@ sub try_lock {
 # ----------------------------------------------------------------------
 # Private Methods
 # ----------------------------------------------------------------------
-
-sub _deadlock {
-    my $self = shift;
-    my ($key) = validate_params(\@_, [1]);
-
-    my $locker;
-    my $stat = FALSE;
-
-    my $break_lock = sub {
-
-        # break the deadlock, irregardless of who owns the lock
-
-        $locker->break_lock();
-        $self->log->warn_msg('lock_broken', $key);
-        $stat = TRUE;
-
-    };
-
-    if ($locker = $self->lockers->{$key}) {
-
-        my $now = DateTime->now(time_zone => 'local');
-        my ($host, $pid, $time) = $locker->whose_lock();
-
-        if (defined($host) && defined($pid) && defined($time)) {
-
-            $time->set_time_zone('local');
-
-            my $span = DateTime::Span->from_datetimes(
-                start => $now->clone->subtract(seconds => $self->deadlocked),
-                end   => $now->clone,
-            );
-
-            $self->log->debug(sprintf('deadlock: host  - %s', $host));
-            $self->log->debug(sprintf('deadlock: pid   - %s', $pid));
-            $self->log->debug(sprintf('deadlock: start - %s', $span->start));
-            $self->log->debug(sprintf('deadlock: lock  - %s', $time));
-            $self->log->debug(sprintf('deadlock: end   - %s', $span->end));
-
-            if ($span->contains($time)) {
-
-                $self->log->debug('deadlock: within time span');
-
-                if ($host eq $self->env->host) {
-
-                    if ($pid == $$) {
-
-                        $self->log->debug('deadlock: our lock');
-                        $stat = TRUE;
-
-                    } else {
-
-                        my $status = $self->proc_status($pid, 'deadlock');
-
-                        unless (($status == 3) || ($status == 2)) {
-
-                            $break_lock->();
-
-                        }
-
-                    }
-
-                } else {
-
-                    if ($self->breaklock) {
-
-                        $break_lock->();
-
-                    } else {
-
-                        $self->throw_msg(
-                            dotid($self->class) . '.deadlock.remote',
-                            'lock_remote',
-                            $key
-
-                        );
-
-                    }
-
-                }
-
-            } else {
-
-                $break_lock->();
-
-            }
-
-        } else {
-
-            # unable to retrieve lock information, break the deadlock,
-            # irregardless of who owns the lock
-
-            $break_lock->();
-
-        }
-
-    } else {
-
-        $self->throw_msg(
-            dotid($self->class) . '.deadlock.nokey',
-            'lock_nokey',
-            $key
-        );
-
-    }
-
-    return $stat;
-
-}
 
 sub init {
     my $class = shift;

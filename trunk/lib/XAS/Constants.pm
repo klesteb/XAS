@@ -62,7 +62,7 @@ use Badger::Class
 
       # lockmgr
 
-      LOCK_DRIVERS => qr(Filesystem),
+      LOCK_DRIVERS => qr(Filesystem|KeyedMutex),
 
   },
   exports => {
