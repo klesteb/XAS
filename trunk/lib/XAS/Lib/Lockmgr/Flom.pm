@@ -10,6 +10,7 @@ use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'handle host port timeout attempts',
+  utils     => 'dotid',
   vars => {
     PARAMS => {
       -key      => 1,
@@ -57,7 +58,7 @@ sub lock {
         $self->throw_msg(
             dotid($self->class) . '.lock',
             'lock_error',
-            $key, $msg
+            $self->key, $msg
         );
 
     };
@@ -97,7 +98,7 @@ sub unlock {
         $self->throw_msg(
             dotid($self->class) . '.unlock',
             'lock_error',
-            $key, $msg
+            $self->key, $msg
         );
 
     };
@@ -143,7 +144,7 @@ sub try_lock {
         $self->throw_msg(
             dotid($self->class) . '.try_lock',
             'lock_error',
-            $key, $msg
+            $self->key, $msg
         );
 
     };
@@ -169,6 +170,7 @@ sub init {
     my $class = shift;
 
     my $rc;
+    my $key;
     my $handle;
     my $timeout;
     my $self = $class->SUPER::init(@_);
@@ -201,7 +203,9 @@ sub init {
 
     }
 
-    if (($rc = Flom::handle_set_resource_name($handle, $self->key)) != Flom::RC_OK) {
+    $key = $self->key;
+
+    if (($rc = Flom::handle_set_resource_name($handle, $key)) != Flom::RC_OK) {
 
         $self->throw_msg(
             dotid($self->class) . 'init',

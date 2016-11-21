@@ -30,6 +30,8 @@ sub stack_trace {
 
             # ignore Try::Tiny lines
 
+            no warnings;
+
             next if (grep( $_ =~ /Try::Tiny/, @$caller ));
             push(@lines, $self->message( caller => @$caller ));
 
