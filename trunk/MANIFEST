@@ -47,6 +47,7 @@ lib/XAS/Lib/Curl/HTTP.pm
 lib/XAS/Lib/Iterator.pm
 lib/XAS/Lib/Lockmgr.pm
 lib/XAS/Lib/Lockmgr/Filesystem.pm
+lib/XAS/Lib/Lockmgr/Flom.pm
 lib/XAS/Lib/Lockmgr/KeyedMutex.pm
 lib/XAS/Lib/Log.pm
 lib/XAS/Lib/Log/Console.pm

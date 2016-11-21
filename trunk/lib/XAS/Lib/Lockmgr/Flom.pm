@@ -1,15 +1,15 @@
-package XAS::Lib::Lockmgr::KeyedMutex;
+package XAS::Lib::Lockmgr::Flom;
 
 our $VERSION = '0.01';
 
+use Flom;
 use Try::Tiny;
-use KeyedMutex;
 use XAS::Constants 'TRUE FALSE HASHREF';
 
 use XAS::Class
   version   => $VERSION,
   base      => 'XAS::Base',
-  accessors => 'host port timeout attempts mutex',
+  accessors => 'handle host port timeout attempts',
   vars => {
     PARAMS => {
       -key      => 1,
@@ -25,28 +25,29 @@ use XAS::Class
 sub lock {
     my $self = shift;
 
-    my $count = 0;
-    my $stat  = TRUE;
-    my $key   = $self->key;
+    my $rc;
+    my $count  = 0;
+    my $stat   = FALSE;
+    my $handle = $self->handle;
 
     try {
 
-        while (! $self->mutex->lock($key)) {
+        if (($rc = Flom::handle_set_lock_mode($handle, Flom::LOCK_MODE_EX)) != Flom::RC_OK) {
 
-            $count++;
-
-            if ($count < $self->attempts) {
-
-                sleep $self->timeout;
-
-            } else {
-
-                $stat = FALSE;
-                last;
-
-            }
+            die Flom::strerror($rc);
 
         }
+
+        while (($rc = Flom::handle_lock($handle)) != Flom::RC_OK) {
+
+            $count += 1;
+            next if ($count < $self->attempts);
+
+            die Flom::strerror($rc);
+
+        }
+
+        $stat = TRUE;
 
     } catch {
 
@@ -68,12 +69,25 @@ sub lock {
 sub unlock {
     my $self = shift;
 
-    my $stat = FALSE;
-    my $key  = $self->key;
+    my $rc;
+    my $stat   = FALSE;
+    my $handle = $self->handle;
 
     try {
 
-        $stat = $self->mutex->release($key);
+        if (($rc = Flom::handle_unlock($handle)) != Flom::RC_OK) {
+
+            die Flom::strerror($rc);
+
+        }
+
+        if (($rc = Flom::handle_set_lock_mode($handle, Flom::LOCK_MODE_NL)) != Flom::RC_OK) {
+
+            die Flom::strerror($rc)
+
+        }
+
+        $stat = TRUE;
 
     } catch {
 
@@ -95,12 +109,31 @@ sub unlock {
 sub try_lock {
     my $self = shift;
 
-    my $stat = FALSE;
-    my $key  = $self->key;
+    my $rc;
+    my $stat   = FALSE;
+    my $handle = $self->handle;
 
     try {
 
-        $stat = $self->mutex->locked($key) ? FALSE : TRUE;
+        if (($rc = Flom::handle_set_lock_mode($handle, Flom::LOCK_MODE_NL)) != Flom::RC_OK) {
+
+            die Flom::strerror($rc);
+
+        }
+
+        if (($rc = Flom::handle_lock($handle)) != Flom::RC_OK) {
+
+            die Flom::strerror($rc);
+
+        }
+
+        if (($rc = Flom::handle_unlock($handle)) != Flom::RC_OK) {
+
+            die Flom::strerror($rc);
+
+        }
+
+        $stat = TRUE;
 
     } catch {
 
@@ -135,15 +168,12 @@ sub exceptions {
 sub init {
     my $class = shift;
 
+    my $rc;
+    my $handle;
+    my $timeout;
     my $self = $class->SUPER::init(@_);
 
-    $self->{'host'} = defined($self->args->{'host'})
-                        ? $self->args->{'host'}
-                        : '127.0.0.1';
-
-    $self->{'port'} = defined($self->args->{'port'})
-                        ? $self->args->{'port'}
-                        : '9507';
+    $self->{'handle'} = $handle = Flom::flom_handle_t->new();
 
     $self->{'timeout'} = defined($self->args->{'timeout'})
                             ? $self->args->{'timeout'}
@@ -153,9 +183,75 @@ sub init {
                             ? $self->args->{'attempts'}
                             : 30;
 
-    $self->{'mutex'} = KeyedMutex->new({
-        sock => $self->host . ':' . $self->port,
-    });
+    $self->{'host'} = defined($self->args->{'host'})
+                        ? $self->args->{'host'}
+                        : '127.0.0.1';
+
+    $self->{'port'} = defined($self->args->{'port'})
+                        ? $self->args->{'port'}
+                        : '28015';
+
+    if (($rc = Flom::handle_init($handle)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
+
+    if (($rc = Flom::handle_set_resource_name($handle, $self->key)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
+
+    $timeout = $self->timeout * 1000;
+
+    if (($rc = Flom::handle_set_resource_timeout($handle, $timeout)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
+
+    if (($rc = Flom::handle_set_unicast_address($handle, $self->host)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
+
+    if (($rc = Flom::handle_set_unicast_port($handle, $self->port)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
+
+    if (($rc = Flom::handle_set_lock_mode($handle, Flom::LOCK_MODE_NL)) != Flom::RC_OK) {
+
+        $self->throw_msg(
+            dotid($self->class) . 'init',
+            'lock_error',
+            $self->key, Flom::strerror($rc)
+        );
+
+    }
 
     return $self;
 
