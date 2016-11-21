@@ -171,6 +171,8 @@ sub init {
 
     my $rc;
     my $key;
+    my $host;
+    my $port;
     my $handle;
     my $timeout;
     my $self = $class->SUPER::init(@_);
@@ -215,7 +217,7 @@ sub init {
 
     }
 
-    $timeout = $self->timeout * 1000;
+    $timeout = $self->timeout * 1000; # convert to milliseconds
 
     if (($rc = Flom::handle_set_resource_timeout($handle, $timeout)) != Flom::RC_OK) {
 
@@ -227,7 +229,9 @@ sub init {
 
     }
 
-    if (($rc = Flom::handle_set_unicast_address($handle, $self->host)) != Flom::RC_OK) {
+    $host = $self->host;
+
+    if (($rc = Flom::handle_set_unicast_address($handle, $host)) != Flom::RC_OK) {
 
         $self->throw_msg(
             dotid($self->class) . 'init',
@@ -237,7 +241,9 @@ sub init {
 
     }
 
-    if (($rc = Flom::handle_set_unicast_port($handle, $self->port)) != Flom::RC_OK) {
+    $port = $self->port;
+
+    if (($rc = Flom::handle_set_unicast_port($handle, $port)) != Flom::RC_OK) {
 
         $self->throw_msg(
             dotid($self->class) . 'init',
@@ -267,7 +273,7 @@ __END__
 
 =head1 NAME
 
-XAS::Lib::Lockmgr::KeyedMutex - Use the keymutexd lock manager for locking.
+XAS::Lib::Lockmgr::Flom - Use the FLoM lock manager for locking.
 
 =head1 SYNOPSIS
 
@@ -278,7 +284,7 @@ XAS::Lib::Lockmgr::KeyedMutex - Use the keymutexd lock manager for locking.
 
  $lockmgr->add(
      -key    => $key,
-     -driver => 'KeyedMutex',
+     -driver => 'Flom',
      -args => {
         port     => 9506,
         address  => '127.0.0.1',
@@ -299,9 +305,9 @@ XAS::Lib::Lockmgr::KeyedMutex - Use the keymutexd lock manager for locking.
 
 =head1 DESCRIPTION
 
-This class uses the keymutexd daemon to manage locks. This leverages the
-atomicity of using a centralized lock manager and allows for discretionary
-locking of resources.
+This class uses the FLoM distributed lock manager to manage locks. This 
+leverages the atomicity of using a centralized lock manager and allows for 
+discretionary locking of resources.
 
 =head1 CONFIGURATION
 
@@ -319,11 +325,11 @@ The number of seconds to wait between lock attempts. The default is 30.
 
 =item B<host>
 
-The address of the host that is presenting the lock daemon.
+The address of the host that is presenting the lock daemon. Defaults to 127.0.0.1.
 
-=B<port>
+=item B<port>
 
-The port that the lock daemon is listening on.
+The port that the lock daemon is listening on. Defaults to 28015.
 
 =back
 
@@ -350,6 +356,8 @@ triggered.
 =head1 SEE ALSO
 
 =over 4
+
+=item L<FLoM|https://sourceforge.net/projects/flom/>
 
 =item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
 
