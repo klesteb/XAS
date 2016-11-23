@@ -219,11 +219,12 @@ The number of seconds to wait between lock attempts. The default is 30.
 
 =item B<host>
 
-The address of the host that is presenting the lock daemon.
+The address of the host that is presenting the lock daemon. Defaults to 
+127.0.0.1.
 
-=B<port>
+=item B<port>
 
-The port that the lock daemon is listening on.
+The port that the lock daemon is listening on. Defaults to 9507.
 
 =back
 
@@ -250,6 +251,8 @@ triggered.
 =head1 SEE ALSO
 
 =over 4
+
+=item L<KeyedMutex|https://metacpan.org/pod/KeyedMutex>
 
 =item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
 

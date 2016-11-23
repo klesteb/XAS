@@ -16,11 +16,18 @@ use XAS::Class
 
 sub exception_handler {
     my $self = shift;
-    my ($ex) = validate_params(\@_, [1]);
+    my ($ex, $alias) = validate_params(\@_, [
+        1,
+        { optional => 1, default => undef },
+    ]);
 
+    my $msg;
     my ($errors, $rc) = $self->parse_exception($ex);
 
-    $self->log->error($errors);
+    $msg = $errors;
+    $msg = $self->message('exception', $alias, $errors) if (defined($alias));
+
+    $self->log->error($msg);
 
     if ($self->env->alerts) {
 
@@ -32,11 +39,18 @@ sub exception_handler {
 
 sub exit_handler {
     my $self = shift;
-    my ($ex) = validate_params(\@_, [1]);
+    my ($ex, $alias) = validate_params(\@_, [
+        1,
+        { optional => 1, default => undef },
+    ]);
 
+    my $msg;
     my ($errors, $rc) = $self->parse_exception($ex);
 
-    $self->log->fatal($errors);
+    $msg = $errors;
+    $msg = $self->message('exception', $alias, $errors) if (defined($alias));
+
+    $self->log->error($msg);
 
     if ($self->env->alerts) {
 
@@ -50,11 +64,18 @@ sub exit_handler {
 
 sub error_handler {
     my $self = shift;
-    my ($ex) = validate_params(\@_, [1]);
+    my ($ex, $alias) = validate_params(\@_, [
+        1,
+        { optional => 1, default => undef },
+    ]);
 
+    my $msg;
     my ($errors, $rc) = $self->parse_exception($ex);
 
-    $self->log->error($errors);
+    $msg = $errors;
+    $msg = $self->message('exception', $alias, $errors) if (defined($alias));
+
+    $self->log->error($msg);
 
 }
 
