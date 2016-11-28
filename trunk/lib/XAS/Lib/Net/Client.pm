@@ -10,17 +10,18 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
-  mixin     => 'XAS::Lib::Mixins::Bufops',
+  mixin     => 'XAS::Lib::Mixins::Bufops XAS::Lib::Mixins::Keepalive',
   utils     => ':validation dotid trim',
   accessors => 'handle select attempts',
   mutators  => 'timeout',
   import    => 'class',
   vars => {
     PARAMS => {
-      -port    => 1,
-      -host    => 1,
-      -timeout => { optional => 1, default => 60 },
-      -eol     => { optional => 1, default => "\015\012" },
+      -port          => 1,
+      -host          => 1,
+      -tcp_keepalive => { optional => 1, default => 0 },
+      -timeout       => { optional => 1, default => 60 },
+      -eol           => { optional => 1, default => "\015\012" },
     },
     ERRNO  => 0,
     ERRSTR => '',
@@ -62,6 +63,14 @@ sub connect {
         );
 
     };
+
+    if ($self->tcp_keepalive) {
+
+        $self->log->debug("$alias: keepalive activated");
+
+        $self->enable_keepalive($self->handle);
+
+    }
 
     $self->handle->blocking(0);
     $self->{'select'} = IO::Select->new($self->handle);
@@ -252,13 +261,15 @@ sub init {
     $self->{'attempts'} = 5;
     $self->{'buffer'}   = '';
 
+    $self->init_keepalive();     # init tcp keepalive definations
+
     return $self;
 
 }
 
 sub _fill_buffer {
     my $self = shift;
-    
+
     my $counter = 0;
     my $working = 1;
     my $read    = 0;
@@ -373,6 +384,10 @@ An optional timeout, it defaults to 60 seconds.
 =item B<-eol>
 
 An optional eol. The default is "\015\012". Which is network netural.
+
+=item B<-tcp_keeplive>
+
+Turns on TCP keepalive for each connection.
 
 =back
 

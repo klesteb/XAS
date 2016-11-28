@@ -13,10 +13,10 @@ use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Lib::POE::Service',
-  mixin     => 'XAS::Lib::Mixins::Handlers',
+  mixin     => 'XAS::Lib::Mixins::Keepalive XAS::Lib::Mixins::Handlers',
   utils     => ':validation weaken params',
   accessors => 'session clients',
-  constants => 'ARRAY',
+  constants => 'ARRAY HASHREF',
   vars => {
     PARAMS => {
       -port             => 1,
@@ -164,7 +164,10 @@ sub reaper {
 
 sub process_request {
     my $self = shift;
-    my ($input, $ctx) = validate_params(\@_, [1,1]);
+    my ($input, $ctx) = validate_params(\@_, [
+        1,
+        type => HASHREF,
+    ]);
 
     $self->process_response($input, $ctx);
 
@@ -172,7 +175,10 @@ sub process_request {
 
 sub process_response {
     my $self = shift;
-    my ($output, $ctx) = validate_params(\@_, [1,1]);
+    my ($output, $ctx) = validate_params(\@_, [
+        1,
+        type => HASHREF,
+    ]);
 
     my $alias = $self->alias;
 
@@ -182,7 +188,10 @@ sub process_response {
 
 sub process_errors {
     my $self = shift;
-    my ($errors, $ctx) = validate_params(\@_, [1,1]);
+    my ($errors, $ctx) = validate_params(\@_, [
+        1,
+        type => HASHREF,
+    ]);
 
     $self->process_response($errors, $ctx);
 
@@ -270,6 +279,14 @@ sub _client_connected {
 
     $self->log->debug("$alias: _client_connected()");
 
+    if ($self->tcp_keepalive) {
+
+        $self->log->debug("$alias: keepalive activated");
+
+        $self->enable_keepalive($socket);
+
+    }
+
     my $client = POE::Wheel::ReadWrite->new(
         Handle       => $socket,
         Filter       => $self->filter,
@@ -350,8 +367,8 @@ sub _client_output {
                 $self->log->error_msg(
                     'net_client_nosocket', 
                     $alias, 
-                    $self->peerhist($wheel), 
-                    $self->peerport($wheel)
+                    $self->peerhist($wheel) || 'unknown', 
+                    $self->peerport($wheel) || 'unknown'
                 );
                 delete $self->clients->{$wheel};
 
@@ -367,7 +384,7 @@ sub _client_output {
 
         my $ex = $_;
 
-        $self->exception_handler($ex);
+        $self->exception_handler($ex, $alias);
 
         delete $self->clients->{$wheel};
 
@@ -379,12 +396,14 @@ sub _client_error {
     my ($self, $syscall, $errnum, $errstr, $wheel) = @_[OBJECT,ARG0..ARG3];
 
     my $alias = $self->alias;
+    my $port  = $self->peerport($wheel) || 'unknown';
+    my $host  = $self->peerhost($wheel) || 'unknown';
 
     $self->log->debug("$alias: _client_error()");
 
     if ($errnum == 0) {
 
-        $self->log->info_msg('net_client_disconnect', $alias, $self->peerhost($wheel), $self->peerport($wheel));
+        $self->log->info_msg('net_client_disconnect', $alias, $host, $port);
 
     } else {
 
@@ -417,8 +436,8 @@ sub _client_flushed {
     my ($self, $wheel) = @_[OBJECT,ARG0]; 
 
     my $alias = $self->alias; 
-    my $host  = $self->peerhost($wheel); 
-    my $port  = $self->peerport($wheel); 
+    my $host  = $self->peerhost($wheel) || 'unknown'; 
+    my $port  = $self->peerport($wheel) || 'unknown'; 
 
     $self->log->debug(sprintf('%s: _client_flushed(), wheel: %s, host: %s, port: %s', $alias, $wheel, $host, $port)); 
     
@@ -432,6 +451,8 @@ sub init {
     my $class = shift;
 
     my $self = $class->SUPER::init(@_);
+
+    $self->init_keepalive();     # init tcp keepalive definations
 
     unless (defined($self->filter)) {
 
@@ -506,6 +527,10 @@ An optional filter to use, defaults to POE::Filter::Line
 =item B<-eol>
 
 An optional EOL, defaults to "\015\012";
+
+=item B<-tcp_keeplive>
+
+Turns on TCP keepalive for each connection.
 
 =back
 

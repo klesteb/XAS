@@ -54,9 +54,9 @@ sub init_keepalive {
         -tcp_keepintvl => { optional => 1, default => 5 },   # interval seconds
     });
     
-    $self->{tcp_keepcnt}   = $p->{tcp_keepcnt};
-    $self->{tcp_keepidle}  = $p->{tcp_keepidle};
-    $self->{tcp_keepintvl} = $p->{tcp_keepintvl};
+    $self->{'tcp_keepcnt'}   = $p->{'tcp_keepcnt'};
+    $self->{'tcp_keepidle'}  = $p->{'tcp_keepidle'};
+    $self->{'tcp_keepintvl'} = $p->{'tcp_keepintvl'};
                                             
     # implement socket level keepalive, what a mess...
 
