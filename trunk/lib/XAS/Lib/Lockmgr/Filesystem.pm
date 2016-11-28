@@ -107,7 +107,7 @@ sub lock {
         my $attempts = shift;
 
         return if ($attempts > $self->attempts);
-        sleep $self->timeout;
+        sleep int(rand($self->timeout));
 
     } catch {
 

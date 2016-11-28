@@ -42,8 +42,19 @@ sub lock {
         while (($rc = Flom::handle_lock($handle)) != Flom::RC_OK) {
 
             $count += 1;
-            next if ($count < $self->attempts);
+            $timeout = int(rand($self->timeout)) * 1000; # convert to milliseconds
 
+            if (($rc = Flom::handle_set_resource_timeout($handle, $timeout)) != Flom::RC_OK) {
+
+                $self->throw_msg(
+                    dotid($self->class) . 'lock',
+                    'lock_error',
+                    $self->key, Flom::strerror($rc)
+                );
+
+            }
+
+            next if ($count < $self->attempts);
             die Flom::strerror($rc);
 
         }
@@ -208,18 +219,6 @@ sub init {
     $key = $self->key;
 
     if (($rc = Flom::handle_set_resource_name($handle, $key)) != Flom::RC_OK) {
-
-        $self->throw_msg(
-            dotid($self->class) . 'init',
-            'lock_error',
-            $self->key, Flom::strerror($rc)
-        );
-
-    }
-
-    $timeout = $self->timeout * 1000; # convert to milliseconds
-
-    if (($rc = Flom::handle_set_resource_timeout($handle, $timeout)) != Flom::RC_OK) {
 
         $self->throw_msg(
             dotid($self->class) . 'init',

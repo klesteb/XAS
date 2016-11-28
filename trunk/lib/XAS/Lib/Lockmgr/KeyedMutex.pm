@@ -37,7 +37,7 @@ sub lock {
 
             if ($count < $self->attempts) {
 
-                sleep $self->timeout;
+                sleep int(rand($self->timeout));
 
             } else {
 
