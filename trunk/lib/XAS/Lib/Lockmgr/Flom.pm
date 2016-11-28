@@ -27,6 +27,7 @@ sub lock {
     my $self = shift;
 
     my $rc;
+    my $timeout;
     my $count  = 0;
     my $stat   = FALSE;
     my $handle = $self->handle;
