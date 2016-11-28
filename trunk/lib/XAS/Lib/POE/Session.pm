@@ -88,7 +88,7 @@ sub session_exception {
     my $alias = $self->alias;
 
     $self->log->debug("$alias: session_exception() - session");
-    $self->error_handler($ex);
+    $self->error_handler($ex, $alias);
 
 }
 

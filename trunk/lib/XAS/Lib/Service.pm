@@ -52,18 +52,20 @@ sub register {
         (0) x (@_)
     ]);
 
-    foreach my $session (@$sessions) {
+    if (ref($sessions) eq 'ARRAYREF') {
 
-        if (my @parts = split(DELIMITER, $session)) {
+        foreach my $session (@$sessions) {
 
-            foreach my $part (@parts) {
+            next if ($session eq '');
+            push(@{$self->{'sessions'}}, $session);
 
-                next if ($part eq '');
-                push(@{$self->{'sessions'}}, $part);
+        }
 
-            }
+    } else {
 
-        } else {
+        my @parts = split(DELIMITER, $sessions);
+
+        foreach my $session (@parts) {
 
             next if ($session eq '');
             push(@{$self->{'sessions'}}, $session);
@@ -71,6 +73,15 @@ sub register {
         }
 
     }
+
+}
+
+sub unregister {
+    my $self = shift;
+    my $session = shift;
+
+    my @sessions = grep { $_ ne $session } @{$self->{'sessions'}};
+    $self->{'sessions'} = \@sessions;
 
 }
 
