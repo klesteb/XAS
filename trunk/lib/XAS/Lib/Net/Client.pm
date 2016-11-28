@@ -66,7 +66,7 @@ sub connect {
 
     if ($self->tcp_keepalive) {
 
-        $self->log->debug("$alias: keepalive activated");
+        $self->log->debug("keepalive activated");
 
         $self->enable_keepalive($self->handle);
 
