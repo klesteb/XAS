@@ -47,11 +47,7 @@ sub lock {
 
             if (($rc = Flom::handle_set_resource_timeout($handle, $timeout)) != Flom::RC_OK) {
 
-                $self->throw_msg(
-                    dotid($self->class) . 'lock',
-                    'lock_error',
-                    $self->key, Flom::strerror($rc)
-                );
+                die Flom::strerror($rc);
 
             }
 
@@ -189,7 +185,7 @@ sub init {
     my $timeout;
     my $self = $class->SUPER::init(@_);
 
-    $self->{'handle'} = $handle = Flom::flom_handle_t->new();
+    $handle = Flom::flom_handle_t->new();
 
     $self->{'timeout'} = defined($self->args->{'timeout'})
                             ? $self->args->{'timeout'}
@@ -263,6 +259,8 @@ sub init {
 
     }
 
+    $self->{'handle'} = $handle;
+    
     return $self;
 
 }
