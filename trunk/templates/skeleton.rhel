@@ -15,9 +15,9 @@
 USER="root"
 NAME="skeleton"
 LCKFILE="/var/lock/subsys/$NAME"
-PIDFILE="/var/run/xas/$NAME.pid"
-LOGFILE="/var/log/xas/$NAME.log"
-CFGFILE="/etc/xas/$NAME.ini"
+PIDFILE="--pid-file /var/run/xas/$NAME.pid"
+LOGFILE="--log-file /var/log/xas/$NAME.log"
+CFGFILE="--cfg-file /etc/xas/$NAME.ini"
 
 # Load the XAS environment
 
@@ -32,7 +32,7 @@ if [ -f /etc/sysconfig/$NAME ];then
 fi
 
 PROGRAM="/usr/sbin/$NAME"
-PARAMS="--pid-file $PIDFILE --log-file $LOGFILE --cfg-file $CFGFILE --daemon"
+PARAMS="$PIDFILE $LOGFILE $CFGFILE --daemon"
 
 # integrate the RHEL functions
 

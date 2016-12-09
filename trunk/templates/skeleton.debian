@@ -20,9 +20,9 @@
 DESC="Description of the service"
 NAME=skeleton
 PROGRAM=/usr/sbin/$NAME
-PIDFILE=/var/run/xas/$NAME.pid
-LOGFILE=/var/log/xas/$NAME.log
-CFGFILE=/etc/xas/$NAME.ini
+PIDFILE="--pid-file /var/run/xas/$NAME.pid"
+LOGFILE="--log-file /var/log/xas/$NAME.log"
+CFGFILE="--cfg-file /etc/xas/$NAME.ini"
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
@@ -48,7 +48,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 . /lib/lsb/init-functions
 
 PROGRAM=/usr/sbin/$NAME
-PARAMS="--pid-file $PIDFILE --log-file $LOGFILE --cfg-file $CFGFILE --daemon"
+PARAMS="$PIDFILE $LOGFILE $CFGFILE --daemon"
 
 #
 # Function that starts the daemon/service
