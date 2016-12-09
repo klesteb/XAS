@@ -48,7 +48,7 @@ use XAS::Class
 
 sub register {
     my $self = shift;
-    my $sessions = validate_params(\@_, [
+    my ($sessions) = validate_params(\@_, [
         (0) x (@_)
     ]);
 
