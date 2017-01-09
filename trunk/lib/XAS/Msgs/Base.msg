@@ -18,6 +18,7 @@ unexpected                   = unexpected error: %s
 nomessage                    = no message supplied
 config_badini                = unable to load config file: %s, reason: %s
 curl                         = curl error: %s, reason: %s
+curl_transfer                = fetched "%s" in %s seconds, at a speed of %s bytes per second
 db_duplicates                = %s: duplicate key found for: %s
 db_nocolumn                  = %s: no such column for: %s
 db_badsyntax                 = %s: invalid input syntax for: %s
