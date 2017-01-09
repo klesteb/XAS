@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 # ============================================================================
-#             Copyright (c) 2016 Kevin L. Esteb All Rights Reserved
-#
 #
 # TITLE:
 #
@@ -147,7 +145,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2012-2016 Kevin L. Esteb
+Copyright (c) 2012-2017 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text

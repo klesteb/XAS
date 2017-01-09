@@ -43,6 +43,7 @@ lib/XAS/Lib/Batch/Interface/Torque.pm
 lib/XAS/Lib/Batch/Job.pm
 lib/XAS/Lib/Batch/Queue.pm
 lib/XAS/Lib/Batch/Server.pm
+lib/XAS/Lib/Curl/FTP.pm
 lib/XAS/Lib/Curl/HTTP.pm
 lib/XAS/Lib/Iterator.pm
 lib/XAS/Lib/Lockmgr.pm
