@@ -69,4 +69,5 @@ Revision history for XAS
 0.15    02-Nov-2016 Kevin L. Esteb
         Working with locking.
         Added tests for locking.
+        Added a FTP transfer module
 
