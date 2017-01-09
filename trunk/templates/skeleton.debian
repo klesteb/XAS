@@ -32,6 +32,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 # Load the XAS environment
 
 [ -r /etc/profile.d/xas.sh ] && . /etc/profile.d/xas.sh
+[ -r /usr/bin/xas-init ] && /usr/bin/xas-init
 
 # Read configuration variable file if it is present
 

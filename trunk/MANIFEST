@@ -1,4 +1,5 @@
 bin/xas-alert
+bin/xas-init
 bin/xas-rotate
 Build.PL
 Changes

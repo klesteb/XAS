@@ -21,9 +21,8 @@ CFGFILE="--cfg-file /etc/xas/$NAME.ini"
 
 # Load the XAS environment
 
-if [ -f /etc/profile.d/xas.sh ]; then
-    . /etc/profile.d/xas.sh
-fi
+[ -r /etc/profile.d/xas.sh ] && . /etc/profile.d/xas.sh
+[ -r /usr/bin/xas-init ] && /usr/bin/xas-init
 
 # integrate the overrides
 

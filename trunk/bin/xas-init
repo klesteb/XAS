@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+#
+# File: xas-init
+# Date: 18-Feb-2016
+# By  : Kevin Esteb
+#
+# This script will create /var/run/xas. This is needed with systemd.
+#
+
+use strict;
+use warnings;
+
+my @dirs = ('/var/run/xas', '/var/lock/xas');
+my ($login,$pass,$uid,$gid) = getpwnam('xas');
+
+foreach my $dir (@dirs) {
+    
+    unless ( -e $dir ) {
+
+        mkdir $dir;
+        chown $uid, $gid, $dir;
+        chmod 0775, $dir;
+        system("chmod g+s $dir");
+
+    }
+
+}
+
+exit 0;
