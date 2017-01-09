@@ -122,6 +122,8 @@ This will display the utilities man page.
 
 =item L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>
 
+=item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::FTP>
+
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
 =item L<XAS::Lib::Iterator|XAS::Lib::Iterator>
@@ -129,6 +131,12 @@ This will display the utilities man page.
 =item L<XAS::Lib::Lockmgr|XAS::Lib::Lockmgr>
 
 =item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Filesystem>
+
+=item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Flom>
+
+=item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Keyedmutex>
+
+=item L<XAS::Lib::Lockmgr::Nolock|XAS::Lib::Lockmgr::Nolock>
 
 =item L<XAS::Lib::Log|XAS::Lib::Log>
 
@@ -173,6 +181,10 @@ This will display the utilities man page.
 =item L<XAS::Lib::Pidfile::Win32|XAS::Lib::Pidfile::Win32>
 
 =item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
+
+=item L<XAS::Lib::Pipe|XAS::Lib::Pipe>
+
+=item L<XAS::Lib::Pipe::Unix|XAS::Lib::Pipe::Unix>
 
 =item L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>
 
