@@ -104,7 +104,7 @@ volumes and go away on system reboots.
 
 =item L<XAS::Utils|XAS::Utils>
 
-=item L<XAS::Apps::Aler|XAS::Apps::Aler>
+=item L<XAS::Apps::Alert|XAS::Apps::Alert>
 
 =item L<XAS::Apps::Rotate|XAS::Apps::Rotate>
 
@@ -128,7 +128,7 @@ volumes and go away on system reboots.
 
 =item L<XAS::Lib::Batch::Interface::Torque|XAS::Lib::Batch::Interface::Torque>
 
-=item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::FTP>
+=item L<XAS::Lib::Curl::FTP|XAS::Lib::Curl::FTP>
 
 =item L<XAS::Lib::Curl::HTTP|XAS::Lib::Curl::HTTP>
 
@@ -138,9 +138,9 @@ volumes and go away on system reboots.
 
 =item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Filesystem>
 
-=item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Flom>
+=item L<XAS::Lib::Lockmgr::Flom|XAS::Lib::Lockmgr::Flom>
 
-=item L<XAS::Lib::Lockmgr::Filesystem|XAS::Lib::Lockmgr::Keyedmutex>
+=item L<XAS::Lib::Lockmgr::Keyedmutex|XAS::Lib::Lockmgr::Keyedmutex>
 
 =item L<XAS::Lib::Lockmgr::Nolock|XAS::Lib::Lockmgr::Nolock>
 
@@ -161,6 +161,8 @@ volumes and go away on system reboots.
 =item L<XAS::Lib::Mixins::Handlers|XAS::Lib::Mixins::Handlers>
 
 =item L<XAS::Lib::Mixins::Keepalive|XAS::Lib::Mixins::Keepalive>
+
+=item L<XAS::Lib::Mixins::Process|XAS::Lib::Mixins::Process>
 
 =item L<XAS::Lib::Mixins::Process::Unix|XAS::Lib::Mixins::Process::Unix>
 
@@ -186,11 +188,11 @@ volumes and go away on system reboots.
 
 =item L<XAS::Lib::Pidfile::Win32|XAS::Lib::Pidfile::Win32>
 
-=item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
-
 =item L<XAS::Lib::Pipe|XAS::Lib::Pipe>
 
 =item L<XAS::Lib::Pipe::Unix|XAS::Lib::Pipe::Unix>
+
+=item L<XAS::Lib::POE::PubSub|XAS::Lib::POE::PubSub>
 
 =item L<XAS::Lib::POE::Session|XAS::Lib::POE::Session>
 

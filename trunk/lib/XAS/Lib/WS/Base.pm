@@ -310,7 +310,7 @@ XAS::Lib::WS::Base - A class for the XAS environment
  my $wsman = XAS::Lib::WS::Base->new(
      -username    => 'username',
      -password    => 'password',
-     -url         => 'http://windowserver5985/wsman',
+     -url         => 'http://windowserver:5985/wsman',
      -auth_method => 'any',
  );
 
@@ -345,7 +345,7 @@ values.
 
 =item B<Example:>
 
-my ($protocol, $vendor, $version) = $wsman->indentify;
+ my ($protocol, $vendor, $version) = $wsman->indentify;
 
 =back
 

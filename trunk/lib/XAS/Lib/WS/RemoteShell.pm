@@ -766,7 +766,7 @@ XAS::Lib::WS::RemoteShell - A class for the XAS environment
 
 This package implements a client for the RemoteShell feature of WS-Manage. 
 Getting the RemoteShell feature working under Windows is not easy. The 
-reasons for these problems may be hidden in a Knowledge Base articule on 
+reasons for these problems may be hidden in a Knowledge Base article on 
 MSDN. These problems are mostly related to authentication and quirks of the
 winrm server.
 
@@ -789,7 +789,7 @@ From a powershell console.
  ps> dir
  ps> cd ..
 
-Other versions of Windows are done similarily. This will allow connections 
+Other versions of Windows are done similarly. This will allow connections 
 from a none Windows box. These connections will be in clear text. 
 B<This should not be used on the public internet>.
 

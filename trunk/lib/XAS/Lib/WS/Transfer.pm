@@ -16,13 +16,10 @@ use XAS::Class
 
 sub get {
     my $self = shift;
-    my $p = validate_params(\@_, {
-        -local  => { type => SCALAR },
-        -remote => { type => SCALAR },
-    });
-
-    my $local  = $p->{'local'};
-    my $remote = $p->{'remote'};
+    my ($remote, $local) = validate_params(\@_, [
+        { type => SCALAR },
+        { type => SCALAR },
+    ]);
 
     # this assumes that the remote WS-Manage server is Microsoft based
     # otherwise you would use something sensible like scp
@@ -56,13 +53,10 @@ sub get {
 
 sub put {
     my $self = shift;
-    my $p = validate_params(\@_, {
-        -local  => { type => SCALAR },
-        -remote => { type => SCALAR },
-    });
-
-    my $local  = $p->{'local'};
-    my $remote = $p->{'remote'};
+    my ($local, $remote) = validate_params(\@_, [
+        { type => SCALAR },
+        { type => SCALAR },
+    ]);
 
     # this assumes that the remote WS-Manage server is Microsoft based
     # otherwise you would use something sensible like scp
@@ -378,7 +372,7 @@ XAS::Lib::WS::Transfer - A class to transfer files with WS-Manage
 
          }
 
-         $trans->put(-local => 'junk.txt', -remote => 'test.txt');
+         $trans->put('junk.txt', 'test.txt');
 
          my $output = $trans->dir('.');
          printf("%s\n", $output);
@@ -409,43 +403,43 @@ be freed on the remote server. You have been warned.
 This module inherits from L<XAS::Lib::WS::RemoteShell|XAS::Lib::WS::RemoteShell> and
 takes the same parameters.
 
-=head2 get(...)
+=head2 get($remote, $local)
 
 Retrieve a file from the remote server. This is very memory intensive 
 operation as the file is converted to base64 and dumped to stdout on the 
 remote end. This blob is then buffered on the local side and converted back
 to a binary blob before being written out to disk. This method can be used 
-to transfer binary files. It takes these parameters:
+to transfer binary files. 
 
 =over 4
 
-=item B<-local>
+=item B<$local>
 
 The name of the local file. Paths are not checked and any existing file
 will be over written.
 
-=item B<-remote>
+=item B<$remote>
 
 The name of the remote file. 
 
 =back
 
-=head2 put(...)
+=head2 put($local, $remote)
 
 This method will put a file on the remote server. This is an extremely slow 
 operation. The local file is block read and the buffer is converted to
 base64. This buffer is then stored within a script that will be executed to 
 convert the blob back into a binary stream. This stream is then appended to 
-the remote file. Not recommeded for large files. This method can be used to 
-transfer binary files. It takes these parameters:
+the remote file. Not recommended for large files. This method can be used to 
+transfer binary files. 
 
 =over 4
 
-=item B<-local>
+=item B<$local>
 
 The name of the local file.
 
-=item B<-remote>
+=item B<$remote>
 
 The name of the remote file. Paths are not checked and any existing file 
 will be appended too.
