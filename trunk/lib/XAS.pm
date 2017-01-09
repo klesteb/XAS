@@ -82,6 +82,12 @@ This will display the utilities man page.
 
 =back
 
+=head2 xas-init
+
+A simple utility that will create directories and set permissions in /var/run.
+This is needed on systemd systems where those directories are mounted as tmpfs 
+volumes and go away on system reboots.
+
 =head1 SEE ALSO
 
 =over 4
