@@ -17,6 +17,7 @@ etc/xas-rotate.ini
 ignore.txt
 lib/XAS.pm
 lib/XAS/Apps/Alert.pm
+lib/XAS/Apps/Init.pm
 lib/XAS/Apps/Rotate.pm
 lib/XAS/Apps/Test/Echo/Client.pm
 lib/XAS/Apps/Test/Echo/Server.pm
