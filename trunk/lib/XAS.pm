@@ -154,7 +154,7 @@ This will display the utilities man page.
 
 =item L<XAS::Lib::Lockmgr::Flom|XAS::Lib::Lockmgr::Flom>
 
-=item L<XAS::Lib::Lockmgr::Keyedmutex|XAS::Lib::Lockmgr::Keyedmutex>
+=item L<XAS::Lib::Lockmgr::KeyedMutex|XAS::Lib::Lockmgr::KeyedMutex>
 
 =item L<XAS::Lib::Lockmgr::Nolock|XAS::Lib::Lockmgr::Nolock>
 
