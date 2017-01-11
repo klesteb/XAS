@@ -84,9 +84,21 @@ This will display the utilities man page.
 
 =head2 xas-init
 
-A simple utility that will create directories and set permissions in /var/run.
-This is needed on systemd systems where those directories are mounted as tmpfs 
-volumes and go away on system reboots.
+A simple utility that will create directories and set permissions for 
+/var/run/xas and /var/lock/xas. This is needed on systemd systems where 
+those directories are mounted as tmpfs volumes and go away on system reboots.
+
+=over 4
+
+=item B<xas-init --help>
+
+This will display a brief help screen on command options.
+
+=item B<xas-init --manual>
+
+This will display the utilities man page.
+
+=back
 
 =head1 SEE ALSO
 
@@ -105,6 +117,8 @@ volumes and go away on system reboots.
 =item L<XAS::Utils|XAS::Utils>
 
 =item L<XAS::Apps::Alert|XAS::Apps::Alert>
+
+=item L<XAS::Apps::Init|XAS::Apps::Init>
 
 =item L<XAS::Apps::Rotate|XAS::Apps::Rotate>
 
