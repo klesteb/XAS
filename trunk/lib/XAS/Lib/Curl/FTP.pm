@@ -148,7 +148,6 @@ sub get {
     ]);
 
     my $stat = FALSE;
-    my $url  = $url->text;
     my $fd   = $file->open('w');
 
     my $write_callback = sub {
@@ -159,8 +158,8 @@ sub get {
 
     };
 
-    $self->curl->setopt(CURLOPT_URL, $url);
     $self->curl->setopt(CURLOPT_WRITEDATA, $fd);
+    $self->curl->setopt(CURLOPT_URL, $url->text);
     $self->curl->setopt(CURLOPT_WRITEFUNCTION, $write_callback);
 
     if (($self->{'retcode'} = $self->curl->perform) == 0) {
@@ -196,7 +195,6 @@ sub put {
     ]);
 
     my $stat = FALSE;
-    my $url  = $url->text;
     my $fd   = $file->open('r');
     my $size = ($file->stat)[7];
 
@@ -211,9 +209,9 @@ sub put {
 
     };
 
-    $self->curl->setopt(CURLOPT_URL, $url);
     $self->curl->setopt(CURLOPT_UPLOAD, 1);
     $self->curl->setopt(CURLOPT_READDATA, $fd);
+    $self->curl->setopt(CURLOPT_URL, $url->text);
     $self->curl->setopt(CURLOPT_INFILESIZE_LARGE, $size);
     $self->curl->setopt(CURLOPT_READFUNCTION, $read_callback);
 

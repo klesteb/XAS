@@ -36,25 +36,24 @@ ok( $locker->key eq $key );
 
 ok( $locker->lock );
 
-ok( ($host, $pid, $time) = $locker->whose_lock );
+ok( ($host, $pid, $time) = $locker->_whose_lock );
 ok( $host eq $locker->env->host );
 ok( $pid == $$ );
 ok( $time->isa('DateTime') );
-ok( ! $locker->try_lock );
-
+ok( $locker->try_lock );
 ok( $locker->unlock );
 
 # orphaned lock directory
 
 mkdir $key;
 
-ok( ($host, $pid, $time) = $locker->whose_lock );
+ok( ($host, $pid, $time) = $locker->_whose_lock );
 ok( ! defined($host) );
 ok( ! defined($pid) );
 ok( ! defined($time) );
 
-ok( ! $locker->try_lock );
-ok( $locker->break_lock );
+ok( $locker->try_lock );
+ok( $locker->lock );
 ok( $locker->unlock );
 
 ok( ! -d $key);
@@ -64,7 +63,7 @@ ok( ! -d $key);
 ok( $locker->lock );
 ok( $lockfile = $locker->_lockfile );
 ok( $lockfile->exists );
-ok( $locker->break_lock );
+ok( $locker->unlock );
 ok( ! $lockfile->exists );
 ok( $locker->unlock );
 
@@ -75,11 +74,11 @@ my $remotelock = File($key, 'remote.1234');
 $remotelock->create;
 
 ok( $remotelock->exists );
-ok( ($host, $pid, $time) = $locker->whose_lock );
+ok( ($host, $pid, $time) = $locker->_whose_lock );
 ok( $host eq 'remote' );
 ok( $pid == 1234 );
 ok( $time->isa('DateTime') );
-ok( $locker->break_lock );
+ok( $locker->unlock($remotelock) );
 ok( ! $remotelock->exists );
 ok( ! $key->exists );
 

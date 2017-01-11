@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 58;
+use Test::More tests => 62;
 
 BEGIN {
     use_ok( 'XAS::Base' )                        || print "Bail out!\n";
@@ -14,12 +14,16 @@ BEGIN {
     use_ok( 'XAS::Apps::Test::Echo::Client' )    || print "Bail out!\n";
     use_ok( 'XAS::Apps::Test::Echo::Server' )    || print "Bail out!\n";
     use_ok( 'XAS::Apps::Test::Logger' )          || print "Bail out!\n";
+    use_ok( 'XAS::Apps::Alert' )                 || print "Bail out!\n";
+    use_ok( 'XAS::Apps::Init' )                  || print "Bail out!\n";
     use_ok( 'XAS::Apps::Rotate' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Daemon' )            || print "Bail out!\n";
     use_ok( 'XAS::Lib::App::Service' )           || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Curl::FTP' )              || print "Bail out!\n";
     use_ok( 'XAS::Lib::Curl::HTTP' )             || print "Bail out!\n";
     use_ok( 'XAS::Lib::Lockmgr' )                || print "Bail out!\n";
     use_ok( 'XAS::Lib::Lockmgr::Filesystem' )    || print "Bail out!\n";
+    use_ok( 'XAS::Lib::Lockmgr::Nolock' )        || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log' )                    || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log::Console' )           || print "Bail out!\n";
     use_ok( 'XAS::Lib::Log::File' )              || print "Bail out!\n";

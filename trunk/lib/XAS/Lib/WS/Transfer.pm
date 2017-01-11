@@ -3,11 +3,11 @@ package XAS::Lib::WS::Transfer;
 our $VERSION = '0.01';
 
 use XAS::Class
-  version  => $VERSION,
-  base     => 'XAS::Lib::WS::RemoteShell',
-  codecs   => 'base64 unicode',
-  utils    => ':validation dotid',
-  constant => 'SCALAR',
+  version   => $VERSION,
+  base      => 'XAS::Lib::WS::RemoteShell',
+  codecs    => 'base64 unicode',
+  utils     => ':validation dotid',
+  constants => 'SCALAR',
 ;
 
 # ----------------------------------------------------------------------

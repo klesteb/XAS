@@ -2,28 +2,30 @@ use strict;
 use lib '../lib';
 
 use Test::More;
-use Badger::Filesystem 'Dir';
+use Badger::Filesystem 'Dir cwd';
 use Data::Dumper;
+
+my $spooldir = Dir(cwd, 'spool');
 
 unless ( $ENV{RELEASE_TESTING} ) {
 
-    plan( skip_all => "Author tests not required for installation" );
+    plan skip_all => "Author tests not required for installation" ;
 
 } else {
 
-    plan(tests => 21);
+    plan tests => 21 ;
     use_ok("XAS::Lib::Modules::Spool");
 
-    unless ( -e 'spool') {
-        mkdir('spool');
+    unless ( -e $spooldir->path) {
+        mkdir($spooldir->path);
     }
 
 }
 
 my $data = 'this is data';
 my $spl = XAS::Lib::Modules::Spool->new(
-    -directory => Dir('spool'),
-    -lock      => 'spool',
+    -directory => $spooldir,
+    -lock      => Dir($spooldir, 'spool')->path,
 );
 isa_ok($spl, "XAS::Lib::Modules::Spool");
 

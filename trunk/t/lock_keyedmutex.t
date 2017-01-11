@@ -8,21 +8,20 @@ use Test::More;
 
 unless ( $ENV{RELEASE_TESTING} ) {
 
-    plan skip_all => 'Author tests not required for installation';
+    plan( skip_all => "Author tests not required for installation" );
 
 } else {
 
     try {
 
         no warnings;
-        require Flom;
-
-        plan tests => 6;
+        require KeyedMutex;
+        plan tests => 7;
 
     } catch {
 
         my $ex = $_;
-        plan skip_all => 'FLoM (the Free Lock Manager) needs to be installed';
+        plan skip_all => "KeyedMutex needs to be installed";
 
     };
 
@@ -30,8 +29,8 @@ unless ( $ENV{RELEASE_TESTING} ) {
 
 # start flom in the background.
 
-system('pkill flom');
-system('flom -a 127.0.0.1 -d -1 -- true');
+system('pkill keyedmutexd');
+system('keyedmutexd -f -s 9507 -m 2048');
 
 # start testing
 
@@ -39,9 +38,10 @@ use XAS::Lib::Lockmgr::Flom;
 use Badger::Filesystem 'cwd Dir';
 
 my $key = Dir(cwd, 'locked')->path;
-my $locker = XAS::Lib::Lockmgr::Flom->new(
+my $locker = XAS::Lib::Lockmgr::KeyedMutex->new(
     -key => $key,
     -args => {
+        port    => 9507,
         address => '127.0.0.1',
     }
 );
@@ -49,12 +49,12 @@ my $locker = XAS::Lib::Lockmgr::Flom->new(
 # basic tests
 
 ok( defined $locker );                                 # check that we got something
-ok( $locker->isa('XAS::Lib::Lockmgr::Flom') );         # and it's the right class
+ok( $locker->isa('XAS::Lib::Lockmgr::KeyedMutex') );   # and it's the right class
 ok( $locker->key eq $key );
 
 ok( $locker->try_lock );
 ok( $locker->lock );
 ok( $locker->unlock );
 
-system('pkill flom');
+system('pkill keyedmutexd');
 
