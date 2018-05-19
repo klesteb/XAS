@@ -60,6 +60,24 @@ sub session_initialize {
 
 }
 
+sub session_shutdown {
+    my $self = shift;
+    
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: entering session_shutdown()");
+
+    delete $self->{'pipe'};
+    $self->fifo->delete();
+    
+    # walk the chain
+
+    $self->SUPER::session_shutdown();
+
+    $self->log->debug("$alias: leaving session_shutdown()");
+
+}
+
 sub process_input {
     my $self = shift;
     my ($input) = validate_params(\@_, [1]);
@@ -139,7 +157,7 @@ sub _pipe_ready {
 
     my $alias = $self->alias;
 
-    $self->log->debug("$alias: pipe_ready()");
+    $self->log->debug("$alias: _pipe_ready()");
 
     $self->pipe_ready();
     
