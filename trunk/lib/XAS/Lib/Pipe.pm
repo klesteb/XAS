@@ -46,6 +46,7 @@ sub session_initialize {
 
     $poe_kernel->state('pipe_error',    $self, '_pipe_error');
     $poe_kernel->state('pipe_input',    $self, '_pipe_input');
+    $poe_kernel->state('pipe_ready',    $self, '_pipe_ready');
     $poe_kernel->state('pipe_output',   $self, '_pipe_output');
     $poe_kernel->state('pipe_connect',  $self, '_pipe_connect');
     $poe_kernel->state('process_error', $self, '_process_error');
@@ -94,6 +95,15 @@ sub process_output {
 
 }
 
+sub pipe_ready {
+    my $self = shift;
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: pipe_ready()");
+
+}
+
 # ----------------------------------------------------------------------
 # Public Events
 # ----------------------------------------------------------------------
@@ -122,6 +132,17 @@ sub _process_error {
 
     $self->process_error($syscall, $errnum, $errstr);
 
+}
+
+sub _pipe_ready {
+    my ($self) = @_[OBJECT];
+
+    my $alias = $self->alias;
+
+    $self->log->debug("$alias: pipe_ready()");
+
+    $self->pipe_ready();
+    
 }
 
 # ----------------------------------------------------------------------
