@@ -44,6 +44,8 @@ sub _pipe_connect {
         ErrorEvent => 'pipe_error'
     );
 
+    $self->event->publish(-event => 'pipe_ready');
+    
 }
 
 sub _pipe_input {

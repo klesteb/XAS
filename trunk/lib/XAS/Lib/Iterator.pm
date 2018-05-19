@@ -1,13 +1,15 @@
 package XAS::Lib::Iterator;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
+use Try::Tiny;
+use XAS::Exception;
 use XAS::Class
   debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   utils     => 'blessed dotid',
-  constants => 'ARRAY HASH DELIMITER CODE',
+  constants => 'ARRAY HASH DELIMITER CODE SCALAR',
   constant => {
     SELF  => 0,
     DATA  => 0,
@@ -16,7 +18,7 @@ use XAS::Class
   },
 ;
 
-#use Data::Dumper;
+use Data::Dumper;
 
 # ----------------------------------------------------------------------
 # Public Methods
@@ -26,25 +28,81 @@ sub new {
     my $class = shift;
     my $data  = shift || [];
 
+    my $datum;
     my $ref = ref($data);
 
     if ($ref eq HASH) {
 
-        $data = [
+        # convert a hash to an array of hashes
+
+        $datum = [
             map {{ key => $_, value => $data->{$_} }} sort keys %$data
         ];
 
+    } elsif ($ref eq ARRAY) {
+
+        # copy the array 
+
+        if (ref($data->[0]) eq ARRAY) {
+
+            # for when the wanted array is nested within
+
+            $datum = $data->[0];
+
+        } else {
+
+            $datum = $data;
+
+        }
+
     } elsif (blessed($data) && $data->can('as_list')) {
 
-        $data = $data->as_list();
+        # try to extract a list from the object
 
-    } elsif ($ref ne ARRAY) {
+        try {
 
-        $data = [sort(split(DELIMITER, $data))];
+            $datum = $data->as_list();
+
+        } catch {
+
+            my $ex = $_;
+            my $e = XAS::Exception->new(
+                type => dotid($class) . '.badobject',
+                info => "this object doesn't have an as_list method"
+            );
+
+            $e->throw;
+
+        };
+
+    } else {
+
+        # try to create an array from a delimited string
+
+        try {
+
+            $datum = [sort(split(DELIMITER, $data))];
+
+        } catch {
+
+            my $ex = $_;
+            my $e = XAS::Exception->new(
+                type => dotid($class) . '.baddata',
+                info => 'the supplied data is not valid'
+            );
+
+            $e->throw;
+
+        };
 
     }
 
-    return bless [$data, scalar @$data, -1], $class;
+    # this object will be a blessed array, supposedly faster then
+    # hash based objects. Nigel wants an 11!
+
+    my $self = bless [$datum, scalar @$datum, -1], $class;
+
+    return $self;
 
 }
 
@@ -77,10 +135,12 @@ sub count {
 
 sub first {
     $_[SELF]->[INDEX] = 0;
+    $_[SELF]->[DATA]->[ $_[SELF]->[INDEX] ]
 }
 
 sub last {
     $_[SELF]->[INDEX] = $_[SELF]->[SIZE] - 1;
+    $_[SELF]->[DATA]->[ $_[SELF]->[INDEX] ]
 }
 
 sub prev {
