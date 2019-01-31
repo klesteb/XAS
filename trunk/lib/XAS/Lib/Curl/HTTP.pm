@@ -1,54 +1,64 @@
 package XAS::Lib::Curl::HTTP;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 BEGIN {
-    no warnings;
+    no warnings 'redefine';
 
-    # this constant is not defined in WWW::Curl on RHEL 5,6,7.
-    # but is, if you compile libcurl on Windows
+    use WWW::Curl::Easy;
 
-    unless (CURLAUTH_ONLY) {
+    eval {
 
-        sub CURLAUTH_ONLY { (1 << 31); } # defined in curl.h
+        # these constants are not always defined for libcurl on RHEL 5,6,7.
+        # but they are, if you compile libcurl on Windows
 
-    }
+        unless (CURLAUTH_ONLY) {
+
+            sub CURLAUTH_ONLY { (1 << 31); } # defined in curl.h
+
+        }
+
+    };
 
 }
 
+use Data::Dumper;
 use HTTP::Response;
-use WWW::Curl::Easy;
 
 use XAS::Class
-  debug     => 0,
   version   => $VERSION,
   base      => 'XAS::Base',
   accessors => 'curl',
+  import    => 'class',
   mutators  => 'retcode',
-  utils     => ':validation dotid',
+  utils     => ':validation dotid trim',
   vars => {
     PARAMS => {
-      -fail_on_error    => { optional => 1, default => 0 },
-      -keep_alive       => { optional => 1, default => 1 },
-      -follow_location  => { optional => 1, default => 1 },
-      -ssl_verify_peer  => { optional => 1, default => 1 },
-      -ssl_verify_host  => { optional => 1, default => 1 },
-      -max_redirects    => { optional => 1, default => 3 },
-      -timeout          => { optional => 1, default => 60 },
-      -connect_timeout  => { optional => 1, default => 300 },
-      -ssl_cacert       => { optional => 1, default => undef },
-      -ssl_keypasswd    => { optional => 1, default => undef },
-      -proxy_url        => { optional => 1, default => undef },
-      -ssl_cert         => { optional => 1, default => undef, depends => [ 'ssl_key' ] },
-      -ssl_key          => { optional => 1, default => undef, depends => [ 'ssl_cert' ] },
-      -password         => { optional => 1, default => undef, depends => [ 'username' ] },
-      -username         => { optional => 1, default => undef, depends => [ 'password' ] },
-      -proxy_password   => { optional => 1, default => undef, depends => [ 'proxy_username' ] },
-      -proxy_username   => { optional => 1, default => undef, depends => [ 'proxy_password' ] },
-      -auth_method      => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
-      -proxy_auth       => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
+      -headers         => { optional => 1, default => 0 },
+      -keep_alive      => { optional => 1, default => 0 },
+      -fail_on_error   => { optional => 1, default => 0 },
+      -followlocation  => { optional => 1, default => 1 },
+      -ssl_verify_peer => { optional => 1, default => 1 },
+      -ssl_verify_host => { optional => 1, default => 1 },
+      -max_redirects   => { optional => 1, default => 3 },
+      -timeout         => { optional => 1, default => 30 },
+      -connect_timeout => { optional => 1, default => 300 },
+      -ssl_cacert      => { optional => 1, default => undef },
+      -ssl_keypasswd   => { optional => 1, default => undef },
+      -proxy_url       => { optional => 1, default => undef },
+      -ssl_cert        => { optional => 1, default => undef, depends => [ '-ssl_key' ] },
+      -ssl_key         => { optional => 1, default => undef, depends => [ '-ssl_cert' ] },
+      -password        => { optional => 1, default => undef, depends => [ '-username' ] },
+      -username        => { optional => 1, default => undef, depends => [ '-password' ] },
+      -proxy_password  => { optional => 1, default => undef, depends => [ '-proxy_username' ] },
+      -proxy_username  => { optional => 1, default => undef, depends => [ '-proxy_password' ] },
+      -auth_method     => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
+      -proxy_auth      => { optional => 1, default => 'noauth', regex => qr/any|noauth|basic|digest|ntlm|negotiate/ },
     }
   },
+  messages => {
+    curl => 'curl error: %s, reason: %s',
+  }
 ;
 
 # ----------------------------------------------------------------------
@@ -67,15 +77,18 @@ sub request {
     my $header   = $request->headers->as_string("\n");
     my @headers  = split("\n", $header);
 
+    push(@headers, "Connection: close") unless $self->keep_alive;
+
     $self->curl->setopt(CURLOPT_URL,        $request->uri);
     $self->curl->setopt(CURLOPT_HTTPHEADER, \@headers) if (scalar(@headers));
 
     # I/O for the request
 
-    $self->curl->setopt(CURLOPT_WRITEDATA,     \@buffer);
-    $self->curl->setopt(CURLOPT_HEADERDATA,    \@head);
-    $self->curl->setopt(CURLOPT_READFUNCTION,  \&_read_callback);
-    $self->curl->setopt(CURLOPT_WRITEFUNCTION, \&_write_callback);
+    $self->curl->setopt(CURLOPT_WRITEDATA,      \@buffer);
+    $self->curl->setopt(CURLOPT_HEADERDATA,     \@buffer);
+    $self->curl->setopt(CURLOPT_READFUNCTION,   \&_read_callback);
+    $self->curl->setopt(CURLOPT_WRITEFUNCTION,  \&_write_callback);
+    $self->curl->setopt(CURLOPT_HEADERFUNCTION, \&_write_callback);
 
     # other options depending on request type
 
@@ -89,9 +102,9 @@ sub request {
 
         my $content = $request->content;
 
-        $self->curl->setopt(CURLOPT_POST,           1);
-        $self->curl->setopt(CURLOPT_POSTFIELDSIZE,  length($content));
-        $self->curl->setopt(CURLOPT_COPYPOSTFIELDS, $content);
+        $self->curl->setopt(CURLOPT_POST,          1);
+        $self->curl->setopt(CURLOPT_POSTFIELDSIZE, length($content));
+        $self->curl->setopt(CURLOPT_POSTFIELDS,    $content);
 
     } elsif ($request->method eq 'PUT') {
 
@@ -115,13 +128,15 @@ sub request {
 
     # perform the request and create the response
 
-    if (($self->{'retcode'} = $self->curl->perform) == 0) {
+   if (($self->{'retcode'} = $self->curl->perform) == 0) {
 
         my @temp;
         my $message;
         my $content;
 
-        # there may be multiple responses within head, we only
+        print Dumper(@buffer) if ($self->xdebug);
+
+        # there may be multiple responses within the buffer, we only
         # want the last one. so search backwards until a HTTP header
         # is found.
 
@@ -133,15 +148,7 @@ sub request {
         }
 
         $content = join('', reverse(@temp));
-
-        # now let HTTP::Response figure it all out...
-
         $response = HTTP::Response->parse($content);
-
-        # do some fixups
-
-        $message = $response->message;
-        $response->message($message) if ($message =~ s/\r//g);
         $response->request($request);
 
     } else {
@@ -185,18 +192,16 @@ sub _write_callback {
 
 }
 
-sub _authentication {
+sub _define_authentication {
     my $self = shift;
 
     my $authen = 0;
-
-    # setup authentication
 
     $authen = CURLAUTH_ANY                          if ($self->auth_method eq 'any');
     $authen = CURLAUTH_NTLM         | CURLAUTH_ONLY if ($self->auth_method eq 'ntlm');
     $authen = CURLAUTH_BASIC        | CURLAUTH_ONLY if ($self->auth_method eq 'basic');
     $authen = CURLAUTH_DIGEST       | CURLAUTH_ONLY if ($self->auth_method eq 'digest');
-    $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotitate');
+    $authen = CURLAUTH_GSSNEGOTIATE | CURLAUTH_ONLY if ($self->auth_method eq 'negotiate');
 
     return $authen;
 
@@ -216,20 +221,21 @@ sub init {
 
     # basic options
 
-    $self->curl->setopt(CURLOPT_HEADER,            0);
+    $self->curl->setopt(CURLOPT_HEADER,            $self->headers);
     $self->curl->setopt(CURLOPT_VERBOSE,           $self->xdebug);
     $self->curl->setopt(CURLOPT_MAXREDIRS,         $self->max_redirects);
     $self->curl->setopt(CURLOPT_PROTOCOLS,         $protocols);
     $self->curl->setopt(CURLOPT_NOPROGRESS,        1);
     $self->curl->setopt(CURLOPT_TIMEOUT_MS,        $timeout);
     $self->curl->setopt(CURLOPT_FAILONERROR,       $self->fail_on_error);
-    $self->curl->setopt(CURLOPT_FORBID_REUSE,      $self->keep_alive);
-    $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->follow_location);
+    $self->curl->setopt(CURLOPT_FORBID_REUSE,      !$self->keep_alive);
+    $self->curl->setopt(CURLOPT_FOLLOWLOCATION,    $self->followlocation);
     $self->curl->setopt(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout);
 
     # setup authentication
 
-    $authen = $self->_authentication();
+    $authen = $self->_define_authentication();
+
     $self->curl->setopt(CURLOPT_HTTPAUTH, $authen);
 
     if ($self->username) {
@@ -243,7 +249,9 @@ sub init {
 
     if ($self->proxy_url) {
 
-        $authen = $self->_authentication();
+        # setup proxy authentication
+
+        $authen = $self->_define_authentication();
 
         $self->curl->setopt(CURLOPT_PROXY,         $self->proxy_url);
         $self->curl->setopt(CURLOPT_PROXYAUTH,     $authen);
@@ -290,135 +298,15 @@ XAS::Lib::Curl::HTTP - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use HTTP::Request;
- use XAS::Lib::Curl::HTTP;
-
- my $response;
- my $request = HTTP::Request->new(GET => 'http://scm.kesteb.us/trac');
- my $ua = XAS::Lib::Curl::HTTP->new();
-
- $response = $ua->request($request);
- print $response->content;
+ use XAS::XXX;
 
 =head1 DESCRIPTION
 
-This module uses L<libcurl|http://curl.haxx.se/libcurl/> as the HTTP engine 
-to make requests from a web server. 
-
 =head1 METHODS
 
-All true/false values use 0/1 as the indicator.
-
-=head2 new
-
-This method initializes the module and takes the following parameters:
-
-=over 4
-
-=item B<-keep_alive>
-
-A toggle to tell curl to forbid the reuse of sockets, defaults to true.
-
-=item B<-follow_location>
-
-A toggle to tell curl to follow redirects, defaults to true.
-
-=item B<-max_redirects>
-
-The number of redirects to follow, defaults to 3.
-
-=item B<-timeout>
-
-The timeout for the connection, defaults to 60 seconds.
-
-=item B<-connect_timeout>
-
-The timeout for the initial connection, defaults to 300 seconds.
-
-=item B<-auth_method>
-
-The authentication method to use, defaults to 'noauth'. Possible
-values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a username
-and password are supplied, curl defaults to 'basic'.
-
-=item B<-password>
-
-An optional password to use, implies a username. Wither the password is
-actually used, depends on -auth_method.
-
-=item B<-username>
-
-An optional username to use, implies a password.
-
-=item B<-ssl_cacert>
-
-An optional CA cerificate to use.
-
-=item B<-ssl_keypasswd>
-
-An optional password for a signed cerificate.
-
-=item B<-ssl_cert>
-
-An optional certificate to use.
-
-=item B<-ssl_key>
-
-An optional key for a certificate to use.
-
-=item B<-ssl_verify_host>
-
-Wither to verify the host certifcate, defaults to true.
-
-=item B<-ssl_verify_peer>
-
-Wither to verify the peer certificate, defaults to true.
-
-=item B<-proxy_url>
-
-The url of a proxy that needs to be transversed.
-
-=item B<-proxy_auth>
-
-The authentication method to use, defaults to 'noauth'. Possible
-values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a proxy
-username and a proxy password are supplied, curl defaults to 'basic'.
-
-=item B<-proxy_password>
-
-An optional password to use, implies a username. Wither the password is
-actually used, depends on -proxy_auth.
-
-=item B<-proxy_username>
-
-An optional username to use, implies a password.
-
-=back
-
-=head2 request($request)
-
-This method sends the requset to the web server. The request will return
-a L<HTTP::Response|https://metacpan.org/pod/HTTP::Response> object. It takes the following parameters:
-
-=over 4
-
-=item B<$request>
-
-A L<HTTP::Request|https://metacpan.org/pod/HTTP::Request> object.
-
-=back
+=head2 method1
 
 =head1 SEE ALSO
-
-=over 4
-
-=item L<XAS|XAS>
-
-=item L<WWW::Curl|https://metacpan.org/pod/WWW::Curl>
-
-=item L<libcurl|http://curl.haxx.se/libcurl/>
-
-=back
 
 =head1 AUTHOR
 
@@ -426,7 +314,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 Kevin L. Esteb
+Copyright (c) 2012-2017 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
