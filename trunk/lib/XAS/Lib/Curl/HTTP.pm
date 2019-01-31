@@ -217,7 +217,7 @@ sub init {
     my $protocols       = (CURLPROTO_HTTP & CURLPROTO_HTTPS);
     my $connect_timeout = $self->timeout * 1000;
 
-    $self->{curl} = WWW::Curl::Easy->new();
+    $self->{'curl'} = WWW::Curl::Easy->new();
 
     # basic options
 
@@ -298,15 +298,136 @@ XAS::Lib::Curl::HTTP - A class for the XAS environment
 
 =head1 SYNOPSIS
 
- use XAS::XXX;
+ use HTTP::Request;
+ use XAS::Lib::Curl::HTTP;
+
+ my $response;
+ my $request = HTTP::Request->new(GET => 'http://scm.kesteb.us/trac');
+ my $ua = XAS::Lib::Curl::HTTP->new();
+
+ $response = $ua->request($request);
+
+ print $response->content;
 
 =head1 DESCRIPTION
 
+This module uses L<libcurl|http://curl.haxx.se/libcurl/> as the HTTP engine
+to make requests from a web server. 
+
 =head1 METHODS
 
-=head2 method1
+All true/false values use 0/1 as the indicator.
+
+=head2 new
+
+This method initializes the module and takes the following parameters:
+
+=over 4
+
+=item B<-keep_alive>
+
+A toggle to tell curl to forbid the reuse of sockets, defaults to true.
+
+=item B<-follow_location>
+
+A toggle to tell curl to follow redirects, defaults to true.
+
+=item B<-max_redirects>
+
+The number of redirects to follow, defaults to 3.
+
+=item B<-timeout>
+
+The timeout for the connection, defaults to 60 seconds.
+
+=item B<-connect_timeout>
+
+The timeout for the initial connection, defaults to 300 seconds.
+
+=item B<-auth_method>
+
+The authentication method to use, defaults to 'noauth'. Possible
+values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a username
+and password are supplied, curl defaults to 'basic'.
+
+=item B<-password>
+
+An optional password to use, implies a username. Wither the password is
+actually used, depends on -auth_method.
+
+=item B<-username>
+
+An optional username to use, implies a password.
+
+=item B<-ssl_cacert>
+
+An optional CA cerificate to use.
+
+=item B<-ssl_keypasswd>
+
+An optional password for a signed cerificate.
+
+=item B<-ssl_cert>
+
+An optional certificate to use.
+
+=item B<-ssl_key>
+
+An optional key for a certificate to use.
+
+=item B<-ssl_verify_host>
+
+Wither to verify the host certifcate, defaults to true.
+
+=item B<-ssl_verify_peer>
+
+Wither to verify the peer certificate, defaults to true.
+
+=item B<-proxy_url>
+
+The url of a proxy that needs to be transversed.
+
+=item B<-proxy_auth>
+
+The authentication method to use, defaults to 'noauth'. Possible
+values are 'any', 'basic', 'digest', 'ntlm', 'negotiate'. If a proxy
+username and a proxy password are supplied, curl defaults to 'basic'.
+
+=item B<-proxy_password>
+
+An optional password to use, implies a username. Wither the password is
+actually used, depends on -proxy_auth.
+
+=item B<-proxy_username>
+
+An optional username to use, implies a password.
+
+=back
+
+=head2 request($request)
+
+This method sends the requset to the web server. The request will return
+a L<HTTP::Response|https://metacpan.org/pod/HTTP::Response> object. It takes the following parameters:
+
+=over 4
+
+=item B<$request>
+
+A L<HTTP::Request|https://metacpan.org/pod/HTTP::Request> object.
+
+=back
 
 =head1 SEE ALSO
+
+=over 4
+
+=item L<XAS|XAS>
+
+=item L<WWW::Curl|https://metacpan.org/pod/WWW::Curl>
+
+=item L<libcurl|http://curl.haxx.se/libcurl/>
+
+=back
 
 =head1 AUTHOR
 
@@ -318,6 +439,5 @@ Copyright (c) 2012-2017 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
-of the license at http://www.perlfoundation.org/artistic_license_2_0.
 
 =cut
