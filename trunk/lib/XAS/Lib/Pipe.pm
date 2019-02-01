@@ -153,7 +153,7 @@ sub _process_error {
 }
 
 sub _pipe_ready {
-    my ($self) = @_[OBJECT];
+    my ($self) = $_[OBJECT];
 
     my $alias = $self->alias;
 
