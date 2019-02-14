@@ -86,6 +86,7 @@ sub _auto_load {
     }
 
     my ($package, $filename, $line) = caller(2);
+
     $self->throw_msg(
         dotid($self->class) . '.auto_load.invmethod',
         'invmethod',

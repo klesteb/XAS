@@ -24,6 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 use HTTP::Response;
+use Try::Tiny::Retry ':all';
 
 use XAS::Class
   version   => $VERSION,
@@ -41,6 +42,7 @@ use XAS::Class
       -ssl_verify_peer => { optional => 1, default => 1 },
       -ssl_verify_host => { optional => 1, default => 1 },
       -max_redirects   => { optional => 1, default => 3 },
+      -connect_retries => { optional => 1, default => 5 },
       -timeout         => { optional => 1, default => 30 },
       -connect_timeout => { optional => 1, default => 300 },
       -ssl_cacert      => { optional => 1, default => undef },
@@ -126,40 +128,72 @@ sub request {
 
     }
 
-    # perform the request and create the response
+    retry {
+        
+        # perform the request and create the response
 
-   if (($self->{'retcode'} = $self->curl->perform) == 0) {
+        if (($self->{'retcode'} = $self->curl->perform) == 0) {
 
-        my @temp;
-        my $message;
-        my $content;
+            my @temp;
+            my $message;
+            my $content;
 
-        print Dumper(@buffer) if ($self->xdebug);
+            print Dumper(@buffer) if ($self->xdebug);
 
-        # there may be multiple responses within the buffer, we only
-        # want the last one. so search backwards until a HTTP header
-        # is found.
+            # there may be multiple responses within the buffer, we only
+            # want the last one. so search backwards until a HTTP header
+            # is found.
 
-        while (my $line = pop(@buffer)) {
+            while (my $line = pop(@buffer)) {
 
-            push(@temp, $line);
-            last if ($line =~ /^HTTP\//);
+                push(@temp, $line);
+                last if ($line =~ /^HTTP\//);
+
+            }
+
+            $content = join('', reverse(@temp));
+            $response = HTTP::Response->parse($content);
+            $response->request($request);
+
+        } else {
+
+            $self->throw_msg(
+                dotid($self->class) . '.request.curl',
+                'curl',
+                $self->retcode, lc($self->curl->strerror($self->retcode))
+            );
 
         }
+        
+    } retry_if {
+        
+        my $ex = $_;
+        my $stat = 1;
+        
+        if (($self->retcode != 5) && # CURLE_COULDNT_RESOLVE_PROXY 
+            ($self->retcode != 6) && # CURLE_COULDNT_RESOLVE_HOST
+            ($self->retcode != 7)) { # CURLE_COULDNT_CONNECT
+                
+            $stat = 0;
+                
+        }
+        
+        $stat;
+        
+    } delay {
+        
+        my $attempts = shift;
 
-        $content = join('', reverse(@temp));
-        $response = HTTP::Response->parse($content);
-        $response->request($request);
+        return if ($attempts > $self->connect_retries);
+        sleep int(rand($self->timeout));
 
-    } else {
-
-        $self->throw_msg(
-            dotid($self->class) . '.request.curl',
-            'curl',
-            $self->retcode, lc($self->curl->strerror($self->retcode))
-        );
-
-    }
+    } catch {
+        
+        my $ex = $_;
+        
+        die $ex;
+        
+    };
 
     return $response;
 
@@ -343,6 +377,10 @@ The timeout for the connection, defaults to 60 seconds.
 =item B<-connect_timeout>
 
 The timeout for the initial connection, defaults to 300 seconds.
+
+=item B<-connect_retries>
+
+The number of retries to attempt a connection, defaults to 5.
 
 =item B<-auth_method>
 
