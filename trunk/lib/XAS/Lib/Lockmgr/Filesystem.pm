@@ -273,7 +273,6 @@ sub _break_lock {
 
     }
 
-
 }
 
 sub _whose_lock {
@@ -417,8 +416,8 @@ sub init {
 
     my $lockfile = $self->env->host . ".$$";
 
-    $self->{'_lockfile'} = File($self->key, $lockfile);
-    $self->{'_lockdir'}  = Dir($self->_lockfile->volume, $self->_lockfile->directory);
+    $self->{'_lockdir'}  = Dir($self->key, 'lock');
+    $self->{'_lockfile'} = File($self->_lockdir, $lockfile);
 
     $self->{'deadlock'} = defined($self->args->{'deadlock'})
                             ? $self->args->{'deadlock'}
