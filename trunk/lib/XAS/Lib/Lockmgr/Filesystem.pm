@@ -416,7 +416,7 @@ sub init {
 
     my $lockfile = $self->env->host . ".$$";
 
-    $self->{'_lockdir'}  = Dir($self->key, 'lock');
+    $self->{'_lockdir'}  = Dir($self->key, '.lock');
     $self->{'_lockfile'} = File($self->_lockdir, $lockfile);
 
     $self->{'deadlock'} = defined($self->args->{'deadlock'})
