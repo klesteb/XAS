@@ -71,9 +71,9 @@ Revision history for XAS
         Added tests for locking.
         Added a FTP transfer module
 
-0.16    12-Dec-2017  Kevin L. Esteb
+0.16    09-Jan-2017  Kevin L. Esteb
         Bug fixes.
         
 0.17    25-Mar-2019
-        bug fixes.
+        Bug fixes.
         
