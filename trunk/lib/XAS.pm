@@ -270,6 +270,10 @@ This will display the utilities man page.
 
 Additional support is available at:
 
+  http://scm.kesteb.us/trac
+
+or locally:
+
 =over 4
 
 =item L<XAS::Docs::Installation|XAS::Docs::Installation>
