@@ -270,7 +270,15 @@ This will display the utilities man page.
 
 Additional support is available at:
 
-  http://scm.kesteb.us/trac
+=over 4
+
+=item L<XAS::Docs::Installation|XAS::Docs::Installation>
+
+=item L<XAS::Docs::Contributions|XAS::Docs::Contributions>
+
+=item L<XAS::Docs::StyleGuide|XAS::Docs::StyleGuide>
+
+=back
 
 =head1 AUTHOR
 
@@ -278,7 +286,7 @@ Kevin L. Esteb, E<lt>kevin@kesteb.usE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2012-2017 Kevin L. Esteb
+Copyright (c) 2012-2023 Kevin L. Esteb
 
 This is free software; you can redistribute it and/or modify it under
 the terms of the Artistic License 2.0. For details, see the full text
