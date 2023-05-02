@@ -16,6 +16,7 @@ invparams                    = invalid parameters passed, reason: %s
 invmethod                    = invalid method "%s" in %s at line %s
 unexpected                   = unexpected error: %s
 nomessage                    = no message supplied
+notimplemented               = method is not implemented
 config_badini                = unable to load config file: %s, reason: %s
 curl                         = curl error: %s, reason: %s
 curl_transfer                = fetched "%s" in %s seconds, at a speed of %s bytes per second
